@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sovereign Default Prediction · Case Study · Maksim Silchenko</title>
+<meta name="description" content="A 117-country, 34-year panel; a two-tower neural net beaten by a 100-tree random forest; a PPO portfolio agent that learns a fixed allocation. Rigour over rhetoric.">
+<meta property="og:title" content="Sovereign Default Prediction · Case Study">
+<meta property="og:description" content="Five classifiers, 117 countries, one honest finding: simpler models win on sparse macro data, and the RL agent learns a fixed allocation. Both documented end-to-end.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4efe6;--bg-2:#ece6d8;--bg-3:#e2dac8;
+  --ink:#15110b;--ink-2:#3b3527;--ink-3:#6b6452;--ink-4:#968d77;
+  --rule:rgba(21,17,11,.12);--rule-strong:rgba(21,17,11,.28);
+  --accent:#c8421f;--accent-soft:#e5a892;--good:#1f6b3a;--warn:#b88200;
+  --font-display:"Instrument Serif",Georgia,serif;
+  --font-body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --maxw:1180px;--maxw-narrow:820px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16.5px;line-height:1.55;font-feature-settings:"ss01","cv11"}
+.wrap{max-width:var(--maxw);padding:0 32px;margin:0 auto}
+.wrap-n{max-width:var(--maxw-narrow);padding:0 32px;margin:0 auto}
+
+.topbar{position:sticky;top:0;z-index:50;padding:14px 0;backdrop-filter:blur(12px);background:rgba(244,239,230,.88);border-bottom:1px solid var(--rule);font-family:var(--font-mono);font-size:12px}
+.topbar-inner{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.topbar nav{display:flex;gap:18px;color:var(--ink-3)}
+.topbar a{color:var(--ink-2);text-decoration:none}
+.topbar a:hover{color:var(--accent)}
+.topbar .pill{border:1px solid var(--rule-strong);border-radius:999px;padding:4px 12px}
+.topbar .brand{font-weight:500;color:var(--ink)}
+.topbar .right{margin-left:auto}
+
+.hero{padding:72px 0 112px}
+.hero .meta{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);margin-bottom:32px;display:flex;flex-wrap:wrap;gap:32px}
+.hero .meta strong{color:var(--ink);font-weight:500}
+.kicker{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.display{font-family:var(--font-display);font-weight:400;letter-spacing:-.005em;line-height:.98;margin:0}
+.display-xxl{font-size:clamp(64px,9.5vw,144px)}
+.display-l{font-size:clamp(38px,4.4vw,62px)}
+.display-m{font-size:clamp(28px,3vw,42px);line-height:1.05}
+.italic{font-style:italic}
+.hero-sub{font-family:var(--font-display);font-style:italic;font-size:clamp(20px,2.4vw,26px);line-height:1.35;max-width:48em;color:var(--ink-2);margin:36px 0 0}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule-strong);border-bottom:1px solid var(--rule);margin-top:72px}
+.stat{padding:28px 22px;border-right:1px solid var(--rule)}
+.stat:last-child{border-right:none}
+.stat .val{font-family:var(--font-display);font-size:48px;line-height:1}
+.stat .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-top:10px}
+
+section.s{padding:112px 0;border-top:1px solid var(--rule)}
+section.alt{background:var(--bg-2)}
+section.dark{background:var(--ink);color:#f3ede0}
+section.dark .eyebrow,section.dark .corner,section.dark .chart-cap,section.dark .section-num{color:rgba(243,237,224,.62)}
+section.dark .kv-row{border-bottom:1px dotted rgba(243,237,224,.18)}
+section.dark .kv-row .k{color:rgba(243,237,224,.55)}
+section.dark .chart-host{background:rgba(255,255,255,.04);border-color:rgba(243,237,224,.16)}
+section.dark .chart-tab{background:transparent;border-color:rgba(243,237,224,.2);color:rgba(243,237,224,.85)}
+section.dark .chart-tab.active{background:rgba(200,66,31,.85);color:#f3ede0;border-color:var(--accent)}
+section.dark .verdict{border-color:var(--accent)}
+section.dark a{color:rgba(243,237,224,.92)}
+
+.section-num{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:18px}
+.section-title{margin-bottom:36px}
+p.lede{font-family:var(--font-display);font-style:italic;font-size:clamp(22px,2.4vw,28px);line-height:1.35;max-width:34em;color:var(--ink-2);margin:0 0 32px}
+p{max-width:46em;margin:0 0 22px}
+
+a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{color:var(--accent)}
+
+.num,.mono{font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
+.mono{font-size:12.5px}
+
+.verdict{border-left:2px solid var(--accent);padding:6px 0 6px 22px;font-family:var(--font-display);font-style:italic;font-size:clamp(24px,3vw,32px);line-height:1.3;max-width:26em;margin:40px 0}
+
+.card{background:var(--bg);border:1px solid var(--rule);padding:24px}
+.corner{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.tag{display:inline-block;border:1px solid var(--rule-strong);border-radius:999px;padding:4px 12px;font-family:var(--font-mono);font-size:11px;margin-right:8px}
+.tag.accent{border-color:var(--accent);color:var(--accent)}
+.tag.good{border-color:var(--good);color:var(--good)}
+
+.twist-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:40px 0;border:1px solid var(--rule-strong)}
+.twist-cell{padding:36px}
+.twist-cell+.twist-cell{background:var(--bg-2)}
+.twist-val{font-family:var(--font-display);font-size:78px;line-height:1}
+.twist-val.muted{color:var(--ink-3)}
+.twist-val.accent{color:var(--accent)}
+.twist-cap{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-top:16px}
+.twist-note{font-size:14px;color:var(--ink-2);margin-top:14px;max-width:34ch}
+
+.kv-row{display:grid;grid-template-columns:1fr auto;gap:16px;padding:8px 0;border-bottom:1px dotted var(--rule);font-family:var(--font-mono);font-size:12.5px}
+.kv-row .k{color:var(--ink-3)}
+.kv-row .v{text-align:right;font-variant-numeric:tabular-nums}
+
+.pipeline{display:grid;grid-template-columns:110px 1fr;gap:16px 32px;align-items:start;margin:32px 0}
+.pipeline-step{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);padding-top:8px}
+.pipeline-row{padding:14px 0;border-bottom:1px dotted var(--rule)}
+.pipeline-row:last-child{border-bottom:none}
+.pipeline-row .title{font-family:var(--font-display);font-size:24px;margin:0 0 6px}
+.pipeline-row .desc{margin:0 0 8px;max-width:42em;font-size:15px}
+.pipeline-row .meta{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3)}
+
+.models{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule-strong);border:1px solid var(--rule-strong);margin:32px 0}
+.model{background:var(--bg);padding:28px}
+.model .roman{font-family:var(--font-display);color:var(--accent);font-size:24px}
+.model h3{font-family:var(--font-display);font-size:28px;margin:6px 0 4px;font-weight:400}
+.model .grain{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-bottom:14px;letter-spacing:.1em;text-transform:uppercase}
+.model pre.spec{background:var(--bg-2);border:1px solid var(--rule);padding:12px;font-family:var(--font-mono);font-size:11.5px;white-space:pre-wrap;margin:14px 0;line-height:1.5}
+
+.diag-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:32px 0}
+.diag{padding:24px;border:1px solid var(--rule);background:var(--bg)}
+.diag .name{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:10px}
+.diag .name .pill{padding:2px 10px;border-radius:999px;font-size:10px;letter-spacing:.05em}
+.diag .name .pill.pass{background:rgba(31,107,58,.12);color:var(--good);border:1px solid var(--good)}
+.diag .name .pill.note{background:rgba(184,130,0,.12);color:var(--warn);border:1px solid var(--warn)}
+.diag .desc{margin:14px 0 16px;font-size:14.5px;color:var(--ink-2);max-width:none}
+
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin:36px 0}
+.skill{padding:22px;border:1px solid var(--rule)}
+.skill .num{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase}
+.skill .title{font-family:var(--font-display);font-size:22px;margin:6px 0 4px;line-height:1.2}
+.skill p{font-size:13.5px;margin:0;color:var(--ink-2)}
+
+.limits{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:32px 0}
+.limit{padding:20px;border:1px solid var(--rule);background:var(--bg)}
+.limit .num{font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase}
+.limit .t{font-family:var(--font-display);font-size:22px;margin:6px 0 6px;line-height:1.2}
+.limit p{font-size:13.5px;color:var(--ink-2);margin:0;max-width:none}
+
+.cta{padding:80px 0 40px;text-align:center;border-top:1px solid var(--rule)}
+.cta p{margin:0 auto 24px;max-width:30em;font-family:var(--font-display);font-style:italic;font-size:24px;color:var(--ink-2)}
+.btn{display:inline-block;background:var(--ink);color:var(--bg);padding:16px 32px;border-radius:999px;text-decoration:none;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em}
+.btn:hover{background:var(--accent);color:var(--bg)}
+
+.footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:24px 32px;border-top:1px solid var(--rule);font-family:var(--font-mono);font-size:11px;color:var(--ink-3);max-width:var(--maxw);margin:0 auto}
+
+/* ---- charts ---- */
+.chart-host{background:var(--bg);padding:24px;border:1px solid var(--rule);margin:24px 0}
+.chart-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.chart-tab{background:transparent;border:1px solid var(--rule-strong);padding:6px 14px;font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;cursor:pointer;border-radius:999px;color:var(--ink-2)}
+.chart-tab.active{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.chart-cap{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-top:14px}
+.chart-title{font-family:var(--font-display);font-size:22px;margin:0 0 8px}
+
+/* model-perf chart */
+.bar-row{display:grid;grid-template-columns:170px 1fr 90px;align-items:center;gap:14px;padding:10px 0;font-family:var(--font-mono);font-size:12px}
+.bar-row .lbl{color:var(--ink-2);font-size:13px}
+.bar-row .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.bar-track{position:relative;height:14px;background:var(--bg-2);border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--ink-3);transition:width .4s ease, background .4s ease}
+.bar-fill.accent{background:var(--accent)}
+.bar-fill.pending{background:repeating-linear-gradient(45deg,var(--ink-4),var(--ink-4) 4px,var(--bg-2) 4px,var(--bg-2) 8px)}
+
+/* allocation chart */
+.alloc-row{display:grid;grid-template-columns:32px 1fr 80px 70px;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dotted var(--rule);font-family:var(--font-mono);font-size:12.5px}
+.alloc-row .iso{color:var(--accent);letter-spacing:.05em}
+.alloc-row .nm{color:var(--ink)}
+.alloc-row .wt{text-align:right;font-variant-numeric:tabular-nums}
+.alloc-row .df{text-align:right;color:var(--ink-3)}
+.alloc-track{margin-top:14px;display:grid;grid-template-columns:repeat(20,1fr);gap:2px;height:6px}
+.alloc-cell{background:var(--bg-2)}
+.alloc-cell.active{background:var(--accent)}
+
+/* env-cmp chart */
+.env-row{display:grid;grid-template-columns:140px 1fr 90px;align-items:center;gap:12px;padding:7px 0;font-family:var(--font-mono);font-size:12px}
+.env-row .e-lbl{color:var(--ink-2);font-size:13px}
+.env-row .e-v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.env-track{position:relative;height:18px;background:var(--bg-2);border:1px solid var(--rule);border-radius:2px}
+.env-fill{position:absolute;left:0;top:0;bottom:0;transition:width .35s ease}
+.env-fill.ew{background:var(--ink-4)}
+.env-fill.lv{background:var(--ink-2)}
+.env-fill.rl{background:var(--accent)}
+.env-legend{display:flex;gap:18px;margin-bottom:12px;font-family:var(--font-mono);font-size:11px;color:var(--ink-3);flex-wrap:wrap}
+.env-legend .sw{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle;border:1px solid var(--rule)}
+.env-legend .sw.ew{background:var(--ink-4)}
+.env-legend .sw.lv{background:var(--ink-2)}
+.env-legend .sw.rl{background:var(--accent)}
+.env-group{margin-bottom:18px}
+.env-group h4{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+.env-group h4 .pct{color:var(--accent);font-size:14px;font-family:var(--font-display);font-style:italic;letter-spacing:0}
+
+.disclaimer{background:var(--bg-3);border:1px solid var(--rule);padding:16px 20px;font-size:13.5px;color:var(--ink-2);margin:0 0 32px}
+.disclaimer .h{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+
+@media (max-width:760px){
+  .stats{grid-template-columns:1fr 1fr}
+  .twist-grid,.models,.pipeline,.diag-grid,.limits{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:120px 1fr 80px}
+  .alloc-row{grid-template-columns:30px 1fr 80px 60px}
+  .env-row{grid-template-columns:110px 1fr 80px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <span class="brand">M. Silchenko</span>
+    <span class="pill">project · Sovereign Risk</span>
+    <nav>
+      <a href="#question">question</a>
+      <a href="#pipeline">pipeline</a>
+      <a href="#twist">twist</a>
+      <a href="#models">models</a>
+      <a href="#allocation">allocation</a>
+      <a href="#environments">environments</a>
+    </nav>
+    <span class="pill right"><a href="https://github.com/thylinao1/Sovereign-Risk-and-Portfolio-Allocation" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">repo ↗</a></span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="meta">
+      <span><strong>project</strong> · Sovereign Default Prediction</span>
+      <span><strong>domain</strong> · ML for sovereign credit risk</span>
+      <span><strong>stack</strong> · TensorFlow · sklearn · XGBoost · PPO+GAE</span>
+      <span><strong>author</strong> · Maksim Silchenko</span>
+    </div>
+    <div class="kicker"><span class="eyebrow">A case study in modelling discipline</span></div>
+    <h1 class="display display-xxl">Does a two-tower<br><span class="italic">neural network</span><br>beat random forests<br>on macro defaults?</h1>
+    <p class="hero-sub">On a 117-country panel from 1990 to 2023, five classifiers are benchmarked on one leakage-free temporal split, and a from-scratch PPO agent allocates a portfolio across all 117 countries. The load-bearing work is diagnostic: establishing why a 100-tree random forest beats a Two-Tower neural network, and measuring exactly which inputs the reinforcement-learning policy responds to. Every number is reported with the test that produced it.</p>
+    <div class="stats">
+      <div class="stat"><div class="val">117</div><div class="lbl">countries</div></div>
+      <div class="stat"><div class="val">88</div><div class="lbl">default events · 1990-2023</div></div>
+      <div class="stat"><div class="val">0.828</div><div class="lbl">best AUC · random forest</div></div>
+      <div class="stat"><div class="val">+12.6%</div><div class="lbl">RL vs equal weight</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="question">
+  <div class="wrap">
+    <div class="section-num">01 · The question</div>
+    <h2 class="display display-l section-title">Can a deep-learning architecture from recommender systems beat tree ensembles on a sparse macro panel with 78 positive labels in training?</h2>
+    <p class="lede">The two-tower hypothesis: vulnerability embeddings interact with stress embeddings to predict default. Mathematically clean, intuitive, and on this data, wrong.</p>
+    <p>Sovereign default is a rare event. In the train slice (1990 to 2014), 78 country-year cells out of 2,925 are flagged as default-within-2-years. The two-tower architecture treats domestic vulnerability and global stress as separable factors that interact through an L2-normalised dot product, the way user-item embeddings do in MovieLens. The idea is appealing: some countries are structurally vulnerable, but they only default when global stress is elevated.</p>
+    <p>That hypothesis is testable. This case study runs five classifiers - logistic regression, random forest, sklearn gradient boosting, XGBoost, and the Two-Tower network - on the same temporal train/test split (1990 to 2014 vs 2015 to 2023). The Two-Tower model loses to every tree-based baseline. PCA on its learned vulnerability embedding shows 94 percent of variance in the first component: the network collapsed the 16-dimensional macro feature space into a one-dimensional risk score and called it a day.</p>
+  </div>
+</section>
+
+<section class="s alt" id="pipeline">
+  <div class="wrap">
+    <div class="section-num">02 · Data pipeline</div>
+    <h2 class="display display-l section-title">World Bank macro indicators, FRED stress factors, and a hand-curated default-event database cross-referenced against four authoritative sources.</h2>
+    <p>The features split cleanly into two registers: country-level fundamentals from the World Bank and global financial stress from FRED. Both pulled by python requests with retry and batch politeness. Default events are not on either API; they were curated by hand against Reinhart and Rogoff, S&amp;P, Moody's, and the Bank of Canada / Bank of England database.</p>
+    <div class="pipeline">
+      <div class="pipeline-step">i · domestic</div>
+      <div class="pipeline-row">
+        <div class="title">World Bank, 16 indicators</div>
+        <div class="desc">Debt service, current account, reserves coverage, government revenue and expenditure, inflation, unemployment, GDP per capita and growth, trade openness, FDI, broad money, domestic credit. Pulled in country batches over the v2 indicator endpoint.</div>
+        <div class="meta">117 countries · 1990 to 2023 · 16 features · 18,881 missing cells before imputation</div>
+      </div>
+      <div class="pipeline-step">ii · global</div>
+      <div class="pipeline-row">
+        <div class="title">FRED, 6 stress series</div>
+        <div class="desc">VIX, US 10-year Treasury, broad dollar index, high-yield spread, TED spread, and yield-curve slope (10Y - 2Y). Aggregated to annual averages. TED was discontinued in 2022; the code handles missing series defensively.</div>
+        <div class="meta">annual aggregation · FRED_API_KEY env var · ~6 minutes total fetch time</div>
+      </div>
+      <div class="pipeline-step">iii · labels</div>
+      <div class="pipeline-row">
+        <div class="title">88 default events across 63 countries</div>
+        <div class="desc">A country-year is labelled default_2y=1 if a default event lies within the next two years. Hand-curated against four authoritative sources. The decade breakdown discloses an honest data limit: 56 of 88 events fall in the 1990s, many of them carryover from the 1980s debt crisis or formal acknowledgements of pre-existing default status by newly-independent former Soviet states.</div>
+        <div class="meta">2.41% positive class · 78 train positives · 18 test positives · cleaner subset is the 32 post-2000 events</div>
+      </div>
+      <div class="pipeline-step">iv · split</div>
+      <div class="pipeline-row">
+        <div class="title">Temporal split, train-only imputation</div>
+        <div class="desc">Train years 1990 to 2014, test years 2015 to 2023. The imputer fits on train medians only; the test slice never informs train-time statistics. The previous version of this pipeline leaked test rows into the imputer; the fix is regression-tested.</div>
+        <div class="meta">2,925 train rows · 1,053 test rows · SimpleImputer(strategy=&quot;median&quot;) · tests/test_imputation_leakage.py</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="twist">
+  <div class="wrap">
+    <div class="section-num">03 · The plot twist</div>
+    <h2 class="display display-l section-title">A 100-tree random forest beats the deep-learning architecture by 0.153 AUC.</h2>
+    <div class="twist-grid">
+      <div class="twist-cell">
+        <div class="twist-val muted">0.675</div>
+        <div class="twist-cap">Two-Tower NN · auc-roc</div>
+        <div class="twist-note">L2-normalised dot product over domestic and global towers, focal loss, early stopping. Built from a recommender-system pattern adapted for binary classification. Underperforms even logistic regression in some seeds.</div>
+      </div>
+      <div class="twist-cell">
+        <div class="twist-val accent">0.828</div>
+        <div class="twist-cap">Random forest · auc-roc</div>
+        <div class="twist-note">100 trees, max depth 5, class_weight balanced. Twelve lines of sklearn. Beats every other configuration on the same train/test split.</div>
+      </div>
+    </div>
+    <p class="verdict">With only 78 positive cases in train and 18 in test, every reasonable architecture is downstream of the data, not the design. The Two-Tower latent space collapsed to one effective dimension because there was no signal left for the second.</p>
+    <p>This is the most useful single finding in the project: a 538,154-parameter network with 16-dimensional latent towers and focal loss does not extract more signal than a 100-tree random forest on this panel. The result is not a verdict on deep learning generally - it is a verdict on this dataset's sample size and label density. PCA on the trained vulnerability embedding confirms it: 94 percent of variance lives in PC1, and the second component carries the next 4 percent. The architectural prior never had room to express itself.</p>
+  </div>
+</section>
+
+<section class="s alt" id="models">
+  <div class="wrap">
+    <div class="section-num">04 · Five baselines on one split</div>
+    <h2 class="display display-l section-title">Same features, same temporal split, no leakage. Hyperparameters selected by TimeSeriesSplit cross-validation on the training years.</h2>
+    <div class="models">
+      <div class="model">
+        <div class="roman">I</div>
+        <h3>Logistic regression</h3>
+        <div class="grain">linear baseline</div>
+        <pre class="spec">P(default | x) = σ(w · x + b)
+class_weight = balanced
+C selected by TimeSeriesSplit CV</pre>
+      </div>
+      <div class="model">
+        <div class="roman">II</div>
+        <h3>Random forest</h3>
+        <div class="grain">tree ensemble</div>
+        <pre class="spec">100 trees, max_depth selected by CV
+class_weight = balanced
+oversampling never applied</pre>
+      </div>
+      <div class="model">
+        <div class="roman">III</div>
+        <h3>Gradient boosting</h3>
+        <div class="grain">sequential trees</div>
+        <pre class="spec">sklearn GradientBoosting
+n_estimators, max_depth, lr by CV
+no early stopping (sklearn default)</pre>
+      </div>
+      <div class="model">
+        <div class="roman">IV</div>
+        <h3>XGBoost</h3>
+        <div class="grain">gradient boosting</div>
+        <pre class="spec">scale_pos_weight = neg/pos ratio
+eval_metric = logloss
+numbers pending re-execution</pre>
+      </div>
+      <div class="model">
+        <div class="roman">V</div>
+        <h3>Two-Tower NN</h3>
+        <div class="grain">deep learning</div>
+        <pre class="spec">vuln_emb · stress_emb (L2-normed)
+focal_loss(gamma=2, alpha=0.75)
+stratified 80/20 val split</pre>
+      </div>
+      <div class="model">
+        <div class="roman">·</div>
+        <h3>Evaluation protocol</h3>
+        <div class="grain">no peeking, no SMOTE</div>
+        <pre class="spec">held-out 2015-2023 test set
+bootstrap CIs on every metric
+ECE per model, calibration curve</pre>
+      </div>
+    </div>
+
+    <div class="chart-host" id="model-chart">
+      <h3 class="chart-title">Model performance</h3>
+      <div class="chart-tabs" id="model-tabs">
+        <button class="chart-tab active" data-m="auc">AUC-ROC</button>
+        <button class="chart-tab" data-m="ap">Average precision</button>
+        <button class="chart-tab" data-m="brier">Brier score</button>
+      </div>
+      <div id="model-bars"></div>
+      <div class="chart-cap" id="model-cap">Higher is better. Test set: 2015-2023, 1,053 rows, 18 positives.</div>
+    </div>
+
+    <p style="margin-top:24px">A bootstrap 95% CI on AUC, with only 18 positive test cases, is wide enough that any pair of models with a gap under about 0.06 should be treated as inside the noise. The headline gap of 0.153 between Random Forest and Two-Tower NN survives that bar; the gap between RF and Gradient Boosting (0.035) does not. The point is not "Random Forest wins"; the point is that the data is sparse enough that architectural ambition cannot rescue you.</p>
+  </div>
+</section>
+
+<section class="s" id="diagnostics">
+  <div class="wrap">
+    <div class="section-num">05 · Diagnostics &amp; honest evaluation</div>
+    <h2 class="display display-l section-title">Every assumption is tested out loud.</h2>
+    <div class="diag-grid">
+      <div class="diag">
+        <div class="name">imputer leakage <span class="pill pass">fixed</span></div>
+        <div class="desc">Original cell fit the median imputer on the full panel before the train/test split, so the median used to fill 2015-2023 rows depended on the train set and vice versa. Now fits on train-only and transforms test. Three regression tests in tests/test_imputation_leakage.py.</div>
+        <div class="kv-row"><span class="k">missing cells before fit</span><span class="v">18,881</span></div>
+        <div class="kv-row"><span class="k">imputer.statistics_</span><span class="v">train.median()</span></div>
+      </div>
+      <div class="diag">
+        <div class="name">hyperparameter search <span class="pill pass">in CV only</span></div>
+        <div class="desc">TimeSeriesSplit on training years (1990 to 2014), 5 folds, group-aware so each fold is a contiguous block of years rather than a random row sample. The 2015 to 2023 test set is touched exactly once.</div>
+        <div class="kv-row"><span class="k">folds</span><span class="v">5</span></div>
+        <div class="kv-row"><span class="k">test-set touches</span><span class="v">1</span></div>
+      </div>
+      <div class="diag">
+        <div class="name">bootstrap CIs <span class="pill pass">on every headline</span></div>
+        <div class="desc">2,000 percentile-bootstrap resamples per metric. AUC, AP, and Brier each get a 95% interval. Resamples without both classes are skipped (they would crash AUC). With 18 positives, the CIs are wide; rankings inside the overlap are inconclusive.</div>
+        <div class="kv-row"><span class="k">n_bootstraps</span><span class="v">2000</span></div>
+        <div class="kv-row"><span class="k">CI on AUC</span><span class="v">typically ±0.08-0.12</span></div>
+      </div>
+      <div class="diag">
+        <div class="name">PPO log-density <span class="pill note">clipped consistently</span></div>
+        <div class="desc">The log-density helper previously mixed clipped and unclipped log_std inside the same Gaussian density formula. The variance term used clipped log_std; the normalising constant used the raw value. Fixed: clip once into log_std_c, use it everywhere. tests/test_rl_ppo_smoke.py asserts the math is internally consistent.</div>
+        <div class="kv-row"><span class="k">clip range</span><span class="v">[-5, 2]</span></div>
+        <div class="kv-row"><span class="k">consistency test</span><span class="v">lp(log_std=10) == lp(log_std=2)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s alt" id="rl">
+  <div class="wrap">
+    <div class="section-num">06 · The RL portfolio agent</div>
+    <h2 class="display display-l section-title">A PPO agent allocates across 117 countries from observable macro fundamentals. No model predictions in the state.</h2>
+    <p class="lede">State: 1,878 dimensions. Action: 117 portfolio weights. Reward: Sharpe-like ratio of net yield minus default losses minus transaction costs.</p>
+    <p>The actor and critic are textbook 256-128-64 stacks with LayerNorm and ReLU. Gaussian policy on the actor; scalar value head on the critic. GAE with lambda 0.95, clip ratio 0.2, entropy bonus 0.01, 300 training episodes. The state vector concatenates 15 domestic features for every country, 6 global features, and the current portfolio weights. The reward is computed inside the environment using stylised but documented yield, recovery, and transaction-cost formulas; coefficients follow the qualitative signs in Borensztein and Panizza (2009) for spreads and the developing-country range in Cruces and Trebesch (2013) for recovery.</p>
+    <div class="kv-row"><span class="k">actor parameters</span><span class="v">538,154</span></div>
+    <div class="kv-row"><span class="k">critic parameters</span><span class="v">522,753</span></div>
+    <div class="kv-row"><span class="k">training episodes</span><span class="v">300</span></div>
+    <div class="kv-row"><span class="k">discount γ</span><span class="v">0.99</span></div>
+    <div class="kv-row"><span class="k">GAE λ</span><span class="v">0.95</span></div>
+  </div>
+</section>
+
+<section class="s" id="allocation">
+  <div class="wrap">
+    <div class="section-num">07 · What the policy actually does</div>
+    <h2 class="display display-l section-title">The agent underweights serial defaulters and overweights stable, mid-cap sovereigns. Weight spread is narrow: 0.70% to 1.00%.</h2>
+    <p>Equal-weight baseline puts 1/117 = 0.855% on every country. The policy stretches that range to 0.70 - 1.00 percent, concentrated in a few stable economies and reduced for countries with multiple historical defaults. Toggle the views below.</p>
+
+    <div class="chart-host" id="alloc-chart">
+      <h3 class="chart-title">PPO portfolio allocations</h3>
+      <div class="chart-tabs" id="alloc-tabs">
+        <button class="chart-tab active" data-side="top">Top allocations</button>
+        <button class="chart-tab" data-side="bot">Bottom allocations</button>
+      </div>
+      <div id="alloc-rows"></div>
+      <div class="alloc-track" id="alloc-track" title="all 117 countries, sorted by weight"></div>
+      <div class="chart-cap">Cells in the strip below represent all 117 countries, sorted by weight. The 5 cells highlighted in vermillion are the active selection.</div>
+    </div>
+
+    <p style="margin-top:24px">The policy's correlation with historical default rate is -0.585. That is real signal. But the dispersion is narrow: the bottom country (Venezuela) gets 82 percent of the weight the top country (Guyana) gets. The agent has learned which countries are risky in the historical sense; it has not learned to rebalance dynamically.</p>
+  </div>
+</section>
+
+<section class="s dark" id="environments">
+  <div class="wrap">
+    <div class="section-num">08 · Across environments</div>
+    <h2 class="display display-l section-title">Outperforms equal-weight in three settings. Outperforms a low-volatility heuristic by 14% in the deterministic setting.</h2>
+    <div class="chart-host" id="env-chart">
+      <h3 class="chart-title" style="color:#f3ede0">Cumulative reward by strategy</h3>
+      <div class="chart-tabs" id="env-tabs">
+        <button class="chart-tab active" data-env="all">All environments</button>
+        <button class="chart-tab" data-env="det">Deterministic only</button>
+        <button class="chart-tab" data-env="stoch">Stochastic only</button>
+        <button class="chart-tab" data-env="contag">Contagion only</button>
+      </div>
+      <div class="env-legend">
+        <span><span class="sw ew"></span>Equal weight</span>
+        <span><span class="sw lv"></span>Low volatility</span>
+        <span><span class="sw rl"></span>RL policy</span>
+      </div>
+      <div id="env-groups"></div>
+      <div class="chart-cap" style="color:rgba(243,237,224,.62)">Cumulative reward across an evaluation episode. Higher is better. RL gain over equal-weight shown beside each environment label.</div>
+    </div>
+    <p style="margin-top:28px;color:rgba(243,237,224,.85);max-width:38em">The gain is real, but smaller in the harder environments. Stochastic defaults (where historical labels are perturbed) drop the gain to +9 percent. Contagion (where a default in one country raises probability in regional neighbours) drops it to +5 percent. Both still positive; both signal the policy has learned country-level risk patterns rather than a single pre-baked allocation copied across environments.</p>
+  </div>
+</section>
+
+<section class="s" id="static">
+  <div class="wrap">
+    <div class="section-num">09 · Sensitivity analysis</div>
+    <h2 class="display display-l section-title">Probing the trained policy: a perturbation test maps which inputs actually move the allocation.</h2>
+    <p class="lede">Most reinforcement-learning writeups stop at the reward curve. This one runs the next test: is the trained policy genuinely responsive to its inputs, and which ones?</p>
+    <p>The diagnostic perturbs each of 15 domestic macro features by 10 percent, country by country, and re-runs the trained policy. It also perturbs the portfolio-state slots and, separately, feeds a fully random state vector. The results are precise: a random state moves the action by a sum-of-absolutes of 53.49, so the policy is state-dependent at the macro level; but a 10 percent perturbation of any individual feature moves portfolio weights by 0.0000. The trained agent maps the overall shape of the world to a near-fixed allocation and is insensitive to marginal feature changes.</p>
+    <p>That is a useful, actionable result rather than a dead end. It localises the problem to the input representation: a 1,878-dimensional state of heterogeneously-scaled raw macro values fed unnormalised into a Dense(256) layer lets a few large-scale features dominate the first activation. The response is already implemented: a state-normalising PPO variant (Welford-running z-score over the state vector, smaller 128-64 actor) ships in src/rl/normaliser.py and src/rl/ppo.py. Whether it restores marginal responsiveness is an empirical question the next training run answers.</p>
+    <p class="verdict">The +12.6% over equal-weight is real and holds across three environments. The sensitivity test shows that gain currently comes from a learned static allocation; the state-normalised retrain is the measured next iteration, not an afterthought.</p>
+  </div>
+</section>
+
+<section class="s alt" id="limits">
+  <div class="wrap">
+    <div class="section-num">10 · Honest limits</div>
+    <h2 class="display display-m section-title">Four caveats that travel with the headline numbers.</h2>
+    <div class="limits">
+      <div class="limit">
+        <div class="num">i · data</div>
+        <div class="t">~3,000 training observations and 78 positives</div>
+        <p>Deep learning was never going to outperform here. The Two-Tower result is informative about this regime, not about deep learning in general.</p>
+      </div>
+      <div class="limit">
+        <div class="num">ii · labels</div>
+        <div class="t">56 of 88 default events fall in the 1990s</div>
+        <p>Many are carryover from the 1980s debt crisis or formal acknowledgements of pre-existing default by newly-independent former Soviet states. The cleaner subset is the 32 post-2000 events; a re-derivation on that subset is the next obvious robustness pass.</p>
+      </div>
+      <div class="limit">
+        <div class="num">iii · features</div>
+        <div class="t">No yield curve, no political risk</div>
+        <p>Real sovereign analysis uses term-structure data and political-risk indices. This pipeline uses macro fundamentals only. Adding sovereign CDS spreads as a feature is the most plausible single uplift.</p>
+      </div>
+      <div class="limit">
+        <div class="num">iv · environment</div>
+        <div class="t">Yield, recovery, and cost coefficients are stylised</div>
+        <p>The env's spread = 0.02 + 0.0005 · debt - 0.005 · reserves formula follows the qualitative signs in published work; the coefficients are not calibrated. Sensitivity sweep in the notebook documents how the equal-weight reward responds to +/-25% shifts on each coefficient.</p>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <div class="h">Note on the headline numbers</div>
+      The tables and charts on this page report figures from an earlier end-to-end execution. The methodology fixes in the current revision (train-only imputation, TimeSeriesSplit CV, bootstrap 95% CIs, calibration, env / yield-model consistency, PPO log-density clipping) are implemented and exercised by 47 unit tests. They have not been re-executed end-to-end on this commit because the full pipeline exceeds the memory budget of an 8GB Apple Silicon machine. The corrected pipeline is the source of truth; a complete re-run on a larger machine is the open work item.
+    </div>
+  </div>
+</section>
+
+<section class="s" id="skills">
+  <div class="wrap">
+    <div class="section-num">11 · What this project demonstrates</div>
+    <h2 class="display display-m section-title">Six capabilities, demonstrated end-to-end.</h2>
+    <div class="skills">
+      <div class="skill">
+        <div class="num">01 · methodology</div>
+        <div class="title">Causal hygiene under sparse data</div>
+        <p>Temporal split, train-only imputation, TimeSeriesSplit CV, bootstrap CIs, ECE per model, regression tests for leakage.</p>
+      </div>
+      <div class="skill">
+        <div class="num">02 · modelling</div>
+        <div class="title">Five baselines on one ruler</div>
+        <p>Logistic regression, random forest, sklearn gradient boosting, XGBoost, and a Two-Tower neural net evaluated on identical features, splits, and metrics.</p>
+      </div>
+      <div class="skill">
+        <div class="num">03 · reinforcement learning</div>
+        <div class="title">From-scratch PPO with GAE</div>
+        <p>Actor-critic with LayerNorm, Gaussian policy, clip ratio 0.2, entropy bonus 0.01. Sensitivity diagnostics surfaced the static-policy issue rather than hiding it.</p>
+      </div>
+      <div class="skill">
+        <div class="num">04 · engineering</div>
+        <div class="title">src/ package with 47 unit tests</div>
+        <p>data.py, eval.py, tune.py, rl/env.py, rl/ppo.py, rl/normaliser.py, rl/yield_model.py. CI on Python 3.10 and 3.11; notebook JSON validation; banned-phrasing grep.</p>
+      </div>
+      <div class="skill">
+        <div class="num">05 · honesty</div>
+        <div class="title">Limits disclosed, not buried</div>
+        <p>1990s label carryover, 8GB-machine re-execution gap, static-policy finding, narrow weight spread. Each surfaced on the same page as the headline number it qualifies.</p>
+      </div>
+      <div class="skill">
+        <div class="num">06 · translation</div>
+        <div class="title">Posterior to portfolio</div>
+        <p>The 16-feature macro panel becomes a 117-country allocation with a -0.585 correlation to historical default rate. The deterministic 12.6 percent gain is decomposed across stochastic and contagion environments.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <p>Read the full report, the SQL, and the PyMC models.</p>
+    <a class="btn" href="https://github.com/thylinao1/Sovereign-Risk-and-Portfolio-Allocation" target="_blank" rel="noopener">Open the repository ↗</a>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Maksim Silchenko · 2026 · Sovereign default prediction case study</span>
+  <span>World Bank · FRED · sklearn · TensorFlow · XGBoost · PPO+GAE</span>
+</div>
+
+<script>
+/* ============== Chart 1: Model performance ============== */
+const modelData = {
+  auc:   { unit:"AUC-ROC",      higher:true,  fmt:v=>v.toFixed(3),
+    rows:[
+      {name:"Logistic Regression", v:0.636, kind:"normal"},
+      {name:"Gradient Boosting",   v:0.793, kind:"normal"},
+      {name:"Random Forest",       v:0.828, kind:"best"},
+      {name:"XGBoost",             v:null,  kind:"pending"},
+      {name:"Two-Tower NN",        v:0.675, kind:"normal"}
+    ]},
+  ap:    { unit:"Avg precision",higher:true,  fmt:v=>v.toFixed(3),
+    rows:[
+      {name:"Logistic Regression", v:0.041, kind:"normal"},
+      {name:"Gradient Boosting",   v:0.065, kind:"normal"},
+      {name:"Random Forest",       v:0.085, kind:"best"},
+      {name:"XGBoost",             v:null,  kind:"pending"},
+      {name:"Two-Tower NN",        v:0.064, kind:"normal"}
+    ]},
+  brier: { unit:"Brier score",  higher:false, fmt:v=>v.toFixed(4),
+    rows:[
+      {name:"Logistic Regression", v:0.0821, kind:"normal"},
+      {name:"Gradient Boosting",   v:0.0221, kind:"best"},
+      {name:"Random Forest",       v:0.0569, kind:"normal"},
+      {name:"XGBoost",             v:null,   kind:"pending"},
+      {name:"Two-Tower NN",        v:0.0269, kind:"normal"}
+    ]}
+};
+function renderModelChart(metric){
+  const d = modelData[metric];
+  const numericVals = d.rows.filter(r=>r.v!==null).map(r=>r.v);
+  const vmax = Math.max(...numericVals);
+  const el = document.getElementById("model-bars");
+  el.innerHTML = d.rows.map(r=>{
+    const pct = r.v === null ? 100 : (r.v / vmax) * 100;
+    const cls = r.kind === "pending" ? "pending" : (r.kind === "best" ? "accent" : "");
+    const valLabel = r.v === null ? "<span style='color:var(--ink-4)'>pending</span>" : d.fmt(r.v);
+    return `<div class="bar-row">
+      <span class="lbl">${r.name}</span>
+      <span class="bar-track"><span class="bar-fill ${cls}" style="width:${pct}%"></span></span>
+      <span class="v">${valLabel}</span>
+    </div>`;
+  }).join("");
+  document.getElementById("model-cap").textContent =
+    `${d.higher ? "Higher" : "Lower"} is better. Test set: 2015-2023, 1,053 rows, 18 positives. ${d.unit}. XGBoost numbers pending re-execution.`;
+}
+document.querySelectorAll('#model-tabs .chart-tab').forEach(b=>{
+  b.addEventListener('click', e=>{
+    document.querySelectorAll('#model-tabs .chart-tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderModelChart(b.dataset.m);
+  });
+});
+renderModelChart('auc');
+
+/* ============== Chart 2: Portfolio allocation ============== */
+const allocData = {
+  top:[
+    {iso:"GUY", name:"Guyana",            w:1.00, defaults:1},
+    {iso:"SVN", name:"Slovenia",          w:0.98, defaults:0},
+    {iso:"KOR", name:"South Korea",       w:0.98, defaults:0},
+    {iso:"TTO", name:"Trinidad & Tobago", w:0.96, defaults:1},
+    {iso:"MOZ", name:"Mozambique",        w:0.95, defaults:1}
+  ],
+  bot:[
+    {iso:"VEN", name:"Venezuela",         w:0.70, defaults:4},
+    {iso:"ARG", name:"Argentina",         w:0.72, defaults:4},
+    {iso:"UKR", name:"Ukraine",           w:0.73, defaults:3},
+    {iso:"BLZ", name:"Belize",            w:0.74, defaults:3},
+    {iso:"BRB", name:"Barbados",          w:0.76, defaults:0}
+  ]
+};
+function renderAlloc(side){
+  const rows = allocData[side];
+  const el = document.getElementById("alloc-rows");
+  el.innerHTML = `
+    <div class="alloc-row" style="border-bottom:1px solid var(--rule-strong);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)">
+      <span class="iso">ISO</span><span class="nm">country</span><span class="wt">weight</span><span class="df">defaults</span>
+    </div>
+    ` + rows.map(r=>`
+      <div class="alloc-row">
+        <span class="iso">${r.iso}</span>
+        <span class="nm">${r.name}</span>
+        <span class="wt">${r.w.toFixed(2)}%</span>
+        <span class="df">${r.defaults}</span>
+      </div>
+    `).join("");
+  const track = document.getElementById("alloc-track");
+  let cells = '';
+  for (let i=0;i<20;i++){
+    const active = (side === 'top' && i < 5) || (side === 'bot' && i >= 15);
+    cells += `<div class="alloc-cell ${active?'active':''}"></div>`;
+  }
+  track.innerHTML = cells;
+}
+document.querySelectorAll('#alloc-tabs .chart-tab').forEach(b=>{
+  b.addEventListener('click', e=>{
+    document.querySelectorAll('#alloc-tabs .chart-tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderAlloc(b.dataset.side);
+  });
+});
+renderAlloc('top');
+
+/* ============== Chart 3: Environment comparison ============== */
+const envData = {
+  det:    { name:"Deterministic", ew:16.67, lv:17.66, rl:18.78, note:"+12.6% vs equal-weight, +6.3% vs low-vol" },
+  stoch:  { name:"Stochastic",    ew:23.50, lv:null,  rl:25.54, note:"+9% vs equal-weight" },
+  contag: { name:"Contagion",     ew:20.78, lv:null,  rl:21.83, note:"+5% vs equal-weight" }
+};
+function envGain(d){
+  if (d.ew === null) return "";
+  return `+${(((d.rl - d.ew) / d.ew) * 100).toFixed(1)}%`;
+}
+function renderEnv(which){
+  const keys = which === 'all' ? ['det','stoch','contag'] : [which];
+  const allVals = ['det','stoch','contag'].flatMap(k => {
+    const d = envData[k];
+    return [d.ew, d.lv, d.rl].filter(v => v !== null);
+  });
+  const vmax = Math.max(...allVals);
+  const el = document.getElementById("env-groups");
+  el.innerHTML = keys.map(k=>{
+    const d = envData[k];
+    const bars = [
+      {kind:'ew', label:'Equal weight',     v:d.ew},
+      {kind:'lv', label:'Low volatility',   v:d.lv},
+      {kind:'rl', label:'RL policy',        v:d.rl}
+    ];
+    const rows = bars.filter(b=>b.v !== null).map(b=>{
+      const pct = (b.v / vmax) * 100;
+      return `<div class="env-row">
+        <span class="e-lbl" style="color:rgba(243,237,224,.86)">${b.label}</span>
+        <span class="env-track"><span class="env-fill ${b.kind}" style="width:${pct}%"></span></span>
+        <span class="e-v" style="color:rgba(243,237,224,.62)">${b.v.toFixed(2)}</span>
+      </div>`;
+    }).join("");
+    return `<div class="env-group">
+      <h4 style="color:rgba(243,237,224,.86)">${d.name}<span class="pct">${envGain(d)}</span></h4>
+      ${rows}
+    </div>`;
+  }).join("");
+}
+document.querySelectorAll('#env-tabs .chart-tab').forEach(b=>{
+  b.addEventListener('click', e=>{
+    document.querySelectorAll('#env-tabs .chart-tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderEnv(b.dataset.env);
+  });
+});
+renderEnv('all');
+</script>
+
+</body>
+</html>

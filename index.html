@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maksim Silchenko · Statistics, Machine Learning & Causal Inference</title>
+<meta name="description" content="Personal portfolio of Maksim Silchenko. Applied statistics, causal inference, experimentation, and machine learning systems.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8; --bg-dark:#15110b;
+    --ink:#15110b; --ink-2:#3b3527; --ink-3:#6b6452; --ink-4:#968d77;
+    --rule:rgba(21,17,11,.12); --rule-strong:rgba(21,17,11,.28);
+    --accent:#c8421f; --accent-soft:#e5a892; --accent-bg:rgba(200,66,31,.08);
+    --good:#1f6b3a;
+    --font-display:"Instrument Serif", Georgia, serif;
+    --font-body:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+    --maxw:1180px; --maxw-narrow:820px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:var(--font-body); font-size:16.5px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; font-feature-settings:"ss01","cv11";
+  }
+  ::selection{background:var(--accent-bg); color:var(--ink)}
+  a{color:var(--ink); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
+  a:hover{color:var(--accent)}
+  .wrap{max-width:var(--maxw); padding:0 32px; margin:0 auto}
+  .wrap-n{max-width:var(--maxw-narrow); padding:0 32px; margin:0 auto}
+
+  /* topbar */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    padding:14px 0;
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    background:rgba(244,239,230,.88);
+    border-bottom:1px solid var(--rule);
+    font-family:var(--font-mono); font-size:12px;
+  }
+  .topbar-inner{
+    display:grid; grid-template-columns:1fr auto 1fr;
+    align-items:center; gap:20px;
+    padding:0 32px; max-width:var(--maxw); margin:0 auto;
+  }
+  .topbar .brand{font-family:var(--font-display); font-style:italic; font-size:17px; color:var(--ink); text-decoration:none; white-space:nowrap; justify-self:start}
+  .topbar nav{display:flex; gap:22px; color:var(--ink-3); justify-self:center}
+  .topbar nav a{color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:600; letter-spacing:.02em}
+  .topbar nav a:hover{color:var(--accent)}
+  .topbar .pill{border:1px solid var(--rule-strong); border-radius:999px; padding:4px 12px; text-decoration:none; color:var(--ink-2)}
+  .topbar .pill:hover{color:var(--accent); border-color:var(--accent)}
+  .topbar .right{display:flex; gap:10px; flex-wrap:wrap; justify-self:end}
+  @media(max-width:900px){
+    .topbar-inner{grid-template-columns:auto 1fr; gap:14px}
+    .topbar nav{display:none}
+    .topbar .right{justify-self:end}
+  }
+
+  /* hero */
+  .hero{padding:56px 0 0}
+  .hero .meta{
+    font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3);
+    margin-bottom:28px; display:flex; flex-wrap:wrap; gap:28px;
+    letter-spacing:.04em;
+  }
+  .hero .meta strong{color:var(--ink); font-weight:500}
+  .kicker{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+  .kicker::before{content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent)}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink-3);
+  }
+  .display{font-family:var(--font-display); font-weight:400; letter-spacing:-.005em; line-height:.98; margin:0; color:var(--ink)}
+  .display-xxl{font-size:clamp(56px, 8.4vw, 124px)}
+  .display-xl{font-size:clamp(40px, 5.4vw, 64px)}
+  .display-l{font-size:clamp(32px, 3.8vw, 48px); line-height:1.05}
+  .display-m{font-size:clamp(24px, 2.6vw, 32px); line-height:1.15}
+  .italic{font-style:italic}
+  .hero-sub{
+    font-family:var(--font-display); font-style:italic;
+    font-size:clamp(20px, 2.4vw, 26px); line-height:1.4;
+    max-width:36em; color:var(--ink-2); margin:32px 0 0;
+  }
+  .hero-bio{
+    max-width:none; font-size:16px; line-height:1.6;
+    color:var(--ink-2);
+  }
+  .hero-bio p{margin:0}
+  .hero-bio p + p{margin-top:.85em}
+  .hero-bio em{color:var(--ink); font-style:italic}
+
+  .hero-card{
+    display:grid; grid-template-columns:200px 1fr;
+    gap:36px; align-items:center;
+  }
+  .hero-card h1{margin:0 0 12px; line-height:1.02}
+  .hero-photo-wrap{display:flex; justify-content:flex-start; align-items:center}
+  .hero-photo{
+    width:100%; height:auto; max-width:200px; display:block;
+    border-radius:8px;
+    box-shadow:0 6px 24px rgba(21,17,11,.10);
+  }
+  @media(max-width:760px){
+    .hero-card{grid-template-columns:1fr; gap:20px}
+    .hero-photo{max-width:160px; margin:0 auto}
+    .hero-photo-wrap{justify-content:center}
+  }
+
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--rule-strong);
+    border-bottom:1px solid var(--rule);
+    margin-top:64px;
+  }
+  .stat{padding:28px 22px; border-right:1px solid var(--rule)}
+  .stat:last-child{border-right:none}
+  .stat .val{font-family:var(--font-display); font-size:42px; line-height:1; color:var(--ink)}
+  .stat .lbl{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-3); margin-top:10px;
+  }
+  @media(max-width:760px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .stat:nth-child(2){border-right:none}
+    .stat:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  }
+
+  /* sections */
+  section.s{padding:44px 0; border-top:1px solid var(--rule)}
+  section.alt{background:var(--bg-2)}
+  section.dark{background:var(--ink); color:#f3ede0; border-top-color:rgba(243,237,224,.08)}
+  section.dark .eyebrow,
+  section.dark .corner{color:rgba(243,237,224,.6)}
+  section.dark .display,
+  section.dark h2, section.dark h3{color:#f3ede0}
+  section.dark a{color:#f3ede0}
+  section.dark a:hover{color:var(--accent-soft)}
+  .section-num{font-family:var(--font-mono); font-size:14px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); font-weight:600; margin-bottom:30px}
+  .section-title{margin-bottom:26px}
+  .section-title-tight{margin-bottom:18px}
+  p.lede{
+    font-family:var(--font-display); font-style:italic;
+    font-size:clamp(22px, 2.4vw, 28px); line-height:1.4;
+    max-width:34em; color:var(--ink-2); margin:0 0 28px;
+  }
+
+  /* experience cards (shared by internships + projects) */
+  .exp-list{display:flex; flex-direction:column; gap:0}
+  .exp{
+    padding:24px 0; border-top:1px solid var(--rule);
+    display:grid; grid-template-columns:200px 1fr; gap:36px;
+  }
+  .exp:first-child{border-top:none}
+  .exp-meta{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3); letter-spacing:.04em}
+  .exp-meta .date{display:block; color:var(--ink-2); margin-bottom:8px}
+  .exp-meta .type{
+    display:inline-block; padding:3px 9px; border-radius:999px;
+    font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  }
+  .exp-meta .type.internship{background:var(--ink); color:var(--bg)}
+  .exp-meta .type.project{border:1px solid var(--rule-strong); color:var(--ink-2)}
+  section.alt .exp{border-top-color:rgba(21,17,11,.10)}
+  .exp-body h3{
+    font-family:var(--font-display); font-size:clamp(26px, 3vw, 36px);
+    font-weight:400; line-height:1.1; margin:0 0 6px; color:var(--ink);
+  }
+  .exp-body .sub{
+    font-family:var(--font-body); font-style:normal;
+    color:var(--ink-2); font-size:15px; margin:0 0 16px;
+  }
+  .exp-body ul{margin:0 0 18px; padding:0; list-style:none}
+  .exp-body li{
+    position:relative; padding-left:22px; margin:0 0 12px;
+    color:var(--ink-2); line-height:1.55;
+  }
+  .exp-body li::before{
+    content:""; position:absolute; left:0; top:.62em;
+    width:8px; height:1px; background:var(--accent);
+  }
+  .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
+  .tag{
+    display:inline-block; font-family:var(--font-mono); font-size:10.5px;
+    letter-spacing:.08em; padding:4px 10px; border-radius:999px;
+    border:1px solid var(--rule-strong); color:var(--ink-2);
+    background:rgba(255,255,255,.35);
+  }
+  section.alt .tag{background:rgba(255,255,255,.55)}
+  .case-link{
+    display:inline-flex; align-items:center; gap:6px; margin-top:18px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
+    color:var(--accent); text-decoration:none; padding:6px 12px;
+    border:1px solid var(--accent); border-radius:999px;
+    transition:background .15s;
+  }
+  .case-link:hover{background:var(--accent-bg); color:var(--accent)}
+  @media(max-width:760px){
+    .exp{grid-template-columns:1fr; gap:14px}
+  }
+
+  /* clickable project cards + modal */
+  .project-card{cursor:pointer}
+  .project-card .project-title{
+    text-decoration:underline; text-decoration-thickness:1px;
+    text-underline-offset:5px; text-decoration-color:var(--rule-strong);
+    transition:color .15s, text-decoration-color .15s;
+  }
+  .project-card .sub{transition:color .15s}
+  .project-card:hover .project-title,
+  .project-card:focus-visible .project-title{color:var(--accent); text-decoration-color:var(--accent)}
+  .project-card:hover .sub{color:var(--ink)}
+  .project-card:focus{outline:none}
+  .project-card:focus-visible{outline:2px solid var(--accent); outline-offset:6px; border-radius:4px}
+  .js-on .project-detail{display:none}
+
+  .modal-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(21,17,11,.55);
+    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:28px;
+  }
+  .modal-overlay[hidden]{display:none}
+  .modal-card{
+    position:relative; background:var(--bg); color:var(--ink);
+    max-width:660px; width:100%; max-height:86vh;
+    display:flex; flex-direction:column; overflow:hidden;
+    border:1px solid var(--rule); border-radius:10px;
+    box-shadow:0 24px 70px rgba(21,17,11,.34);
+  }
+  .modal-scroll{overflow-y:auto; padding:44px 44px 28px}
+  .modal-foot{
+    flex-shrink:0; padding:18px 44px;
+    border-top:1px solid var(--rule); background:var(--bg);
+  }
+  .modal-foot[hidden]{display:none}
+  .modal-foot .detail-actions{display:flex; gap:10px; flex-wrap:wrap}
+  .modal-foot .case-link{
+    margin-top:0; font-weight:600; font-size:13px;
+    background:var(--accent); color:#fff; border-color:var(--accent);
+    padding:10px 18px;
+  }
+  .modal-foot .case-link:hover{background:#a8341a; color:#fff; border-color:#a8341a}
+  .modal-foot .repo-link{
+    background:transparent; color:var(--accent); border-color:var(--accent);
+  }
+  .modal-foot .repo-link:hover{background:var(--accent-bg); color:var(--accent); border-color:var(--accent)}
+  .modal-card .project-title{text-decoration:none}
+  .modal-card h3{margin-top:0}
+  .modal-card .sub{margin-bottom:18px}
+  .modal-close{
+    position:absolute; top:14px; right:16px;
+    width:34px; height:34px; padding:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg); border:1px solid var(--rule-strong); border-radius:50%;
+    color:var(--ink-3); font-size:20px; line-height:1; cursor:pointer;
+    font-family:var(--font-body); z-index:2;
+  }
+  .modal-close:hover{color:var(--accent); border-color:var(--accent)}
+  @media(max-width:600px){
+    .modal-scroll{padding:42px 22px 24px}
+    .modal-foot{padding:16px 22px}
+  }
+
+  /* skills */
+  .skills-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:32px 48px}
+  .skill-group h4{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink-3);
+    margin:0 0 14px; font-weight:500;
+  }
+  .skill-group p{margin:0; line-height:1.65; color:var(--ink-2); font-size:15.5px}
+  .skill-group strong{color:var(--ink); font-weight:500}
+  @media(max-width:760px){ .skills-grid{grid-template-columns:1fr; gap:32px} }
+
+  /* awards (compact, dark) */
+  section.awards-section{padding:38px 0 44px; margin-top:12px}
+  .awards{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border-top:1px solid rgba(243,237,224,.18); margin-top:24px}
+  .award{padding:22px 22px; border-right:1px solid rgba(243,237,224,.18); border-bottom:1px solid rgba(243,237,224,.18)}
+  .award:nth-child(3n){border-right:none}
+  .award .ord{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; color:rgba(243,237,224,.6); margin-bottom:10px}
+  .award h4{font-family:var(--font-display); font-size:22px; font-weight:400; line-height:1.2; margin:0 0 10px; color:#f3ede0}
+  .award p{margin:0; color:rgba(243,237,224,.75); font-size:14.5px; line-height:1.55}
+  @media(max-width:760px){
+    .awards{grid-template-columns:1fr}
+    .award, .award:nth-child(3n){border-right:none}
+  }
+
+  /* education */
+  .edu-list{display:flex; flex-direction:column; gap:0}
+  .edu{
+    padding:20px 0; border-top:1px solid var(--rule);
+    display:grid; grid-template-columns:200px 1fr; gap:36px;
+  }
+  .edu:first-child{border-top:none}
+  .edu-meta{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3)}
+  .edu-body h3{
+    font-family:var(--font-display); font-size:24px; font-weight:400;
+    line-height:1.2; margin:0 0 4px;
+  }
+  .edu-body .role{font-style:italic; color:var(--ink-2); margin:0 0 10px}
+  .edu-body p{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.55}
+  .edu-body ul.exchanges{margin:10px 0 0; padding:0; list-style:none}
+  .edu-body ul.exchanges li{
+    position:relative; padding-left:20px; margin:0 0 6px;
+    color:var(--ink-2); font-size:14.5px;
+  }
+  .edu-body ul.exchanges li::before{
+    content:""; position:absolute; left:0; top:.7em;
+    width:8px; height:1px; background:var(--accent);
+  }
+  @media(max-width:760px){
+    .edu{grid-template-columns:1fr; gap:8px}
+  }
+
+  /* footer */
+  footer{
+    padding:40px 0 40px;
+    border-top:1px solid var(--rule);
+    text-align:center;
+  }
+  footer .name{
+    font-family:var(--font-display); font-style:italic;
+    font-size:24px; color:var(--ink); display:block;
+  }
+  footer .contact-links{
+    margin-top:20px; display:flex; justify-content:center; gap:24px;
+    flex-wrap:wrap; font-family:var(--font-mono);
+    font-size:13px; letter-spacing:.04em;
+  }
+  footer .contact-links a{ color:var(--ink-2); text-decoration:none; }
+  footer .contact-links a:hover{ color:var(--accent); }
+  footer .contact-links button{
+    background:none; border:none; padding:0; cursor:pointer;
+    font-family:var(--font-mono); font-size:13px; letter-spacing:.04em;
+    color:var(--ink-2);
+  }
+  footer .contact-links button:hover{color:var(--accent)}
+
+  /* CV chooser modal */
+  .topbar button.pill{
+    background:transparent; cursor:pointer;
+    font-family:var(--font-mono); font-size:12px;
+  }
+  .modal-card.cv-card{display:block; overflow-y:auto; max-width:520px}
+  .cv-card-body{padding:44px 40px 38px}
+  .cv-card-title{
+    font-family:var(--font-display); font-weight:400; font-size:27px;
+    line-height:1.2; margin:0 0 22px; color:var(--ink);
+  }
+  .cv-choices{display:flex; flex-direction:column; gap:10px}
+  .cv-choice{
+    display:block; text-decoration:none; padding:14px 16px;
+    border:1px solid var(--rule-strong); border-radius:8px;
+    transition:border-color .15s, background .15s;
+  }
+  .cv-choice:hover{border-color:var(--accent); background:var(--accent-bg)}
+  .cv-choice-name{
+    display:block; font-family:var(--font-body); font-weight:600;
+    font-size:15px; color:var(--ink);
+  }
+  .cv-choice:hover .cv-choice-name{color:var(--accent)}
+  .cv-choice-desc{display:block; font-size:13px; color:var(--ink-3); margin-top:3px}
+  @media(max-width:600px){ .cv-card-body{padding:42px 22px 30px} }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#top" class="brand">M. Silchenko</a>
+    <nav>
+      <a href="#awards">Distinctions</a>
+      <a href="#internships">Internships</a>
+      <a href="#projects">Projects</a>
+      <a href="#education">Education</a>
+      <a href="#skills">Skills</a>
+    </nav>
+    <div class="right">
+      <button type="button" class="pill cv-open">CV ↗</button>
+      <a class="pill" href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="pill" href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn ↗</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="hero">
+  <div class="wrap">
+    <div class="meta">
+      <span><strong>Based</strong> · Singapore</span>
+      <span><strong>NUS</strong> · Computing (Business Analytics, Statistics specialisation), MSc</span>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-photo-wrap">
+        <img src="photo.jpg" alt="Maksim Silchenko" class="hero-photo">
+      </div>
+      <div class="hero-text">
+        <div class="kicker"><span class="eyebrow">Portfolio</span></div>
+        <h1 class="display display-l">Maksim Silchenko</h1>
+        <div class="hero-bio">
+          <p>
+            I&rsquo;m an MSc student in NUS School of Computing (Business Analytics),
+            specializing in Statistics, and a winner of the Jane Street Quantitative
+            Reasoning Competition and the National Mathematics Olympiad
+            (top 0.015% nationally).
+          </p>
+          <p>
+            My work sits at the intersection of causal inference, experimental
+            design (A/B testing), and robust machine learning systems, translating
+            complex models into executive-level strategic decisions. At The TCM
+            Group I built a randomised-controlled-trial framework now adopted as the
+            firm&rsquo;s standard for measuring training impact; on a 97k-order
+            marketplace dataset, a hierarchical Bayesian model surfaced
+            category-level effects a pooled A/B test had missed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SELECTED DISTINCTIONS (replaces stats grid) ============ -->
+<section id="awards" class="s dark awards-section">
+  <div class="wrap">
+    <h2 class="display display-l section-title-tight">Selected <span class="italic">distinctions.</span></h2>
+
+    <div class="awards">
+      <div class="award">
+        <div class="ord">01</div>
+        <h4>MIPT National Mathematics Olympiad</h4>
+        <p>Winner of the Russian National Mathematics Olympiad (Moscow Institute of Physics &amp; Technology), top 0.015% nationally.</p>
+      </div>
+      <div class="award">
+        <div class="ord">02</div>
+        <h4>Jane Street Quantitative-Reasoning Puzzle</h4>
+        <p>Winner, February 2026 monthly quantitative-reasoning and probability competition run by Jane Street&rsquo;s research team.</p>
+      </div>
+      <div class="award">
+        <div class="ord">03</div>
+        <h4>Extracurricular Coursework</h4>
+        <p>Stanford CS229 / CS230 · MIT RES.6-012 Probability · Imperial Mathematics for ML · IBM Data Science Specialization · McElreath&rsquo;s Statistical Rethinking (2026).</p>
+      </div>
+      <div class="award">
+        <div class="ord">04</div>
+        <h4>Top of Cohort · Bayes Business School</h4>
+        <p>Top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>; ESADE <em>Mergers &amp; Acquisitions</em>.</p>
+      </div>
+      <div class="award">
+        <div class="ord">05</div>
+        <h4>Full Scholarships</h4>
+        <p>Full Scholarship at the National University of Singapore (Spring 2025) and ESADE Business School (Autumn 2024) exchanges.</p>
+      </div>
+      <div class="award">
+        <div class="ord">06</div>
+        <h4>BUPT Agentic AI Scholarship</h4>
+        <p>Fully-funded scholarship for Agentic AI Bootcamp by the Beijing University of Posts &amp; Telecommunications (Jun&ndash;Jul 2026).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INTERNSHIPS ============ -->
+<section id="internships" class="s">
+  <div class="wrap">
+    <div class="section-num">§ 01 · Internships</div>
+
+    <div class="exp-list">
+
+      <!-- Orbuc Research -->
+      <article class="exp project-card" data-project-id="orbuc" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">Feb 2026 – Apr 2026</span>
+          <span class="type internship">Internship</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">Orbuc Research · Quantitative Research Intern</h3>
+          <p class="sub">Statistical Modeling &amp; Time-Series Research · London, UK</p>
+          <div class="project-detail">
+            <ul>
+              <li>Developed a time-series anomaly-detection model that classifies latent states with Hidden Markov Models to flag unstable, low-predictability conditions, validated across 5 out-of-sample windows where it held up in 4 of 5.</li>
+              <li>Built an LLM agent that automatically classifies events from live news streams, grounding each call with retrieval-augmented generation (RAG) over an embedded knowledge base, enforcing schema-constrained output, and aggregating results into a single risk score with a probabilistic layer.</li>
+              <li>Hardened the surrounding Python pipeline for reliability with SQL (SQLite) persistence of every event and classification, batched API calls, rate-limit handling, and an automated test suite.</li>
+              <li>Engineered the statistical analysis behind the firm&rsquo;s March 2026 research report, characterising 9 historical anomaly periods and identifying 4 statistically significant shifts in correlation structure.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Hidden Markov Models</span>
+              <span class="tag">Anomaly Detection</span>
+              <span class="tag">LLM Agent</span>
+              <span class="tag">RAG</span>
+              <span class="tag">SQLite</span>
+              <span class="tag">Time-Series</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- TCM Group -->
+      <article class="exp project-card" data-project-id="tcm" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">Jan 2026 – Apr 2026</span>
+          <span class="type internship">Internship</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">The TCM Group · Data &amp; Analytics Consultant</h3>
+          <p class="sub">Bayes Business School Capstone · Highest grade in cohort · London, UK</p>
+          <div class="project-detail">
+            <ul>
+              <li>Designed a causal-inference framework (RCT-style wait-list control, paired hypothesis tests) to measure leadership-training outcomes, presented it to TCM&rsquo;s senior leadership, and saw it adopted as the standard for ongoing programme evaluation.</li>
+              <li>Replaced multiple-choice surveys that correlated poorly with on-the-job behaviour by engineering a serverless LLM scoring engine (TypeScript, Vercel, OpenAI) that grades open-ended scenario responses 0 to 10 against rubrics, deployed with Zod schema validation and automatic retry so malformed model output is never returned.</li>
+              <li>Built the hypothesis-testing methodology for evaluation: a decision rule that picks the correct paired test by sample size and distribution (Wilcoxon signed-rank, paired t-test etc.), reports effect sizes with CIs, and tests against a meaningful-change threshold rather than zero.</li>
+              <li>Built an automated evaluation harness that benchmarks the scorer against a hand-labelled gold dataset (0.90 Spearman correlation with human raters), then halved its scoring error with a cross-validated calibration that corrects the model&rsquo;s systematic bias.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Causal Inference</span>
+              <span class="tag">RCT Design</span>
+              <span class="tag">Hypothesis Testing</span>
+              <span class="tag">LLM Rubric Scoring</span>
+              <span class="tag">LLM-as-Judge Eval</span>
+              <span class="tag">Calibration</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link repo-link" href="https://github.com/thylinao1/TCM" target="_blank" rel="noopener">GitHub repo ↗</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Oxford Comma -->
+      <article class="exp project-card" data-project-id="oxford-comma" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">Oct 2025 – Jan 2026</span>
+          <span class="type internship">Internship</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">Oxford Comma Advisory · Data Analyst Intern</h3>
+          <p class="sub">Education &amp; Admissions Consultancy · London, UK</p>
+          <div class="project-detail">
+            <ul>
+              <li>Designed a two-tower collaborative-filtering recommendation system for university matching using learned embeddings (0.82 precision@5, entropy-validated diversity, 73% consultant approval), cutting consultant research time from 2 hours to 3 minutes.</li>
+              <li>Built a feature-engineering pipeline feeding an XGBoost churn model (AUC 0.79) and a Cox Proportional Hazards survival analysis on 800+ inquiries; organic leads convert 60% faster (p = 0.003).</li>
+              <li>Designed and analysed A/B tests on personalised outreach, lifting booking rates from 18% to 27% (p = 0.004).</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Two-Tower NN</span>
+              <span class="tag">XGBoost</span>
+              <span class="tag">Cox Proportional Hazards</span>
+              <span class="tag">A/B Testing</span>
+              <span class="tag">Embeddings</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects" class="s alt">
+  <div class="wrap">
+    <div class="section-num">§ 02 · Projects</div>
+
+    <div class="exp-list">
+
+      <!-- Olist -->
+      <article class="exp project-card" data-project-id="olist" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">2026</span>
+          <span class="type project">Project</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">Olist Hierarchical Bayesian A/B Testing</h3>
+          <p class="sub">Brazilian e-commerce panel · 97k orders · hierarchical Bayesian causal inference in PyMC 5</p>
+          <div class="project-detail">
+            <ul>
+              <li>Reframed a flat marketplace A/B test as a causal-identification problem on a 97k-order panel, using a hierarchical Bayesian difference-in-differences in PyMC that corrected the policy effect from a naive &minus;2pp to a DiD-identified +1.5pp.</li>
+              <li>Built the full analytics pipeline behind it (DuckDB medallion SQL, a NetworkX causal DAG, three Bayesian models, falsification tests) and translated the posterior into a costed &minus;R$452K net envelope, turning an apparent per-customer win into a no-launch call.</li>
+              <li>Architected the analysis as a clean, importable Python package (ETL, feature builders, causal DAG, separate model factories per likelihood) with a DuckDB feature stack that rebuilds end-to-end in roughly five seconds.</li>
+              <li>Validated the models with held-out cross-validation (PSIS-LOO), posterior-predictive checks, and prior-sensitivity sweeps. The headline result shifted just 0.0004 logit across three hyperprior families.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">PyMC 5</span>
+              <span class="tag">Hierarchical Bayes</span>
+              <span class="tag">Difference-in-Differences</span>
+              <span class="tag">DuckDB</span>
+              <span class="tag">PSIS-LOO</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link" href="projects/olist.html">Read case study →</a>
+              <a class="case-link repo-link" href="https://github.com/thylinao1/Olist-Bayesian-AB-Testing/tree/main" target="_blank" rel="noopener">GitHub repo ↗</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- A/B-Test Experimentation Guardrail -->
+      <article class="exp project-card" data-project-id="ab-guardrail" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">2026</span>
+          <span class="type project">Project</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">A/B-Test Experimentation Guardrail</h3>
+          <p class="sub">Experiment-safety auditing tool · SRM detection &amp; causal inference · optional Claude tool-use agent</p>
+          <div class="project-detail">
+            <ul>
+              <li>Built a command-line A/B-test guardrail that checks whether an experiment is safe to interpret, using a chi-square Sample Ratio Mismatch test that flagged a compromised 61/39 allocation a standard metric t-test runs straight past.</li>
+              <li>Separated genuine treatment effects from confounding with propensity score matching and Rosenbaum sensitivity bounds to return a clear launch verdict; validated on a 300k-row stratified sample of Criteo&rsquo;s real 13.98M-row Uplift experiment.</li>
+              <li>Built an optional Anthropic Claude tool-use agent mode: a bounded multi-turn loop that chooses which of 3 schema-defined tools to call next, with the LLM held off the numerical path so every figure comes from scipy and scikit-learn.</li>
+              <li>Designed the default pipeline to route deterministically and call the LLM once, at the end, narrating a code-decided verdict as a plain-English summary; one model call per audit, the statistical core covered by a 36-case pytest suite in CI (Python 3.10 to 3.12).</li>
+              <li>Engineered the tool as a production-shaped Python package (typed dataclasses, a custom exception hierarchy, an installable CLI, ruff-linted CI) with a data loader hardened against messy real-world exports; validating against the 14M-row Criteo dataset surfaced three production bugs, each fixed and locked down with a regression test.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">SRM Detection</span>
+              <span class="tag">Propensity Score Matching</span>
+              <span class="tag">Claude Tool-Use Agent</span>
+              <span class="tag">Criteo Uplift</span>
+              <span class="tag">pytest + CI</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link" href="projects/abguardrail.html">Read case study →</a>
+              <a class="case-link repo-link" href="https://github.com/thylinao1/ab-guardrail" target="_blank" rel="noopener">GitHub repo ↗</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- PowerCo -->
+      <article class="exp project-card" data-project-id="powerco" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">2025</span>
+          <span class="type project">Project</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">Cost-Sensitive Churn Pipeline</h3>
+          <p class="sub">Energy-utility SME churn · 14,606 customers · cost-sensitive, decision-aware modelling</p>
+          <div class="project-detail">
+            <ul>
+              <li>Built a SMOTE-balanced Random Forest on 14,606 SME utility customers, tuning the decision threshold against a GBP cost matrix to cut expected misclassification cost by ~&pound;15.9M on a sealed test fold.</li>
+              <li>Pressure-tested the headline savings by sweeping the three cost assumptions behind it (customer lifetime value, campaign cost, retention rate), reporting the &pound;15.9M with the conditions it depends on instead of as a standalone claim.</li>
+              <li>Stress-tested the model for time decay by splitting customers on contract activation date and re-scoring the newest cohort, exposing a discrimination drop (test AUC ~0.67 to ~0.62) that established periodic retraining as a deployment precondition rather than an afterthought.</li>
+              <li>Turned the churn score into a retention action list by running permutation feature importance on the frozen test pipeline, isolating profit-margin variables as the dominant drivers so the business knew which accounts to prioritise and why.</li>
+              <li>Added a Random Survival Forest for time-to-churn (held-out concordance 0.71, vs 0.56 for the Cox model it replaced), validated it on a temporal holdout, and shipped the pipeline as a typed Python library with a 48-test CI suite.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">SMOTE</span>
+              <span class="tag">Cost-Sensitive Thresholding</span>
+              <span class="tag">Random Survival Forest</span>
+              <span class="tag">Permutation Importance</span>
+              <span class="tag">CI Suite</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link" href="projects/powerco.html">Read case study →</a>
+              <a class="case-link repo-link" href="https://github.com/thylinao1/BCGX-Data-Scientist" target="_blank" rel="noopener">GitHub repo ↗</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Rare-Event Prediction & RL -->
+      <article class="exp project-card" data-project-id="rare-event" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">2025</span>
+          <span class="type project">Project</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">Rare-Event Prediction &amp; Reinforcement Learning for Sequential Allocation</h3>
+          <p class="sub">Sovereign-default prediction · 34-year cross-country macro panel · 5-model benchmark + PPO from scratch</p>
+          <div class="project-detail">
+            <ul>
+              <li>Implemented PPO with Generalised Advantage Estimation from scratch in TensorFlow/Keras over a 117-dimensional continuous action space; the learned policy beat a uniform-allocation baseline by ~13% in the deterministic setting and 5-9% under stochastic and contagion variants.</li>
+              <li>Built a rare-event classification pipeline on a 34-year cross-country macro panel: 117 entities, 21 features, a ~2.4% positive rate, with 88 hand-curated default events labelled against multiple authoritative sources.</li>
+              <li>Benchmarked five models on a temporal 1990-2014 / 2015-2023 split: logistic regression, random forest, gradient boosting, XGBoost, and a Two-Tower neural network (a dual-embedding architecture from large-scale recommender systems). Random forest gave the best discrimination (AUC 0.83); the Two-Tower underperformed (AUC 0.68), which I report and diagnose rather than hide.</li>
+              <li>Built a perturbation-based sensitivity harness that exposed a policy under-responsiveness in the trained agent, then implemented Welford running z-score normalisation over the 1,878-dimensional continuous state as the candidate fix.</li>
+              <li>Packaged the work to production engineering standards: a typed src/ package, a 47-test pytest suite, and a GitHub Actions CI pipeline running a Python 3.10/3.11 test matrix and notebook validation.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Rare-Event Prediction</span>
+              <span class="tag">Model Benchmark</span>
+              <span class="tag">Two-Tower NN</span>
+              <span class="tag">PPO + GAE</span>
+              <span class="tag">TensorFlow / Keras</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link" href="projects/sovereign.html">Read case study →</a>
+              <a class="case-link repo-link" href="https://github.com/thylinao1/Sovereign-Risk-and-Portfolio-Allocation" target="_blank" rel="noopener">GitHub repo ↗</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- JPMC / Credit Risk -->
+      <article class="exp project-card" data-project-id="jpmc" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">2025</span>
+          <span class="type project">Project</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">Credit Risk Classifier &amp; MLOps Pipeline</h3>
+          <p class="sub">Retail credit-risk modelling · probability-of-default under an asymmetric cost matrix · Q-learning</p>
+          <div class="project-detail">
+            <ul>
+              <li>Built a probability-of-default model under an asymmetric cost matrix, lifting held-out profit by $363K over the default 0.5 threshold.</li>
+              <li>Architected the analytics codebase as an importable Python package with single-responsibility modules (data loading, threshold evaluation, calibration, RL environment), backed by an 82-test suite and a multi-version CI matrix.</li>
+              <li>Implemented tabular Q-learning for a finite-horizon inventory-optimisation MDP (deterministic seed, linear epsilon decay, illegal-action handling), and built the chronological 24/24-month evaluation that caught its in-sample edge as an overfit.</li>
+              <li>Implemented covariate-shift mitigations (importance weighting, cohort-adaptive thresholding) and a diagnostic that identified the cohort failure as a base-rate problem rather than covariate shift, recommending a 45% break-even repricing instead of a model retune.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Probability of Default</span>
+              <span class="tag">Cost-Sensitive Classification</span>
+              <span class="tag">Q-Learning</span>
+              <span class="tag">Covariate Shift</span>
+              <span class="tag">pytest + CI</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link" href="projects/jpmc.html">Read case study →</a>
+              <a class="case-link repo-link" href="https://github.com/thylinao1/JPMC-Quantitative-Researcher" target="_blank" rel="noopener">GitHub repo ↗</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ EDUCATION ============ -->
+<section id="education" class="s">
+  <div class="wrap">
+    <div class="section-num">§ 03 · Education</div>
+
+    <div class="edu-list">
+      <div class="edu">
+        <div class="edu-meta">2026 – Present<br><span style="opacity:.7">Singapore</span></div>
+        <div class="edu-body">
+          <h3>National University of Singapore (NUS)</h3>
+          <p class="role">Computing (Business Analytics, Statistics specialisation), MSc</p>
+        </div>
+      </div>
+
+      <div class="edu">
+        <div class="edu-meta">Jun – Jul 2026<br><span style="opacity:.7">Beijing, China</span></div>
+        <div class="edu-body">
+          <h3>Beijing University of Posts &amp; Telecommunications (BUPT)</h3>
+          <p class="role">Agentic AI Bootcamp · Fully-Funded Scholarship</p>
+        </div>
+      </div>
+
+      <div class="edu">
+        <div class="edu-meta">Sep 2022 – Jun 2026<br><span style="opacity:.7">London, UK</span></div>
+        <div class="edu-body">
+          <h3>Bayes Business School (formerly City, University of London)</h3>
+          <p class="role">BSc International Business (Hons) · First-Class Honours, Highest Distinction</p>
+          <p>Top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>, and ESADE <em>Mergers &amp; Acquisitions</em>.</p>
+          <ul class="exchanges">
+            <li><strong>NUS exchange</strong>, Singapore (Jan&ndash;Jun 2025) · Full Scholarship</li>
+            <li><strong>ESADE Business School exchange</strong>, Barcelona, Spain (Aug&ndash;Dec 2024) · Full Scholarship</li>
+            <li><strong>UT Austin exchange</strong>, Austin, USA (Aug&ndash;Dec 2023)</li>
+          </ul>
+          <p style="margin-top:14px"><strong style="color:var(--ink)">Extracurricular Quantitative Coursework:</strong> Stanford CS229 Machine Learning, Stanford CS230 Deep Learning, MIT RES.6-012 Introduction to Probability, Stanford EE178 Probabilistic Systems Analysis, Imperial College Mathematics for Machine Learning, IBM Applied Data Science Specialization (Databases &amp; SQL, Visualization, Python), Statistical Rethinking 2026 (R. McElreath, Max Planck).</p>
+        </div>
+      </div>
+
+      <div class="edu">
+        <div class="edu-meta">Sep 2021 – Jun 2022<br><span style="opacity:.7">London, UK</span></div>
+        <div class="edu-body">
+          <h3>UCL Economics &amp; Mathematics Foundation Programme</h3>
+          <p class="role">Final grade A* · Mathematics 87%, Highest Distinction</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SKILLS (moved to bottom) ============ -->
+<section id="skills" class="s alt">
+  <div class="wrap">
+    <div class="section-num">§ 04 · Skills</div>
+
+    <div class="skills-grid">
+      <div class="skill-group">
+        <h4>Statistical Methods</h4>
+        <p>
+          Causal Inference (DiD, RCT design, causal DAGs, wait-list controlled trials, synthetic controls, propensity-score matching),
+          A/B Testing &amp; Experimentation (variant design, power analysis, SRM detection, multiple-testing correction),
+          Bayesian Statistics (PyMC 5, NUTS, hierarchical models),
+          Survival Analysis (Cox PH, Kaplan-Meier),
+          Hypothesis Testing (t-test, Wilcoxon signed-rank, Mann-Whitney U, Fisher z),
+          Stochastic Processes &amp; Sequential Modeling (Hidden Markov Models, time-series, state-space methods),
+          SHAP, Brier, isotonic and LOOCV calibration, Effect-size estimation (Cohen&rsquo;s d, rank-biserial),
+          Hodges-Lehmann non-parametric CIs.
+        </p>
+      </div>
+
+      <div class="skill-group">
+        <h4>Machine Learning, Deep Learning &amp; GenAI</h4>
+        <p>
+          Supervised/Unsupervised Learning, Gradient Boosting (XGBoost, LightGBM),
+          Neural Networks (CNNs, RNNs, LSTMs, Transformers, Two-Tower),
+          NLP, Computer Vision, Recommendation Systems, Embeddings &amp; Vector Search,
+          Reinforcement Learning (DQN, PPO + GAE, Actor-Critic),
+          Probabilistic Graphical Models, LLMs, Prompt Engineering, RAG,
+          OpenAI API, Anthropic Claude tool-use, Zod structured outputs,
+          LLM Fine-Tuning, RLHF, Agentic AI (LangChain, LlamaIndex), Generative AI Applications.
+        </p>
+      </div>
+
+      <div class="skill-group">
+        <h4>Programming &amp; Databases</h4>
+        <p>
+          Python (NumPy, pandas, scikit-learn, TensorFlow, PyTorch, statsmodels, SciPy, XGBoost, LightGBM, PyMC),
+          TypeScript, C++, R, SQL, BigQuery, Spark/PySpark, DuckDB,
+          React 19, Vite, Vercel Serverless, Supabase (Postgres).
+        </p>
+      </div>
+
+      <div class="skill-group">
+        <h4>MLOps, Cloud &amp; Visualisation</h4>
+        <p>
+          Google Cloud Platform (BigQuery, Vertex AI), Docker, Kubernetes,
+          MLOps (CI/CD, Model Deployment, Feature Pipelines, ETL/Airflow),
+          GitHub Actions, pytest, Vitest, ruff, Git/GitHub, Jupyter, LaTeX,
+          Tableau, Power BI, matplotlib, seaborn, Plotly.
+        </p>
+      </div>
+
+      <div class="skill-group">
+        <h4>Spoken Languages</h4>
+        <p>
+          English (Fluent), Russian (Native),
+          Ukrainian (Native), Belarusian (Fluent),
+          Spanish (Professional Working).
+        </p>
+      </div>
+
+      <div class="skill-group">
+        <h4>Extracurricular Coursework</h4>
+        <p>
+          Stanford CS229 Machine Learning, Stanford CS230 Deep Learning,
+          MIT RES.6-012 Introduction to Probability, Stanford EE178 Probabilistic Systems Analysis,
+          Imperial College Mathematics for Machine Learning, IBM Applied Data Science Specialization,
+          Statistical Rethinking 2026 (R. McElreath, Max Planck).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <span class="name">Maksim Silchenko</span>
+    <div class="contact-links">
+      <button type="button" class="cv-open">CV</button>
+      <a href="mailto:mthylinao@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ CV MODAL ============ -->
+<div id="cv-modal" class="modal-overlay" hidden>
+  <div class="modal-card cv-card" role="dialog" aria-modal="true" aria-label="Choose a CV">
+    <button type="button" class="modal-close" aria-label="Close">&times;</button>
+    <div class="cv-card-body">
+      <h3 class="cv-card-title">Choose the CV variant that fits your role</h3>
+      <div class="cv-choices">
+        <a class="cv-choice" href="cv-applied-ai-ds.pdf" target="_blank" rel="noopener">
+          <span class="cv-choice-name">Applied AI &amp; Data Science ↗</span>
+          <span class="cv-choice-desc">Causal inference, experimentation, and statistical machine learning.</span>
+        </a>
+        <a class="cv-choice" href="cv-agentic-genai.pdf" target="_blank" rel="noopener">
+          <span class="cv-choice-name">Agentic AI &amp; GenAI Systems ↗</span>
+          <span class="cv-choice-desc">LLM agents, RAG, tool-use, and generative-AI applications.</span>
+        </a>
+        <a class="cv-choice" href="cv-mlops-rl.pdf" target="_blank" rel="noopener">
+          <span class="cv-choice-name">MLOps &amp; Production Engineering ↗</span>
+          <span class="cv-choice-desc">Reinforcement learning, deployment pipelines, and CI/CD.</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROJECT MODAL ============ -->
+<div id="project-modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="Project details">
+    <button type="button" class="modal-close" aria-label="Close">&times;</button>
+    <div class="modal-scroll exp-body"></div>
+    <div class="modal-foot" hidden></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  document.body.classList.add('js-on');
+  var modal = document.getElementById('project-modal');
+  if (!modal) return;
+  var scroll = modal.querySelector('.modal-scroll');
+  var foot = modal.querySelector('.modal-foot');
+  var closeBtn = modal.querySelector('.modal-close');
+  var lastFocus = null;
+
+  function openModal(card) {
+    lastFocus = card;
+    var title = card.querySelector('.project-title');
+    var sub = card.querySelector('.sub');
+    var detail = card.querySelector('.project-detail');
+    scroll.innerHTML = '';
+    foot.innerHTML = '';
+    if (title) scroll.appendChild(title.cloneNode(true));
+    if (sub) scroll.appendChild(sub.cloneNode(true));
+    var actions = null;
+    if (detail) {
+      var kids = detail.children;
+      for (var i = 0; i < kids.length; i++) {
+        var node = kids[i];
+        if (node.classList && node.classList.contains('detail-actions')) actions = node;
+        else scroll.appendChild(node.cloneNode(true));
+      }
+    }
+    if (actions) { foot.appendChild(actions.cloneNode(true)); foot.hidden = false; }
+    else { foot.hidden = true; }
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    scroll.scrollTop = 0;
+    closeBtn.focus();
+    var id = card.getAttribute('data-project-id');
+    if (id) history.replaceState(null, '', '#' + id);
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    var h = (location.hash || '').replace('#', '');
+    if (h && document.querySelector('[data-project-id="' + h + '"]')) {
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    if (lastFocus) lastFocus.focus();
+  }
+
+  var cards = document.querySelectorAll('.project-card');
+  for (var i = 0; i < cards.length; i++) {
+    (function (card) {
+      card.addEventListener('click', function () { openModal(card); });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(card); }
+      });
+    })(cards[i]);
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  // deep linking: open a project/internship modal straight from the URL hash
+  function openFromHash() {
+    var h = (location.hash || '').replace('#', '');
+    if (!h) return;
+    var target = document.querySelector('[data-project-id="' + h + '"]');
+    if (target) openModal(target);
+  }
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
+
+  // CV chooser modal
+  var cvModal = document.getElementById('cv-modal');
+  if (cvModal) {
+    var cvClose = cvModal.querySelector('.modal-close');
+    var cvLast = null;
+    var openCv = function (btn) {
+      cvLast = btn;
+      cvModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      cvClose.focus();
+    };
+    var closeCv = function () {
+      cvModal.hidden = true;
+      document.body.style.overflow = '';
+      if (cvLast) cvLast.focus();
+    };
+    var cvBtns = document.querySelectorAll('.cv-open');
+    for (var c = 0; c < cvBtns.length; c++) {
+      (function (b) { b.addEventListener('click', function () { openCv(b); }); })(cvBtns[c]);
+    }
+    cvClose.addEventListener('click', closeCv);
+    cvModal.addEventListener('click', function (e) { if (e.target === cvModal) closeCv(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !cvModal.hidden) closeCv();
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

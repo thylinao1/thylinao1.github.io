@@ -1196,5 +1196,24 @@ renderDrivers();
 updateStudio();
 updateInspector();
 </script>
+<script>
+/* portfolio home button */
+(function(){
+  function addHome(){
+    if(document.getElementById('__home_btn__'))return;
+    if(!document.body)return;
+    var a=document.createElement('a');
+    a.id='__home_btn__';
+    a.href='../index.html';
+    a.innerHTML='&#8592;&nbsp; Home';
+    a.setAttribute('aria-label','Back to portfolio home');
+    a.style.cssText='position:fixed;top:16px;left:16px;z-index:2147483647;padding:9px 16px;background:#15110b;color:#f4efe6;font:600 13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-decoration:none;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.22);';
+    document.body.appendChild(a);
+  }
+  if(document.body)addHome();
+  document.addEventListener('DOMContentLoaded',addHome);
+  window.addEventListener('load',addHome);
+})();
+</script>
 </body>
 </html>

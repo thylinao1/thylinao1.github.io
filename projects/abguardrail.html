@@ -1098,22 +1098,41 @@ function commas(n){ return Math.round(n).toLocaleString('en-US'); }
 })();
 </script>
 <script>
-/* portfolio home button */
+/* portfolio: home button + nav label capitalisation */
 (function(){
-  function addHome(){
-    if(document.getElementById('__home_btn__'))return;
-    if(!document.body)return;
-    var a=document.createElement('a');
-    a.id='__home_btn__';
-    a.href='../index.html';
-    a.innerHTML='&#8592;&nbsp; Home';
-    a.setAttribute('aria-label','Back to portfolio home');
-    a.style.cssText='position:fixed;top:16px;left:16px;z-index:2147483647;padding:9px 16px;background:#15110b;color:#f4efe6;font:600 13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-decoration:none;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.22);';
-    document.body.appendChild(a);
+  var a;
+  function place(){
+    if(!a)return;
+    var bar=document.querySelector('.topbar');
+    a.style.top=((bar&&bar.offsetHeight?bar.offsetHeight:56)+12)+'px';
   }
-  if(document.body)addHome();
-  document.addEventListener('DOMContentLoaded',addHome);
-  window.addEventListener('load',addHome);
+  function capNav(){
+    var links=document.querySelectorAll('.nav a, .topbar a[href^="#"]');
+    for(var i=0;i<links.length;i++){
+      var el=links[i],t=el.textContent;
+      if(t&&/^[a-z]/.test(t))el.textContent=t.charAt(0).toUpperCase()+t.slice(1);
+    }
+  }
+  function run(){
+    if(!document.body)return;
+    if(!a){
+      a=document.createElement('a');
+      a.id='__home_btn__';
+      a.href='../index.html';
+      a.innerHTML='&#8592;&nbsp; Home';
+      a.setAttribute('aria-label','Back to portfolio home');
+      a.style.cssText='position:fixed;left:16px;top:68px;z-index:2147483647;padding:9px 16px;background:#15110b;color:#f4efe6;font:600 13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-decoration:none;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.22);';
+    }
+    if(!a.parentNode)document.body.appendChild(a);
+    place();
+    capNav();
+  }
+  if(document.body)run();
+  document.addEventListener('DOMContentLoaded',run);
+  window.addEventListener('load',run);
+  window.addEventListener('resize',place);
+  setTimeout(run,400);
+  setTimeout(run,1400);
 })();
 </script>
 </body>

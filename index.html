@@ -56,10 +56,49 @@
   .topbar .pill:hover{color:var(--accent); border-color:var(--accent)}
   .topbar .right{display:flex; gap:10px; flex-wrap:wrap; justify-self:end}
   @media(max-width:900px){
-    .topbar-inner{grid-template-columns:auto 1fr; gap:14px}
+    .topbar-inner{grid-template-columns:1fr auto; gap:14px}
     .topbar nav{display:none}
-    .topbar .right{justify-self:end}
+    .topbar .right{display:none}
+    .hamburger{display:flex}
   }
+
+  /* mobile nav drawer */
+  .hamburger{
+    display:none; align-items:center; justify-content:center;
+    width:40px; height:36px; padding:0; cursor:pointer; justify-self:end;
+    background:none; border:1px solid var(--rule-strong); border-radius:8px;
+    color:var(--ink);
+  }
+  .hamburger:hover{border-color:var(--accent); color:var(--accent)}
+  .drawer-backdrop{
+    position:fixed; inset:0; background:rgba(21,17,11,.5);
+    opacity:0; pointer-events:none; transition:opacity .26s; z-index:310;
+  }
+  body.nav-open .drawer-backdrop{opacity:1; pointer-events:auto}
+  .nav-drawer{
+    position:fixed; top:0; right:0; height:100%; width:min(286px,82vw);
+    background:var(--bg); border-left:1px solid var(--rule);
+    box-shadow:-14px 0 44px rgba(21,17,11,.22);
+    transform:translateX(100%); transition:transform .26s ease;
+    z-index:320; padding:58px 24px 26px; overflow-y:auto;
+    display:flex; flex-direction:column;
+  }
+  body.nav-open .nav-drawer{transform:translateX(0)}
+  .nav-drawer .drawer-links{display:flex; flex-direction:column}
+  .nav-drawer a, .nav-drawer .drawer-cv{
+    font-family:var(--font-body); font-size:16px; color:var(--ink);
+    text-decoration:none; padding:12px 2px; cursor:pointer;
+    border:none; background:none; text-align:left;
+    border-bottom:1px solid var(--rule);
+  }
+  .nav-drawer a:hover, .nav-drawer .drawer-cv:hover{color:var(--accent)}
+  .drawer-sep{height:16px}
+  .drawer-close{
+    position:absolute; top:12px; right:14px; width:34px; height:34px;
+    border:1px solid var(--rule-strong); border-radius:50%;
+    background:none; color:var(--ink-3); font-size:20px; cursor:pointer; padding:0;
+  }
+  .drawer-close:hover{color:var(--accent); border-color:var(--accent)}
 
   /* hero */
   .hero{padding:56px 0 0}
@@ -405,6 +444,9 @@
       <a class="pill" href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub ↗</a>
       <a class="pill" href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn ↗</a>
     </div>
+    <button type="button" class="hamburger" aria-label="Open menu" aria-expanded="false">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
   </div>
 </header>
 
@@ -888,6 +930,25 @@
   </div>
 </footer>
 
+<!-- ============ MOBILE NAV DRAWER ============ -->
+<div id="nav-backdrop" class="drawer-backdrop"></div>
+<aside id="nav-drawer" class="nav-drawer" aria-label="Site menu" aria-hidden="true">
+  <button type="button" class="drawer-close" aria-label="Close menu">&times;</button>
+  <div class="drawer-links">
+    <a href="#awards">Distinctions</a>
+    <a href="#internships">Internships</a>
+    <a href="#projects">Projects</a>
+    <a href="#education">Education</a>
+    <a href="#skills">Skills</a>
+  </div>
+  <div class="drawer-sep"></div>
+  <div class="drawer-links">
+    <button type="button" class="cv-open drawer-cv">CV</button>
+    <a href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub ↗</a>
+    <a href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn ↗</a>
+  </div>
+</aside>
+
 <!-- ============ CV MODAL ============ -->
 <div id="cv-modal" class="modal-overlay" hidden>
   <div class="modal-card cv-card" role="dialog" aria-modal="true" aria-label="Choose a CV">
@@ -1020,6 +1081,22 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !cvModal.hidden) closeCv();
     });
+  }
+
+  // mobile nav drawer
+  var ham=document.querySelector('.hamburger');
+  var navDrawer=document.getElementById('nav-drawer');
+  var navBackdrop=document.getElementById('nav-backdrop');
+  if(ham&&navDrawer){
+    var openNav=function(){document.body.classList.add('nav-open');ham.setAttribute('aria-expanded','true');navDrawer.setAttribute('aria-hidden','false');};
+    var closeNav=function(){document.body.classList.remove('nav-open');ham.setAttribute('aria-expanded','false');navDrawer.setAttribute('aria-hidden','true');};
+    ham.addEventListener('click',openNav);
+    if(navBackdrop)navBackdrop.addEventListener('click',closeNav);
+    var dc=navDrawer.querySelector('.drawer-close');
+    if(dc)dc.addEventListener('click',closeNav);
+    var dlinks=navDrawer.querySelectorAll('a, .drawer-cv');
+    for(var d=0;d<dlinks.length;d++)dlinks[d].addEventListener('click',closeNav);
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('nav-open'))closeNav();});
   }
 })();
 </script>

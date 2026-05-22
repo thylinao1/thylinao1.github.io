@@ -26,6 +26,7 @@
     background:var(--bg); color:var(--ink);
     font-family:var(--font-body); font-size:16.5px; line-height:1.55;
     -webkit-font-smoothing:antialiased; font-feature-settings:"ss01","cv11";
+    overflow-wrap:break-word;
   }
   ::selection{background:var(--accent-bg); color:var(--ink)}
   a{color:var(--ink); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
@@ -364,6 +365,26 @@
   .cv-choice:hover .cv-choice-name{color:var(--accent)}
   .cv-choice-desc{display:block; font-size:13px; color:var(--ink-3); margin-top:3px}
   @media(max-width:600px){ .cv-card-body{padding:42px 22px 30px} }
+
+  /* ---- mobile polish ---- */
+  @media(max-width:640px){
+    .wrap, .wrap-n{padding:0 20px}
+    .topbar{padding:11px 0}
+    .topbar-inner{padding:0 20px; gap:10px}
+    .topbar .brand{font-size:15px}
+    .topbar .pill{padding:4px 9px; font-size:11px}
+    .topbar .right{gap:7px}
+    .hero{padding:36px 0 0}
+    .hero .meta{gap:7px 16px; margin-bottom:20px}
+    section.s{padding:38px 0}
+    section.awards-section{padding:32px 0 36px}
+    .modal-overlay{padding:12px}
+    .modal-foot .detail-actions{width:100%}
+    .modal-foot .case-link{flex:1; justify-content:center; text-align:center}
+    .award{padding:20px 18px}
+    .exp-body h3{font-size:24px}
+    .display-l{font-size:30px}
+  }
 </style>
 </head>
 <body>
@@ -392,7 +413,7 @@
   <div class="wrap">
     <div class="meta">
       <span><strong>Based</strong> · Singapore</span>
-      <span><strong>NUS</strong> · Computing (Business Analytics, Statistics specialisation), MSc</span>
+      <span><strong>NUS</strong> · MSc, School of Computing (Business Analytics), Specialised in Statistics</span>
     </div>
 
     <div class="hero-card">
@@ -494,6 +515,9 @@
               <span class="tag">RAG</span>
               <span class="tag">SQLite</span>
               <span class="tag">Time-Series</span>
+            </div>
+            <div class="detail-actions">
+              <a class="case-link repo-link" href="https://catalyst-agent-orbuc.streamlit.app" target="_blank" rel="noopener">Agent Prototype ↗</a>
             </div>
           </div>
         </div>

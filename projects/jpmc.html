@@ -1186,7 +1186,10 @@ p.lede {
   window.addEventListener('load',build);
   window.addEventListener('resize',place);
   document.addEventListener('keydown',function(e){if(e.key==='Escape')shut();});
-  setTimeout(build,400);setTimeout(build,1400);
+  setTimeout(build,400);setTimeout(build,1400);setTimeout(build,3000);
+  var pend;
+  function schedule(){if(pend)return;pend=setTimeout(function(){pend=null;build();},150);}
+  if(window.MutationObserver){try{new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}}
 })();
 </script>
 </body>

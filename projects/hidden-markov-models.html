@@ -461,18 +461,18 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
   <div class="col">
     <span class="eyebrow reveal"><span class="num">09</span> · The name map</span>
     <h2 class="reveal">Every picture, its textbook name</h2>
-    <p class="reveal">The whole vocabulary lines up cleanly against the pictures. Keep this as the translation table between the lamps and any paper or library you run into.</p>
+    <p class="reveal">A cheat sheet for the names, for when you take this to a paper or a library. The left column is what I have been calling things, the middle is what you will see them called out there, and the right is a one-line reminder of the job each one does.</p>
     <div class="gloss reveal">
-      <div class="row"><div class="term">Lamp<span class="alt">Gaussian component</span></div><div class="def">One mood's emission shape: a <b>centre</b> (mean vector) plus a <b>spread</b> (covariance matrix). Three lamps is a 3-component Gaussian mixture.</div></div>
-      <div class="row"><div class="term">Glow / brightness<span class="alt">density</span></div><div class="def">How strongly a lamp lights a point, its probability density there. Fades smoothly, never reaches zero.</div></div>
-      <div class="row"><div class="term">The 80 / 15 / 5 mix<span class="alt">responsibilities · &gamma;</span></div><div class="def">A point's normalised shares across the lamps. The posterior probability of each mood given that reading, and, with time, the trail around it.</div></div>
-      <div class="row"><div class="term">Stretched ruler<span class="alt">Mahalanobis distance</span></div><div class="def">Distance measured in a lamp's own arrow-lengths instead of centimetres, so spread and tilt are baked into "near."</div></div>
-      <div class="row"><div class="term">Long &amp; short arrows<span class="alt">eigenvectors / PCA axes</span></div><div class="def">The covariance matrix's perpendicular principal axes. Their lengths are the variances along them.</div></div>
-      <div class="row"><div class="term">Colour, move, repeat<span class="alt">EM algorithm</span></div><div class="def">Alternate the E-step (shares, lamps frozen) and the M-step (lamps, shares frozen) until the fit score stops climbing.</div></div>
-      <div class="row"><div class="term">The whole loop here<span class="alt">Baum-Welch</span></div><div class="def">EM specialised to a hidden Markov model: lamps and the handoff grid learned together. The job of <span class="kbd">fit()</span>.</div></div>
-      <div class="row"><div class="term">Two-pass trick<span class="alt">forward-backward</span></div><div class="def">The efficient colouring step: one sweep each direction over the trail, combined per hour to score moods using the whole sequence.</div></div>
-      <div class="row"><div class="term">Stickiness grid<span class="alt">transition matrix · A</span></div><div class="def">Mood-to-mood handoff tendencies. The model's memory of how moods persist and switch.</div></div>
-      <div class="row"><div class="term">Brightest thread<span class="alt">Viterbi</span></div><div class="def">The single most likely whole sequence of moods given a fixed model.</div></div>
+      <div class="row"><div class="term">Lamp<span class="alt">Gaussian component</span></div><div class="def">What one mood looks like: where it tends to sit (the <b>centre</b>, a mean vector) and how it spreads around there (the <b>spread</b>, a covariance matrix). Stack three of them and you have a Gaussian mixture.</div></div>
+      <div class="row"><div class="term">Glow / brightness<span class="alt">density</span></div><div class="def">How hard a lamp lights a given point. That number is its probability density, and it tails off smoothly without ever hitting zero.</div></div>
+      <div class="row"><div class="term">The 80 / 15 / 5 mix<span class="alt">responsibilities · &gamma;</span></div><div class="def">A point's shares across the three lamps, adding to one. Papers call this the posterior over moods given the reading; once time is in, it folds in the trail on either side too.</div></div>
+      <div class="row"><div class="term">Stretched ruler<span class="alt">Mahalanobis distance</span></div><div class="def">Distance counted in a lamp's own arrow-lengths rather than centimetres, so its spread and tilt are already baked into what counts as near.</div></div>
+      <div class="row"><div class="term">Long &amp; short arrows<span class="alt">eigenvectors / PCA axes</span></div><div class="def">The two perpendicular axes hiding inside the covariance matrix. Each one's length is how much the cloud varies that way. If that sounds like PCA, it is.</div></div>
+      <div class="row"><div class="term">Colour, move, repeat<span class="alt">EM algorithm</span></div><div class="def">Flip between the E-step (work out the shares, lamps held still) and the M-step (move the lamps, shares held still), and keep going until nothing shifts.</div></div>
+      <div class="row"><div class="term">The whole loop here<span class="alt">Baum-Welch</span></div><div class="def">EM pointed at a hidden Markov model, so the lamps and the handoff grid get learned in the same loop. This is what <span class="kbd">fit()</span> is doing.</div></div>
+      <div class="row"><div class="term">Two-pass trick<span class="alt">forward-backward</span></div><div class="def">One sweep up the trail, one back down, combined at each hour. It is how the colouring step uses the whole sequence without taking forever.</div></div>
+      <div class="row"><div class="term">Stickiness grid<span class="alt">transition matrix · A</span></div><div class="def">How likely each mood is to hand off to each other one. The model's memory of what usually follows what.</div></div>
+      <div class="row"><div class="term">Brightest thread<span class="alt">Viterbi</span></div><div class="def">The single most likely path of moods through a finished model, read end to end.</div></div>
     </div>
   </div>
 </section>
@@ -514,10 +514,9 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
   <div class="wrap">
     <div class="col">
       <div class="sig">Lamps in the dark.</div>
-      <p style="margin:0; color:var(--ink-3); font-size:18px; max-width:580px;">A geometric retelling of the EM algorithm and Hidden Markov Models, written because the algebra never clicked for me until it became light. If a picture here helped, the small admissions tucked beside each one are what keep it honest.</p>
+      <p style="margin:0; color:var(--ink-3); font-size:18px; max-width:780px;">A geometric retelling of the EM algorithm and Hidden Markov Models, written because the algebra never clicked for me until it became light. If a picture here helped, the small admissions tucked beside each one are what keep it honest.</p>
       <div class="meta">
-        Maksim Silchenko · 2026<br>
-        One self-contained page. Every diagram is live math, not a recording.
+        Maksim Silchenko · 2026
       </div>
     </div>
   </div>

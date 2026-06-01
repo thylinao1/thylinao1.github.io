@@ -222,14 +222,13 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
 <main>
 <div class="wrap">
 
-<!-- ============ 01 · INTUITION OVER ALGEBRA ============ -->
+<!-- ============ 01 · INTRODUCTION ============ -->
 <section id="intro">
   <div class="col">
-    <span class="eyebrow reveal"><span class="num">01</span> · Intuition over algebra</span>
-    <h2 class="reveal">The algebra was fine. The picture was missing.</h2>
+    <span class="eyebrow reveal"><span class="num">01</span> · Introduction</span>
+    <h2 class="reveal">Intuition over algebra</h2>
     <p class="lead reveal">When I was learning hidden Markov models, the model itself was understandable to me, and so was the algebra behind it: how you actually arrive at the answer. But the picture never clicked. The geometry, the image of the thing, never formed in my head, so I had the steps without ever having an intuitive feel for what was going on. And that intuition is, to me, the part that matters most when you are trying to understand a concept.</p>
-    <p class="reveal">It is not that the math was hard. Every write-up checked out line by line; it was the meaning that evaporated the moment I closed the page, leaving me with steps I could repeat but not <em>see</em>. That gap is the whole reason this exists: some ideas only click once you can watch them, and EM is one of them. Drawn the right way, the equations get their meaning and become something you can watch happen on a plane, or visualise in your own head.</p>
-    <p class="reveal">The first time I had to build one of these for real was during my quant research internship at a crypto trading startup in London. (Quant research just means using math and code to make bets on markets.) I used a hidden Markov model to guess which "state" the market was in each hour: drifting quietly, going nowhere, or running hard in one direction. None of that is special to markets, though. The same machine reads speech, tags stretches of DNA, tracks where a robot thinks it is, and labels messy handwriting. Anywhere a hidden situation changes slowly and leaks clues as it goes, this is the tool people reach for.</p>
+    <p class="reveal">The first time I had to build one of these for real was during my quant research internship at a crypto trading startup in London. I used a hidden Markov model to guess which "state" the market was in each hour: drifting quietly, going nowhere, or running hard in one direction. None of that is special to markets, though. The same machine reads speech, tags stretches of DNA, tracks where a robot thinks it is, and labels messy handwriting. Anywhere a hidden situation changes slowly and leaks clues as it goes, this is the tool people reach for.</p>
     <p class="reveal">A model like this has two moving parts. One says what each hidden state <em>looks like</em>: the kind of readings that state tends to produce. The other says how the states <em>follow</em> one another: whether calm tends to stay calm, whether a streak tends to keep going. The model begins knowing neither, and EM is how it learns both at once from nothing but the unlabeled readings.</p>
     <p class="reveal">Most courses hand you the update equations and trust the symbols to carry the meaning. They never did for me. What follows rebuilds the whole thing as a picture you can hold.</p>
   </div>

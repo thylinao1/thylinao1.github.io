@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lamps in the dark · seeing the EM algorithm instead of solving it</title>
+<meta name="description" content="Hidden Markov Models and the EM algorithm, drawn as green, blue, and red lamps glowing over a plane: soft mixes of light, a trail of points, and the loop that fits them to data. A geometric representation for people who can read the algebra but never saw the picture." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8;
+  --ink:#15110b; --ink-2:#3b3527; --ink-3:#6b6452; --ink-4:#968d77;
+  --rule:rgba(21,17,11,0.12); --rule-strong:rgba(21,17,11,0.28);
+  --accent:#c8421f; --accent-soft:#e5a892; --accent-bright:#e0613a;
+  --good:#1f6b3a; --warn:#b88200;
+  --lamp-a:#2f9e44;   /* green */
+  --lamp-b:#3a63cf;   /* blue  */
+  --lamp-c:#d23a28;   /* red   */
+  --font-display:"Instrument Serif","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink-2);
+  font-family:var(--font-body); font-size:20px; line-height:1.62;
+  font-weight:400; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+::selection{background:var(--accent-soft); color:var(--ink);}
+
+#progress{position:fixed; top:0; left:0; height:2px; width:0; background:var(--accent); z-index:60; transition:width .12s linear;}
+nav#toc{position:fixed; top:50%; left:28px; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px;}
+nav#toc a{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9b927e; text-decoration:none; display:flex; align-items:center; gap:9px; transition:color .35s var(--ease);}
+nav#toc a .dot{width:6px; height:6px; border-radius:50%; background:rgba(150,141,119,.6); transition:all .35s var(--ease);}
+nav#toc a .lbl{opacity:0; transform:translateX(-4px); transition:all .35s var(--ease);}
+nav#toc a:hover{color:var(--accent);}
+nav#toc a:hover .lbl{opacity:1; transform:none;}
+nav#toc a.active{color:var(--accent);}
+nav#toc a.active .dot{background:var(--accent); transform:scale(1.5);}
+nav#toc a.active .lbl{opacity:1; transform:none;}
+@media(max-width:1160px){nav#toc{display:none;}}
+
+.home-btn{position:fixed; top:20px; left:26px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(127,110,90,0.12); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease); animation:homeSlide .9s var(--ease) .35s both;}
+.home-btn svg{display:block;}
+.home-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+@keyframes homeSlide{from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:none;}}
+@media(max-width:600px){.home-btn{top:14px; left:14px; padding:7px 12px; font-size:10px;}}
+
+.wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+.col{max-width:var(--read); margin:0 auto;}
+section{padding:56px 0;}
+.eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px; display:block;}
+.eyebrow .num{color:var(--accent);}
+
+h1,h2,h3{font-family:var(--font-display); font-weight:400; color:var(--ink); line-height:1.0; margin:0;}
+h2{font-size:clamp(34px,5vw,52px); letter-spacing:-.01em; margin-bottom:18px;}
+h3{font-size:clamp(25px,3.2vw,33px); letter-spacing:-.005em; line-height:1.05; margin:46px 0 10px;}
+p{margin:0 0 22px;}
+.lead{font-family:var(--font-display); font-size:clamp(23px,2.8vw,29px); line-height:1.32; color:var(--ink-2); margin-bottom:26px;}
+strong{font-weight:600; color:var(--ink);}
+em{font-style:italic;}
+.greenword{color:var(--lamp-a); font-weight:600;}
+.blueword{color:var(--lamp-b); font-weight:600;}
+.redword{color:var(--lamp-c); font-weight:600;}
+
+/* ---------- dark hero ---------- */
+#hero{padding:0 0 13vh; min-height:100vh; display:flex; flex-direction:column; justify-content:center; position:relative; background:#07060a; isolation:isolate;}
+#hero canvas{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
+#hero::after{content:""; position:absolute; left:0; right:0; bottom:0; height:15vh; z-index:1; background:linear-gradient(180deg, rgba(7,6,10,0), var(--bg)); pointer-events:none;}
+#hero .col{max-width:1080px; position:relative; z-index:2; animation:heroReveal 1.9s var(--ease) .15s both;}
+@keyframes heroReveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+.hero-mark{font-family:var(--font-mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.62); margin-bottom:32px;}
+#hero h1{font-size:clamp(56px,12vw,152px); line-height:.92; letter-spacing:-.02em; color:#f6f2ea; margin-bottom:24px; text-shadow:0 2px 80px rgba(0,0,0,.55);}
+#hero h1 .it{font-style:italic; color:var(--accent-bright);}
+.hero-sub{font-family:var(--font-display); font-size:clamp(20px,2.6vw,28px); line-height:1.34; color:rgba(244,239,230,.84); max-width:900px; margin-top:clamp(34px,8vh,120px); margin-bottom:32px;}
+.hero-meta{font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; color:rgba(244,239,230,.64); line-height:1.95;}
+.hero-meta b{color:rgba(244,239,230,.94); font-weight:500;}
+.scrollcue{position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:3; font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.45); display:flex; flex-direction:column; align-items:center; gap:8px;}
+.scrollcue .bar{width:1px; height:34px; background:linear-gradient(rgba(244,239,230,.5),transparent); animation:cue 2.4s var(--ease) infinite;}
+@keyframes cue{0%{transform:scaleY(.3);transform-origin:top;opacity:0}40%{opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+
+/* ---------- figures ---------- */
+figure{margin:34px 0; position:relative;}
+.figure-wide{width:min(960px,calc(100vw - 56px)); margin-left:50%; transform:translateX(-50%);}
+.panel{background:var(--bg-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 18px 40px -28px rgba(21,17,11,.4);}
+.panel.dark{background:#0c0a12; border-color:rgba(255,255,255,.08); box-shadow:0 18px 50px -28px rgba(0,0,0,.6);}
+.panel.dark .legend{color:rgba(244,239,230,.55);}
+.panel.dark .legend span[style]{color:rgba(244,239,230,.45)!important;}
+figcaption{font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--ink-3); margin-top:14px; letter-spacing:.01em;}
+figcaption b{color:var(--ink-2); font-weight:500;}
+canvas.fig{display:block; width:100%; border-radius:8px; touch-action:none;}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-top:16px;}
+.controls .grp{display:flex; align-items:center; gap:9px;}
+.controls label{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3);}
+button.btn{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:var(--bg-3); border:1px solid var(--rule-strong); border-radius:7px; padding:8px 14px; cursor:pointer; transition:all .2s var(--ease);}
+button.btn:hover{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+button.btn:active{transform:translateY(1px);}
+button.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+button.btn.primary:hover{background:#a8350f;}
+input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:4px; background:var(--rule-strong); outline:none; cursor:pointer; width:150px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); box-shadow:0 1px 4px rgba(21,17,11,.35); transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); cursor:pointer;}
+.toggle{display:inline-flex; border:1px solid var(--rule-strong); border-radius:8px; overflow:hidden;}
+.toggle button{font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:8px 13px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; transition:all .2s;}
+.toggle button.on{background:var(--ink); color:var(--bg);}
+.readout{font-family:var(--font-mono); font-size:12px; color:var(--ink-2);}
+.readout b{color:var(--accent); font-weight:500;}
+
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3); margin-top:14px;}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.legend i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+
+.pull{border-left:2px solid var(--accent); padding:4px 0 4px 22px; margin:30px 0; font-family:var(--font-display); font-size:clamp(22px,2.7vw,27px); line-height:1.34; color:var(--ink);}
+.note{background:var(--bg-2); border:1px solid var(--rule); border-left:2px solid var(--accent-soft); border-radius:10px; padding:18px 22px; margin:26px 0; font-size:18px; line-height:1.56;}
+.note .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;}
+.note p:last-child{margin-bottom:0;}
+.kbd{font-family:var(--font-mono); font-size:.82em; background:var(--bg-3); border:1px solid var(--rule); border-radius:4px; padding:1px 6px;}
+
+/* popout trigger + modal */
+button.popout{font-family:var(--font-mono); font-size:13px; letter-spacing:.02em; color:var(--accent); background:none; border:none; border-bottom:1px solid var(--accent-soft); cursor:pointer; padding:0 0 1px; transition:border-color .2s;}
+button.popout:hover{border-color:var(--accent);}
+button.popout::before{content:"› "; color:var(--accent);}
+.modal-back{position:fixed; inset:0; z-index:80; background:rgba(7,6,10,.55); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:24px; opacity:0; transition:opacity .3s var(--ease);}
+.modal-back.open{display:flex; opacity:1;}
+.modal{background:var(--bg); border:1px solid var(--rule-strong); border-radius:16px; max-width:760px; width:100%; max-height:90vh; overflow-y:auto; padding:30px 32px 26px; box-shadow:0 30px 80px -20px rgba(0,0,0,.5); transform:translateY(14px) scale(.99); transition:transform .35s var(--ease);}
+.modal-back.open .modal{transform:none;}
+.modal h3{margin:0 0 6px; font-size:30px;}
+.modal .eyebrow{margin-bottom:14px;}
+.modal p{font-size:18px; line-height:1.56; margin-bottom:16px;}
+.modal .close{position:sticky; top:0; float:right; font-family:var(--font-mono); font-size:18px; color:var(--ink-3); background:none; border:none; cursor:pointer; line-height:1; padding:2px 6px; margin:-6px -8px 0 0;}
+.modal .close:hover{color:var(--accent);}
+.hregime{font-family:var(--font-mono); font-size:13px; margin-top:6px;}
+
+hr.rule{border:none; border-top:1px solid var(--rule); margin:0;}
+
+.gloss{display:grid; grid-template-columns:1fr; gap:0; margin-top:20px; border-top:1px solid var(--rule);}
+.gloss .row{display:grid; grid-template-columns:minmax(140px,200px) 1fr; gap:18px; padding:18px 0; border-bottom:1px solid var(--rule); align-items:baseline;}
+.gloss .term{font-family:var(--font-display); font-size:23px; color:var(--ink); line-height:1.1;}
+.gloss .term .alt{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.04em; color:var(--ink-4); text-transform:uppercase; margin-top:5px;}
+.gloss .def{font-size:17px; line-height:1.55; color:var(--ink-3);}
+.gloss .def b{color:var(--ink-2); font-weight:600;}
+@media(max-width:620px){.gloss .row{grid-template-columns:1fr; gap:6px;}}
+
+footer{padding:70px 0 90px; border-top:1px solid var(--rule); margin-top:40px;}
+footer .col{display:flex; flex-direction:column; gap:18px;}
+footer .sig{font-family:var(--font-display); font-size:26px; color:var(--ink);}
+footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); line-height:1.9; letter-spacing:.02em;}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+.reveal.in{opacity:1; transform:none;}
+.figure-wide.reveal{transform:translateX(-50%) translateY(26px);}
+.figure-wide.reveal.in{transform:translateX(-50%);}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1!important; transform:none!important; transition:none!important;}
+  .figure-wide.reveal{transform:translateX(-50%)!important;}
+  #hero .col{animation:none!important;}
+  .home-btn{animation:none!important;}
+  .scrollcue .bar{animation:none;}
+}
+@media(max-width:600px){
+  body{font-size:18px;}
+  section{padding:42px 0;}
+  .wrap{padding:0 20px;}
+  .panel{padding:14px;}
+  .modal{padding:22px 20px;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<a class="home-btn" href="https://thylinao1.github.io/index.html" aria-label="Back to portfolio home">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+  <span>Home</span>
+</a>
+
+<nav id="toc" aria-label="Sections">
+  <a href="#hero" data-sec="hero"><span class="dot"></span><span class="lbl">Top</span></a>
+  <a href="#intro" data-sec="intro"><span class="dot"></span><span class="lbl">Why a picture</span></a>
+  <a href="#lamps" data-sec="lamps"><span class="dot"></span><span class="lbl">Lamps, not fences</span></a>
+  <a href="#estep" data-sec="estep"><span class="dot"></span><span class="lbl">Colouring the dots</span></a>
+  <a href="#mstep" data-sec="mstep"><span class="dot"></span><span class="lbl">Moving the lamps</span></a>
+  <a href="#loop" data-sec="loop"><span class="dot"></span><span class="lbl">The loop</span></a>
+  <a href="#time" data-sec="time"><span class="dot"></span><span class="lbl">The trail</span></a>
+  <a href="#viterbi" data-sec="viterbi"><span class="dot"></span><span class="lbl">Reading the path</span></a>
+  <a href="#naming" data-sec="naming"><span class="dot"></span><span class="lbl">Naming the moods</span></a>
+  <a href="#map" data-sec="map"><span class="dot"></span><span class="lbl">The name map</span></a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="col">
+      <div class="hero-mark">A geometric reading · Hidden Markov Models &amp; EM</div>
+      <h1>Lamps<br>in the <span class="it">dark</span></h1>
+      <p class="hero-sub">A geometric representation of the EM algorithm and Hidden Markov Models, and the ideas that hang off them: the forward-backward sweep, a quiet link to PCA, Baum-Welch, and Viterbi. The wall of algebra, redrawn as light: lamps glowing over a plane, a trail of points wandering between them, and a loop that nudges the lamps until they fit.</p>
+      <div class="hero-meta">
+        <b>Prerequisites</b> &nbsp;a little linear algebra and basic probability<br>
+        <b>Reading</b> &nbsp;~16 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;interactive features and animations for visual representation
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue"><span>scroll</span><span class="bar"></span></div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- ============ 01 · WHY A PICTURE ============ -->
+<section id="intro">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">01</span> · Why a picture</span>
+    <h2 class="reveal">The model was fine. The fitting was the wall.</h2>
+    <p class="lead reveal">When I was learning hidden Markov models, the model itself never gave me much trouble. What I kept bouncing off was the algorithm that <em>fits one to data</em>: <strong>EM</strong>.</p>
+    <p class="reveal">Every write-up checked out line by line. The algebra was correct while someone walked me through it. Then I would close the page and the meaning would evaporate. I could reproduce the steps without ever seeing what they were <em>doing</em> to anything.</p>
+    <p class="reveal">That gap is the whole reason this exists. Some ideas only click once you can <em>watch</em> them, and EM is one of them. Drawn the right way, the equations stop being a wall and turn into a description of something you can actually <em>see</em> happen on a plane.</p>
+    <p class="reveal">The first time I had to build one of these for real was during my quant research internship at a crypto trading startup in London. (Quant research just means using math and code to make bets on markets.) I used a hidden Markov model to guess which "state" the market was in each hour: drifting quietly, going nowhere, or running hard in one direction. None of that is special to markets, though. The same machine reads speech, tags stretches of DNA, tracks where a robot thinks it is, and labels messy handwriting. Anywhere a hidden situation changes slowly and leaks clues as it goes, this is the tool people reach for.</p>
+    <p class="reveal">Here is the situation it answers. Something underneath you changes over time, and you <em>never get to see it</em>. You only see what it gives off, step after step. The job is to run it backwards: from the clues alone, work out which hidden states were probably active, and how those states tend to hand off to one another.</p>
+    <p class="reveal">A model like this has two moving parts. One says what each hidden state <em>looks like</em>: the kind of readings that state tends to produce. The other says how the states <em>follow</em> one another: whether calm tends to stay calm, whether a streak tends to keep going. The model begins knowing neither, and EM is how it learns both at once from nothing but the unlabeled readings.</p>
+    <p class="reveal">Most courses hand you the update equations and trust the symbols to carry the meaning. They never did for me. What follows rebuilds the whole thing as a picture you can hold.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 02 · LAMPS NOT FENCES ============ -->
+<section id="lamps">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">02</span> · Lamps, not fences</span>
+    <h2 class="reveal">Every lamp lights the whole plane</h2>
+    <p class="reveal">Let me make the picture concrete before it gets abstract. Say a fresh reading arrives every hour, and each reading is a small bundle of numbers. Three, so we can draw it: maybe how fast things are moving, how spread out they are, and how much the recent past predicts the next step. (For example, in finance these three could be volatility, correlation, and a persistence measure like the Hurst exponent. The exact names do not matter here.) Stack those three numbers and you have a point. Drop the point onto a plane and the hour becomes a single dot. A week of hours is a loose cloud of dots floating in that space.</p>
+    <p class="reveal">So imagine there are three different modes the world can be in, and let us call them <strong>lamps</strong> for now. What we are trying to do is sort the hours, every single dot we have, into these lamps. Each lamp sits at one spot, the most typical reading for its mood, and throws a coloured glow outward. There are three of them here, <span class="greenword">green</span>, <span class="blueword">blue</span>, and <span class="redword">red</span>, and the same three colours show up in every diagram below.</p>
+    <p class="reveal">The tempting first picture is a map chopped into territories: this patch belongs to one mood, that patch to another, and a dot simply lands inside one of them, sort of like fences. Some of you might even think of it as <strong>k-means clustering</strong>, where every point is handed to its nearest centre. It is easy to draw. It is also wrong, and the wrongness turns out to be the entire mechanism, so it is worth changing the approach.</p>
+    <p class="reveal">A mood does not own a patch. A mood is a lamp, brightest at its centre and fading as you move out (but never going fully dark anywhere; look at the diagram below and you can watch the glow thin toward the edges without ever stopping). Green's glow out at the far corner is faint. It is still not zero. Every lamp reaches every point on the plane, just with wildly different brightness.</p>
+    <p class="reveal">So a dot is never simply "green and not red." It is lit by all three lamps at once, brightly by the near one and faintly by the far ones. The honest question is not <em>which region</em> it sits in but <em>what mix of light</em> it catches: this dot is 80% green light, 15% red, 5% blue. Those three shares always add up to 100%, and that mix, how much of each lamp's light a dot is catching, is the thing the whole algorithm is really about.</p>
+    <div class="pull reveal">If the fences were real, every dot would have one true mood and there would be nothing left to figure out. The only reason inference exists at all is that the fences do not. A faint reach is still a reach, and a faint claim is still a claim.</div>
+    <p class="reveal">Drag the lamps below. The default view shows the truth: soft overlapping glows that blend where they meet, mixing into new colours wherever two beams cross. Turn a lamp's weight up and watch its territory actually grow and pull in dots near the edge, not just glow brighter in the same spot. Flip to <span class="kbd">fences</span> to see the seductive lie, hard borders with every dot handed to one owner, and notice how brittle the seams are.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="mixCanvas" class="fig" aria-label="Interactive: drag the three lamp centres and adjust their weights to watch the responsibility field change"></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="mixMode">
+            <button data-mode="glow" class="on">Glows (truth)</button>
+            <button data-mode="fence">Fences (the lie)</button>
+          </div>
+          <div class="grp"><label>Green wt</label><input type="range" id="wA" min="5" max="100" value="60"></div>
+          <div class="grp"><label>Blue wt</label><input type="range" id="wB" min="5" max="100" value="55"></div>
+          <div class="grp"><label>Red wt</label><input type="range" id="wC" min="5" max="100" value="70"></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--lamp-a)"></i>lamp A</span>
+          <span><i style="background:var(--lamp-b)"></i>lamp B</span>
+          <span><i style="background:var(--lamp-c)"></i>lamp C</span>
+          <span style="color:var(--ink-4)">drag any centre · weight = how often that mood shows up</span>
+        </div>
+      </div>
+      <figcaption><b>A mixture of three lamps, drawn as light.</b> A point's colour is the blend of the three glows that reach it, so where two beams overlap you get a third colour. The weight slider raises or lowers how loud a lamp's claim is even where its glow is dim, so turning one up visibly grows its territory and pulls in dots near the edge. In <b>fence</b> mode the same field is forced into hard ownership. Notice how brittle the borders are, and how nudging one centre flips a whole strip of dots that barely moved.</figcaption>
+    </figure>
+
+    <p class="reveal">Now drop down to a single dot and ask what it actually sees. Three beams land on it at once, just at different strengths, and its mix is simply its share of each colour. The figure below freezes one dot near the green lamp and magnifies it: <em>mostly green, with some red and a little blue</em>. Around it you can watch the beams add like real light. Up top, where green and blue overlap, the colour shifts toward cyan. Down the middle, green and red pile into a warm yellow. In the centre all three meet and wash toward white. And out where one beam barely reaches, the other two split the dot between them.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="dotCanvas" class="fig" aria-label="One dot magnified to show it catches about 80 percent green light, 15 percent red, 5 percent blue, with the plane's mixing regions circled"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--lamp-a)"></i>Green lamp</span>
+          <span><i style="background:var(--lamp-b)"></i>Blue lamp</span>
+          <span><i style="background:var(--lamp-c)"></i>Red lamp</span>
+          <span style="color:var(--ink-4)">beams add like light: green + blue reads cyan, all three read near white</span>
+        </div>
+      </div>
+      <figcaption><b>From one dot's point of view.</b> Each lamp's centre is marked and labelled. The three throw real light that adds where it overlaps, so green and blue make cyan, green and red make yellow, and all three together wash toward white. The white ringed dot is the one we are examining, and the magnifier spells out the light it gets from each lamp: <em>mostly green, some red, a little blue, all at once</em>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 03 · E-STEP ============ -->
+<section id="estep">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">03</span> · Colouring the dots</span>
+    <h2 class="reveal">How much of each lamp does a dot catch?</h2>
+    <p class="reveal">You might expect each lamp's glow to be a perfect circle. Look back at the diagrams, though, and the glows come out stretched, more like ovals than circles. That stretch is not decoration, and it changes what the word <em>close</em> even means. If you took a plain ruler and measured the raw centimetres from a dot to each lamp, you would sometimes get the wrong answer: a dot can sit nearer the green lamp in plain distance and still belong mostly to the red one. How can that be? Because a wide, sprawling mood reaches far while a tight, disciplined mood barely reaches past its own centre, so each lamp measures distance in its own stretched way. The fix is to stop using a plain ruler and use one shaped to fit each lamp.</p>
+    <p class="reveal">Picture a lamp's spread as two arrows planted at its centre, at right angles. A <strong>long arrow</strong> down the direction the readings stretch most, and a <strong>short arrow</strong> across the direction they barely vary. A round lamp has two equal arrows. An oval one, think of a surfboard, has one long and one short. Now stop asking "how many centimetres away is the dot" and ask instead, "how many of this lamp's own arrows out is it, along each arrow?"</p>
+
+    <figure class="reveal">
+      <div class="panel">
+        <canvas id="rulerCanvas" class="fig" aria-label="A stretched lamp with its long and short axes, and two points the same number of arrow-lengths from the centre"></canvas>
+      </div>
+      <figcaption><b>The stretched ruler.</b> The same physical step counts as <em>near</em> along the long arrow and <em>far</em> along the short one. A dot way out at the tip of the oval still looks at home. The identical distance sideways already looks foreign. (This stretched distance has a textbook name, the Mahalanobis distance, but the arrows are all you need to feel it.)</figcaption>
+    </figure>
+
+    <p class="reveal">A step along the long arrow barely uses up the ruler, so far still feels near. A step along the short arrow burns through the ruler fast, so a little way out already feels distant. That makes the short direction the sensitive one, the direction where a dot most quickly stops looking like it belongs. Turn that stretched distance into a brightness with a smooth bell-shaped fall-off (close means bright, far means dim, never quite zero), do it for all three lamps, and the dot now has three raw brightnesses.</p>
+    <p class="reveal">One last move makes them the percentages: divide each lamp's brightness by the total of all three. That is why the mix always lands on something like 80 / 15 / 5 that sums to 100. You are asking what share of this dot's total light comes from each lamp. Computing that share for every dot, with the lamps held where they currently sit, is the whole <strong>E-step</strong>. The E is for <em>expectation</em>, because each share is the expected amount that the dot belongs to that mood.</p>
+    <p class="reveal">Two honest notes while we are here. The oval shape is an assumption, not a fact about the world. We are <em>choosing</em> to model each mood as a smooth elliptical blob because it is easy to compute with, and that choice is weakest out in the tails, which is exactly where the interesting surprises live. And the brightness is not distance alone: it is also scaled by how common the mood is, so a rare lamp needs strong local evidence before it can claim a dot. That second factor is the weight slider you were dragging a moment ago.</p>
+
+    <h3 class="reveal">If that looked like PCA, you were right</h3>
+    <p class="reveal">Some of you will have felt a bump of recognition at "long arrow, short arrow." Those two arrows are a <strong>principal component analysis</strong> of that lamp's cloud, the same object under a different name. The long arrow points along the direction of most variation. Project the cloud onto it and it spreads the most. The short arrow points along the least variation. The thing that holds the stretch and the tilt, the <strong>covariance matrix</strong>, is exactly what PCA reads its axes off of.</p>
+    <p class="reveal">The arrows are forced to be at right angles, by the way, and not by convention. A covariance matrix is symmetric, and symmetric matrices always hand back perpendicular axes. One nice twist: ordinary PCA usually <em>throws the short arrow away</em> to compress data, while the lamp leans on the short arrow hardest, because that is the direction where a dot most quickly stops looking like one of its own. Same arrow, opposite attitude toward it.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 04 · M-STEP ============ -->
+<section id="mstep">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">04</span> · Moving the lamps</span>
+    <h2 class="reveal">Centre first, then the arrows</h2>
+    <p class="reveal">The E-step coloured every dot with the lamps held still. The <strong>M-step</strong> does the opposite: freeze the colours, move the lamps. Each lamp slides to the <em>weighted middle</em> of the dots, where every dot tugs the lamp toward itself in proportion to how much of that lamp's colour it caught. A dot that is 80% green yanks the green lamp hard. A 5%-green dot barely nudges it. Then, around the new centre, you redraw the two arrows from the spread of the dots that softly belong to it. The M is for <em>maximization</em>, because that move is the one that makes the dots you actually observed least surprising under the updated lamps.</p>
+    <p class="reveal">This whole move resembles k-means clustering, except we never draw a hard border. Every dot still receives all three lights, just in different proportions, so it tugs all three lamps at once instead of being handed to a single nearest one. That soft pull is the only difference, and it is the difference that makes everything later work.</p>
+    <div class="pull reveal">The balance point is the single spot that holds the cloud tightest. Put the centre anywhere else and every dot is, on average, farther from it. Centre first: squeeze the total spread to its smallest. Arrows second: split whatever spread is left into "most this way, least the other."</div>
+    <p class="reveal">This is also why a bad centre wrecks the shape. Measure spread from an off-balance point and you do not just inflate the arrows, you rotate the long one off true, and the oval becomes a distorted account of the cloud. One small guardrail lives here too: a lamp can collapse onto a single dot if you let it, its spread shrinking toward nothing and its brightness spiking toward infinity. Real code quietly forbids that by refusing to let a lamp shrink below some minimum size. Otherwise "tightening onto the real shape" can degrade into a lamp impaling one lucky point.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 05 · THE LOOP ============ -->
+<section id="loop">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">05</span> · The loop</span>
+    <h2 class="reveal">Colour, move, colour, move</h2>
+    <p class="reveal">Now alternate. Colour the dots with the lamps frozen. Move the lamps with the colours frozen. Recolour. Re-move. That back and forth <em>is</em> the EM algorithm: expectation, then maximization, repeated until the lamps stop sliding. Watch it run below, starting from three random lamps dropped on a cloud they do not fit, then walking into place pass by pass.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="emCanvas" class="fig" aria-label="Animated EM: three lamps fitting a point cloud, responsibilities and centres updating each pass"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="emPlay">Play</button>
+          <button class="btn" id="emStep">Step E·M</button>
+          <button class="btn" id="emReset">Reset</button>
+          <span class="readout">pass <b id="emIter">0</b> &nbsp;·&nbsp; fit score <b id="emLL">·</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--lamp-a)"></i>lamp A</span>
+          <span><i style="background:var(--lamp-b)"></i>lamp B</span>
+          <span><i style="background:var(--lamp-c)"></i>lamp C</span>
+          <span style="color:var(--ink-4)">dots tint toward whichever lamp claims them · rings are the lamp shapes</span>
+        </div>
+      </div>
+      <figcaption><b>EM running for real.</b> This is the actual algorithm on a synthetic cloud, the math rather than a recording. The "fit score" (the log-likelihood, how unsurprising the dots are under the current lamps) only ever climbs. Each full pass is guaranteed to raise it or leave it flat, never lower it. That climb is EM's one firm promise, and, as the next paragraph admits, also its one real limit.</figcaption>
+    </figure>
+
+    <p class="reveal">A caveat that the tidy animation hides. EM only ever promises that a pass will not make the fit worse. It climbs to the nearest good-enough arrangement (a local optimum, what optimization people call a local minimum), not the best one that exists. Start the lamps somewhere else and they can settle into a different, worse layout and sit there happily, because "nothing is moving" only means you found a resting spot, not the right one. In practice you run it a few times from random starts and keep the best. The clip above always tidies up. Real data sometimes parks a lamp in a ditch and calls it done.</p>
+
+    <h3 class="reveal">The Light Keeper, the second force</h3>
+    <p class="reveal">There is a second force I have been holding back, and it is the thing that truly separates this from the k-means clustering it keeps resembling. Picture a <strong>Light Keeper</strong>, someone who walks the dots in order and checks that none of them is doing anything <em>strange</em>. As he walks he keeps a notebook. Dots bathed heavily in green light tend to stay green for a while; it almost never goes green, green, green, then a hard jump to mostly red, then green again. He has simply never seen this little world flip that fast.</p>
+    <p class="reveal">Now watch the picture below. He walks the green trail hour by hour, x<sub>n</sub>, then x<sub>n+1</sub>, then x<sub>n+2</sub>, all of them deep green. Then he reaches a stray dot that, by raw distance, looks far from the green light and almost sitting on the red lamp. Down in the corner the red lamp notices it and starts pulling, dragging its own centre toward this single dot. The Light Keeper says no. The hours on both sides of the stray are deep green, and green, then a hard red, then green again would be the most surprising thing he has seen all day. So he writes the stray down as green after all, left sitting just on the edge of the green region, and the red lamp lets go.</p>
+    <p class="reveal">The reason he can overrule the geometry is that the dots are a sequence, hour after hour, not a scatter thrown down at random. That is why they are labelled x<sub>n</sub>, x<sub>n+1</sub>, and so on. Real processes carry this kind of inertia. A river running down a mountain does not flow, dry up completely, and come roaring back inside three hours. Moods change with some normality, and the model leans on exactly that.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="vetoCanvas" class="fig" aria-label="Animated: a stray point on a trail, re-weighted by the trail's memory so it stops dragging a lamp"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="vetoPlay">Play</button>
+          <span class="readout" id="vetoStatus">geometry only</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--lamp-a)"></i>green (the trail)</span>
+          <span><i style="background:var(--lamp-c)"></i>red lamp</span>
+          <span style="color:var(--ink-4)">the red lamp's centre is computed live from the dots that claim it</span>
+        </div>
+      </div>
+      <figcaption><b>The Light Keeper vetoes a bad pull.</b> On pure geometry the stray hour sits closer to the red lamp, so it claims a big red share and drags the red lamp up toward itself, off its own cluster. Then the trail's memory weighs in: the hours on both sides of the stray were deep green, and green then red then green is a jump this trail almost never makes. The stray's red share collapses, its pull weakens, and the red lamp snaps back home. The lamp position you see is recomputed every frame from the dots that claim it, so the drag and the snap-back are real, not drawn on.</figcaption>
+    </figure>
+
+    <p class="reveal">So the Light Keeper does quiet, important work. He makes sure no single stray drags a lamp out of place, and that every dot ends up where the rhythm of the trail says it belongs. The catch is timing. If you let him do his accounting only at the very end, he never gets to vote while the lamps are still moving; he just describes where they drifted once it is too late to hold them. Run him every pass, and his veto becomes a live force that keeps a lamp from chasing one lonely dot, over and over, until the shapes settle on the real clusters.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 06 · THE TRAIL ============ -->
+<section id="time">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">06</span> · The trail</span>
+    <h2 class="reveal">The points arrive in order</h2>
+    <p class="reveal">Until now the dots were a loose cloud. But they arrive in sequence, hour 1, hour 2, hour 3, and the light each one catches is <em>sticky</em>: green tends to follow green, a streak tends to keep going. That stickiness, the rule the Light Keeper reaches for when he decides where a dot belongs, is the <strong>transition matrix</strong>: three moods across, three down, each cell holding how strongly one mood tends to be followed by another. Think of it as the notebook he keeps of how this little lamp world behaves, read straight off the trail in the same soft currency as everything else.</p>
+    <p class="reveal">So a dot's mix now comes from two things at once: how brightly each lamp hits it, and how plausibly the surrounding trail allows that mood. A dot sitting right under the green lamp can still come out mostly blue if calling it green would force the trail to flicker blue, green, blue across three hours, a move the notebook says almost never happens.</p>
+    <div class="note reveal">
+      <span class="tag">How the Light Keeper actually does it, and one build note</span>
+      <p>He does not just glance at the two neighbours. The exact version weighs the <em>entire</em> trail to score each hour, every hour before it and every hour after, and it does this efficiently with a two-pass trick: one sweep front to back gathering everything that led up to here, one sweep back to front gathering everything that follows, then combining the two at each hour. That is the <strong>forward-backward</strong> procedure.</p>
+      <p>The order matters, and it is worth getting right. It would be wrong to picture him making one left-to-right pass, fixing each dot's colour as he goes, then circling back to patch up the surprising ones. What he actually does is walk the trail without committing: at each dot he only records what the path so far implies, keeps going to the very end, then sweeps back recording what the future implies. Only once he has seen the whole trail in both directions does he return to each dot and hand it its final mix, you are more green here than red. Evidence from both sides, gathered before any dot is fixed.</p>
+      <p>One last build note. The handoff grid is not made by multiplying "this hour was 70% green" by "next hour was 60% blue." The correct count asks for the chance the chain was green and then blue <em>across that one step, taken together</em>, which already folds in how likely a green to blue move is. The intuition is right. The exact bookkeeping is a touch more careful than a multiplication.</p>
+    </div>
+    <p class="reveal">With time in the picture the names settle into place. The whole colour-move-colour-move loop, now including the grid, is <strong>EM</strong>. Applied to this lamps-plus-trail model it earns its own name, <strong>Baum-Welch</strong>. The two-pass trick inside the colouring step is <strong>forward-backward</strong>. In a typical codebase, the single call <span class="kbd">fit()</span> is the whole Baum-Welch loop with forward-backward humming inside it.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 07 · VITERBI ============ -->
+<section id="viterbi">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">07</span> · Reading the path</span>
+    <h2 class="reveal">Once the lamps are fixed, thread the needle</h2>
+    <p class="reveal">Fitting is done: the transition matrix, the lamp centres, and the beam shapes are all fixed now. A different job comes next. Given a fresh sequence of hours the model has never seen before, which <em>single sequence</em> of moods is the system most likely to have walked through? Not the favourite mood at each hour on its own, but the best whole path, one mood per hour, chosen so the entire chain stays consistent with the stickiness grid. That is the <strong>Viterbi</strong> algorithm.</p>
+    <p class="reveal">Here is the idea in plain steps. Every dot already carries its mix of light, say 80% red, 15% blue, 5% green. The first hour arrives mostly green, so we call the mood green. The next five hours are mostly green too, so we stay green. Then the sixth hour lands mostly red, more red territory than anything else, so we switch to red. Walking the trail like this, reading each hour's mood from the light it caught while respecting how willing the grid is to switch, is what Viterbi does. It is a close cousin of dynamic programming: each step reuses the best answer from the step before instead of rebuilding the whole path from scratch.</p>
+    <p class="reveal">Picture a trellis: a column of three mood-nodes for each hour, time running left to right. Every node carries a score for "the best story that ends here," built by extending the best story from the previous column through the grid and the lamp brightness at this hour. Sweep left to right filling in scores, then walk back right to left following each node's best predecessor, and one brightest thread lights up. Step it below.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="vitCanvas" class="fig" aria-label="Viterbi trellis: the most likely mood sequence threading through a series of observations"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="vitPlay">Run</button>
+          <button class="btn" id="vitStep">Step</button>
+          <button class="btn" id="vitReset">New series</button>
+          <span class="readout" id="vitStatus">forward sweep · column 0</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--lamp-a)"></i>mood A</span>
+          <span><i style="background:var(--lamp-b)"></i>mood B</span>
+          <span><i style="background:var(--lamp-c)"></i>mood C</span>
+          <span style="color:var(--ink-4)">top: the readings · bottom: the trellis, brightest path in bold</span>
+        </div>
+      </div>
+      <figcaption><b>The single most likely path.</b> The forward sweep scores every node, the backward trace commits to one mood per hour. Because the path is chosen as a whole, it sometimes overrules the locally favourite mood at a given hour to keep the chain plausible, absorbing a stray reading into its neighbours' mood rather than spawning a one-hour flicker the grid would call near impossible.</figcaption>
+    </figure>
+
+    <p class="reveal">One thing I glossed, worth flagging. The single most likely path is not always what you want, because committing to one mood per hour quietly re-imposes the hard borders we spent all this time tearing down. Sometimes the full mix is the point: a dot that is 60% red is also 20% blue and 20% green, and those minorities can carry real weight. Keeping the whole mix instead of collapsing it has its own name, marginal or posterior decoding, and there are jobs where that is the right call. In finance, for instance, a risk measure like value at risk cares about the 20% chance, not just the headline mood, because that tail is exactly what hurts you. Same data, different question: reach for the single best path when you need one clean story, and for the full mix when the small probabilities are what you are actually after.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 08 · NAMING ============ -->
+<section id="naming">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">08</span> · Naming the moods</span>
+    <h2 class="reveal">The model hands you nameless lamps</h2>
+    <p class="reveal">Here is the part that surprises people. The model never names its moods. <span class="kbd">fit()</span> hands back three lamps with no labels, lamp 0, lamp 1, lamp 2, in an order that can even reshuffle between runs. It found three blobs and three handoff tendencies. It has no idea that one of them is "calm" and another is "wild." Attaching meaning is your job, and you do it by looking at where each lamp's centre sits.</p>
+    <p class="reveal">How you name them depends entirely on what your three numbers measured. If one of those numbers separates the moods cleanly, sort the lamps along it and read the order straight off. That is the whole step. The sort also quietly fixes the reshuffling problem: whichever index the model handed you, the name you care about always lands on whichever lamp is currently most extreme along your chosen number.</p>
+    <p class="reveal">There are many ways to pick that number, and the right one is whatever makes the moods mean something in your problem. In the markets case I mentioned, people lean on a single number called the Hurst exponent, which sorts a path from "snaps back" to "runs away." It is a nice example because it turns three anonymous blobs into three words you can act on, and it is exactly the kind of thing that needs a little finance vocabulary, so I have tucked it out of the way.</p>
+    <p class="reveal"><button class="popout" id="hurstTrigger">Open the Hurst exponent (with a slider to play with)</button></p>
+    <p class="reveal">Once the lamps have names, you can finally ask things in plain language: which mood was the system in at 3pm, how often does it switch, what usually comes after a long calm stretch. The shapes came from the math. The meaning comes from this one human step of looking and labelling.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 09 · NAME MAP ============ -->
+<section id="map">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">09</span> · The name map</span>
+    <h2 class="reveal">Every picture, its textbook name</h2>
+    <p class="reveal">The whole vocabulary lines up cleanly against the pictures. Keep this as the translation table between the lamps and any paper or library you run into.</p>
+    <div class="gloss reveal">
+      <div class="row"><div class="term">Lamp<span class="alt">Gaussian component</span></div><div class="def">One mood's emission shape: a <b>centre</b> (mean vector) plus a <b>spread</b> (covariance matrix). Three lamps is a 3-component Gaussian mixture.</div></div>
+      <div class="row"><div class="term">Glow / brightness<span class="alt">density</span></div><div class="def">How strongly a lamp lights a point, its probability density there. Fades smoothly, never reaches zero.</div></div>
+      <div class="row"><div class="term">The 80 / 15 / 5 mix<span class="alt">responsibilities · &gamma;</span></div><div class="def">A point's normalised shares across the lamps. The posterior probability of each mood given that reading, and, with time, the trail around it.</div></div>
+      <div class="row"><div class="term">Stretched ruler<span class="alt">Mahalanobis distance</span></div><div class="def">Distance measured in a lamp's own arrow-lengths instead of centimetres, so spread and tilt are baked into "near."</div></div>
+      <div class="row"><div class="term">Long &amp; short arrows<span class="alt">eigenvectors / PCA axes</span></div><div class="def">The covariance matrix's perpendicular principal axes. Their lengths are the variances along them.</div></div>
+      <div class="row"><div class="term">Colour, move, repeat<span class="alt">EM algorithm</span></div><div class="def">Alternate the E-step (shares, lamps frozen) and the M-step (lamps, shares frozen) until the fit score stops climbing.</div></div>
+      <div class="row"><div class="term">The whole loop here<span class="alt">Baum-Welch</span></div><div class="def">EM specialised to a hidden Markov model: lamps and the handoff grid learned together. The job of <span class="kbd">fit()</span>.</div></div>
+      <div class="row"><div class="term">Two-pass trick<span class="alt">forward-backward</span></div><div class="def">The efficient colouring step: one sweep each direction over the trail, combined per hour to score moods using the whole sequence.</div></div>
+      <div class="row"><div class="term">Stickiness grid<span class="alt">transition matrix · A</span></div><div class="def">Mood-to-mood handoff tendencies. The model's memory of how moods persist and switch.</div></div>
+      <div class="row"><div class="term">Brightest thread<span class="alt">Viterbi</span></div><div class="def">The single most likely whole sequence of moods given a fixed model.</div></div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+</main>
+
+<!-- ============ HURST MODAL ============ -->
+<div class="modal-back" id="hurstModal" role="dialog" aria-modal="true" aria-label="The Hurst exponent">
+  <div class="modal">
+    <button class="close" id="hurstClose" aria-label="Close">✕</button>
+    <span class="eyebrow">Optional · a little finance vocabulary</span>
+    <h3>The Hurst exponent</h3>
+    <p>The Hurst exponent, written H, is a single number between 0 and 1 that measures how much a path keeps doing what it was just doing.</p>
+    <p>
+      <b>H below 0.5</b> means the path is anti-persistent: when it moves one way it tends to snap back. Traders call this <span class="greenword">mean-reverting</span>.<br>
+      <b>H near 0.5</b> means the path wanders with no pull either way. A <span class="blueword">random walk</span>.<br>
+      <b>H above 0.5</b> means a move tends to keep going. <span class="redword">Trending</span>.
+    </p>
+    <p>So if you wanted to name three market moods, you would read the Hurst value at each lamp's centre, sort them low to high, and the order is mean-reverting, then random walk, then trending. Drag the slider to feel what each looks like on the same underlying randomness.</p>
+    <figure style="margin:18px 0 8px;">
+      <div class="panel" style="background:var(--bg-3);">
+        <canvas id="hurstCanvas" class="fig" aria-label="A simulated price path whose persistence changes as you drag the Hurst slider"></canvas>
+        <div class="controls">
+          <div class="grp" style="flex:1; min-width:220px;">
+            <label>Hurst&nbsp;H</label>
+            <input type="range" id="hurstSlider" min="10" max="90" value="22" style="flex:1; width:auto;">
+            <span class="readout" style="min-width:50px"><b id="hurstVal">0.22</b></span>
+          </div>
+          <span class="readout hregime" id="hurstWord" style="min-width:150px"></span>
+        </div>
+      </div>
+    </figure>
+    <p style="font-size:16px; color:var(--ink-3);">One warning if you ever use this for real. Estimated on a short window, H is noisy and easy to fool, and H exactly 0.5 is a knife-edge no real series actually sits on. Treat the three labels as useful handles, not facts the data handed you.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="col">
+      <div class="sig">Lamps in the dark.</div>
+      <p style="margin:0; color:var(--ink-3); font-size:18px; max-width:580px;">A geometric retelling of the EM algorithm and Hidden Markov Models, written because the algebra never clicked for me until it became light. If a picture here helped, the small admissions tucked beside each one are what keep it honest.</p>
+      <div class="meta">
+        Maksim Silchenko · 2026<br>
+        One self-contained page. Every diagram is live math, not a recording.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+(function(){
+  const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setupCanvas(cv, h, maxDpr){
+    const dpr = Math.min(window.devicePixelRatio||1, maxDpr||2);
+    const w = cv.clientWidth || 600;
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    cv.style.height = h+'px';
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx, w, h, dpr};
+  }
+  // returns a getter that is false while the canvas is scrolled out of view, so its
+  // rAF loop can skip the expensive redraw and keep scrolling smooth
+  function inView(cv){
+    let v=true;
+    if('IntersectionObserver' in window){
+      const io=new IntersectionObserver(es=>{ v=es[0].isIntersecting; },{rootMargin:'140px'});
+      io.observe(cv);
+    }
+    return ()=>v;
+  }
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function gauss(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  const CSS = getComputedStyle(document.documentElement);
+  const COL = {
+    a: CSS.getPropertyValue('--lamp-a').trim(), b: CSS.getPropertyValue('--lamp-b').trim(), c: CSS.getPropertyValue('--lamp-c').trim(),
+    bg: CSS.getPropertyValue('--bg').trim(), bg2: CSS.getPropertyValue('--bg-2').trim(),
+    ink: CSS.getPropertyValue('--ink').trim(), ink3: CSS.getPropertyValue('--ink-3').trim(), accent: CSS.getPropertyValue('--accent').trim()
+  };
+  function hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  const RGB = {a:hex2rgb(COL.a), b:hex2rgb(COL.b), c:hex2rgb(COL.c), bg:hex2rgb(COL.bg)};
+
+  function mvpdf(dx,dy,S){
+    const det = S[0]*S[2]-S[1]*S[1];
+    if(det<=1e-9) return 0;
+    const inv00=S[2]/det, inv11=S[0]/det, inv01=-S[1]/det;
+    const q = dx*(inv00*dx+inv01*dy) + dy*(inv01*dx+inv11*dy);
+    return Math.exp(-0.5*q)/(2*Math.PI*Math.sqrt(det));
+  }
+  function eigen2(S){
+    const a=S[0], b=S[1], c=S[2];
+    const tr=a+c, d=Math.sqrt(Math.max(0,((a-c)/2)*((a-c)/2)+b*b));
+    const l1=tr/2+d, l2=tr/2-d;
+    const angle=0.5*Math.atan2(2*b, a-c);
+    return {angle, l1:Math.sqrt(Math.max(l1,1e-6)), l2:Math.sqrt(Math.max(l2,1e-6))};
+  }
+  // covariance ellipse: data-space stddev mapped to px through (w,h) separately
+  function drawCov(ctx,cx,cy,S,w,h,stroke,lw,alpha,sig){
+    const e=eigen2(S);
+    const ax=Math.cos(e.angle), ay=Math.sin(e.angle), bx=-Math.sin(e.angle), by=Math.cos(e.angle);
+    ctx.beginPath();
+    for(let i=0;i<=48;i++){
+      const th=i/48*6.2832;
+      const dx=Math.cos(th)*e.l1*sig, dy=Math.sin(th)*e.l2*sig;
+      const px=(ax*dx+bx*dy), py=(ay*dx+by*dy);
+      const sxp=(cx+px*w), syp=(cy+py*h);
+      if(i===0)ctx.moveTo(sxp,syp); else ctx.lineTo(sxp,syp);
+    }
+    ctx.closePath(); ctx.globalAlpha=alpha; ctx.strokeStyle=stroke; ctx.lineWidth=lw; ctx.stroke(); ctx.globalAlpha=1;
+  }
+
+  /* ================= HERO (pitch black, lights bounce in and light the title) ================= */
+  (function(){
+    const cv=document.getElementById('heroCanvas'); if(!cv) return;
+    let st, lights, t0=null, raf;
+    function init(){
+      const h=Math.max(window.innerHeight, 560);
+      st=setupCanvas(cv,h,1.35);   // lower pixel density on the big full-screen canvas keeps it smooth
+      const rng=mulberry32(7);
+      // each light drifts in a straight line and bounces off the edges
+      lights=[RGB.a, RGB.b, RGB.c].map((col,i)=>{   // three lamps only: green, blue, red
+        const a=rng()*6.2832, sp=0.004515+rng()*0.00318;   // 50% slower
+        return {col, x:0.08+rng()*0.84, y:0.08+rng()*0.84, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, r:0.58+rng()*0.24, ph:i*1.7+rng()*0.6};
+      });
+    }
+    function step(){
+      for(const L of lights){
+        L.x+=L.vx; L.y+=L.vy;
+        // bounce off all four edges of the full screen
+        if(L.x<0.02){L.x=0.02; L.vx=Math.abs(L.vx);} else if(L.x>0.98){L.x=0.98; L.vx=-Math.abs(L.vx);}
+        if(L.y<0.02){L.y=0.02; L.vy=Math.abs(L.vy);} else if(L.y>0.98){L.y=0.98; L.vy=-Math.abs(L.vy);}
+      }
+    }
+    function draw(now){
+      if(t0===null)t0=now;
+      const fade=Math.min(1,(now-t0)/1300); // pitch black, then the lights emerge
+      const {ctx,w,h}=st;
+      ctx.clearRect(0,0,w,h);
+      ctx.globalCompositeOperation='lighter';
+      for(const L of lights){
+        const cx=L.x*w, cy=L.y*h, rad=L.r*Math.min(w,h);
+        const pulse=0.6+0.4*Math.sin(now*0.0008+L.ph); // each light breathes on its own phase, so they take turns leading
+        const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+        g.addColorStop(0,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},${0.93*fade*pulse})`);
+        g.addColorStop(0.5,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},${0.2325*fade*pulse})`);
+        g.addColorStop(1,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},0)`);
+        ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+      }
+      ctx.globalCompositeOperation='source-over';
+      const rng=mulberry32(99);
+      for(let i=0;i<90;i++){
+        const x=rng()*w, y=rng()*h, s=0.5+rng()*1.3;
+        ctx.fillStyle=`rgba(244,239,230,${(0.06+rng()*0.16)*fade})`;
+        ctx.beginPath(); ctx.arc(x,y,s,0,6.28); ctx.fill();
+      }
+    }
+    const heroVisible=inView(cv);
+    function loop(now){ if(heroVisible()){ step(); draw(now); } raf=requestAnimationFrame(loop); }
+    init();
+    if(REDUCED){ requestAnimationFrame(n=>{ t0=n-1300; draw(n); }); }
+    else loop(0);
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();},150);});
+  })();
+
+  /* ================= 02: MIXTURE (drag + weights, stretched lamps) ================= */
+  (function(){
+    const cv=document.getElementById('mixCanvas'); if(!cv) return;
+    let st, off, offCtx, mode='glow';
+    const RES=190;
+    const comps=[
+      {c:RGB.a, x:0.28, y:0.42, S:[0.048,0.018,0.012], w:0.60},
+      {c:RGB.b, x:0.64, y:0.30, S:[0.014,-0.010,0.048], w:0.55},
+      {c:RGB.c, x:0.56, y:0.72, S:[0.052,0.004,0.016], w:0.70}
+    ];
+    let dots=[];
+    function makeDots(){
+      const rng=mulberry32(42); dots=[];
+      comps.forEach((cp)=>{ for(let i=0;i<26;i++){ const e=eigen2(cp.S);
+        const a=gauss(rng)*e.l1, b=gauss(rng)*e.l2, ca=Math.cos(e.angle), sa=Math.sin(e.angle);
+        dots.push({x:cp.x+a*ca-b*sa, y:cp.y+a*sa+b*ca}); }});
+    }
+    function init(){
+      const h=Math.min(Math.max(cv.clientWidth*0.52,300),440);
+      st=setupCanvas(cv,h);
+      off=document.createElement('canvas'); off.width=RES; off.height=Math.round(RES*h/st.w);
+      offCtx=off.getContext('2d'); makeDots();
+    }
+    function render(){
+      const {ctx,w,h}=st;
+      const ow=off.width, oh=off.height;
+      const img=offCtx.createImageData(ow,oh);
+      let maxTot=1e-9; const cache=new Float32Array(ow*oh*4);
+      for(let j=0;j<oh;j++)for(let i=0;i<ow;i++){
+        const px=i/(ow-1), py=j/(oh-1);
+        let bs=[0,0,0], tot=0;
+        for(let k=0;k<3;k++){const d=comps[k].w*mvpdf(px-comps[k].x,py-comps[k].y,comps[k].S); bs[k]=d; tot+=d;}
+        const idx=(j*ow+i)*4; cache[idx]=bs[0];cache[idx+1]=bs[1];cache[idx+2]=bs[2];cache[idx+3]=tot;
+        if(tot>maxTot)maxTot=tot;
+      }
+      for(let j=0;j<oh;j++)for(let i=0;i<ow;i++){
+        const idx=(j*ow+i)*4; let r=cache[idx],g=cache[idx+1],b=cache[idx+2],tot=cache[idx+3];
+        let R,G,B;
+        if(mode==='glow'){
+          const rr=r/tot, gg=g/tot, bb=b/tot;
+          const cr=rr*RGB.a[0]+gg*RGB.b[0]+bb*RGB.c[0], cg=rr*RGB.a[1]+gg*RGB.b[1]+bb*RGB.c[1], cb=rr*RGB.a[2]+gg*RGB.b[2]+bb*RGB.c[2];
+          // high floor => the beams cover the whole plane (no bare gaps); the lift near a centre keeps a glow feel
+          const intensity=0.7+0.3*Math.pow(Math.min(tot/maxTot,1),0.5);
+          R=RGB.bg[0]+(cr-RGB.bg[0])*intensity; G=RGB.bg[1]+(cg-RGB.bg[1])*intensity; B=RGB.bg[2]+(cb-RGB.bg[2])*intensity;
+        } else {
+          let win=0; if(g>r&&g>=b)win=1; else if(b>r&&b>g)win=2;
+          const wc=[RGB.a,RGB.b,RGB.c][win];
+          R=RGB.bg[0]+(wc[0]-RGB.bg[0])*0.5; G=RGB.bg[1]+(wc[1]-RGB.bg[1])*0.5; B=RGB.bg[2]+(wc[2]-RGB.bg[2])*0.5;
+        }
+        const p=(j*ow+i)*4; img.data[p]=R; img.data[p+1]=G; img.data[p+2]=B; img.data[p+3]=255;
+      }
+      offCtx.putImageData(img,0,0);
+      ctx.imageSmoothingEnabled=true; ctx.clearRect(0,0,w,h); ctx.drawImage(off,0,0,w,h);
+      for(const d of dots){ ctx.beginPath(); ctx.arc(d.x*w,d.y*h,2.4,0,6.28); ctx.fillStyle='rgba(21,17,11,0.5)'; ctx.fill(); }
+      comps.forEach((cp,k)=>{
+        const x=cp.x*w, y=cp.y*h, stroke=`rgb(${cp.c[0]},${cp.c[1]},${cp.c[2]})`;
+        // faint ellipse outlines so the stretched (oval) shape of each lamp is visible
+        drawCov(ctx,x,y,cp.S,w,h,'rgba(255,255,255,0.5)',1.4,0.5,2);
+        drawCov(ctx,x,y,cp.S,w,h,stroke,1.2,0.55,2);
+        ctx.beginPath(); ctx.arc(x,y,8,0,6.28); ctx.fillStyle=`rgb(${cp.c[0]},${cp.c[1]},${cp.c[2]})`; ctx.fill();
+        ctx.lineWidth=2.5; ctx.strokeStyle=COL.bg; ctx.stroke();
+        ctx.fillStyle=COL.bg; ctx.font='600 11px IBM Plex Mono, monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(['A','B','C'][k], x, y+0.5);
+      });
+    }
+    let drag=-1;
+    function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return {x:(t.clientX-r.left)/r.width,y:(t.clientY-r.top)/r.height};}
+    function down(e){const p=pos(e);let best=-1,bd=0.05;comps.forEach((cp,k)=>{const dd=(cp.x-p.x)**2+(cp.y-p.y)**2;if(dd<bd){bd=dd;best=k;}});drag=best;if(best>=0)e.preventDefault();}
+    function move(e){if(drag<0)return;const p=pos(e);comps[drag].x=Math.max(0.04,Math.min(0.96,p.x));comps[drag].y=Math.max(0.04,Math.min(0.96,p.y));render();e.preventDefault();}
+    function up(){drag=-1;}
+    cv.addEventListener('mousedown',down); cv.addEventListener('touchstart',down,{passive:false});
+    window.addEventListener('mousemove',move); window.addEventListener('touchmove',move,{passive:false});
+    window.addEventListener('mouseup',up); window.addEventListener('touchend',up);
+    [['wA',0],['wB',1],['wC',2]].forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.addEventListener('input',()=>{comps[k].w=el.value/100;render();});});
+    document.querySelectorAll('#mixMode button').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('#mixMode button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); mode=b.dataset.mode; render();
+    }));
+    init(); render();
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();render();},160);});
+  })();
+
+  /* ================= 02b: ONE DOT'S VIEW (additive beams + regions + magnifier) ================= */
+  (function(){
+    const cv=document.getElementById('dotCanvas'); if(!cv) return;
+    let st;
+    // green covers the left and touches the top; blue top-right; red bottom-right (clockwise green, blue, red)
+    const G={x:0.18,y:0.33,col:RGB.a,name:'Green'}, B={x:0.80,y:0.23,col:RGB.b,name:'Blue'}, R={x:0.74,y:0.78,col:RGB.c,name:'Red'};
+    const lamps=[G,B,R];
+    const dot={x:0.34,y:0.52};
+    const sBeam=0.05;
+    function shares(p){
+      const b=lamps.map(L=>Math.exp(-(((p.x-L.x)**2+(p.y-L.y)**2))/(2*sBeam)));
+      const tot=b[0]+b[1]+b[2]+1e-9; return b.map(v=>v/tot);
+    }
+    function init(){const h=Math.min(Math.max(cv.clientWidth*0.64,360),470);st=setupCanvas(cv,h);}
+    function draw(){
+      const {ctx,w,h}=st;
+      ctx.clearRect(0,0,w,h); ctx.fillStyle='#0c0a12'; ctx.fillRect(0,0,w,h);
+      // bright, wide additive beams so overlaps actually mix: green+blue = cyan, green+red = yellow, blue+red = magenta, all three = white
+      ctx.globalCompositeOperation='lighter';
+      for(const L of lamps){
+        const cx=L.x*w, cy=L.y*h, rad=0.74*Math.min(w,h);
+        const g=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+        g.addColorStop(0,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},1)`);
+        g.addColorStop(0.32,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},0.66)`);
+        g.addColorStop(0.66,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},0.24)`);
+        g.addColorStop(1,`rgba(${L.col[0]},${L.col[1]},${L.col[2]},0)`);
+        ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+      }
+      ctx.globalCompositeOperation='source-over';
+      // text with a dark outline so it reads on top of bright light
+      function label(text,x,y,align,size,col){
+        ctx.font=(size||12)+'px IBM Plex Mono'; ctx.textAlign=align||'left'; ctx.textBaseline='alphabetic';
+        ctx.lineWidth=3.2; ctx.strokeStyle='rgba(8,6,12,0.85)'; ctx.strokeText(text,x,y);
+        ctx.fillStyle=col||'rgba(244,239,230,0.96)'; ctx.fillText(text,x,y);
+      }
+      // lamp centres: small solid dots (no ring) so they look different from the examined dot
+      for(const L of lamps){ const cx=L.x*w, cy=L.y*h;
+        ctx.beginPath(); ctx.arc(cx,cy,4.5,0,6.28); ctx.fillStyle='#0c0a12'; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx,cy,3,0,6.28); ctx.fillStyle=`rgb(${L.col[0]},${L.col[1]},${L.col[2]})`; ctx.fill();
+      }
+      label('Center of Green lamp', G.x*w+11, G.y*h+4, 'left', 12.5);
+      label('Center of Blue lamp', B.x*w-11, B.y*h-9, 'right', 12.5);
+      label('Center of Red lamp', R.x*w-11, R.y*h+16, 'right', 12.5);
+      // the examined dot (no connecting beams; the magnifier shows the light it gets from each lamp)
+      const dx=dot.x*w, dy=dot.y*h, sh=shares(dot);
+      ctx.beginPath(); ctx.arc(dx,dy,15,0,6.28); ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(dx,dy,7,0,6.28); ctx.fillStyle='#fff'; ctx.fill();
+      label('the dot we are examining', dx+21, dy-13, 'left', 12, 'rgba(255,255,255,0.96)');
+      // magnifier in the bottom-left corner
+      const mr=Math.min(w,h)*0.16, mx=mr+22, my=h-mr-20;
+      ctx.beginPath(); ctx.moveTo(dx,dy); ctx.lineTo(mx+mr*0.72,my-mr*0.72); ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(mx,my,mr,0,6.28); ctx.fillStyle='#161320'; ctx.fill(); ctx.lineWidth=2.5; ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.stroke();
+      let a0=30*Math.PI/180;   // rotated 10 degrees back anticlockwise
+      sh.forEach((s,i)=>{ const a1=a0+s*6.2832; ctx.beginPath(); ctx.moveTo(mx,my); ctx.arc(mx,my,mr*0.62,a0,a1); ctx.closePath();
+        ctx.fillStyle=`rgb(${lamps[i].col[0]},${lamps[i].col[1]},${lamps[i].col[2]})`; ctx.fill(); a0=a1; });
+      label('the dot, magnified', mx, my+mr+16, 'center', 10.5, 'rgba(244,239,230,0.6)');
+      const order=[['Green',0],['Red',2],['Blue',1]];
+      const lx=mx+mr+16; let ly=my-18;
+      order.forEach(([name,idx])=>{ const pc=Math.round(sh[idx]*100);
+        ctx.beginPath(); ctx.arc(lx-8,ly,4,0,6.28); ctx.fillStyle=`rgb(${lamps[idx].col[0]},${lamps[idx].col[1]},${lamps[idx].col[2]})`; ctx.fill();
+        label(pc+'% '+name, lx, ly+4, 'left', 13); ly+=22; });
+    }
+    init(); draw();
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();draw();},160);});
+  })();
+
+  /* ================= 03: STRETCHED RULER ================= */
+  (function(){
+    const cv=document.getElementById('rulerCanvas'); if(!cv) return;
+    let st;
+    function init(){const h=Math.min(Math.max(cv.clientWidth*0.50,300),380);st=setupCanvas(cv,h);}
+    function draw(){
+      const {ctx,w,h}=st; ctx.clearRect(0,0,w,h);
+      const cx=w*0.44, cy=h*0.50;
+      const ang=-0.34, L=Math.min(w,h)*0.30, Sshort=L*0.30;
+      const W=(lx,ly)=>({x:cx+lx*Math.cos(ang)-ly*Math.sin(ang), y:cy+lx*Math.sin(ang)+ly*Math.cos(ang)});
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,L*2.4);
+      g.addColorStop(0,`rgba(${RGB.c[0]},${RGB.c[1]},${RGB.c[2]},0.16)`); g.addColorStop(1,`rgba(${RGB.c[0]},${RGB.c[1]},${RGB.c[2]},0)`);
+      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang);
+      for(let k=1;k<=3;k++){
+        ctx.beginPath(); ctx.ellipse(0,0,L*k,Sshort*k,0,0,6.28);
+        if(k===2){ctx.strokeStyle='rgba(200,66,31,0.85)'; ctx.lineWidth=2; ctx.setLineDash([]);}
+        else{ctx.strokeStyle='rgba(200,66,31,0.26)'; ctx.lineWidth=1.2; ctx.setLineDash([4,5]);}
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.strokeStyle='rgba(21,17,11,0.40)'; ctx.lineWidth=1.4; ctx.setLineDash([3,4]);
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(2*L,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-2*Sshort); ctx.stroke();
+      ctx.setLineDash([]);
+      function arrow(dx,dy,col){
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(dx,dy); ctx.strokeStyle=col; ctx.lineWidth=2.6; ctx.stroke();
+        const a=Math.atan2(dy,dx);
+        ctx.beginPath(); ctx.moveTo(dx,dy);
+        ctx.lineTo(dx-10*Math.cos(a-0.4),dy-10*Math.sin(a-0.4)); ctx.lineTo(dx-10*Math.cos(a+0.4),dy-10*Math.sin(a+0.4));
+        ctx.closePath(); ctx.fillStyle=col; ctx.fill();
+      }
+      arrow(L,0,COL.ink); arrow(0,-Sshort,COL.accent);
+      [[2*L,0],[0,-2*Sshort]].forEach(([px,py])=>{
+        ctx.beginPath(); ctx.arc(px,py,6,0,6.28); ctx.fillStyle=COL.ink; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=COL.bg; ctx.stroke();
+      });
+      ctx.beginPath(); ctx.arc(0,0,6,0,6.28); ctx.fillStyle=`rgb(${RGB.c[0]},${RGB.c[1]},${RGB.c[2]})`; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=COL.bg; ctx.stroke();
+      ctx.restore();
+      ctx.font='500 12px IBM Plex Mono, monospace';
+      const pL=W(2*L,0), pS=W(0,-2*Sshort), aL=W(L,0), aS=W(0,-Sshort);
+      ctx.fillStyle=COL.ink; ctx.textBaseline='middle';
+      ctx.textAlign='left';  ctx.fillText('2 units (further in cm)', pL.x+12, pL.y-13);
+      ctx.textAlign='right'; ctx.fillText('2 units (closer in cm)', pS.x-12, pS.y-13);
+      ctx.fillStyle=COL.ink3;
+      ctx.textAlign='left';  ctx.fillText('long axis · 1 unit', aL.x+12, aL.y+22);
+      ctx.textAlign='right'; ctx.fillText('short axis · 1 unit', aS.x-14, aS.y+4);
+      ctx.font='italic 14px Instrument Serif, serif'; ctx.fillStyle=COL.ink; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+      ctx.fillText('Both points sit on the same ring, equally at home, yet one is much farther in plain distance.', w*0.5, h-14);
+    }
+    init(); draw();
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();draw();},160);});
+  })();
+
+  /* ================= 05a: EM ANIMATION ================= */
+  (function(){
+    const cv=document.getElementById('emCanvas'); if(!cv) return;
+    let st, pts, est, prev, target, tween, iter, ll, playing=false, raf;
+    const K=3, COLS=[RGB.a,RGB.b,RGB.c];
+    function genData(){
+      const rng=mulberry32(2027);
+      const truth=[{x:0.30,y:0.38,S:[0.012,0.004,0.008],n:60},{x:0.66,y:0.34,S:[0.008,-0.003,0.013],n:55},{x:0.52,y:0.70,S:[0.016,0.001,0.009],n:65}];
+      pts=[];
+      truth.forEach(t=>{const e=eigen2(t.S);for(let i=0;i<t.n;i++){
+        const a=gauss(rng)*e.l1,b=gauss(rng)*e.l2,ca=Math.cos(e.angle),sa=Math.sin(e.angle);
+        pts.push({x:t.x+a*ca-b*sa, y:t.y+a*sa+b*ca});}});
+    }
+    function clone(a){return a.map(e=>({x:e.x,y:e.y,S:e.S.slice(),w:e.w}));}
+    function computeLL(p){let s=0;for(const q of pts){let m=0;for(const e of p)m+=e.w*mvpdf(q.x-e.x,q.y-e.y,e.S);s+=Math.log(m+1e-12);}return s;}
+    function initEst(){
+      const rng=mulberry32(11); est=[];
+      for(let k=0;k<K;k++) est.push({x:0.25+rng()*0.5,y:0.25+rng()*0.5,S:[0.05,0,0.05],w:1/K});
+      prev=clone(est); target=clone(est); tween=1; iter=0; ll=computeLL(est);
+    }
+    function emStep(){
+      const R=pts.map(p=>{let b=est.map(e=>e.w*mvpdf(p.x-e.x,p.y-e.y,e.S));let t=b[0]+b[1]+b[2]+1e-12;return b.map(x=>x/t);});
+      prev=clone(est); const next=[];
+      for(let k=0;k<K;k++){
+        let nk=0,mx=0,my=0;
+        for(let i=0;i<pts.length;i++){const r=R[i][k];nk+=r;mx+=r*pts[i].x;my+=r*pts[i].y;}
+        nk=Math.max(nk,1e-6); mx/=nk; my/=nk;
+        let s00=0,s01=0,s11=0;
+        for(let i=0;i<pts.length;i++){const r=R[i][k],dx=pts[i].x-mx,dy=pts[i].y-my;s00+=r*dx*dx;s01+=r*dx*dy;s11+=r*dy*dy;}
+        s00/=nk;s01/=nk;s11/=nk; s00=Math.max(s00,0.0016); s11=Math.max(s11,0.0016);
+        next.push({x:mx,y:my,S:[s00,s01,s11],w:nk/pts.length});
+      }
+      target=next; tween=0; iter++; est=clone(prev); ll=computeLL(target);
+      document.getElementById('emIter').textContent=iter; document.getElementById('emLL').textContent=ll.toFixed(1);
+    }
+    function lerpParams(t){
+      const e=t*t*(3-2*t);
+      for(let k=0;k<K;k++){
+        est[k].x=prev[k].x+(target[k].x-prev[k].x)*e; est[k].y=prev[k].y+(target[k].y-prev[k].y)*e;
+        for(let i=0;i<3;i++) est[k].S[i]=prev[k].S[i]+(target[k].S[i]-prev[k].S[i])*e;
+        est[k].w=prev[k].w+(target[k].w-prev[k].w)*e;
+      }
+    }
+    function draw(){
+      const {ctx,w,h}=st; ctx.clearRect(0,0,w,h); ctx.fillStyle=COL.bg2; ctx.fillRect(0,0,w,h);
+      for(const p of pts){
+        let b=est.map(e=>e.w*mvpdf(p.x-e.x,p.y-e.y,e.S));let t=b[0]+b[1]+b[2]+1e-12;
+        const r=[b[0]/t,b[1]/t,b[2]/t];
+        const cr=r[0]*RGB.a[0]+r[1]*RGB.b[0]+r[2]*RGB.c[0], cg=r[0]*RGB.a[1]+r[1]*RGB.b[1]+r[2]*RGB.c[1], cb=r[0]*RGB.a[2]+r[1]*RGB.b[2]+r[2]*RGB.c[2];
+        ctx.beginPath(); ctx.arc(p.x*w,p.y*h,3.1,0,6.28); ctx.fillStyle=`rgb(${cr|0},${cg|0},${cb|0})`; ctx.fill();
+      }
+      est.forEach((e,k)=>{
+        const cx=e.x*w, cy=e.y*h, col=COLS[k], stroke=`rgb(${col[0]},${col[1]},${col[2]})`;
+        // three rings (1, 2, 3 sigma), fading out, to show the glow is not fenced to a border
+        drawCov(ctx,cx,cy,e.S,w,h,stroke,2.2,0.95,1); drawCov(ctx,cx,cy,e.S,w,h,stroke,1.4,0.42,2); drawCov(ctx,cx,cy,e.S,w,h,stroke,1,0.16,3);
+        ctx.beginPath(); ctx.arc(cx,cy,6,0,6.28); ctx.fillStyle=stroke; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=COL.bg; ctx.stroke();
+      });
+    }
+    const emVisible=inView(cv);
+    function frame(){
+      if(emVisible()){
+        if(tween<1){tween=Math.min(1,tween+0.035); lerpParams(tween); draw();}
+        else if(playing){
+          let mv=0; for(let k=0;k<K;k++){mv+=Math.abs(target[k].x-prev[k].x)+Math.abs(target[k].y-prev[k].y);}
+          if(iter>0 && mv<0.0006){playing=false; document.getElementById('emPlay').textContent='Play';} else emStep();
+        }
+      }
+      raf=requestAnimationFrame(frame);
+    }
+    function init(){const hh=Math.min(Math.max(cv.clientWidth*0.56,320),460);st=setupCanvas(cv,hh);}
+    genData(); init(); initEst(); draw();
+    document.getElementById('emPlay').addEventListener('click',function(){playing=!playing; this.textContent=playing?'Pause':'Play'; if(playing && tween>=1) emStep();});
+    document.getElementById('emStep').addEventListener('click',()=>{playing=false;document.getElementById('emPlay').textContent='Play';if(tween>=1)emStep();});
+    document.getElementById('emReset').addEventListener('click',()=>{playing=false;document.getElementById('emPlay').textContent='Play';initEst();document.getElementById('emIter').textContent='0';document.getElementById('emLL').textContent='·';draw();});
+    frame();
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();draw();},160);});
+  })();
+
+  /* ================= 05b: TRAIL VETO ================= */
+  (function(){
+    const cv=document.getElementById('vetoCanvas'); if(!cv) return;
+    let st, trail=0, dir=1, playing=false, raf, hold=0;
+    // lamp A home + cluster (the trail), lamp C home cluster, one stray on the trail near C
+    const lampA={x:0.23,y:0.48};
+    const cHome={x:0.8033,y:0.73};   // exactly the cluster centroid, so the lamp lands on it at full veto
+    const cPts=[[0.77,0.69],[0.84,0.72],[0.80,0.78]];     // red cluster (tight, so the stray has leverage)
+    // six green trail dots in time order: a top row left to right, then a bottom row, with the stray between them
+    const green=[[0.13,0.40],[0.23,0.39],[0.33,0.41],[0.33,0.57],[0.23,0.58],[0.13,0.56]];
+    const stray={x:0.60,y:0.46}; // far from green, near red on raw distance
+    const sA=0.010, sC=0.011;     // brightness widths
+    function bri(p,lamp,s){const dx=p.x-lamp.x,dy=p.y-lamp.y;return Math.exp(-(dx*dx+dy*dy)/(2*s));}
+    function init(){const h=Math.min(Math.max(cv.clientWidth*0.52,320),440);st=setupCanvas(cv,h);}
+    function strayShares(trailStrength){
+      // geometry brightness toward A-home and C-home
+      const bA=bri(stray,lampA,sA), bC=bri(stray,cHome,sC);
+      // trail memory: neighbours are mood A, so A then C then A is unlikely -> damp C as trailStrength rises
+      const cDamp=1 - trailStrength;   // at full veto the red share hits 0, so the lamp returns all the way home
+      const ra=bA, rc=bC*cDamp; const tot=ra+rc+1e-9;
+      return {a:ra/tot, c:rc/tot};
+    }
+    function cLampCentre(trailStrength){
+      // red lamp sits at the weighted middle of everything that claims red:
+      // its own cluster (full red) plus the stray weighted by its red share
+      const sh=strayShares(trailStrength).c;
+      let wsum=0,mx=0,my=0;
+      cPts.forEach(p=>{wsum+=1;mx+=p[0];my+=p[1];});
+      mx+=sh*stray.x; my+=sh*stray.y; wsum+=sh;
+      return {x:mx/wsum, y:my/wsum};
+    }
+    function draw(ts){
+      const {ctx,w,h}=st; ctx.clearRect(0,0,w,h); ctx.fillStyle=COL.bg2; ctx.fillRect(0,0,w,h);
+      const Cc=cLampCentre(ts);
+      // glows
+      function glow(cx,cy,rgb,a){const g=ctx.createRadialGradient(cx,cy,0,cx,cy,0.30*Math.min(w,h));
+        g.addColorStop(0,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`); g.addColorStop(1,`rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`); ctx.fillStyle=g; ctx.fillRect(0,0,w,h);}
+      glow(lampA.x*w,lampA.y*h,RGB.a,0.16); glow(Cc.x*w,Cc.y*h,RGB.c,0.16);
+      // trail line through the A points in order, out to the stray, back
+      const seq=[green[0],green[1],green[2],[stray.x,stray.y],green[3],green[4],green[5]];
+      ctx.beginPath(); seq.forEach((p,i)=>{const x=p[0]*w,y=p[1]*h;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+      ctx.strokeStyle='rgba(21,17,11,0.18)'; ctx.lineWidth=1.5; ctx.stroke();
+      // points
+      function dot(x,y,rgb,rad){ctx.beginPath();ctx.arc(x*w,y*h,rad,0,6.28);ctx.fillStyle=`rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;ctx.fill();}
+      green.forEach(p=>dot(p[0],p[1],RGB.a,3.6));
+      cPts.forEach(p=>dot(p[0],p[1],RGB.c,3.6));
+      // stray colour = blend of A and C by its shares
+      const sh=strayShares(ts);
+      const sr=sh.a*RGB.a[0]+sh.c*RGB.c[0], sg=sh.a*RGB.a[1]+sh.c*RGB.c[1], sb=sh.a*RGB.a[2]+sh.c*RGB.c[2];
+      ctx.beginPath(); ctx.arc(stray.x*w,stray.y*h,6.5,0,6.28); ctx.fillStyle=`rgb(${sr|0},${sg|0},${sb|0})`; ctx.fill();
+      ctx.lineWidth=2; ctx.strokeStyle=COL.bg; ctx.stroke();
+      // red lamp centre (the thing that moves)
+      const cx=Cc.x*w, cy=Cc.y*h;
+      ctx.beginPath(); ctx.arc(cx,cy,9,0,6.28); ctx.fillStyle=`rgb(${RGB.c[0]},${RGB.c[1]},${RGB.c[2]})`; ctx.fill();
+      ctx.lineWidth=2.5; ctx.strokeStyle=COL.bg; ctx.stroke();
+      ctx.fillStyle=COL.bg; ctx.font='600 11px IBM Plex Mono'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('C',cx,cy);
+      // home marker (where C belongs)
+      ctx.beginPath(); ctx.arc(cHome.x*w,cHome.y*h,4,0,6.28); ctx.strokeStyle='rgba(200,66,31,0.5)'; ctx.lineWidth=1.4; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+      // sequence labels in time order, xn through xn+6, none overlapping
+      ctx.font='500 10px IBM Plex Mono'; ctx.fillStyle=COL.ink3; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+      ['xn','xn+1','xn+2'].forEach((lab,i)=>ctx.fillText(lab, green[i][0]*w, green[i][1]*h-11));
+      ['xn+4','xn+5','xn+6'].forEach((lab,i)=>ctx.fillText(lab, green[i+3][0]*w, green[i+3][1]*h+18));
+      // the stray is xn+3
+      ctx.font='500 11px IBM Plex Mono'; ctx.fillStyle=COL.ink; ctx.fillText('xn+3 · the stray', stray.x*w, stray.y*h-13);
+      const pct=Math.round(strayShares(ts).c*100);
+      ctx.fillStyle=COL.ink3; ctx.fillText(pct+'% red', stray.x*w, stray.y*h+20);
+    }
+    let t=0;
+    const vetoVisible=inView(cv);
+    function frame(){
+      if(vetoVisible()){
+        if(playing){
+          if(hold>0){hold--;}
+          else{ trail+=dir*0.006; if(trail>=1){trail=1;dir=-1;hold=110;} if(trail<=0){trail=0;dir=1;hold=110;} }
+        }
+        const ts=trail, e=ts*ts*(3-2*ts); draw(e);   // smoothstep so the lamp eases in and out instead of snapping
+        document.getElementById('vetoStatus').textContent = ts<0.04?'geometry only: the stray drags the red lamp out' : ts>0.96?'the Light Keeper vetoes it: red lamp stays home' : 'the Light Keeper is overruling the stray';
+      }
+      raf=requestAnimationFrame(frame);
+    }
+    function init2(){init(); draw(0);}
+    init2();
+    document.getElementById('vetoPlay').addEventListener('click',function(){playing=!playing;this.textContent=playing?'Pause':'Play';});
+    if(!REDUCED){playing=true;document.getElementById('vetoPlay').textContent='Pause';}
+    frame();
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();draw(trail);},160);});
+  })();
+
+  /* ================= 07: VITERBI ================= */
+  (function(){
+    const cv=document.getElementById('vitCanvas'); if(!cv) return;
+    let st, obs, states, T=20, means=[-1.05,0.0,1.1], esd=0.62;
+    const A=[[0.82,0.12,0.06],[0.14,0.72,0.14],[0.06,0.12,0.82]], PI=[0.34,0.33,0.33];
+    let delta, psi, path, step, phase, seedN=3, anim;
+    const COLS=[RGB.a,RGB.b,RGB.c];
+    function logp(o,k){const d=o-means[k];return -0.5*(d*d)/(esd*esd) - Math.log(esd*Math.sqrt(2*Math.PI));}
+    function gen(){
+      const rng=mulberry32(seedN); states=[]; obs=[];
+      let s=PI[0]>rng()?0:(rng()<0.5?1:2);
+      for(let t=0;t<T;t++){
+        if(t>0){const r=rng();let cum=0,ns=0;for(let k=0;k<3;k++){cum+=A[s][k];if(r<=cum){ns=k;break;}}s=ns;}
+        states.push(s); obs.push(means[s]+gauss(rng)*esd);
+      }
+      delta=Array.from({length:T},()=>[-1e9,-1e9,-1e9]); psi=Array.from({length:T},()=>[0,0,0]); path=new Array(T).fill(-1);
+      step=0; phase='fwd'; document.getElementById('vitStatus').textContent='forward sweep · column 0';
+    }
+    function fwdCol(t){
+      for(let k=0;k<3;k++){
+        if(t===0){delta[0][k]=Math.log(PI[k])+logp(obs[0],k);psi[0][k]=0;}
+        else{let best=-1e9,arg=0;for(let i=0;i<3;i++){const v=delta[t-1][i]+Math.log(A[i][k]);if(v>best){best=v;arg=i;}}delta[t][k]=best+logp(obs[t],k);psi[t][k]=arg;}
+      }
+    }
+    function backtrace(){let best=-1e9,arg=0;for(let k=0;k<3;k++)if(delta[T-1][k]>best){best=delta[T-1][k];arg=k;}path[T-1]=arg;for(let t=T-2;t>=0;t--)path[t]=psi[t+1][path[t+1]];}
+    function init(){const h=Math.min(Math.max(cv.clientWidth*0.5,330),430);st=setupCanvas(cv,h);}
+    function draw(){
+      const {ctx,w,h}=st; ctx.clearRect(0,0,w,h);
+      const padL=40,padR=18,padT=14, obsH=h*0.30, trY=h*0.42, trH=h*0.52;
+      const x=t=> padL + (w-padL-padR)*(t/(T-1));
+      const rows=[trY+trH*0.16, trY+trH*0.5, trY+trH*0.84];
+      const omin=-2.3,omax=2.3, oy=v=>padT+(obsH-padT)*(1-(v-omin)/(omax-omin));
+      ctx.strokeStyle='rgba(21,17,11,0.14)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padL,oy(0)); ctx.lineTo(w-padR,oy(0)); ctx.stroke();
+      ctx.beginPath(); obs.forEach((o,t)=>{const px=x(t),py=oy(o);t?ctx.lineTo(px,py):ctx.moveTo(px,py);}); ctx.strokeStyle='rgba(21,17,11,0.35)'; ctx.lineWidth=1.4; ctx.stroke();
+      obs.forEach((o,t)=>{const px=x(t),py=oy(o);const revealed=(phase==='fwd'&&t<=step)||phase!=='fwd';
+        ctx.beginPath(); ctx.arc(px,py,3.4,0,6.28); const c=COLS[states[t]];
+        ctx.fillStyle=revealed?`rgb(${c[0]},${c[1]},${c[2]})`:'rgba(21,17,11,0.18)'; ctx.fill();});
+      ctx.font='500 9.5px IBM Plex Mono'; ctx.fillStyle=COL.ink3; ctx.textAlign='left'; ctx.fillText('readings', padL, padT+4);
+      for(let t=0;t<T;t++){const lit=(phase==='fwd'&&t<=step)||(phase!=='fwd');
+        for(let k=0;k<3;k++){const px=x(t),py=rows[k];
+          if(t>0 && lit){ctx.beginPath(); ctx.moveTo(x(t-1),rows[psi[t][k]]); ctx.lineTo(px,py); ctx.strokeStyle='rgba(21,17,11,0.10)'; ctx.lineWidth=1; ctx.stroke();}}}
+      if(phase==='done'||phase==='back'){ctx.beginPath();
+        for(let t=0;t<T;t++){if(path[t]<0)continue;const px=x(t),py=rows[path[t]];t&&path[t-1]>=0?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+        ctx.strokeStyle=COL.accent; ctx.lineWidth=2.6; ctx.lineJoin='round'; ctx.stroke();}
+      for(let t=0;t<T;t++){const lit=(phase==='fwd'&&t<=step)||(phase!=='fwd');
+        for(let k=0;k<3;k++){const px=x(t),py=rows[k]; const onPath=(path[t]===k)&&(phase==='back'||phase==='done');
+          ctx.beginPath(); ctx.arc(px,py,onPath?6:4.2,0,6.28); const c=COLS[k];
+          if(lit){ctx.fillStyle=`rgb(${c[0]},${c[1]},${c[2]})`; ctx.globalAlpha=onPath?1:0.55;} else {ctx.fillStyle='rgba(21,17,11,0.12)'; ctx.globalAlpha=1;}
+          ctx.fill(); ctx.globalAlpha=1; if(onPath){ctx.lineWidth=2;ctx.strokeStyle=COL.bg;ctx.stroke();}}}
+      ctx.font='500 9.5px IBM Plex Mono'; ctx.fillStyle=COL.ink3; ctx.textAlign='right';
+      ['mood A','mood B','mood C'].forEach((lab,k)=>{ctx.fillText(lab,padL-6,rows[k]+3);});
+    }
+    function advance(){
+      if(phase==='fwd'){fwdCol(step);
+        if(step>=T-1){phase='back'; step=0; backtrace(); document.getElementById('vitStatus').textContent='backward trace · committing the path';}
+        else {step++; document.getElementById('vitStatus').textContent='forward sweep · column '+step;}
+      } else if(phase==='back'){
+        if(step>=T-1){phase='done'; document.getElementById('vitStatus').textContent='done · brightest path locked';} else step++;
+      }
+      draw();
+    }
+    function run(){ if(anim)clearInterval(anim); anim=setInterval(()=>{ if(phase==='done'){clearInterval(anim);return;} advance(); }, REDUCED?260:130); }
+    init(); gen(); fwdCol(0); draw();
+    document.getElementById('vitPlay').addEventListener('click',run);
+    document.getElementById('vitStep').addEventListener('click',()=>{if(anim)clearInterval(anim);advance();});
+    document.getElementById('vitReset').addEventListener('click',()=>{if(anim)clearInterval(anim);seedN=(seedN*7+13)%1000;gen();fwdCol(0);draw();});
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();draw();},160);});
+  })();
+
+  /* ================= HURST (inside modal) ================= */
+  const Hurst=(function(){
+    const cv=document.getElementById('hurstCanvas'); if(!cv) return {open(){}};
+    let st, base, N=129, levels=7, inited=false;
+    function buildBase(){const rng=mulberry32(808); base=[];
+      for(let l=0;l<=levels;l++){const arr=[];const count=Math.pow(2,l);for(let i=0;i<=count;i++)arr.push(gauss(rng));base.push(arr);}}
+    function series(H){
+      const arr=new Float64Array(N).fill(0); arr[0]=0; arr[N-1]=0; let range=1.0;
+      for(let l=1;l<=levels;l++){const seg=Math.pow(2,l), step=(N-1)/seg, scale=Math.pow(0.5,l*H)*range;
+        for(let i=1;i<seg;i+=2){const idx=Math.round(i*step), lo=Math.round((i-1)*step), hi=Math.round((i+1)*step);
+          arr[idx]=0.5*(arr[lo]+arr[hi]) + base[l][(i-1)/2|0]*scale*1.1;}}
+      return arr;
+    }
+    function size(){const h=Math.min(Math.max(cv.clientWidth*0.42,220),320);st=setupCanvas(cv,h);}
+    function draw(H){
+      const {ctx,w,h}=st; ctx.clearRect(0,0,w,h); ctx.fillStyle=CSS.getPropertyValue('--bg-3').trim(); ctx.fillRect(0,0,w,h);
+      const s=series(H); let mn=Infinity,mx=-Infinity; for(const v of s){if(v<mn)mn=v;if(v>mx)mx=v;}
+      const pad=22, midV=(mn+mx)/2, span=Math.max(mx-mn,0.4)*1.25;
+      const X=i=>pad+(w-2*pad)*(i/(N-1)), Y=v=>h/2-(v-midV)/span*(h-2*pad);
+      ctx.beginPath(); ctx.moveTo(pad,Y(midV)); ctx.lineTo(w-pad,Y(midV)); ctx.strokeStyle='rgba(21,17,11,0.18)'; ctx.setLineDash([4,5]); ctx.lineWidth=1; ctx.stroke(); ctx.setLineDash([]);
+      let col = H<0.45? RGB.a : (H>0.55? RGB.c : RGB.b);
+      ctx.beginPath(); ctx.moveTo(X(0),Y(s[0])); for(let i=1;i<N;i++)ctx.lineTo(X(i),Y(s[i])); ctx.lineTo(X(N-1),h); ctx.lineTo(X(0),h); ctx.closePath();
+      const grad=ctx.createLinearGradient(0,0,0,h); grad.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0.16)`); grad.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`); ctx.fillStyle=grad; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(X(0),Y(s[0])); for(let i=1;i<N;i++)ctx.lineTo(X(i),Y(s[i])); ctx.strokeStyle=`rgb(${col[0]},${col[1]},${col[2]})`; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+    }
+    const slider=document.getElementById('hurstSlider'), val=document.getElementById('hurstVal'), word=document.getElementById('hurstWord');
+    function update(){const H=slider.value/100; val.textContent=H.toFixed(2);
+      let txt,cls; if(H<0.45){txt='mean-reverting (snaps back)';cls='greenword';} else if(H>0.55){txt='trending (keeps going)';cls='redword';} else {txt='random walk (no pull)';cls='blueword';}
+      word.innerHTML='<span class="'+cls+'">'+txt+'</span>'; draw(H);}
+    function open(){ if(!inited){buildBase(); inited=true;} size(); update(); }
+    slider.addEventListener('input',update);
+    let to; window.addEventListener('resize',()=>{if(!inited)return;clearTimeout(to);to=setTimeout(()=>{size();update();},160);});
+    return {open};
+  })();
+
+  /* ================= MODAL wiring ================= */
+  (function(){
+    const back=document.getElementById('hurstModal'), trig=document.getElementById('hurstTrigger'), close=document.getElementById('hurstClose');
+    if(!back||!trig) return;
+    function openModal(){back.classList.add('open'); document.body.style.overflow='hidden'; requestAnimationFrame(()=>Hurst.open());}
+    function closeModal(){back.classList.remove('open'); document.body.style.overflow='';}
+    trig.addEventListener('click',openModal);
+    close.addEventListener('click',closeModal);
+    back.addEventListener('click',e=>{if(e.target===back)closeModal();});
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&back.classList.contains('open'))closeModal();});
+  })();
+
+  /* ================= scroll: reveal, progress, active nav ================= */
+  (function(){
+    const prog=document.getElementById('progress');
+    function onScroll(){const sc=window.scrollY||document.documentElement.scrollTop; const dh=document.documentElement.scrollHeight-window.innerHeight; prog.style.width=(dh>0?(sc/dh*100):0)+'%';}
+    window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+    const items=[...document.querySelectorAll('.reveal')];
+    if('IntersectionObserver' in window && !REDUCED){
+      const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in'); io.unobserve(e.target);}});},{threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      document.querySelectorAll('section').forEach(sec=>{sec.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=Math.min(i*60,260)+'ms';});});
+      items.forEach(el=>io.observe(el));
+    } else { items.forEach(el=>el.classList.add('in')); }
+    const links=[...document.querySelectorAll('#toc a')], map={}; links.forEach(a=>map[a.dataset.sec]=a);
+    const secs=[...document.querySelectorAll('section[id], header[id]')];
+    if('IntersectionObserver' in window){
+      const io2=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active')); const a=map[e.target.id]; if(a)a.classList.add('active');}});},{threshold:0.01, rootMargin:'-45% 0px -50% 0px'});
+      secs.forEach(s=>io2.observe(s));
+    }
+  })();
+})();
+</script>
+</body>
+</html>

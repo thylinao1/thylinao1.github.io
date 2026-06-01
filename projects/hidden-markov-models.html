@@ -123,6 +123,7 @@ input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; 
 .legend i{width:11px; height:11px; border-radius:50%; display:inline-block;}
 
 .pull{border-left:2px solid var(--accent); padding:4px 0 4px 22px; margin:30px 0; font-family:var(--font-display); font-size:clamp(22px,2.7vw,27px); line-height:1.34; color:var(--ink);}
+.redline{border-left:2px solid var(--accent); padding-left:22px;}
 .note{background:var(--bg-2); border:1px solid var(--rule); border-left:2px solid var(--accent-soft); border-radius:10px; padding:18px 22px; margin:26px 0; font-size:18px; line-height:1.56;}
 .note .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;}
 .note p:last-child{margin-bottom:0;}
@@ -190,7 +191,7 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
 
 <nav id="toc" aria-label="Sections">
   <a href="#hero" data-sec="hero"><span class="dot"></span><span class="lbl">Top</span></a>
-  <a href="#intro" data-sec="intro"><span class="dot"></span><span class="lbl">Why a picture</span></a>
+  <a href="#intro" data-sec="intro"><span class="dot"></span><span class="lbl">Intuition over algebra</span></a>
   <a href="#lamps" data-sec="lamps"><span class="dot"></span><span class="lbl">Lamps, not fences</span></a>
   <a href="#estep" data-sec="estep"><span class="dot"></span><span class="lbl">Colouring the dots</span></a>
   <a href="#mstep" data-sec="mstep"><span class="dot"></span><span class="lbl">Moving the lamps</span></a>
@@ -221,16 +222,14 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
 <main>
 <div class="wrap">
 
-<!-- ============ 01 · WHY A PICTURE ============ -->
+<!-- ============ 01 · INTUITION OVER ALGEBRA ============ -->
 <section id="intro">
   <div class="col">
-    <span class="eyebrow reveal"><span class="num">01</span> · Why a picture</span>
-    <h2 class="reveal">The model was fine. The fitting was the wall.</h2>
-    <p class="lead reveal">When I was learning hidden Markov models, the model itself never gave me much trouble. What I kept bouncing off was the algorithm that <em>fits one to data</em>: <strong>EM</strong>.</p>
-    <p class="reveal">Every write-up checked out line by line. The algebra was correct while someone walked me through it. Then I would close the page and the meaning would evaporate. I could reproduce the steps without ever seeing what they were <em>doing</em> to anything.</p>
-    <p class="reveal">That gap is the whole reason this exists. Some ideas only click once you can <em>watch</em> them, and EM is one of them. Drawn the right way, the equations stop being a wall and turn into a description of something you can actually <em>see</em> happen on a plane.</p>
+    <span class="eyebrow reveal"><span class="num">01</span> · Intuition over algebra</span>
+    <h2 class="reveal">The algebra was fine. The picture was missing.</h2>
+    <p class="lead reveal">When I was learning hidden Markov models, the model itself was understandable to me, and so was the algebra behind it: how you actually arrive at the answer. But the picture never clicked. The geometry, the image of the thing, never formed in my head, so I had the steps without ever having an intuitive feel for what was going on. And that intuition is, to me, the part that matters most when you are trying to understand a concept.</p>
+    <p class="reveal">It is not that the math was hard. Every write-up checked out line by line; it was the meaning that evaporated the moment I closed the page, leaving me with steps I could repeat but not <em>see</em>. That gap is the whole reason this exists: some ideas only click once you can watch them, and EM is one of them. Drawn the right way, the equations get their meaning and become something you can watch happen on a plane, or visualise in your own head.</p>
     <p class="reveal">The first time I had to build one of these for real was during my quant research internship at a crypto trading startup in London. (Quant research just means using math and code to make bets on markets.) I used a hidden Markov model to guess which "state" the market was in each hour: drifting quietly, going nowhere, or running hard in one direction. None of that is special to markets, though. The same machine reads speech, tags stretches of DNA, tracks where a robot thinks it is, and labels messy handwriting. Anywhere a hidden situation changes slowly and leaks clues as it goes, this is the tool people reach for.</p>
-    <p class="reveal">Here is the situation it answers. Something underneath you changes over time, and you <em>never get to see it</em>. You only see what it gives off, step after step. The job is to run it backwards: from the clues alone, work out which hidden states were probably active, and how those states tend to hand off to one another.</p>
     <p class="reveal">A model like this has two moving parts. One says what each hidden state <em>looks like</em>: the kind of readings that state tends to produce. The other says how the states <em>follow</em> one another: whether calm tends to stay calm, whether a streak tends to keep going. The model begins knowing neither, and EM is how it learns both at once from nothing but the unlabeled readings.</p>
     <p class="reveal">Most courses hand you the update equations and trust the symbols to carry the meaning. They never did for me. What follows rebuilds the whole thing as a picture you can hold.</p>
   </div>
@@ -247,8 +246,7 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
     <p class="reveal">So imagine there are three different modes the world can be in, and let us call them <strong>lamps</strong> for now. What we are trying to do is sort the hours, every single dot we have, into these lamps. Each lamp sits at one spot, the most typical reading for its mood, and throws a coloured glow outward. There are three of them here, <span class="greenword">green</span>, <span class="blueword">blue</span>, and <span class="redword">red</span>, and the same three colours show up in every diagram below.</p>
     <p class="reveal">The tempting first picture is a map chopped into territories: this patch belongs to one mood, that patch to another, and a dot simply lands inside one of them, sort of like fences. Some of you might even think of it as <strong>k-means clustering</strong>, where every point is handed to its nearest centre. It is easy to draw. It is also wrong, and the wrongness turns out to be the entire mechanism, so it is worth changing the approach.</p>
     <p class="reveal">A mood does not own a patch. A mood is a lamp, brightest at its centre and fading as you move out (but never going fully dark anywhere; look at the diagram below and you can watch the glow thin toward the edges without ever stopping). Green's glow out at the far corner is faint. It is still not zero. Every lamp reaches every point on the plane, just with wildly different brightness.</p>
-    <p class="reveal">So a dot is never simply "green and not red." It is lit by all three lamps at once, brightly by the near one and faintly by the far ones. The honest question is not <em>which region</em> it sits in but <em>what mix of light</em> it catches: this dot is 80% green light, 15% red, 5% blue. Those three shares always add up to 100%, and that mix, how much of each lamp's light a dot is catching, is the thing the whole algorithm is really about.</p>
-    <div class="pull reveal">If the fences were real, every dot would have one true mood and there would be nothing left to figure out. The only reason inference exists at all is that the fences do not. A faint reach is still a reach, and a faint claim is still a claim.</div>
+    <p class="reveal redline">So a dot is never simply "green and not red." It is lit by all three lamps at once, brightly by the near one and faintly by the far ones. The honest question is not <em>which region</em> it sits in but <em>what mix of light</em> it catches: this dot is 80% green light, 15% red, 5% blue. Those three shares always add up to 100%, and that mix, how much of each lamp's light a dot is catching, is the thing the whole algorithm is really about.</p>
     <p class="reveal">Drag the lamps below. The default view shows the truth: soft overlapping glows that blend where they meet, mixing into new colours wherever two beams cross. Turn a lamp's weight up and watch its territory actually grow and pull in dots near the edge, not just glow brighter in the same spot. Flip to <span class="kbd">fences</span> to see the seductive lie, hard borders with every dot handed to one owner, and notice how brittle the seams are.</p>
 
     <figure class="figure-wide reveal">
@@ -435,7 +433,7 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
       <figcaption><b>The single most likely path.</b> The forward sweep scores every node, the backward trace commits to one mood per hour. Because the path is chosen as a whole, it sometimes overrules the locally favourite mood at a given hour to keep the chain plausible, absorbing a stray reading into its neighbours' mood rather than spawning a one-hour flicker the grid would call near impossible.</figcaption>
     </figure>
 
-    <p class="reveal">One thing I glossed, worth flagging. The single most likely path is not always what you want, because committing to one mood per hour quietly re-imposes the hard borders we spent all this time tearing down. Sometimes the full mix is the point: a dot that is 60% red is also 20% blue and 20% green, and those minorities can carry real weight. Keeping the whole mix instead of collapsing it has its own name, marginal or posterior decoding, and there are jobs where that is the right call. In finance, for instance, a risk measure like value at risk cares about the 20% chance, not just the headline mood, because that tail is exactly what hurts you. Same data, different question: reach for the single best path when you need one clean story, and for the full mix when the small probabilities are what you are actually after.</p>
+    <p class="reveal">One caveat I glossed: the single most likely path is not always what you want, because committing to one mood per hour quietly re-imposes the hard borders. Sometimes the full mix matters: a dot that is 60% red is also 20% blue and 20% green, and keeping that whole mix (marginal, or posterior, decoding) is the right call when the small probabilities are the point, as in a risk measure that cares about the tail. Same data, different question.</p>
   </div>
 </section>
 

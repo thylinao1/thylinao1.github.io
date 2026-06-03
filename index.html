@@ -328,6 +328,83 @@
     .award, .award:nth-child(3n){border-right:none}
   }
 
+  /* featured research card (compact banner) */
+  .research-feature{padding:28px 0 4px; border-top:none}
+  .feature-card{
+    display:block; text-decoration:none; color:var(--ink);
+    border:1px solid var(--rule-strong); border-radius:12px;
+    background:linear-gradient(180deg, var(--bg-2), var(--bg));
+    padding:12px 26px; position:relative; overflow:hidden;
+    transition:border-color .18s, box-shadow .18s, transform .18s;
+  }
+  .feature-card:hover{
+    border-color:var(--accent); color:var(--ink);
+    box-shadow:0 12px 34px rgba(21,17,11,.10); transform:translateY(-2px);
+  }
+  .feature-card:focus{outline:none}
+  .feature-card:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
+  .feature-tag{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-mono); font-size:13px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--good); font-weight:600; margin-bottom:6px;
+  }
+  .feature-tag .dot{
+    width:8px; height:8px; border-radius:50%; background:var(--good);
+    box-shadow:0 0 0 4px rgba(31,107,58,.14);
+  }
+  .feature-grid{display:flex; align-items:center; gap:18px}
+  .feature-main{flex:0 1 560px; min-width:0}
+  .feature-title{font-size:clamp(20px, 2.3vw, 27px); margin:0 0 6px; line-height:1.08}
+  .feature-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0 0 7px; max-width:48em}
+  .feature-cta{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
+    color:var(--accent); font-weight:600;
+  }
+  .feature-cta .arrow{transition:transform .18s}
+  .feature-card:hover .feature-cta .arrow{transform:translateX(4px)}
+  .feature-aside{flex:1 1 0; display:flex; justify-content:center; align-items:center}
+  .feature-aside svg{width:100%; height:auto; max-width:270px}
+  @media(max-width:680px){
+    .feature-card{padding:16px 18px}
+    .feature-grid{flex-direction:column; align-items:flex-start; gap:14px}
+    .feature-aside{display:none}
+  }
+
+  /* blog */
+  .blog-list{display:flex; flex-direction:column}
+  .blog-entry{
+    display:grid; grid-template-columns:200px 1fr; gap:36px;
+    padding:24px 0; border-top:1px solid var(--rule);
+    text-decoration:none; color:var(--ink);
+  }
+  .blog-entry:first-child{border-top:none}
+  .exp-meta .type.essay{border:1px solid var(--rule-strong); color:var(--ink-2)}
+  .blog-title{
+    font-family:var(--font-display); font-size:clamp(26px, 3vw, 36px);
+    font-weight:400; line-height:1.1; margin:0 0 6px; color:var(--ink);
+    text-decoration:underline; text-decoration-thickness:1px;
+    text-underline-offset:5px; text-decoration-color:var(--rule-strong);
+    transition:color .15s, text-decoration-color .15s;
+  }
+  .blog-entry:hover .blog-title,
+  .blog-entry:focus-visible .blog-title{color:var(--accent); text-decoration-color:var(--accent)}
+  .blog-body .sub{
+    font-family:var(--font-body); color:var(--ink-2);
+    font-size:15px; margin:0 0 14px;
+  }
+  .blog-excerpt{color:var(--ink-2); line-height:1.6; margin:0 0 14px; max-width:46em}
+  .blog-read{
+    display:inline-flex; align-items:center; gap:7px; margin-top:4px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
+    color:var(--accent); font-weight:600;
+  }
+  .blog-read .arrow{transition:transform .15s}
+  .blog-entry:hover .blog-read .arrow{transform:translateX(4px)}
+  .blog-entry:focus{outline:none}
+  .blog-entry:focus-visible{outline:2px solid var(--accent); outline-offset:6px; border-radius:4px}
+  @media(max-width:760px){ .blog-entry{grid-template-columns:1fr; gap:14px} }
+
   /* education */
   .edu-list{display:flex; flex-direction:column; gap:0}
   .edu{
@@ -436,6 +513,7 @@
       <a href="#awards">Distinctions</a>
       <a href="#internships">Internships</a>
       <a href="#projects">Projects</a>
+      <a href="#blog">Blog</a>
       <a href="#education">Education</a>
       <a href="#skills">Skills</a>
     </nav>
@@ -468,23 +546,67 @@
         <h1 class="display display-l">Maksim Silchenko</h1>
         <div class="hero-bio">
           <p>
-            I&rsquo;m an MSc student in NUS School of Computing (Business Analytics),
-            specializing in Statistics, and a winner of the Jane Street Quantitative
-            Reasoning Competition and the National Mathematics Olympiad
-            (top 0.015% nationally).
+            I&rsquo;m an MSc student at NUS School of Computing (Business Analytics),
+            specializing in Statistics. BlueDot AI Safety Grant recipient for
+            chain-of-thought interpretability (Jun&nbsp;&rsquo;26), Jane Street
+            Quantitative Reasoning Competition winner (Feb&nbsp;&rsquo;26), and
+            National Mathematics Olympiad winner (top 0.015% nationally).
           </p>
           <p>
-            My work sits at the intersection of causal inference, experimental
-            design (A/B testing), and robust machine learning systems, translating
-            complex models into executive-level strategic decisions. At The TCM
-            Group I built a randomised-controlled-trial framework now adopted as the
-            firm&rsquo;s standard for measuring training impact; on a 97k-order
-            marketplace dataset, a hierarchical Bayesian model surfaced
-            category-level effects a pooled A/B test had missed.
+            My work sits at the intersection of causal inference and production
+            machine learning systems, translating complex models into strategic
+            decisions. My past experience includes quantitative research at Orbuc,
+            a London-based crypto startup, where I built statistical-arbitrage
+            strategies and an LLM news agent; and a data &amp; analytics consultancy at
+            The TCM Group, where I introduced statistical methods for evaluating training
+            outcomes and built an LLM agent to score and automate that evaluation.
+            Two recent projects: an A/B-test guardrail that decides whether an experiment
+            is safe to act on, and a hierarchical Bayesian difference-in-differences on
+            Olist&rsquo;s Brazilian e-commerce data that reversed a free-shipping policy&rsquo;s
+            apparent effect once confounding was removed.
           </p>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ FEATURED RESEARCH ============ -->
+<section id="research" class="s research-feature">
+  <div class="wrap">
+    <a class="feature-card" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">
+      <div class="feature-tag"><span class="dot"></span>Funded AI-Safety Research (ongoing) · BlueDot Impact Rapid Grant</div>
+      <div class="feature-grid">
+        <div class="feature-main">
+          <h2 class="display feature-title">Does a language model&rsquo;s chain-of-thought <span style="font-style:normal; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px">actually cause</span> its answer?</h2>
+          <p class="feature-desc">
+            A Bayesian causal-mediation test of whether an LLM&rsquo;s stated reasoning truly drives
+            its answer or is just post-hoc, with calibrated uncertainty for scalable oversight.
+          </p>
+          <span class="feature-cta">Explore the funded AI-safety research <span class="arrow">&rarr;</span></span>
+        </div>
+        <div class="feature-aside">
+          <svg viewBox="0 0 380 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
+            <defs>
+              <marker id="ah-acc" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
+              <marker id="ah-mut" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
+            </defs>
+            <path d="M48 92 Q190 122 332 92" fill="none" stroke="#968d77" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#ah-mut)"/>
+            <path d="M46 72 L165 46" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
+            <path d="M215 46 L334 72" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
+            <circle cx="30" cy="84" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
+            <circle cx="190" cy="34" r="22" fill="#c8421f"/>
+            <circle cx="350" cy="84" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
+            <text x="30" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
+            <text x="190" y="41" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
+            <text x="350" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
+            <text x="30" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">PROMPT</text>
+            <text x="190" y="11" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">CoT</text>
+            <text x="350" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">ANSWER</text>
+          </svg>
+        </div>
+      </div>
+    </a>
   </div>
 </section>
 
@@ -496,33 +618,33 @@
     <div class="awards">
       <div class="award">
         <div class="ord">01</div>
+        <h4>BlueDot Impact Rapid Grant · AI Safety</h4>
+        <p>Awarded a <a href="https://bluedot.org/programs/rapid-grants" target="_blank" rel="noopener">BlueDot Impact Rapid Grant</a> (Jun&nbsp;&rsquo;26) to fund <a href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Bayesian Causal Faithfulness for LLM Chain-of-Thought</a>: calibrated uncertainty for whether a model&rsquo;s reasoning is faithful or post-hoc.</p>
+      </div>
+      <div class="award">
+        <div class="ord">02</div>
         <h4>MIPT National Mathematics Olympiad</h4>
         <p>Winner of the Russian National Mathematics Olympiad (Moscow Institute of Physics &amp; Technology), top 0.015% nationally.</p>
       </div>
       <div class="award">
-        <div class="ord">02</div>
+        <div class="ord">03</div>
         <h4>Jane Street Quantitative-Reasoning Puzzle</h4>
         <p>Winner, February 2026 monthly quantitative-reasoning and probability competition run by Jane Street&rsquo;s research team.</p>
       </div>
       <div class="award">
-        <div class="ord">03</div>
+        <div class="ord">04</div>
         <h4>Extracurricular Coursework</h4>
         <p>Stanford CS229 / CS230 · MIT RES.6-012 Probability · Imperial Mathematics for ML · IBM Data Science Specialization · McElreath&rsquo;s Statistical Rethinking (2026).</p>
       </div>
       <div class="award">
-        <div class="ord">04</div>
+        <div class="ord">05</div>
         <h4>Top of Cohort · Bayes Business School</h4>
         <p>Top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>; ESADE <em>Mergers &amp; Acquisitions</em>.</p>
       </div>
       <div class="award">
-        <div class="ord">05</div>
-        <h4>Full Scholarships</h4>
-        <p>Full Scholarship at the National University of Singapore (Spring 2025) and ESADE Business School (Autumn 2024) exchanges.</p>
-      </div>
-      <div class="award">
         <div class="ord">06</div>
-        <h4>BUPT Agentic AI Scholarship</h4>
-        <p>Fully-funded scholarship for Agentic AI Bootcamp by the Beijing University of Posts &amp; Telecommunications (Jun&ndash;Jul 2026).</p>
+        <h4>Full Scholarships</h4>
+        <p>Full Scholarships at the National University of Singapore (Spring 2025) and ESADE Business School (Autumn 2024) exchanges, plus a fully-funded scholarship for the Beijing University of Posts &amp; Telecommunications Agentic AI Bootcamp (Jun&ndash;Jul 2026).</p>
       </div>
     </div>
   </div>
@@ -797,10 +919,48 @@
   </div>
 </section>
 
-<!-- ============ EDUCATION ============ -->
-<section id="education" class="s">
+<!-- ============ BLOG ============ -->
+<section id="blog" class="s">
   <div class="wrap">
-    <div class="section-num">§ 03 · Education</div>
+    <div class="section-num">§ 03 · Blog</div>
+
+    <div class="blog-list">
+
+      <!-- Hidden Markov Models / EM -->
+      <a class="blog-entry" href="https://thylinao1.github.io/projects/hidden-markov-models.html" target="_blank" rel="noopener">
+        <div class="exp-meta">
+          <span class="date">2026 · ~16 min read</span>
+          <span class="type essay">Essay</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">Lamps in the Dark</h3>
+          <p class="sub">A geometric reading of Hidden Markov Models &amp; the EM algorithm</p>
+          <p class="blog-excerpt">
+            When I was learning hidden Markov models, I couldn&rsquo;t find an explanation that
+            really showed how they work. This piece builds a geometric, intuitive picture of
+            hidden Markov models, along with the EM steps, forward-backward, Baum-Welch, and the
+            Viterbi algorithm, and even how they link to PCA. Interactive diagrams and animations
+            throughout aim to make the picture stick in your head.
+          </p>
+          <div class="tags">
+            <span class="tag">Hidden Markov Models</span>
+            <span class="tag">EM Algorithm</span>
+            <span class="tag">Baum-Welch</span>
+            <span class="tag">Forward-Backward</span>
+            <span class="tag">Viterbi</span>
+          </div>
+          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ EDUCATION ============ -->
+<section id="education" class="s alt">
+  <div class="wrap">
+    <div class="section-num">§ 04 · Education</div>
 
     <div class="edu-list">
       <div class="edu">
@@ -846,9 +1006,9 @@
 </section>
 
 <!-- ============ SKILLS (moved to bottom) ============ -->
-<section id="skills" class="s alt">
+<section id="skills" class="s">
   <div class="wrap">
-    <div class="section-num">§ 04 · Skills</div>
+    <div class="section-num">§ 05 · Skills</div>
 
     <div class="skills-grid">
       <div class="skill-group">
@@ -941,6 +1101,7 @@
     <a href="#awards">Distinctions</a>
     <a href="#internships">Internships</a>
     <a href="#projects">Projects</a>
+    <a href="#blog">Blog</a>
     <a href="#education">Education</a>
     <a href="#skills">Skills</a>
   </div>

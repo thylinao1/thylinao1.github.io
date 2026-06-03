@@ -353,7 +353,7 @@
     box-shadow:0 0 0 4px rgba(31,107,58,.14);
   }
   .feature-grid{display:flex; align-items:center; gap:18px}
-  .feature-main{flex:0 1 560px; min-width:0}
+  .feature-main{flex:0 1 670px; min-width:0}
   .feature-title{font-size:clamp(20px, 2.3vw, 27px); margin:0 0 6px; line-height:1.08}
   .feature-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0 0 7px; max-width:48em}
   .feature-cta{
@@ -363,8 +363,8 @@
   }
   .feature-cta .arrow{transition:transform .18s}
   .feature-card:hover .feature-cta .arrow{transform:translateX(4px)}
-  .feature-aside{flex:1 1 0; display:flex; justify-content:center; align-items:center}
-  .feature-aside svg{width:100%; height:auto; max-width:270px}
+  .feature-aside{flex:1 1 0; display:flex; justify-content:flex-end; align-items:center; transform:translateY(-16px)}
+  .feature-aside svg{width:100%; height:auto; max-width:351px}
   @media(max-width:680px){
     .feature-card{padding:16px 18px}
     .feature-grid{flex-direction:column; align-items:flex-start; gap:14px}
@@ -586,23 +586,23 @@
           <span class="feature-cta">Explore the funded AI-safety research <span class="arrow">&rarr;</span></span>
         </div>
         <div class="feature-aside">
-          <svg viewBox="0 0 380 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
+          <svg viewBox="0 0 380 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
             <defs>
               <marker id="ah-acc" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
               <marker id="ah-mut" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
             </defs>
-            <path d="M48 92 Q190 122 332 92" fill="none" stroke="#968d77" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#ah-mut)"/>
-            <path d="M46 72 L165 46" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
-            <path d="M215 46 L334 72" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
-            <circle cx="30" cy="84" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
-            <circle cx="190" cy="34" r="22" fill="#c8421f"/>
-            <circle cx="350" cy="84" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
-            <text x="30" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
-            <text x="190" y="41" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
-            <text x="350" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
-            <text x="30" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">PROMPT</text>
-            <text x="190" y="11" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">CoT</text>
-            <text x="350" y="115" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">ANSWER</text>
+            <path d="M52 104 Q190 130 328 104" fill="none" stroke="#968d77" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#ah-mut)"/>
+            <path d="M51 86 L166 56" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
+            <path d="M214 56 L329 86" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
+            <circle cx="30" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
+            <circle cx="190" cy="46" r="22" fill="#c8421f"/>
+            <circle cx="350" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
+            <text x="30" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
+            <text x="190" y="53" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
+            <text x="350" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
+            <text x="30" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">PROMPT</text>
+            <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">CoT</text>
+            <text x="350" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">ANSWER</text>
           </svg>
         </div>
       </div>

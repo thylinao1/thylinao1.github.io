@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>One in twenty · the most overhyped number in statistics</title>
+<meta name="description" content="What a p-value actually is, and how overhyped and misread the 0.05 threshold really is. A courtroom retelling: the p-value is evidence, 'significant' is a verdict, and 0.05 is a fixed sentence nobody justified. Interactive figures for the tail area, false-discovery rate, the dance of the p-values, Type I/II error, and surprisal." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8;
+  --ink:#15110b; --ink-2:#3b3527; --ink-3:#6b6452; --ink-4:#968d77;
+  --rule:rgba(21,17,11,0.12); --rule-strong:rgba(21,17,11,0.28);
+  --accent:#c8421f; --accent-soft:#e5a892; --accent-bright:#e0613a;
+  --good:#1f6b3a; --warn:#b88200;
+  /* semantic spine: evidence (blue), the verdict / 0.05 (terracotta = accent),
+     a real effect in the world (green), harm / false conviction (red) */
+  --evidence:#3a63cf;   /* the data, the p-value, the evidence */
+  --verdict:#c8421f;    /* "significant", the 0.05 line, the sentence */
+  --real:#2f9e44;       /* a true effect exists */
+  --danger:#d23a28;     /* harm, a false conviction */
+  --font-display:"Instrument Serif","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink-2);
+  font-family:var(--font-body); font-size:20px; line-height:1.62;
+  font-weight:400; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+::selection{background:var(--accent-soft); color:var(--ink);}
+
+#progress{position:fixed; top:0; left:0; height:2px; width:0; background:var(--accent); z-index:60; transition:width .12s linear;}
+nav#toc{position:fixed; top:50%; left:28px; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px;}
+nav#toc a{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9b927e; text-decoration:none; display:flex; align-items:center; gap:9px; transition:color .35s var(--ease);}
+nav#toc a .dot{width:6px; height:6px; border-radius:50%; background:rgba(150,141,119,.6); transition:all .35s var(--ease);}
+nav#toc a .lbl{opacity:0; transform:translateX(-4px); transition:all .35s var(--ease); white-space:nowrap;}
+nav#toc a:hover{color:var(--accent);}
+nav#toc a:hover .lbl{opacity:1; transform:none;}
+nav#toc a.active{color:var(--accent);}
+nav#toc a.active .dot{background:var(--accent); transform:scale(1.5);}
+nav#toc a.active .lbl{opacity:1; transform:none;}
+@media(max-width:1220px){nav#toc{display:none;}}
+
+.home-btn{position:fixed; top:20px; left:26px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(127,110,90,0.12); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease); animation:homeSlide .9s var(--ease) .35s both;}
+.home-btn svg{display:block;}
+.home-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+@keyframes homeSlide{from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:none;}}
+@media(max-width:600px){.home-btn{top:14px; left:14px; padding:7px 12px; font-size:10px;}}
+
+.wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+.col{max-width:var(--read); margin:0 auto;}
+section{padding:56px 0;}
+.eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px; display:block;}
+.eyebrow .num{color:var(--accent);}
+
+h1,h2,h3{font-family:var(--font-display); font-weight:400; color:var(--ink); line-height:1.0; margin:0;}
+h2{font-size:clamp(34px,5vw,52px); letter-spacing:-.01em; margin-bottom:18px;}
+h3{font-size:clamp(25px,3.2vw,33px); letter-spacing:-.005em; line-height:1.05; margin:46px 0 10px;}
+p{margin:0 0 22px;}
+.lead{font-family:var(--font-display); font-size:clamp(23px,2.8vw,29px); line-height:1.32; color:var(--ink-2); margin-bottom:26px;}
+strong{font-weight:600; color:var(--ink);}
+em{font-style:italic;}
+.eviword{color:var(--evidence); font-weight:600;}
+.verdictword{color:var(--accent); font-weight:600;}
+.realword{color:var(--real); font-weight:600;}
+.dangerword{color:var(--danger); font-weight:600;}
+.mono{font-family:var(--font-mono); font-size:.9em;}
+
+/* ---------- dark hero ---------- */
+#hero{padding:0 0 13vh; min-height:100vh; display:flex; flex-direction:column; justify-content:center; position:relative; background:#07060a; isolation:isolate;}
+#hero canvas{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
+#hero::after{content:""; position:absolute; left:0; right:0; bottom:0; height:15vh; z-index:1; background:linear-gradient(180deg, rgba(7,6,10,0), var(--bg)); pointer-events:none;}
+#hero .col{max-width:1080px; position:relative; z-index:2; animation:heroReveal 1.9s var(--ease) .15s both;}
+@keyframes heroReveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+.hero-mark{font-family:var(--font-mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.62); margin-bottom:32px;}
+#hero h1{font-size:clamp(56px,12vw,152px); line-height:.92; letter-spacing:-.02em; color:#f6f2ea; margin-bottom:24px; text-shadow:0 2px 80px rgba(0,0,0,.55);}
+#hero h1 .it{font-style:italic; color:var(--accent-bright);}
+.hero-sub{font-family:var(--font-display); font-size:clamp(20px,2.6vw,28px); line-height:1.34; color:rgba(244,239,230,.84); max-width:900px; margin-top:clamp(34px,8vh,120px); margin-bottom:32px;}
+.hero-meta{font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; color:rgba(244,239,230,.64); line-height:1.95;}
+.hero-meta b{color:rgba(244,239,230,.94); font-weight:500;}
+.scrollcue{position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:3; font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.45); display:flex; flex-direction:column; align-items:center; gap:8px;}
+.scrollcue .bar{width:1px; height:34px; background:linear-gradient(rgba(244,239,230,.5),transparent); animation:cue 2.4s var(--ease) infinite;}
+@keyframes cue{0%{transform:scaleY(.3);transform-origin:top;opacity:0}40%{opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+
+/* ---------- figures ---------- */
+figure{margin:34px 0; position:relative;}
+.figure-wide{width:min(960px,calc(100vw - 56px)); margin-left:50%; transform:translateX(-50%);}
+.panel{background:var(--bg-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 18px 40px -28px rgba(21,17,11,.4);}
+.panel.dark{background:#0c0a12; border-color:rgba(255,255,255,.08); box-shadow:0 18px 50px -28px rgba(0,0,0,.6);}
+.panel.dark .legend{color:rgba(244,239,230,.55);}
+.panel.dark .readout{color:rgba(244,239,230,.8);}
+.panel.dark .controls label{color:rgba(244,239,230,.55);}
+figcaption{font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--ink-3); margin-top:14px; letter-spacing:.01em;}
+figcaption b{color:var(--ink-2); font-weight:500;}
+canvas.fig{display:block; width:100%; border-radius:8px; touch-action:none;}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-top:16px;}
+.controls .grp{display:flex; align-items:center; gap:9px;}
+.controls label{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3);}
+button.btn{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:var(--bg-3); border:1px solid var(--rule-strong); border-radius:7px; padding:8px 14px; cursor:pointer; transition:all .2s var(--ease);}
+button.btn:hover{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+button.btn:active{transform:translateY(1px);}
+button.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+button.btn.primary:hover{background:#a8350f;}
+input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:4px; background:var(--rule-strong); outline:none; cursor:pointer; width:150px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); box-shadow:0 1px 4px rgba(21,17,11,.35); transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); cursor:pointer;}
+.panel.dark input[type=range]{background:rgba(255,255,255,.18);}
+.panel.dark input[type=range]::-webkit-slider-thumb{border-color:#0c0a12;}
+.toggle{display:inline-flex; border:1px solid var(--rule-strong); border-radius:8px; overflow:hidden;}
+.toggle button{font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:8px 13px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; transition:all .2s;}
+.toggle button.on{background:var(--ink); color:var(--bg);}
+.panel.dark .toggle{border-color:rgba(255,255,255,.2);}
+.panel.dark .toggle button{color:rgba(244,239,230,.55);}
+.panel.dark .toggle button.on{background:var(--bg); color:var(--ink);}
+.readout{font-family:var(--font-mono); font-size:12px; color:var(--ink-2);}
+.readout b{color:var(--accent); font-weight:500;}
+
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3); margin-top:14px;}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.legend i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+
+.pull{border-left:2px solid var(--accent); padding:4px 0 4px 22px; margin:30px 0; font-family:var(--font-display); font-size:clamp(22px,2.7vw,27px); line-height:1.34; color:var(--ink);}
+.redline{border-left:2px solid var(--accent); padding-left:22px;}
+.note{background:var(--bg-2); border:1px solid var(--rule); border-left:2px solid var(--accent-soft); border-radius:10px; padding:18px 22px; margin:26px 0; font-size:18px; line-height:1.56;}
+.note .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;}
+.note.caution{border-left-color:var(--warn);}
+.note.caution .tag{color:var(--warn);}
+.note p:last-child{margin-bottom:0;}
+.kbd{font-family:var(--font-mono); font-size:.82em; background:var(--bg-3); border:1px solid var(--rule); border-radius:4px; padding:1px 6px;}
+.eq{font-family:var(--font-mono); font-size:.9em; background:var(--bg-2); border:1px solid var(--rule); border-radius:6px; padding:2px 8px; white-space:nowrap; color:var(--ink);}
+
+/* case cards (harm section) */
+.cases{display:grid; grid-template-columns:1fr; gap:16px; margin:28px 0;}
+.case{background:var(--bg-2); border:1px solid var(--rule); border-radius:12px; padding:20px 22px;}
+.case .h{font-family:var(--font-display); font-size:24px; color:var(--ink); line-height:1.1; margin-bottom:4px;}
+.case .k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; display:block;}
+.case p{font-size:17px; line-height:1.55; margin:0; color:var(--ink-3);}
+.case p b{color:var(--ink-2); font-weight:600;}
+
+
+hr.rule{border:none; border-top:1px solid var(--rule); margin:0;}
+
+.gloss{display:grid; grid-template-columns:1fr; gap:0; margin-top:20px; border-top:1px solid var(--rule);}
+.gloss .row{display:grid; grid-template-columns:minmax(150px,215px) 1fr; gap:18px; padding:18px 0; border-bottom:1px solid var(--rule); align-items:baseline;}
+.gloss .term{font-family:var(--font-display); font-size:23px; color:var(--ink); line-height:1.1;}
+.gloss .term .alt{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.04em; color:var(--ink-4); text-transform:uppercase; margin-top:5px;}
+.gloss .def{font-size:17px; line-height:1.55; color:var(--ink-3);}
+.gloss .def b{color:var(--ink-2); font-weight:600;}
+@media(max-width:620px){.gloss .row{grid-template-columns:1fr; gap:6px;}}
+
+footer{padding:70px 0 90px; border-top:1px solid var(--rule); margin-top:40px;}
+footer .col{display:flex; flex-direction:column; gap:18px;}
+footer .sig{font-family:var(--font-display); font-size:26px; color:var(--ink);}
+footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); line-height:1.9; letter-spacing:.02em;}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+.reveal.in{opacity:1; transform:none;}
+.figure-wide.reveal{transform:translateX(-50%) translateY(26px);}
+.figure-wide.reveal.in{transform:translateX(-50%);}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1!important; transform:none!important; transition:none!important;}
+  .figure-wide.reveal{transform:translateX(-50%)!important;}
+  #hero .col{animation:none!important;}
+  .home-btn{animation:none!important;}
+  .scrollcue .bar{animation:none;}
+}
+@media(max-width:600px){
+  body{font-size:18px;}
+  section{padding:42px 0;}
+  .wrap{padding:0 20px;}
+  .panel{padding:14px;}
+  .modal{padding:22px 20px;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<a class="home-btn" href="https://thylinao1.github.io/index.html" aria-label="Back to portfolio home">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+  <span>Home</span>
+</a>
+
+<nav id="toc" aria-label="Sections">
+  <a href="#hero" data-sec="hero"><span class="dot"></span><span class="lbl">Top</span></a>
+  <a href="#intro" data-sec="intro"><span class="dot"></span><span class="lbl">Opening statement</span></a>
+  <a href="#evidence" data-sec="evidence"><span class="dot"></span><span class="lbl">Evidence, not verdict</span></a>
+  <a href="#origin" data-sec="origin"><span class="dot"></span><span class="lbl">A sentence nobody justified</span></a>
+  <a href="#alone" data-sec="alone"><span class="dot"></span><span class="lbl">Convicting the innocent</span></a>
+  <a href="#harm" data-sec="harm"><span class="dot"></span><span class="lbl">When the ritual hurt</span></a>
+  <a href="#courts" data-sec="courts"><span class="dot"></span><span class="lbl">Different courts</span></a>
+  <a href="#innocence" data-sec="innocence"><span class="dot"></span><span class="lbl">Proving innocence</span></a>
+  <a href="#close" data-sec="close"><span class="dot"></span><span class="lbl">Closing argument</span></a>
+  <a href="#map" data-sec="map"><span class="dot"></span><span class="lbl">The name map</span></a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="col">
+      <div class="hero-mark">On the p-value &amp; the cult of p &lt; 0.05</div>
+      <h1>One in <span class="it">twenty</span></h1>
+      <p class="hero-sub">p &lt; 0.05 is the most overhyped and misinterpreted threshold in statistics, and this is my attempt to say what a p-value actually is, along with everything we have been trained to read into it that it never said. I tell it as a courtroom, because that is the frame that finally made it click for me: the p-value is the evidence, &ldquo;significant&rdquo; is the verdict, and 0.05 is a fixed sentence nobody ever really justified.</p>
+      <div class="hero-meta">
+        <b>Prerequisites</b> &nbsp;a little basic probability, no heavy math<br>
+        <b>Reading</b> &nbsp;~15 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;interactive figures you can drag, run, and reset
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue"><span>scroll</span><span class="bar"></span></div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- ============ 01 · OPENING STATEMENT ============ -->
+<section id="intro">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">01</span> · Opening statement</span>
+    <h2 class="reveal">A gift, then quietly taken back</h2>
+    <p class="lead reveal">I have spent a lot of my time learning statistics on my own, and of everything I have picked up that way nothing has fascinated me more than the p-value, mostly because of how confusingly it gets taught.</p>
+    <p class="reveal">There are thousands of YouTube explainers, polished university courses, even those TikTok street interviews where someone stops a person walking out of a place like MIT and asks &ldquo;what&rsquo;s a p-value?&rdquo; and watches them freeze. That mix of ubiquity and confusion is both alarming and telling, and a number this central should not be leaving this many careful people lost for words.</p>
+    <p class="reveal">Here is the pattern I keep running into. At first <span class="mono">p &lt; 0.05</span> is handed to you as a gift, a clean line, a single number that makes learning easier, and if you cross it your result is &ldquo;real.&rdquo; Then you go one level deeper and that same 0.05 gets quietly taken away. In <em>Statistical Rethinking</em>, in my internships, in the papers I read, the line keeps moving, it is field-dependent and context-dependent and half the time nobody explains why, and meanwhile a lot of the material aimed at students still treats 0.05 as a law of nature.</p>
+    <p class="reveal">So this is my attempt to sort it out in the open, what a p-value actually is and how overhyped and misread that 0.05 threshold really is. My honest opinion, which I will try to earn over the rest of this piece rather than just assert, is that a p-value sitting by itself, with no effect size, no context, no sense of how the study was actually built, is very nearly useless. The number itself is fine. What breaks is everything we have been trained to read into it that it never actually said.</p>
+    <p class="reveal">The frame that finally made it click for me is a courtroom. A p-value is a piece of <span class="eviword">evidence</span>, the word &ldquo;significant&rdquo; is a <span class="verdictword">verdict</span>, and 0.05 is the fixed sentence a judge reads out no matter what the case is. If you keep those three apart most of the confusion goes away, and if you let them blur together, which is more or less how the number gets taught, you get the mess we are in.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 02 · EVIDENCE, NOT VERDICT ============ -->
+<section id="evidence">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">02</span> · The evidence, not the verdict</span>
+    <h2 class="reveal">What the number actually measures</h2>
+    <p class="reveal">Start with the null hypothesis, <span class="eq">H&#8320;</span>. In court it is the presumption of innocence, so you assume nothing is going on: no effect, no difference, the coin is fair, the drug does nothing. You do not have to believe it, you just adopt it as the baseline story, and then you ask how strange your data would look if that story were true.</p>
+    <p class="reveal">That question has a precise answer and it is the p-value. <strong>A p-value is the probability of getting data at least as extreme as what you actually saw, if the null hypothesis were true.</strong> In symbols, <span class="eq">P(data this extreme | H&#8320; true)</span>. A small p means that if nothing were going on, data like mine would be a rare accident, which is genuine evidence against the null, a witness whose story is hard to square with innocence.</p>
+    <p class="reveal">Drag the marker below. It is the test statistic, how far your result sits from what the null expects, measured in standard deviations. The curve is the world the null predicts, where results near zero are common and results far out are rare. The shaded <span class="verdictword">tail</span> is everything &ldquo;at least this extreme,&rdquo; and its area is the p-value. Watch the number move as you drag.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="tailCanvas" class="fig" aria-label="Interactive: drag the observed test statistic along a bell curve; the shaded tail area is the p-value, shown live"></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="tailSide" role="group" aria-label="p-value side">
+            <button data-side="two" class="on" aria-pressed="true">Two-sided</button>
+            <button data-side="one" aria-pressed="false">One-sided</button>
+          </div>
+          <div class="grp"><label for="tailStat">Statistic&nbsp;z</label><input type="range" id="tailStat" min="0" max="400" value="145"></div>
+          <span class="readout">z = <b id="tailZ">1.45</b> &nbsp;·&nbsp; p = <b id="tailP">0.147</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--evidence)"></i>the null&rsquo;s predicted world</span>
+          <span><i style="background:var(--accent)"></i>the tail, &ldquo;at least this extreme&rdquo;</span>
+          <span style="color:var(--ink-4)">drag the marker · the shaded area is the p-value</span>
+        </div>
+      </div>
+      <figcaption><b>The p-value, drawn as an area.</b> The bell is what pure chance would produce if the null were true. Slide the result outward and the tail shrinks, because extreme data is unlikely under the null, so the p-value drops. Notice the one thing the picture never tells you, which is how likely the null itself is. It only tells you how surprising your data would be in a world where the null holds, and that gap is the whole story.</figcaption>
+    </figure>
+
+    <h3 class="reveal">The one mistake everything else descends from</h3>
+    <p class="reveal">Here is where almost everyone slips, and it is worth slowing down for. The p-value is <span class="eq">P(evidence | innocent)</span>. What we actually want to know is the other way round, <span class="eq">P(innocent | evidence)</span>, meaning given this result how likely is it that nothing is really going on. Those two are not the same number, and swapping one for the other even has a name. It is the <strong>prosecutor&rsquo;s fallacy</strong>, and it is called that because it is a courtroom error in the first place.</p>
+    <p class="reveal redline">A prosecutor tells the jury that the chance an innocent person&rsquo;s DNA would match is one in a million, so there is only a one-in-a-million chance the defendant is innocent. That is flatly wrong. The first number is the chance of the evidence assuming innocence, the second is the chance of innocence given the evidence, and turning one into the other quietly ignores how many people were in the pool to begin with. A p-value of 0.03 does not mean there is a 3% chance the null is true, or a 97% chance your effect is real. It never said that, we just keep hearing it say it.</p>
+    <p class="reveal">So a bare p-value answers exactly one question, how surprising my data is if nothing is going on, and it stays quiet on every question we actually care about, like whether the effect is real, whether it is large, whether it matters, whether it would happen again. Those silences are not a flaw in the number, they are the number being honest about its job. The trouble only starts when we mistake the silence for an answer.</p>
+    <div class="note reveal">
+      <span class="tag">Three things a p-value is not</span>
+      <p>It is not the probability the null is true. It is not the probability your result is a fluke. And &ldquo;<span class="mono">p &gt; 0.05</span>&rdquo; is not proof that there is no effect, because failing to convict is not the same as establishing innocence. Hold onto that last one, a surprising amount of harm hides inside it.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 03 · A SENTENCE NOBODY JUSTIFIED ============ -->
+<section id="origin">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">03</span> · A sentence nobody justified</span>
+    <h2 class="reveal">Where 0.05 actually came from</h2>
+    <p class="reveal">If 0.05 were a law of nature you would expect a derivation somewhere, a cost-benefit calculation, a proof, something. There isn&rsquo;t one. The line is a convention that slowly hardened into a commandment, and tracing how that happened is the fastest cure I know for treating it as sacred.</p>
+    <p class="reveal">Ronald Fisher usually gets the credit, but he inherited the number more than he invented it. The historians Michael Cowles and Caroline Davis traced a &ldquo;three probable errors&rdquo; rule of thumb, which is numerically close to the two-standard-deviation line we still use, circulating among statisticians well before Fisher published anything, back around 1908 and building on Edgeworth in the 1880s. Something like a 5% habit was already in the water.</p>
+    <p class="reveal">In his 1925 handbook Fisher framed 5% as exactly that, a convenience. It was, in his own phrasing, simply convenient to draw the line at one-in-twenty for a researcher doing arithmetic by hand, a practical cutoff rather than a claim about the fabric of the world. A year later, in a 1926 paper on field experiments, he made the point that it was one option among several, so if one-in-twenty did not feel strict enough for a given case you could just as easily use one-in-fifty (2%) or one-in-a-hundred (1%). The number was always meant to flex with the stakes.</p>
+    <div class="pull reveal">By the mid-1950s Fisher was attacking the very idea of a fixed threshold, which is the thing his name now stamps onto every stats syllabus.</div>
+    <p class="reveal">In his 1956 book he wrote, in plain terms, that no working scientist has a single fixed level of significance that they apply to every experiment year after year, and that you weigh each case on its own evidence. That is about as direct a repudiation of a permanent 0.05 rule as he ever put in print. Richard McElreath reads that same 1925 passage the same way in <em>Statistical Rethinking</em>, as codifying a convention that was already in wide use rather than justifying why 5% in particular is right, and his verdict on the threshold is blunt, that it is purely conventional and there is no reason to expect it to be optimizing anything at all.</p>
+    <p class="reveal">The rigid version won out anyway, and the reason is that a second framework got welded onto Fisher&rsquo;s. Jerzy Neyman and Egon Pearson recast testing as a decision procedure, where you fix an error rate, call it <span class="eq">&alpha;</span>, before you see the data, then mechanically accept or reject, and you judge the whole apparatus by its long-run error rate rather than the evidence in any one study. They also added the idea of the missed effect, the false negative, which Fisher&rsquo;s evidence-only view did not really have. Fisher thought the whole thing was industrial quality-control thinking smuggled into science, and he said so, bitterly, for the rest of his life.</p>
+    <p class="reveal">The number we all use is the wreckage of that fight. The everyday ritual, where you compute one p-value, compare it to a fixed 0.05, and declare &ldquo;significant,&rdquo; treats a single result as if it were both Fisher&rsquo;s continuous measure of evidence and Neyman and Pearson&rsquo;s pre-committed accept/reject decision at the same time, and it is cleanly neither. Gerd Gigerenzer calls this hybrid the &ldquo;null ritual,&rdquo; and its authority is really borrowed from two philosophies that never actually agreed with each other. The verdict sounds firm because we are quietly running two incompatible courts through one gavel.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 04 · CONVICTING THE INNOCENT ============ -->
+<section id="alone">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">04</span> · How one number convicts the innocent</span>
+    <h2 class="reveal">Why a lone p-value misleads</h2>
+    <p class="reveal">Suppose we do everything by the book, one honest study, a clean <span class="mono">p &lt; 0.05</span>, a &ldquo;significant&rdquo; result. How often is that verdict actually right. The uncomfortable answer is that it depends entirely on things the p-value never shows you, and it can be wrong far more than 5% of the time.</p>
+    <p class="reveal">The reason is base rates, the same thing the prosecutor ignored. A verdict of &ldquo;significant&rdquo; sweeps up two very different kinds of study, real effects that got correctly caught and null effects convicted by bad luck, and the share of your convictions that are false depends on how many true effects were in the pool to begin with. Test a lot of long-shot hypotheses and even a well-run filter hands you a courtroom full of wrongful convictions.</p>
+    <p class="reveal">Play with it below. You set how often a tested hypothesis is really true (the base rate), how good your study is at catching real effects (its power), and your false-alarm rate <span class="eq">&alpha;</span>. The array shows 1,000 hypotheses sorted into the four outcomes, and the number that should unsettle you is the <span class="dangerword">false-discovery rate</span>, meaning among everything you called &ldquo;significant,&rdquo; what fraction is actually a null effect wearing a guilty verdict.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="fdrCanvas" class="fig" aria-label="Interactive: 1000 hypotheses split into true positives, false positives, true negatives, and false negatives as you change base rate, power, and alpha; the false discovery rate updates live"></canvas>
+        <div class="controls">
+          <div class="grp"><label for="fdrPrior">Base rate true</label><input type="range" id="fdrPrior" min="1" max="50" value="10"><span class="readout"><b id="fdrPriorV">10%</b></span></div>
+          <div class="grp"><label for="fdrPower">Power</label><input type="range" id="fdrPower" min="10" max="99" value="80"><span class="readout"><b id="fdrPowerV">80%</b></span></div>
+          <div class="grp"><label for="fdrAlpha">&alpha;</label><input type="range" id="fdrAlpha" min="5" max="100" value="50"><span class="readout"><b id="fdrAlphaV">0.05</b></span></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--real)"></i>real effect, caught (TP)</span>
+          <span><i style="background:var(--danger)"></i>null, falsely convicted (FP)</span>
+          <span><i style="background:var(--ink-4)"></i>null, correctly cleared (TN)</span>
+          <span><i style="background:var(--accent-soft)"></i>real effect, missed (FN)</span>
+        </div>
+        <p class="readout" id="fdrText" style="margin-top:12px; line-height:1.6;"></p>
+      </div>
+      <figcaption><b>The false-discovery rate hides inside a &ldquo;significant&rdquo; result.</b> With a 10% base rate, 80% power, and &alpha; = 0.05, a fresh &ldquo;significant&rdquo; finding is a false alarm around a third of the time, not 5%. Tightening &alpha; helps a little, and raising the base rate (testing better hypotheses) helps far more. <b>One honest caveat.</b> This exact percentage is not a universal fact about p&nbsp;=&nbsp;0.05, it is a consequence of the numbers you set here, and if you change the base rate the whole story changes, which is really the point.</figcaption>
+    </figure>
+
+    <p class="reveal">McElreath runs essentially this calculation with a stricter setup than the figure&rsquo;s default, a hypothesis true only 1 in 100 times, tested at 95% power. There a &ldquo;significant&rdquo; result is correct only around 16% of the time, and you can land there yourself by dragging the base rate down to 1% and power up near 95% above. Tightening the threshold to 1% barely rescues it, you get to roughly a coin flip, and the biggest lever by far is not a stricter line, it is testing hypotheses that stand a decent chance of being true in the first place. David Colquhoun ran a similar calculation and got a false-discovery rate of at least 26% for a result sitting right at <span class="mono">p&nbsp;=&nbsp;0.05</span>, though, exactly as the figure warns, that number rides on his assumptions and other reasonable assumptions move it.</p>
+
+    <h3 class="reveal">&ldquo;Not significant&rdquo; is not &ldquo;nothing there&rdquo;</h3>
+    <p class="reveal">The mirror-image error is just as common and a lot quieter. A study comes back <span class="mono">p&nbsp;=&nbsp;0.12</span> and gets written up as &ldquo;no effect,&rdquo; but failing to convict is not the same as proving innocence. Absence of evidence is not evidence of absence, and a small, underpowered study can miss a real and important effect simply because it never gathered enough data to see it. The honest reading of a non-significant result is usually &ldquo;we can&rsquo;t tell yet,&rdquo; not &ldquo;there is nothing here,&rdquo; and a whole section below is about people who paid for that confusion.</p>
+    <p class="reveal">There is an even subtler trap here. If one study lands significant and another does not, it is tempting to say the two disagree, but the difference between &ldquo;significant&rdquo; and &ldquo;not significant&rdquo; is not itself statistically significant, and two studies can be perfectly compatible and still fall on opposite sides of the line. The line invites us to see a conflict that the evidence does not actually support.</p>
+
+    <h3 class="reveal">A garden of forking paths</h3>
+    <p class="reveal">Now the part that surprised me most, because it needs no villain at all. Give an honest analyst one dataset with nothing going on, pure noise, no real effect. Along the way they face small defensible choices, like which outcome to use, whether to include a covariate, how to handle an outlier, which subgroup to look at, and each choice on its own is reasonable. But every combination is a different path through the analysis, and with enough forks at least one path lands under 0.05 by chance alone.</p>
+    <p class="reveal">Click through the choices below. The data underneath has no signal in it at all. You are not p-hacking, not running the study a hundred times, not doing anything you could not defend to a reviewer, you are just making one reasonable call at each fork, and watching how many of the defensible paths happen to cross the line.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="forkCanvas" class="fig" aria-label="Interactive: a decision tree over one null dataset; pick a defensible analysis choice at each fork and see the resulting p-value, with a counter of how many paths reach significance"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="forkPick">Pick a random path</button>
+          <button class="btn" id="forkAll">Reveal all paths</button>
+          <button class="btn" id="forkReseed">New null dataset</button>
+          <span class="readout" id="forkStatus">choose a path, the data has no real effect</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>path reaches p &lt; 0.05</span>
+          <span><i style="background:var(--ink-4)"></i>path stays above 0.05</span>
+          <span style="color:var(--ink-4)"><b id="forkCount">reveal all to count</b></span>
+        </div>
+      </div>
+      <figcaption><b>The garden of forking paths.</b> This is Andrew Gelman and Eric Loken&rsquo;s point, made visible. Significance can be manufactured with no dishonesty and no repeated runs, just ordinary analytic freedom applied once to noise, and the researcher need never even see the paths they did not take. Every path here is defensible in isolation, the problem only shows up when you count them.</figcaption>
+    </figure>
+
+    <h3 class="reveal">The dance of the p-values</h3>
+    <p class="reveal">Last, the instability that finally broke my faith in reading a single p-value at all. Fix a real effect, a genuine one that is present in the world, and fix a sample size, then run the same study again and again drawing fresh data each time. The p-value does not settle near one value, it dances, wildly, across orders of magnitude from one run to the next. Geoff Cumming&rsquo;s demonstration is the one that stuck with me, that a study coming in at exactly <span class="mono">p&nbsp;=&nbsp;0.05</span> could, on an identical repeat, land anywhere from about 0.00008 to about 0.44.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="danceCanvas" class="fig" aria-label="Interactive: repeated studies of the same true effect, each dropping a p-value on a logarithmic axis to show how unstable a single p-value is; a toggle shows confidence intervals for contrast"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="dancePlay">Run replications</button>
+          <button class="btn" id="danceStep">One more study</button>
+          <button class="btn" id="danceReset">Reset</button>
+          <div class="grp"><label for="danceN">Sample n</label><input type="range" id="danceN" min="10" max="200" value="50"></div>
+          <div class="grp"><label for="danceEffect">True effect</label><input type="range" id="danceEffect" min="10" max="90" value="40"></div>
+          <div class="grp toggle" id="danceView" role="group" aria-label="view mode">
+            <button data-view="p" class="on" aria-pressed="true">p-values</button>
+            <button data-view="ci" aria-pressed="false">intervals</button>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>p &lt; 0.05</span>
+          <span><i style="background:var(--ink-4)"></i>p &ge; 0.05</span>
+          <span class="readout" style="color:var(--ink-3)">last p = <b id="danceP">n/a</b> · <span id="danceStats">no runs yet</span></span>
+        </div>
+      </div>
+      <figcaption><b>One effect, many studies, a p-value that will not sit still.</b> Every run here comes from the same true effect, only the random sample changes. The p-values scatter across the log axis, crossing 0.05 in both directions purely by sampling luck. Switch to <b>intervals</b> and the estimates, while still noisy, at least tell a consistent story about size and uncertainty, which is the argument for reporting them instead of a lone p.</figcaption>
+    </figure>
+
+    <p class="reveal">Put those four together, the base-rate trap, the &ldquo;not significant&rdquo; trap, the forking paths, and the dance, and a single p-value stripped of its context starts to look less like evidence and more like a coin that only remembers how it landed. It is not meaningless, it is just nowhere near enough on its own to convict anyone.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 05 · WHEN THE RITUAL HURT PEOPLE ============ -->
+<section id="harm">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">05</span> · When the ritual hurt people</span>
+    <h2 class="reveal">This is not just a methods quibble</h2>
+    <p class="reveal">It would be easy to file all of this under academic hygiene, but it is not that. The specific habit, where you run a test, check whether p clears 0.05, then declare an effect either &ldquo;real&rdquo; or &ldquo;not there,&rdquo; has a documented history of getting the wrong answer at the moments it mattered most. The recurring mistake is always the same one from section 02, reading &ldquo;not significant&rdquo; as &ldquo;no effect,&rdquo; when the honest reading was &ldquo;we do not have enough data yet.&rdquo;</p>
+
+    <div class="cases reveal">
+      <div class="case">
+        <span class="k">Road safety · Ezra Hauer (2004)</span>
+        <div class="h">Real effects rounded down to zero</div>
+        <p>In &ldquo;The harm done by tests of significance,&rdquo; the traffic engineer Ezra Hauer walks through three episodes, right-turn-on-red rules, paving highway shoulders, and speed-limit increases, where individual underpowered studies failed to reach significance and that failure got misread as evidence of <b>no effect</b>. The point estimates were often already pointing at a real effect, and it took larger studies or pooling across states to confirm what the ritual had waved through, a safety <em>cost</em> with right-turn-on-red and higher speed limits, and a missed safety <em>benefit</em> with paved shoulders. Hauer&rsquo;s worry is that leaning on the significance line actively slows the accumulation of real safety knowledge.</p>
+      </div>
+      <div class="case">
+        <span class="k">Drug safety · CAST trial (1989 to 1991)</span>
+        <div class="h">A surrogate cleared drugs that killed</div>
+        <p>Flecainide and encainide reached market by suppressing an easily measured proxy, irregular heartbeats, which was assumed to track with survival. When the Cardiac Arrhythmia Suppression Trial finally tested real mortality, patients on the drugs died at a <b>relative risk of about 2.5 for total mortality</b> (95% CI 1.6 to 4.5) versus placebo, and the arm was halted early, in April 1989. The surrogate endpoint that had cleared the drugs never measured the thing that actually mattered.</p>
+      </div>
+      <div class="case">
+        <span class="k">The law · <em>Matrixx v. Siracusano</em> (2011)</span>
+        <div class="h">The Supreme Court rejected the bright line</div>
+        <p>Matrixx, the maker of a cold remedy, argued that adverse-event reports linking its product to a permanent loss of smell were legally immaterial to investors because they were not statistically significant. In a unanimous ruling (563 U.S. 27), the U.S. Supreme Court rejected statistical significance as a bright-line test for materiality, holding that temporal association, plausibility, and consistency can matter even without a significant p. It is a securities case rather than a clinical one, but the reasoning is exactly the point, that a non-significant result is not the same as &ldquo;no signal.&rdquo;</p>
+      </div>
+    </div>
+
+    <div class="note caution reveal">
+      <span class="tag">A number I will not repeat as fact</span>
+      <p>You may have seen a claim that tens of thousands of people, often the figure &ldquo;50,000+&rdquo;, died from the flecainide/encainide episode. That figure comes from a 1995 book and is <strong>disputed</strong>, because a later peer-reviewed reanalysis looked for a matching bump in national mortality trends and did not find one. The harm shown inside the CAST trial itself is real and well documented, it is the specific death-toll number that is contested, so I am flagging it rather than banking on it, which is more or less the whole spirit of this piece.</p>
+    </div>
+
+    <p class="reveal">The fix these cases point to is not a stricter threshold. It is dropping the reflex to collapse a result into &ldquo;real&rdquo; or &ldquo;not there&rdquo; at all, and reporting the effect size and its uncertainty instead. That is harder work than checking whether a number cleared 0.05, and it is also what would have caught the shoulder-paving effect and the CAST mortality signal a good deal earlier.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 06 · DIFFERENT COURTS ============ -->
+<section id="courts">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">06</span> · Different courts, different burdens</span>
+    <h2 class="reveal">The threshold moves, on purpose</h2>
+    <p class="reveal">If 0.05 were a natural constant, every field would use it. They don&rsquo;t, and the differences are the clearest proof that the line is a choice about stakes, not a fact about truth. Think of each field as a court with its own burden of proof, set by what it costs to be wrong.</p>
+    <p class="reveal">Particle physics wants near-certainty before it will say the word &ldquo;discovery,&rdquo; because a false discovery there is a public humiliation. Its bar is <strong>five sigma</strong>, a one-sided p-value of about <span class="mono">2.9&times;10&#8315;&#8311;</span>, roughly one in 3.5 million. That is more than five orders of magnitude stricter than medicine&rsquo;s everyday 0.05, since 0.05 over 2.9&times;10&#8315;&#8311; is a factor of about 170,000. There is a myth worth killing while we are here, which is that physics also has a looser &ldquo;three sigma&rdquo; level, around <span class="mono">p&nbsp;&asymp;&nbsp;0.0013</span>, but that one is explicitly &ldquo;evidence worth a closer look,&rdquo; never a discovery. The half-remembered idea that physicists discover things at <em>p</em> around 0.003 confuses the &ldquo;keep watching&rdquo; bar with the &ldquo;announce it&rdquo; bar.</p>
+    <p class="reveal">Genomics goes stricter still, for a purely mechanical reason: a genome-wide study tests hundreds of thousands of variants at once, so it adopts a &ldquo;genome-wide significance&rdquo; threshold of <span class="mono">5&times;10&#8315;&#8312;</span> to keep false positives under control across all those simultaneous chances to be fooled. Same principle as physics: the more shots you take, the higher the bar has to sit.</p>
+    <p class="reveal">Meanwhile methodologists argue about the default itself. One camp (Benjamin and dozens of co-authors, 2018) proposed dropping the line for new discoveries from 0.05 to <strong>0.005</strong>. Another, led by Daniel Lakens, replied &ldquo;justify your alpha,&rdquo; where the fix is not another universal number but asking researchers to defend whatever threshold they use for the specific study, which is, tellingly, Fisher&rsquo;s late position all over again.</p>
+
+    <p class="reveal">Underneath the arguing is a single idea, that <span class="eq">&alpha;</span> is a risk trade-off. Every test balances a false alarm (a Type I error, convicting the innocent) against a miss (a Type II error, letting the guilty walk). Push <span class="eq">&alpha;</span> down and you convict fewer innocents but miss more real effects, unless you also gather more data. The figure below is that trade-off, and you can grab it. Drag the cutoff and watch the false-alarm and miss regions trade against each other.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="powerCanvas" class="fig" aria-label="Interactive: two overlapping bell curves for the null and an alternative; drag the decision cutoff to see the alpha (false alarm) and beta (miss) regions and the power update"></canvas>
+        <div class="controls">
+          <div class="grp"><label for="powerCut">Cutoff</label><input type="range" id="powerCut" min="80" max="340" value="164"></div>
+          <div class="grp"><label for="powerEffect">True effect</label><input type="range" id="powerEffect" min="20" max="110" value="41"></div>
+          <span class="readout">&alpha; = <b id="powerAlpha">.05</b> &nbsp;·&nbsp; miss &beta; = <b id="powerBeta">.34</b> &nbsp;·&nbsp; power = <b id="powerPow">.66</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--evidence)"></i>null world (no effect)</span>
+          <span><i style="background:var(--real)"></i>a world where the effect is real</span>
+          <span><i style="background:var(--accent)"></i>&alpha;: false alarms</span>
+          <span><i style="background:var(--accent-soft)"></i>&beta;: missed effects</span>
+        </div>
+      </div>
+      <figcaption><b>Moving the line trades one error for the other.</b> Slide the cutoff left and you catch more real effects (power climbs) but convict more innocents (&alpha; climbs). Slide it right and you get the reverse. There is no setting that zeroes out both, there are only settings that match, or mismatch, the real-world cost of each mistake. That is the choice 0.05 quietly makes for you, usually without anyone checking whether it fits.</figcaption>
+    </figure>
+
+    <p class="reveal redline">And there is a threshold beyond the threshold that the ritual skips entirely. A result can be statistically significant and still be far too small to care about, because with a big enough sample a trivial difference will eventually cross any line. So careful fields pair the significance test with a <em>pre-declared effect size that would actually matter</em>, the minimal clinically important difference (MCID) in medicine, or the smallest effect size of interest (SESOI) in psychology. A drug that lowers blood pressure by a statistically airtight 0.4&nbsp;mmHg has cleared the first bar and failed the one that counts. Significance is necessary, but it is never sufficient.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 07 · PROVING INNOCENCE ============ -->
+<section id="innocence">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">07</span> · Proving innocence</span>
+    <h2 class="reveal">Better tools, and a better mindset</h2>
+    <p class="reveal">If the lone p-value is a weak witness, the obvious next question is what to call instead. None of the alternatives are magic, and I want to be honest about that, but each one fixes a specific blind spot, and together they add up to a saner way to read evidence.</p>
+
+    <h3 class="reveal">Actually proving &ldquo;no meaningful effect&rdquo;</h3>
+    <p class="reveal">Ordinary testing can never support &ldquo;there is no effect,&rdquo; because failing to reject the null just means you did not gather enough to rule zero out. But sometimes proving innocence is exactly the question you have, like whether this generic drug is equivalent to the brand, or whether this change is harmless. The tool for that is <strong>equivalence testing</strong>, usually done as <strong>TOST</strong>, two one-sided tests. You first set two bounds around zero, defining the band of effects small enough to count as &ldquo;no meaningful difference,&rdquo; and those bounds come from your SESOI, a judgment about what matters, not from the data. Then you run two tests, one asking whether the effect is reliably above the lower bound and one whether it is reliably below the upper one, and if both pass you have earned the right to say the effect is negligibly small, which is a claim plain significance testing can never make.</p>
+    <p class="reveal">There is a clean shortcut hiding here, that running TOST at <span class="eq">&alpha; = 0.05</span> gives the same verdict as checking whether the <strong>90% interval</strong> (note: 90%, not 95%) sits entirely inside your bounds. Which points at the deeper move, just report the interval.</p>
+
+    <h3 class="reveal">Compatibility, not confidence</h3>
+    <p class="reveal">A confidence interval already carries both of the things a lone p-value cannot, whether zero is plausible and whether an effect big enough to matter is plausible. The trouble is the word &ldquo;confidence,&rdquo; which invites two misreadings, treating the interval as pass/fail (does it touch zero?), and saying &ldquo;there is a 95% probability the true value is in here,&rdquo; which is not what it means. Sander Greenland and colleagues suggest renaming it a <strong>compatibility interval</strong>, the range of effect sizes reasonably compatible with your data. Read that way it is a list of the stories the evidence tolerates, a spectrum to read rather than a verdict.</p>
+
+    <h3 class="reveal">Surprise, measured in coin flips</h3>
+    <p class="reveal">One reason p-values feel slippery is that the scale is deceptive, so <span class="mono">p&nbsp;=&nbsp;0.001</span> feels ten times as surprising as <span class="mono">0.01</span>, but it is not. A cleaner scale is the <strong>surprisal</strong>, or S-value, <span class="eq">S = &minus;log&#8322;(p)</span> bits, which you can read as how many heads in a row your data is as surprising as, if the null were true. A p of 0.05 is about 4.3 bits, so roughly four or five heads in a row, which is mildly surprising and not proof of anything. Drag the slider and feel how slowly surprise actually accumulates.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="surpCanvas" class="fig" aria-label="Interactive: convert a p-value to an S-value in bits and to an equivalent streak of coin flips, showing that small p-values are less surprising than they feel"></canvas>
+        <div class="controls">
+          <div class="grp"><label for="surpP">p-value</label><input type="range" id="surpP" min="1" max="1000" value="271"></div>
+          <span class="readout">p = <b id="surpPv">0.050</b> &nbsp;·&nbsp; S = <b id="surpBits">4.3</b> bits &nbsp;·&nbsp; &asymp; <b id="surpHeads">4.3</b> heads in a row</span>
+        </div>
+        <div class="legend">
+          <span style="color:rgba(244,239,230,.5)">each coin = one bit of surprise · p = 0.05 is only about four or five flips</span>
+        </div>
+      </div>
+      <figcaption><b>How surprising is &ldquo;significant,&rdquo; really?</b> On the surprisal scale, going from <span class="mono">p&nbsp;=&nbsp;0.01</span> to <span class="mono">0.001</span> adds only about 3.3 bits, three more coin flips, not a tenfold leap. It reframes the whole feel of the number, so a &ldquo;significant&rdquo; result is a modestly surprising coincidence under the null, nothing that should end an argument by itself.</figcaption>
+    </figure>
+
+    <h3 class="reveal">And a fair word on going Bayesian</h3>
+    <p class="reveal">The Bayesian alternatives, Bayes factors and posterior probabilities, answer the question we actually wanted all along, which is, given the data, how the hypotheses compare. That is a real improvement over the transposed conditional. But I want to be careful not to oversell it, because the pitch is often a bit dishonest. A Bayes factor requires a prior, and the prior is a judgment call. Bayesian methods do not remove the subjective choice buried in the analysis, they make it explicit and put it in the open, which is better, but it is a trade of one judgment for another rather than a subjectivity-free machine that hands you the truth. Anyone selling it as that machine is doing the same overselling that got p-values into trouble in the first place.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 08 · CLOSING ARGUMENT ============ -->
+<section id="close">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">08</span> · Closing argument</span>
+    <h2 class="reveal">Earn the thesis, carefully</h2>
+    <p class="reveal">I opened with a deliberately provocative line, that a p-value in a vacuum is nearly useless, and I owe you a more precise version of it now, because the sloppy version is wrong and I do not want to commit the very sin this piece is about.</p>
+    <p class="reveal">So, to be exact about it, a p-value reported on its own, with no effect size, no interval, no account of how the study was built and how many analytic paths were available, tells you almost nothing you can act on. That is my opinion, and I have tried to earn it over the base-rate trap, the dance, the forking paths, and the fields that all pick different lines. The correctly scoped claim matters here though, because a p-value that is <strong>correctly interpreted and reported alongside an effect size and a compatibility interval is genuine, valid information</strong>. The problem was never really the number, it is the ritual that grew up around it.</p>
+    <p class="reveal">That is also, roughly, where the profession has landed. The American Statistical Association&rsquo;s 2016 statement did not ban p-values, it pushed back on the misuses, that p is not the probability the hypothesis is true, that thresholds should not drive conclusions on their own, and that p says nothing about effect size. The 2019 <em>Nature</em> comment signed by hundreds of researchers went further and argued for retiring the &ldquo;significant / not significant&rdquo; dichotomy altogether, and note that this is not the same as abandoning p-values, it is about dropping the bright line that invites all this abuse wherever it happens to be drawn.</p>
+    <div class="pull reveal">The p-value might be the worst-taught idea in statistics precisely because it has so much to say, and we go and compress all of it into one bit, cross the line or do not.</div>
+    <p class="reveal">That is the part I feel most, as someone still fairly early in learning this. The 0.05 line gets handed to students as a kindness, a way to make an overwhelming subject tractable, but the kindness is a lie of omission, and the correction, that the line is conventional and contextual and half the story at best, usually arrives years later if it arrives at all. I would rather it were taught with its context intact from the beginning, as evidence rather than a verdict, as one witness rather than the whole jury. The number deserves that, and so do the people who will spend their careers trusting it.</p>
+    <p class="reveal">So keep the three apart, the <span class="eviword">evidence</span>, the <span class="verdictword">verdict</span>, and the fixed sentence nobody really justified, and the p-value goes back to being what it always was, a modest and genuinely useful little number that got badly oversold. It was never going to carry a whole science on its own, and we should probably stop asking it to.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 09 · NAME MAP ============ -->
+<section id="map">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">09</span> · The name map</span>
+    <h2 class="reveal">Every metaphor, its textbook name</h2>
+    <p class="reveal">A cheat sheet for when you take this to a paper or a stats course. The left column is what I have been calling things, the middle is what you will see them called out there, and the right is a one-line reminder of the job each one does.</p>
+    <div class="gloss reveal">
+      <div class="row"><div class="term">The evidence<span class="alt">p-value</span></div><div class="def">The probability of data at least this extreme <b>if the null were true</b>, written <span class="mono">P(data | H&#8320;)</span>. A measure of how surprising your result is under &ldquo;nothing is going on,&rdquo; and nothing more than that.</div></div>
+      <div class="row"><div class="term">Presumption of innocence<span class="alt">null hypothesis · H&#8320;</span></div><div class="def">The baseline story you assume and try to strain: no effect, no difference, the coin is fair. You never prove it true; you only find data hard or easy to square with it.</div></div>
+      <div class="row"><div class="term">The verdict<span class="alt">&ldquo;statistically significant&rdquo;</span></div><div class="def">The decision to reject the null because <span class="mono">p &lt; &alpha;</span>. A yes/no call laid on top of a continuous piece of evidence, which is where most of the trouble starts.</div></div>
+      <div class="row"><div class="term">The fixed sentence<span class="alt">&alpha; · the 0.05 threshold</span></div><div class="def">The false-alarm rate you pre-commit to. Conventionally 0.05, but that number was inherited, never derived, and Fisher himself later rejected fixing it.</div></div>
+      <div class="row"><div class="term">The prosecutor&rsquo;s fallacy<span class="alt">transposed conditional</span></div><div class="def">Swapping <span class="mono">P(evidence | innocent)</span> for <span class="mono">P(innocent | evidence)</span>. Treating a small p as the probability the null is true. The root error everything else descends from.</div></div>
+      <div class="row"><div class="term">A false conviction<span class="alt">Type I error · false positive</span></div><div class="def">Calling an effect real when the null is actually true. Its long-run rate is &alpha;. How often you make it in <em>practice</em> depends on the base rate.</div></div>
+      <div class="row"><div class="term">A crime that walked<span class="alt">Type II error · &beta; · power</span></div><div class="def">Missing a real effect. Power (1 &minus; &beta;) is your chance of catching one that&rsquo;s truly there. Low power is why &ldquo;not significant&rdquo; so often just means &ldquo;too small a study.&rdquo;</div></div>
+      <div class="row"><div class="term">Wrongful convictions in the pile<span class="alt">false-discovery rate</span></div><div class="def">Among all &ldquo;significant&rdquo; results, the share that are actually null. Driven by the base rate, not by &alpha; alone, which is why a lone p can mislead so badly.</div></div>
+      <div class="row"><div class="term">Was the crime worth prosecuting<span class="alt">effect size · MCID / SESOI</span></div><div class="def">How big the effect is, and whether it&rsquo;s big enough to matter. Significance without this is empty: a large sample makes trivial effects &ldquo;significant.&rdquo;</div></div>
+      <div class="row"><div class="term">Different courts&rsquo; burdens<span class="alt">field-specific &alpha;</span></div><div class="def">Physics&rsquo;s five sigma (&asymp; 3&times;10&#8315;&#8311;), genomics&rsquo;s 5&times;10&#8315;&#8312;, the 0.005 proposal. Proof that the threshold scales with the cost of being wrong.</div></div>
+      <div class="row"><div class="term">Proving innocence<span class="alt">equivalence testing · TOST</span></div><div class="def">Two one-sided tests against pre-set bounds, letting you actually conclude &ldquo;no meaningful effect,&rdquo; which is something ordinary testing can never do.</div></div>
+      <div class="row"><div class="term">Every story the evidence tolerates<span class="alt">compatibility (confidence) interval</span></div><div class="def">The range of effect sizes reasonably compatible with the data. A spectrum to read rather than a pass/fail line, and not &ldquo;95% probability the truth is in here.&rdquo;</div></div>
+      <div class="row"><div class="term">Surprise in coin flips<span class="alt">S-value · surprisal</span></div><div class="def"><span class="mono">S = &minus;log&#8322;(p)</span> bits: how many heads in a row your data is as surprising as. p = 0.05 is only about 4.3 bits.</div></div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="col">
+      <div class="sig">One in twenty.</div>
+      <p style="margin:0; color:var(--ink-3); font-size:18px; max-width:780px;">Written because the 0.05 threshold was handed to me as a law of nature, then quietly taken back, and I wanted to understand the gap. If a figure here helped, the honest caveats tucked beside each one are what keep it from turning into another overhyped line. A p-value is evidence, and not a verdict.</p>
+      <div class="meta">
+        Maksim Silchenko · 2026
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+(function(){
+  const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= shared canvas + stats helpers ================= */
+  function setupCanvas(cv, h, maxDpr){
+    const dpr = Math.min(window.devicePixelRatio||1, maxDpr||2);
+    const w = cv.clientWidth || 600;
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    cv.style.height = h+'px';
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx, w, h, dpr};
+  }
+  // getter that is false while the canvas is off-screen, so rAF loops can skip work
+  function inView(cv){
+    let v=true;
+    if('IntersectionObserver' in window){
+      const io=new IntersectionObserver(es=>{ v=es[0].isIntersecting; },{rootMargin:'140px'});
+      io.observe(cv);
+    }
+    return ()=>v;
+  }
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function gauss(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function clamp(x,lo,hi){return x<lo?lo:(x>hi?hi:x);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  // error function (Abramowitz & Stegun 7.1.26, |err| < 1.5e-7)
+  function erf(x){const s=x<0?-1:1; x=Math.abs(x); const t=1/(1+0.3275911*x);
+    const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+    return s*y;}
+  function normPdf(z){return Math.exp(-0.5*z*z)/Math.sqrt(2*Math.PI);}
+  function normCdf(z){return 0.5*(1+erf(z/Math.SQRT2));}
+  // inverse normal CDF (Acklam), good to ~1e-9 across the middle
+  function normInv(p){
+    if(p<=0) return -Infinity; if(p>=1) return Infinity;
+    const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+    const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+    const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+    const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+    const plow=0.02425, phigh=1-plow; let q,r;
+    if(p<plow){q=Math.sqrt(-2*Math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    if(p<=phigh){q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+    q=Math.sqrt(-2*Math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+  }
+  function fmtP(p){
+    if(!isFinite(p)) return 'n/a';
+    if(p>=0.0001) return p.toFixed(p>=0.1?2:(p>=0.001?3:4));
+    const e=Math.floor(Math.log10(p)); const m=p/Math.pow(10,e);
+    return m.toFixed(1)+'×10'+String(e).replace('-','−').split('').map(ch=>'⁰¹²³⁴⁵⁶⁷⁸⁹−'[ '0123456789-'.indexOf(ch)]).join('');
+  }
+
+  const CSS = getComputedStyle(document.documentElement);
+  const COL = {
+    bg: CSS.getPropertyValue('--bg').trim(), bg2: CSS.getPropertyValue('--bg-2').trim(), bg3: CSS.getPropertyValue('--bg-3').trim(),
+    ink: CSS.getPropertyValue('--ink').trim(), ink2: CSS.getPropertyValue('--ink-2').trim(), ink3: CSS.getPropertyValue('--ink-3').trim(), ink4: CSS.getPropertyValue('--ink-4').trim(),
+    accent: CSS.getPropertyValue('--accent').trim(), accentSoft: CSS.getPropertyValue('--accent-soft').trim(),
+    evidence: CSS.getPropertyValue('--evidence').trim(), real: CSS.getPropertyValue('--real').trim(), danger: CSS.getPropertyValue('--danger').trim(),
+    warn: CSS.getPropertyValue('--warn').trim()
+  };
+  function hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  const RGB = {accent:hex2rgb(COL.accent), evidence:hex2rgb(COL.evidence), real:hex2rgb(COL.real), danger:hex2rgb(COL.danger), bg:hex2rgb(COL.bg), ink:hex2rgb(COL.ink)};
+
+  // expose helpers so each figure module can use them
+  const LIB = {setupCanvas, inView, mulberry32, gauss, clamp, lerp, erf, normPdf, normCdf, normInv, fmtP, COL, RGB, REDUCED};
+
+  /* ================= HERO: a null distribution forming in the dark, its tail glowing ================= */
+  (function(){
+    const cv=document.getElementById('heroCanvas'); if(!cv) return;
+    let st, raf, t0=null, motes;
+    function init(){
+      const h=Math.max(window.innerHeight, 560);
+      st=setupCanvas(cv,h,1.35);
+      const rng=mulberry32(20);
+      // drifting "evidence" motes that pool under the bell
+      motes=[];
+      for(let i=0;i<70;i++){ motes.push({z:(rng()*2-1)*3.1, y:rng(), vy:0.0006+rng()*0.0016, ph:rng()*6.28, sp:0.4+rng()*1.1}); }
+    }
+    function bellY(z){ return Math.exp(-0.5*z*z); } // peak 1 at z=0
+    function draw(now){
+      if(t0===null)t0=now;
+      const fade=Math.min(1,(now-t0)/1400);
+      const {ctx,w,h}=st;
+      ctx.clearRect(0,0,w,h);
+      const baseY=h*0.72, amp=h*0.40, zSpan=3.4;
+      const X=z=>w*0.5 + (z/zSpan)*(w*0.46);
+      const Y=v=>baseY - v*amp;
+      // shaded region under the curve (the null's world) in evidence-blue
+      ctx.beginPath(); ctx.moveTo(X(-zSpan),baseY);
+      for(let i=0;i<=160;i++){ const z=-zSpan+ i/160*2*zSpan; ctx.lineTo(X(z),Y(bellY(z))); }
+      ctx.lineTo(X(zSpan),baseY); ctx.closePath();
+      const g=ctx.createLinearGradient(0,Y(1),0,baseY);
+      g.addColorStop(0,`rgba(${RGB.evidence[0]},${RGB.evidence[1]},${RGB.evidence[2]},${0.30*fade})`);
+      g.addColorStop(1,`rgba(${RGB.evidence[0]},${RGB.evidence[1]},${RGB.evidence[2]},0.02)`);
+      ctx.fillStyle=g; ctx.fill();
+      // the glowing tail beyond z*=1.96, in verdict terracotta
+      const zc=1.96;
+      ctx.save(); ctx.beginPath(); ctx.moveTo(X(zc),baseY);
+      for(let i=0;i<=60;i++){ const z=zc+ i/60*(zSpan-zc); ctx.lineTo(X(z),Y(bellY(z))); }
+      ctx.lineTo(X(zSpan),baseY); ctx.closePath();
+      const pulse=0.6+0.4*Math.sin(now*0.0011);
+      const tg=ctx.createLinearGradient(X(zc),0,X(zSpan),0);
+      tg.addColorStop(0,`rgba(${RGB.accent[0]},${RGB.accent[1]},${RGB.accent[2]},${0.55*fade*pulse})`);
+      tg.addColorStop(1,`rgba(${RGB.accent[0]},${RGB.accent[1]},${RGB.accent[2]},0.04)`);
+      ctx.fillStyle=tg; ctx.fill(); ctx.restore();
+      // the curve itself
+      ctx.beginPath();
+      for(let i=0;i<=200;i++){ const z=-zSpan+ i/200*2*zSpan; const px=X(z),py=Y(bellY(z)); if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+      ctx.strokeStyle=`rgba(244,239,230,${0.5*fade})`; ctx.lineWidth=1.6; ctx.stroke();
+      // threshold line
+      ctx.beginPath(); ctx.moveTo(X(zc),Y(bellY(zc))-6); ctx.lineTo(X(zc),baseY);
+      ctx.strokeStyle=`rgba(${RGB.accent[0]},${RGB.accent[1]},${RGB.accent[2]},${0.7*fade*pulse})`; ctx.lineWidth=1.4; ctx.setLineDash([4,5]); ctx.stroke(); ctx.setLineDash([]);
+      // drifting motes
+      for(const m of motes){
+        m.y += m.vy; if(m.y>1){ m.y=0; m.z=(Math.sin(m.ph+now*0.0002)*2.6); }
+        const z=m.z, top=Y(bellY(z))-6, yy=lerp(30, baseY-4, m.y);
+        if(yy<top) continue;
+        const a=(0.10+0.18*Math.sin(now*0.001*m.sp+m.ph))*fade;
+        ctx.beginPath(); ctx.arc(X(z), yy, 1.5, 0, 6.28);
+        ctx.fillStyle=`rgba(244,239,230,${Math.max(0,a)})`; ctx.fill();
+      }
+    }
+    const vis=inView(cv);
+    function loop(now){ if(vis()) draw(now); raf=requestAnimationFrame(loop); }
+    init();
+    if(REDUCED){ requestAnimationFrame(n=>{ t0=n-1400; draw(n); }); }
+    else loop(0);
+    let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{init();},150);});
+  })();
+
+  /* =========================================================================
+     The six interactive figures below are built by the figure workflow.
+     Each is a self-contained IIFE that: reads its canvas by id, uses the LIB
+     helpers, honours LIB.REDUCED with a meaningful static frame, and re-inits
+     on resize. Stubs draw a labelled placeholder until filled.
+     ========================================================================= */
+
+  function stub(id, label){
+    const cv=document.getElementById(id); if(!cv) return;
+    const st=setupCanvas(cv, Math.min(Math.max(cv.clientWidth*0.5,300),420));
+    const {ctx,w,h}=st; ctx.fillStyle=COL.bg3; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle=COL.ink4; ctx.font='12px IBM Plex Mono'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label+' loading…', w/2, h/2);
+  }
+
+  /* FIG 1 · TAIL AREA */ (function(){
+  const cv=document.getElementById('tailCanvas'); if(!cv) return;
+  let ctx,w,h;
+  let padL=40,padR=20,padT=30,padB=36,plotW=0,peakH=0,y0=0;
+  const PEAK0=0.3989422804014327; // normPdf(0)
+  const state={side:'two', z:1.45};
+  let dragging=false;
+
+  const slider=document.getElementById('tailStat');
+  const outZ=document.getElementById('tailZ');
+  const outP=document.getElementById('tailP');
+  const sideWrap=document.getElementById('tailSide');
+
+  function rgba(arr,a){return 'rgba('+arr[0]+','+arr[1]+','+arr[2]+','+a+')';}
+  function zToX(z){return padL+((z+4)/8)*plotW;}
+  function yFor(z){return y0-(normPdf(z)/PEAK0)*peakH;}
+
+  function pval(){return state.side==='two'? 2*normCdf(-state.z): normCdf(-state.z);}
+
+  function syncReadouts(){
+    if(outZ) outZ.textContent=state.z.toFixed(2);
+    if(outP) outP.textContent=fmtP(pval());
+  }
+
+  function init(){
+    const cssH=Math.min(Math.max(cv.clientWidth*0.55,300),440);
+    const s=setupCanvas(cv,cssH,2);
+    ctx=s.ctx; w=s.w; h=s.h;
+    plotW=w-padL-padR;
+    y0=h-padB;
+    peakH=(h-padB)-padT;
+  }
+
+  function fillTail(a,b){
+    ctx.beginPath();
+    ctx.moveTo(zToX(a),y0);
+    const N=80;
+    for(let i=0;i<=N;i++){const z=a+(b-a)*i/N; ctx.lineTo(zToX(z),yFor(z));}
+    ctx.lineTo(zToX(b),y0);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function draw(){
+    if(!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    // panel bg
+    ctx.fillStyle=COL.bg2;
+    ctx.fillRect(0,0,w,h);
+
+    // faint integer ticks
+    ctx.strokeStyle=rgba(RGB.ink,0.08);
+    ctx.lineWidth=1;
+    ctx.fillStyle=COL.ink4;
+    ctx.font='11px IBM Plex Mono';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    for(let zi=-3;zi<=3;zi++){
+      const x=zToX(zi);
+      ctx.beginPath();ctx.moveTo(x,padT);ctx.lineTo(x,y0);ctx.stroke();
+    }
+
+    // full-curve fill = the null's predicted world
+    const N=240;
+    ctx.beginPath();
+    ctx.moveTo(zToX(-4),y0);
+    for(let i=0;i<=N;i++){const z=-4+8*i/N; ctx.lineTo(zToX(z),yFor(z));}
+    ctx.lineTo(zToX(4),y0);
+    ctx.closePath();
+    ctx.fillStyle=rgba(RGB.evidence,0.10);
+    ctx.fill();
+
+    // tail shading
+    ctx.fillStyle=rgba(RGB.accent,0.5);
+    fillTail(state.z,4);
+    if(state.side==='two') fillTail(-4,-state.z);
+
+    // curve
+    ctx.beginPath();
+    for(let i=0;i<=N;i++){const z=-4+8*i/N; const x=zToX(z),y=yFor(z); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.strokeStyle=COL.ink2;ctx.lineWidth=1.6;
+    ctx.lineJoin='round';ctx.stroke();
+
+    // baseline
+    ctx.beginPath();ctx.moveTo(padL,y0+0.5);ctx.lineTo(w-padR,y0+0.5);
+    ctx.strokeStyle=rgba(RGB.ink,0.25);ctx.lineWidth=1;ctx.stroke();
+
+    // center 0 tick
+    const cx=zToX(0);
+    ctx.beginPath();ctx.moveTo(cx,y0);ctx.lineTo(cx,y0+5);
+    ctx.strokeStyle=COL.ink3;ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=COL.ink3;ctx.font='11px IBM Plex Mono';
+    ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText('0',cx,y0+7);
+
+    // vertical markers
+    function marker(z,label){
+      const x=zToX(z),yc=yFor(z);
+      ctx.beginPath();ctx.moveTo(x,yc);ctx.lineTo(x,y0);
+      ctx.strokeStyle=COL.accent;ctx.lineWidth=1.4;ctx.stroke();
+      ctx.fillStyle=COL.accent;ctx.font='600 12px IBM Plex Mono';
+      ctx.textAlign='center';ctx.textBaseline='top';
+      ctx.fillText(label,x,y0+7);
+    }
+    if(state.side==='two') marker(-state.z,'-z');
+    marker(state.z,'z');
+
+    // handle on curve at z
+    const hx=zToX(state.z),hy=yFor(state.z);
+    ctx.beginPath();ctx.arc(hx,hy,6.5,0,Math.PI*2);
+    ctx.fillStyle=COL.accent;ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=COL.bg2;ctx.stroke();
+
+    // p note
+    ctx.fillStyle=COL.ink3;ctx.font='600 12px IBM Plex Mono';
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText('p = shaded area',padL,padT-22);
+  }
+
+  function setFromZ(rawZ,syncSlider){
+    let z=clamp(rawZ,0,4);
+    if(syncSlider && slider){slider.value=String(Math.round(z*100)); z=parseFloat(slider.value)/100;}
+    state.z=z;
+    syncReadouts();
+    draw();
+  }
+
+  function getPos(e){
+    const r=cv.getBoundingClientRect();
+    const t=(e.touches&&e.touches[0])?e.touches[0]:e;
+    return {x:t.clientX-r.left,y:t.clientY-r.top};
+  }
+  function setFromX(x){
+    const zr=((x-padL)/plotW)*8-4;
+    setFromZ(zr,true);
+  }
+
+  function onDown(e){dragging=true; if(e.cancelable)e.preventDefault(); setFromX(getPos(e).x);}
+  function onMove(e){if(!dragging)return; if(e.cancelable)e.preventDefault(); setFromX(getPos(e).x);}
+  function onUp(){dragging=false;}
+
+  cv.addEventListener('mousedown',onDown);
+  window.addEventListener('mousemove',onMove);
+  window.addEventListener('mouseup',onUp);
+  cv.addEventListener('touchstart',onDown,{passive:false});
+  cv.addEventListener('touchmove',onMove,{passive:false});
+  window.addEventListener('touchend',onUp);
+
+  if(slider){
+    slider.addEventListener('input',function(){setFromZ(parseFloat(slider.value)/100,false);});
+  }
+  if(sideWrap){
+    sideWrap.querySelectorAll('[data-side]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        sideWrap.querySelectorAll('[data-side]').forEach(function(b){b.classList.remove('on');b.setAttribute('aria-pressed','false');});
+        btn.classList.add('on'); btn.setAttribute('aria-pressed','true');
+        state.side=btn.getAttribute('data-side')==='one'?'one':'two';
+        syncReadouts();
+        draw();
+      });
+    });
+  }
+
+  let rt;
+  window.addEventListener('resize',function(){
+    clearTimeout(rt);
+    rt=setTimeout(function(){init();draw();},160);
+  });
+
+  // initial
+  if(slider) state.z=parseFloat(slider.value)/100;
+  init();
+  syncReadouts();
+  draw();
+})();
+  /* FIG 2 · FALSE-DISCOVERY */ (function(){
+  const cv=document.getElementById('fdrCanvas'); if(!cv) return;
+  let ctx,w,h;
+  const N=1000;
+
+  function els(){
+    return {
+      prior:document.getElementById('fdrPrior'),
+      power:document.getElementById('fdrPower'),
+      alpha:document.getElementById('fdrAlpha'),
+      priorV:document.getElementById('fdrPriorV'),
+      powerV:document.getElementById('fdrPowerV'),
+      alphaV:document.getElementById('fdrAlphaV'),
+      text:document.getElementById('fdrText')
+    };
+  }
+
+  function compute(){
+    const e=els();
+    const priorRaw=e.prior?+e.prior.value:10;
+    const powerRaw=e.power?+e.power.value:80;
+    const alphaRaw=e.alpha?+e.alpha.value:50;
+    const pi=priorRaw/100, power=powerRaw/100, alpha=alphaRaw/1000;
+    const trueN=Math.round(pi*N), nullN=N-trueN;
+    const TP=Math.round(power*trueN), FN=trueN-TP;
+    const FP=Math.round(alpha*nullN), TN=nullN-FP;
+    const denom=FP+TP;
+    const FDR = denom>0 ? FP/denom : 0;
+    return {priorRaw,powerRaw,alphaRaw,pi,power,alpha,trueN,nullN,TP,FN,FP,TN,FDR};
+  }
+
+  function drawBlock(x,y,cols,cell,r,segs){
+    let idx=0;
+    for(let si=0; si<segs.length; si++){
+      const s=segs[si];
+      ctx.fillStyle=s.c;
+      for(let k=0;k<s.n;k++){
+        const col=idx%cols, row=(idx/cols)|0;
+        const cx=x+col*cell+cell/2, cy=y+row*cell+cell/2;
+        ctx.beginPath();
+        ctx.arc(cx,cy,r,0,Math.PI*2);
+        ctx.fill();
+        idx++;
+      }
+    }
+  }
+
+  function drawBracket(x,yLine,ww,label){
+    ctx.strokeStyle=COL.accent;
+    ctx.lineWidth=1.4;
+    ctx.beginPath();
+    ctx.moveTo(x,yLine);
+    ctx.lineTo(x+ww,yLine);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x,yLine); ctx.lineTo(x,yLine+5);
+    ctx.moveTo(x+ww,yLine); ctx.lineTo(x+ww,yLine+5);
+    ctx.stroke();
+    ctx.fillStyle=COL.accent;
+    ctx.font='600 12px IBM Plex Mono';
+    ctx.textAlign='center';
+    ctx.textBaseline='alphabetic';
+    ctx.fillText(label, x+ww/2, yLine-6);
+  }
+
+  function draw(){
+    if(!ctx) return;
+    const d=compute();
+    const e=els();
+    if(e.priorV) e.priorV.textContent=d.priorRaw+'%';
+    if(e.powerV) e.powerV.textContent=d.powerRaw+'%';
+    if(e.alphaV) e.alphaV.textContent=d.alpha.toFixed(3);
+    const sig=d.TP+d.FP;
+    const FDRpct=Math.round(d.FDR*100);
+    if(e.text){
+      e.text.textContent="Of the ~"+sig+" results you'd call significant, ~"+d.FP+
+        " are false alarms, a false-discovery rate of "+FDRpct+
+        "%. That number falls out of the base rate you set, not from p = 0.05 itself.";
+    }
+
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle=COL.bg2;
+    ctx.fillRect(0,0,w,h);
+
+    const padX=Math.max(16,w*0.045);
+    const padTop=18, padBot=16;
+    const availW=w-2*padX;
+    const cols=Math.max(20,Math.min(40,Math.floor(availW/14)));
+
+    const nsCount=d.TN+d.FN;
+    const sigRows=Math.max(1,Math.ceil(sig/cols));
+    const nsRows=Math.max(1,Math.ceil(nsCount/cols));
+    const totalRows=sigRows+nsRows;
+
+    const bracketZone=26;     // label + line above significant block
+    const blockGap=Math.max(16,h*0.05);
+    const nsLabelH=16;
+
+    const extras=padTop+bracketZone+blockGap+nsLabelH+padBot;
+    const availH=Math.max(40,h-extras);
+    let cell=Math.min(availW/cols, availH/totalRows);
+    cell=Math.max(cell,4);
+    const dotR=Math.max(1.6,cell*0.34);
+    const gridW=cols*cell;
+    const x0=(w-gridW)/2;
+
+    // significant block
+    const sigLineY=padTop+bracketZone-10;
+    const sigY0=padTop+bracketZone;
+    drawBlock(x0,sigY0,cols,cell,dotR,[
+      {n:d.TP,c:COL.real},
+      {n:d.FP,c:COL.danger}
+    ]);
+    drawBracket(x0,sigLineY,gridW,"called significant, "+FDRpct+"% false");
+
+    const sigBottom=sigY0+sigRows*cell;
+
+    // not-significant label
+    ctx.fillStyle=COL.ink3;
+    ctx.font='11px IBM Plex Mono';
+    ctx.textAlign='left';
+    ctx.textBaseline='alphabetic';
+    ctx.fillText("called not significant, "+nsCount+" of 1000",
+      x0, sigBottom+blockGap*0.62);
+
+    // not-significant block
+    const nsY0=sigBottom+blockGap;
+    drawBlock(x0,nsY0,cols,cell,dotR,[
+      {n:d.TN,c:COL.ink4},
+      {n:d.FN,c:COL.accentSoft}
+    ]);
+  }
+
+  function init(){
+    const cssH=Math.min(Math.max(cv.clientWidth*0.6,340),480);
+    const s=setupCanvas(cv,cssH,2);
+    ctx=s.ctx; w=s.w; h=s.h;
+  }
+
+  init();
+  draw();
+
+  ['fdrPrior','fdrPower','fdrAlpha'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input',draw);
+  });
+
+  let rt;
+  window.addEventListener('resize',function(){
+    clearTimeout(rt);
+    rt=setTimeout(function(){ init(); draw(); },160);
+  });
+})();
+  /* FIG 3 · FORKING PATHS */ (function(){
+  const cv=document.getElementById('forkCanvas'); if(!cv) return;
+  const statusEl=document.getElementById('forkStatus');
+  const countEl=document.getElementById('forkCount');
+  const btnPick=document.getElementById('forkPick');
+  const btnAll=document.getElementById('forkAll');
+  const btnReseed=document.getElementById('forkReseed');
+
+  let ctx,w,h;
+  let seed=(1014>>>0); // instructive default: 2 of 16 defensible paths cross 0.05 on pure noise (reseed is fully random)
+  let leaves=[];
+  let sigCount=0;
+  let revealedAll=REDUCED?true:false;
+  const revealed=new Set();
+  let picked=-1;
+  let pulseLeaf=-1, pulseT0=0, rafId=0;
+
+  // ---- geometry ----
+  const PADL=54, PADT=66, PADB=40, PADR=20, RIGHTTXT=66;
+  function x0(){return PADL;}
+  function x4(){return w-PADR-RIGHTTXT;}
+  function colX(L){return x0()+(x4()-x0())*(L/4);}
+  function treeTop(){return PADT;}
+  function treeBot(){return h-PADB;}
+  function nodeY(L,idx){const t=treeTop(),b=treeBot();return t+(b-t)*((idx+0.5)/Math.pow(2,L));}
+
+  // ---- model (honest one-sample z-test over a null dataset) ----
+  function computeLeaves(sd){
+    const rng=mulberry32(sd);
+    const n=60; const y1=[],y2=[],g=[];
+    for(let i=0;i<n;i++){ y1.push(gauss(rng)); y2.push(gauss(rng)); g.push(rng()<0.5?0:1); }
+    const out=[];
+    for(let leaf=0;leaf<16;leaf++){
+      const f1=(leaf>>3)&1, f2=(leaf>>2)&1, f3=(leaf>>1)&1, f4=leaf&1;
+      const src=f1?y2:y1;
+      let arr=[];
+      for(let i=0;i<n;i++){ if(f2&&g[i]===1) continue; arr.push({v:src[i],g:g[i]}); }
+      if(f4&&arr.length>2){ let mi=0,mx=-1; for(let i=0;i<arr.length;i++){const a=Math.abs(arr[i].v); if(a>mx){mx=a;mi=i;}} arr.splice(mi,1); }
+      if(f3){
+        let gs=0,s0=0,c0=0,s1=0,c1=0;
+        for(const o of arr){gs+=o.v; if(o.g===0){s0+=o.v;c0++;}else{s1+=o.v;c1++;}}
+        const grand=gs/arr.length; const m0=c0?s0/c0:grand, m1=c1?s1/c1:grand;
+        arr=arr.map(o=>({v:o.v-(o.g===0?m0:m1)+grand,g:o.g}));
+      }
+      const m=arr.length; let sum=0; for(const o of arr)sum+=o.v; const mean=sum/m;
+      let ss=0; for(const o of arr)ss+=(o.v-mean)*(o.v-mean);
+      const sdv=m>1?Math.sqrt(ss/(m-1)):0;
+      const z=sdv>0?mean/(sdv/Math.sqrt(m)):0;
+      const p=2*normCdf(-Math.abs(z));
+      out.push({leaf,f1,f2,f3,f4,m,p,sig:p<0.05});
+    }
+    return out;
+  }
+  function leafText(L){
+    return ['outcome '+(L.f1?'Y2':'Y1'),
+            (L.f2?'excl. subgroup B':'all subjects'),
+            (L.f3?'adjusted':'unadjusted'),
+            (L.f4?'outlier trimmed':'outliers kept')].join(' · ');
+  }
+  function recompute(){
+    leaves=computeLeaves(seed);
+    sigCount=leaves.reduce((a,r)=>a+(r.sig?1:0),0);
+  }
+
+  const FORKS=[{n:'outcome',a:'Y1',b:'Y2'},{n:'subgroup',a:'all',b:'excl B'},{n:'adjust',a:'raw',b:'ANCOVA'},{n:'outliers',a:'keep',b:'trim'}];
+
+  function draw(){
+    if(!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle=COL.bg2; ctx.fillRect(0,0,w,h);
+
+    // title
+    ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+    ctx.fillStyle=COL.ink; ctx.font='600 13px IBM Plex Mono';
+    ctx.fillText('Garden of forking paths', PADL, 22);
+    ctx.fillStyle=COL.ink3; ctx.font='11px IBM Plex Mono';
+    ctx.fillText('one null dataset · 16 defensible readings', PADL, 38);
+
+    // fork labels at each split gap
+    for(let k=0;k<4;k++){
+      const gx=(colX(k)+colX(k+1))/2;
+      ctx.textAlign='center';
+      ctx.fillStyle=COL.ink2; ctx.font='600 10px IBM Plex Mono';
+      ctx.fillText('F'+(k+1)+' '+FORKS[k].n, gx, 50);
+      ctx.fillStyle=COL.ink4; ctx.font='9px IBM Plex Mono';
+      ctx.fillText(FORKS[k].a+'  /  '+FORKS[k].b, gx, 61);
+    }
+
+    // edges (thin)
+    ctx.lineWidth=1; ctx.strokeStyle='rgba(21,17,11,0.18)';
+    for(let L=0;L<4;L++){
+      const cnt=Math.pow(2,L);
+      for(let i=0;i<cnt;i++){
+        const px=colX(L), py=nodeY(L,i);
+        for(let c=0;c<2;c++){
+          const ci=2*i+c, cx=colX(L+1), cy=nodeY(L+1,ci);
+          ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(cx,cy); ctx.stroke();
+        }
+      }
+    }
+
+    // highlighted root-to-leaf path
+    if(picked>=0){
+      ctx.lineWidth=2; ctx.strokeStyle=COL.ink2;
+      for(let L=0;L<4;L++){
+        const pi=picked>>(4-L), ci=picked>>(3-L);
+        ctx.beginPath();
+        ctx.moveTo(colX(L),nodeY(L,pi));
+        ctx.lineTo(colX(L+1),nodeY(L+1,ci));
+        ctx.stroke();
+      }
+    }
+
+    // interior nodes (small marks)
+    ctx.fillStyle=COL.ink4;
+    for(let L=0;L<4;L++){
+      const cnt=Math.pow(2,L);
+      for(let i=0;i<cnt;i++){
+        ctx.beginPath(); ctx.arc(colX(L),nodeY(L,i),2,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    // leaves
+    const lx=colX(4);
+    for(let i=0;i<16;i++){
+      const L=leaves[i]; const ly=nodeY(4,i);
+      const show=revealedAll||revealed.has(i);
+      const isPk=(i===picked);
+      if(show){
+        ctx.beginPath(); ctx.arc(lx,ly,isPk?4.4:3.4,0,Math.PI*2);
+        ctx.fillStyle=L.sig?COL.accent:COL.ink4; ctx.fill();
+        if(isPk){ ctx.lineWidth=1.4; ctx.strokeStyle=COL.ink2; ctx.stroke(); }
+        // p value text
+        ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.font=(isPk?'600 9px':'9px')+' IBM Plex Mono';
+        ctx.fillStyle=L.sig?COL.accent:COL.ink3;
+        ctx.fillText(fmtP(L.p), lx+9, ly);
+      }else{
+        ctx.beginPath(); ctx.arc(lx,ly,3,0,Math.PI*2);
+        ctx.lineWidth=1; ctx.strokeStyle=COL.ink4; ctx.stroke();
+      }
+    }
+
+    // pulse ring on picked leaf
+    if(!REDUCED&&pulseLeaf>=0){
+      const now=performance.now(); const pr=clamp((now-pulseT0)/750,0,1);
+      if(pr<1){
+        const ly=nodeY(4,pulseLeaf);
+        ctx.beginPath(); ctx.arc(lx,ly,4+18*pr,0,Math.PI*2);
+        ctx.lineWidth=2; ctx.strokeStyle='rgba('+RGB.accent[0]+','+RGB.accent[1]+','+RGB.accent[2]+','+(0.6*(1-pr))+')';
+        ctx.stroke();
+      }
+    }
+
+    // legend
+    ctx.textBaseline='middle'; ctx.textAlign='left';
+    const ly0=h-16;
+    ctx.beginPath(); ctx.arc(PADL+4,ly0,3.4,0,Math.PI*2); ctx.fillStyle=COL.accent; ctx.fill();
+    ctx.fillStyle=COL.ink3; ctx.font='9px IBM Plex Mono';
+    ctx.fillText('p < 0.05', PADL+13, ly0);
+    ctx.beginPath(); ctx.arc(PADL+92,ly0,3.4,0,Math.PI*2); ctx.fillStyle=COL.ink4; ctx.fill();
+    ctx.fillStyle=COL.ink3; ctx.fillText('not significant', PADL+101, ly0);
+  }
+
+  function frame(){
+    rafId=requestAnimationFrame(frame);
+    if(!inView(cv)) return;
+    const done=(performance.now()-pulseT0)>=750;
+    draw();
+    if(done){ pulseLeaf=-1; cancelAnimationFrame(rafId); rafId=0; draw(); }
+  }
+
+  function pickLeaf(idx){
+    picked=idx; revealed.add(idx);
+    const L=leaves[idx];
+    if(statusEl) statusEl.textContent=leafText(L)+'  →  p = '+fmtP(L.p)+(L.sig?'   ✓ significant':'');
+    if(!REDUCED){ pulseLeaf=idx; pulseT0=performance.now(); if(!rafId) rafId=requestAnimationFrame(frame); }
+    else draw();
+    draw();
+  }
+
+  function updateCount(){
+    if(countEl) countEl.textContent=sigCount+' of 16 paths reach p < 0.05';
+  }
+
+  // ---- controls ----
+  if(btnPick) btnPick.addEventListener('click',function(){ pickLeaf((Math.random()*16)|0); });
+  if(btnAll) btnAll.addEventListener('click',function(){ revealedAll=true; updateCount(); draw(); });
+  if(btnReseed) btnReseed.addEventListener('click',function(){
+    seed=(seed+((Math.random()*1e9)>>>0)+2654435761)>>>0;
+    recompute(); picked=-1; revealed.clear(); pulseLeaf=-1;
+    if(revealedAll) updateCount();
+    if(statusEl) statusEl.textContent='New null dataset. Pick a path or reveal all.';
+    draw();
+  });
+
+  // canvas tap-to-pick (mouse + touch)
+  function onPointer(e){
+    const t=(e.touches&&e.touches[0])?e.touches[0]:e;
+    const r=cv.getBoundingClientRect();
+    const px=t.clientX-r.left, py=t.clientY-r.top;
+    let best=-1,bd=24;
+    const lx=colX(4);
+    for(let i=0;i<16;i++){
+      const ly=nodeY(4,i); const d=Math.hypot(px-lx,py-ly);
+      if(d<bd){bd=d;best=i;}
+    }
+    if(best>=0){ e.preventDefault(); pickLeaf(best); }
+  }
+  cv.addEventListener('mousedown',onPointer);
+  cv.addEventListener('touchstart',onPointer,{passive:false});
+
+  // ---- init / resize ----
+  function init(){
+    const cssH=Math.min(Math.max(cv.clientWidth*0.66,340),480);
+    const s=setupCanvas(cv,cssH,2);
+    ctx=s.ctx; w=s.w; h=s.h;
+    draw();
+  }
+  recompute();
+  if(revealedAll) updateCount(); else if(countEl) countEl.textContent='reveal all to count';
+  if(statusEl) statusEl.textContent=REDUCED?'All 16 analyses shown, same data, different defensible choices.':'Pick a path to trace one analyst’s choices.';
+  init();
+
+  let rt=0;
+  window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ init(); },160); });
+})();
+  /* FIG 4 · DANCE OF THE P-VALUES */ (function(){
+  const cv=document.getElementById('danceCanvas'); if(!cv) return;
+  let ctx,w,h;
+  let runs=[];
+  let rng;
+  const SEED=0x9e3779b9|0;
+  let view='p';
+  let timer=null;
+  let lastP=null;
+  const M={l:48,r:22,t:36,b:38};
+
+  const $=id=>document.getElementById(id);
+  function getN(){ const el=$('danceN'); return el?(+el.value):50; }
+  function getD(){ const el=$('danceEffect'); return el?((+el.value)/100):0.4; }
+  function reseed(){ rng=mulberry32(SEED); }
+  reseed();
+
+  function init(){
+    const cssH=Math.min(Math.max(cv.clientWidth*0.55,300),440);
+    const s=setupCanvas(cv,cssH,2);
+    ctx=s.ctx; w=s.w; h=s.h;
+  }
+
+  function replicate(){
+    const n=getN(), d=getD();
+    let sum=0;
+    for(let i=0;i<n;i++) sum+=d+gauss(rng);
+    const m=sum/n;
+    const se=1/Math.sqrt(n);
+    const z=m/se;
+    const p=2*normCdf(-Math.abs(z));
+    return {p:p,m:m,se:se,ci0:m-1.96*se,ci1:m+1.96*se,sig:p<0.05,jit:rng()};
+  }
+
+  function median(arr){
+    if(!arr.length) return NaN;
+    const a=arr.slice().sort((x,y)=>x-y);
+    const k=a.length>>1;
+    return (a.length&1)?a[k]:(a[k-1]+a[k])/2;
+  }
+
+  function updateReadouts(){
+    const pEl=$('danceP'), sEl=$('danceStats');
+    if(pEl) pEl.textContent = (lastP==null)?'n/a':fmtP(lastP);
+    if(sEl){
+      if(!runs.length){ sEl.textContent='no runs yet'; }
+      else{
+        const med=median(runs.map(r=>r.p));
+        const below=runs.filter(r=>r.sig).length/runs.length*100;
+        sEl.textContent='median p = '+fmtP(med)+' · '+Math.round(below)+'% below 0.05';
+      }
+    }
+  }
+
+  function niceStep(x){
+    if(!(x>0)||!isFinite(x)) return 1;
+    const p=Math.pow(10,Math.floor(Math.log10(x)));
+    const f=x/p;
+    let nn; if(f<1.5)nn=1; else if(f<3)nn=2; else if(f<7)nn=5; else nn=10;
+    return nn*p;
+  }
+  function fmtNum(v){
+    if(Math.abs(v)<1e-9) return '0';
+    const a=Math.abs(v);
+    const dec=a<1?2:(a<10?1:0);
+    return v.toFixed(dec);
+  }
+
+  function clearBg(){ ctx.fillStyle=COL.bg2; ctx.fillRect(0,0,w,h); }
+
+  function drawP(){
+    const pl=M.l, pr=w-M.r, pt=M.t, pb=h-M.b;
+    const pw=pr-pl, ph=pb-pt;
+    ctx.textBaseline='alphabetic';
+    ctx.fillStyle=COL.ink3; ctx.font='600 12px IBM Plex Mono'; ctx.textAlign='left';
+    ctx.fillText('p-value  ·  log scale', pl, pt-16);
+    const xOf=p=>pl+clamp(-Math.log10(p)/5,0,1)*pw;
+    const ticks=[{v:1,l:'1'},{v:0.1,l:'0.1'},{v:0.01,l:'0.01'},{v:1e-3,l:'10⁻³'},{v:1e-4,l:'10⁻⁴'},{v:1e-5,l:'10⁻⁵'}];
+    ctx.strokeStyle=COL.ink4; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pl,pb); ctx.lineTo(pr,pb); ctx.stroke();
+    ctx.font='11px IBM Plex Mono'; ctx.textAlign='center';
+    ticks.forEach(t=>{
+      const x=xOf(t.v);
+      ctx.strokeStyle=COL.ink4; ctx.globalAlpha=0.45;
+      ctx.beginPath(); ctx.moveTo(x,pt); ctx.lineTo(x,pb); ctx.stroke();
+      ctx.globalAlpha=1;
+      ctx.fillStyle=COL.ink3; ctx.fillText(t.l,x,pb+16);
+    });
+    const x05=xOf(0.05);
+    ctx.strokeStyle=COL.accent; ctx.lineWidth=1.4; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(x05,pt-2); ctx.lineTo(x05,pb); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=COL.accent; ctx.font='600 11px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText('0.05',x05,pt-4);
+    for(let i=0;i<runs.length;i++){
+      const r=runs[i];
+      const x=xOf(r.p);
+      const y=pt+8+r.jit*(ph-16);
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+      ctx.fillStyle=r.sig?COL.accent:COL.ink4;
+      ctx.globalAlpha=0.82; ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  function drawCI(){
+    const pl=M.l, pr=w-M.r, pt=M.t, pb=h-M.b;
+    const pw=pr-pl, ph=pb-pt;
+    const d=getD();
+    const recent=runs.slice(-40);
+    let lo=Math.min(0,d), hi=Math.max(0,d);
+    if(recent.length){ for(const r of recent){ if(r.ci0<lo)lo=r.ci0; if(r.ci1>hi)hi=r.ci1; } }
+    else { lo=Math.min(0,d)-0.5; hi=Math.max(0,d)+0.5; }
+    const pad=(hi-lo)*0.08||0.2; lo-=pad; hi+=pad;
+    const xOf=m=>pl+(m-lo)/(hi-lo)*pw;
+    ctx.textBaseline='alphabetic';
+    ctx.fillStyle=COL.ink3; ctx.font='600 12px IBM Plex Mono'; ctx.textAlign='left';
+    ctx.fillText('95% intervals  ·  effect estimate', pl, pt-16);
+    ctx.strokeStyle=COL.ink4; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pl,pb); ctx.lineTo(pr,pb); ctx.stroke();
+    ctx.font='11px IBM Plex Mono'; ctx.textAlign='center'; ctx.fillStyle=COL.ink3;
+    const step=niceStep((hi-lo)/5);
+    const start=Math.ceil(lo/step)*step;
+    for(let v=start; v<=hi+1e-9; v+=step){ ctx.fillText(fmtNum(v),xOf(v),pb+16); }
+    const x0=xOf(0);
+    ctx.strokeStyle=COL.ink3; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(x0,pt); ctx.lineTo(x0,pb); ctx.stroke();
+    const xd=xOf(d);
+    ctx.strokeStyle=COL.real; ctx.lineWidth=1.4; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(xd,pt-2); ctx.lineTo(xd,pb); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=COL.real; ctx.font='600 11px IBM Plex Mono'; ctx.textAlign='center';
+    ctx.fillText('true effect',xd,pt-4);
+    const maxRows=40, rowH=ph/maxRows;
+    for(let i=0;i<recent.length;i++){
+      const r=recent[recent.length-1-i];
+      const y=pt+rowH*(i+0.5);
+      const c=r.sig?COL.accent:COL.ink4;
+      ctx.strokeStyle=c; ctx.lineWidth=1.4; ctx.globalAlpha=0.9;
+      const xa=xOf(r.ci0), xb=xOf(r.ci1);
+      ctx.beginPath(); ctx.moveTo(xa,y); ctx.lineTo(xb,y); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(xa,y-2.5); ctx.lineTo(xa,y+2.5);
+      ctx.moveTo(xb,y-2.5); ctx.lineTo(xb,y+2.5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(xOf(r.m),y,2,0,Math.PI*2); ctx.fillStyle=c; ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  function draw(){
+    if(!ctx) return;
+    clearBg();
+    if(view==='p') drawP(); else drawCI();
+  }
+
+  function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+
+  function runBatch(count){
+    stopTimer();
+    if(REDUCED){
+      for(let i=0;i<count;i++){ const r=replicate(); runs.push(r); lastP=r.p; }
+      updateReadouts(); draw(); return;
+    }
+    const visible=inView(cv);
+    let done=0;
+    timer=setInterval(()=>{
+      const r=replicate(); runs.push(r); lastP=r.p; done++;
+      updateReadouts();
+      if(visible()) draw();
+      if(done>=count){ stopTimer(); draw(); }
+    },30);
+  }
+
+  function step(){
+    stopTimer();
+    const r=replicate(); runs.push(r); lastP=r.p;
+    updateReadouts(); draw();
+  }
+
+  function resetAll(){
+    stopTimer(); runs=[]; lastP=null; reseed();
+    updateReadouts(); draw();
+  }
+
+  function setView(v){
+    view=v;
+    const cont=$('danceView');
+    if(cont){ cont.querySelectorAll('[data-view]').forEach(b=>{
+      b.setAttribute('aria-pressed', b.getAttribute('data-view')===v?'true':'false');
+    }); }
+    draw();
+  }
+
+  const play=$('dancePlay'); if(play) play.addEventListener('click',()=>runBatch(50));
+  const stp=$('danceStep'); if(stp) stp.addEventListener('click',step);
+  const rst=$('danceReset'); if(rst) rst.addEventListener('click',resetAll);
+  const nEl=$('danceN'); if(nEl) nEl.addEventListener('input',resetAll);
+  const eEl=$('danceEffect'); if(eEl) eEl.addEventListener('input',resetAll);
+  const vc=$('danceView');
+  if(vc){ vc.querySelectorAll('[data-view]').forEach(b=>{
+    b.addEventListener('click',()=>setView(b.getAttribute('data-view')));
+  }); }
+
+  let rt;
+  window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ init(); draw(); },160); });
+
+  init();
+  setView('p');
+  updateReadouts();
+  if(REDUCED){ runBatch(50); } else { draw(); }
+})();
+  /* FIG 5 · TYPE I / II */ (function(){
+  const cv=document.getElementById('powerCanvas'); if(!cv) return;
+  let ctx,w,h;
+  const cutEl=document.getElementById('powerCut');
+  const effEl=document.getElementById('powerEffect');
+  const aEl=document.getElementById('powerAlpha');
+  const bEl=document.getElementById('powerBeta');
+  const pEl=document.getElementById('powerPow');
+
+  const PAD={l:18,r:18,t:38,b:34};
+  const X_MIN=-3.5, Y_TOP=0.445, N=180;
+
+  function getC(){ return clamp((+cutEl.value)/100, 0.80, 3.40); }
+  function getMu(){ return clamp((+effEl.value)/20, 1.0, 5.5); }
+
+  function init(){
+    const cssH=Math.min(Math.max(cv.clientWidth*0.55,300),440);
+    const s=setupCanvas(cv,cssH,2); ctx=s.ctx; w=s.w; h=s.h;
+  }
+
+  function fmtProb(p){
+    if(!isFinite(p)) p=0;
+    if(p<0.005 && p>0) return fmtP(p);
+    if(p<=0) return '0';
+    let s=p.toFixed(2);
+    return s.replace(/^0\./,'.');
+  }
+
+  // coordinate mapping (depends on current mu)
+  function makeMap(mu){
+    const xMax=mu+3.5;
+    const plotL=PAD.l, plotR=w-PAD.r, plotW=plotR-plotL;
+    const baseY=h-PAD.b, topY=PAD.t;
+    const X=x=>plotL+(x-X_MIN)/(xMax-X_MIN)*plotW;
+    const Y=pd=>baseY-(pd/Y_TOP)*(baseY-topY);
+    return {xMax,plotL,plotR,plotW,baseY,topY,X,Y};
+  }
+
+  function shadeRegion(m,mean,fromX,toX,style,alpha){
+    ctx.save();
+    ctx.globalAlpha=alpha;
+    ctx.fillStyle=style;
+    ctx.beginPath();
+    ctx.moveTo(m.X(fromX), m.baseY);
+    for(let i=0;i<=N;i++){
+      const x=lerp(fromX,toX,i/N);
+      ctx.lineTo(m.X(x), m.Y(normPdf(x-mean)));
+    }
+    ctx.lineTo(m.X(toX), m.baseY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function faintFill(m,mean,style,fromX,toX){
+    ctx.save();
+    ctx.globalAlpha=0.07;
+    ctx.fillStyle=style;
+    ctx.beginPath();
+    ctx.moveTo(m.X(fromX), m.baseY);
+    for(let i=0;i<=N;i++){
+      const x=lerp(fromX,toX,i/N);
+      ctx.lineTo(m.X(x), m.Y(normPdf(x-mean)));
+    }
+    ctx.lineTo(m.X(toX), m.baseY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function strokeCurve(m,mean,style,fromX,toX){
+    ctx.save();
+    ctx.strokeStyle=style;
+    ctx.lineWidth=1.5;
+    ctx.lineJoin='round';
+    ctx.beginPath();
+    for(let i=0;i<=N;i++){
+      const x=lerp(fromX,toX,i/N);
+      const px=m.X(x), py=m.Y(normPdf(x-mean));
+      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function draw(){
+    const mu=getMu(), c=getC();
+    const m=makeMap(mu);
+    const xMax=m.xMax;
+
+    // panel
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle=COL.bg2;
+    ctx.fillRect(0,0,w,h);
+
+    // baseline axis
+    ctx.save();
+    ctx.strokeStyle=COL.ink4;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(m.plotL,m.baseY+0.5);
+    ctx.lineTo(m.plotR,m.baseY+0.5);
+    ctx.stroke();
+    // x ticks at integer z
+    ctx.fillStyle=COL.ink3;
+    ctx.font='11px IBM Plex Mono';
+    ctx.textAlign='center';
+    ctx.textBaseline='top';
+    const lo=Math.ceil(X_MIN), hi=Math.floor(xMax);
+    for(let t=lo;t<=hi;t++){
+      const px=m.X(t);
+      ctx.strokeStyle=COL.ink4;
+      ctx.beginPath();
+      ctx.moveTo(px,m.baseY);
+      ctx.lineTo(px,m.baseY+4);
+      ctx.stroke();
+      ctx.fillText(String(t),px,m.baseY+6);
+    }
+    ctx.restore();
+
+    // faint full fills under each bell
+    faintFill(m,0,COL.evidence,X_MIN,xMax);
+    faintFill(m,mu,COL.real,X_MIN,xMax);
+
+    // shaded error regions
+    // alpha = null bell right of c  -> false alarms (accent)
+    shadeRegion(m,0,c,xMax,COL.accent,0.45);
+    // beta = alt bell left of c -> missed effects (accentSoft)
+    shadeRegion(m,mu,X_MIN,c,COL.accentSoft,0.5);
+
+    // stroked curves on top
+    strokeCurve(m,0,COL.evidence,X_MIN,xMax);
+    strokeCurve(m,mu,COL.real,X_MIN,xMax);
+
+    // cutoff line
+    const cpx=m.X(c);
+    ctx.save();
+    ctx.strokeStyle=COL.accent;
+    ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.moveTo(cpx, m.topY-4);
+    ctx.lineTo(cpx, m.baseY);
+    ctx.stroke();
+    // grab handle
+    ctx.fillStyle=COL.accent;
+    ctx.beginPath();
+    ctx.arc(cpx, m.topY-4, 3.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    // greek labels inside shaded regions
+    ctx.save();
+    ctx.font='600 12px IBM Plex Mono';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    // alpha label: between c and c+~0.8 along null tail
+    const aX=Math.min(c+0.55, xMax-0.3);
+    ctx.fillStyle=COL.accent;
+    ctx.fillText('α', m.X(aX), m.Y(normPdf(aX-0))-14);
+    // beta label: just left of c along alt lower area
+    const bX=Math.max(c-0.55, mu-2.6);
+    ctx.fillStyle=COL.ink2;
+    ctx.fillText('β', m.X(bX), m.Y(normPdf(bX-mu))-14);
+    ctx.restore();
+
+    // H0 / H1 labels over peaks
+    ctx.save();
+    ctx.font='600 12px IBM Plex Mono';
+    ctx.textAlign='center';
+    ctx.textBaseline='bottom';
+    ctx.fillStyle=COL.evidence;
+    ctx.fillText('H₀', m.X(0), m.Y(normPdf(0))-6);
+    ctx.fillStyle=COL.real;
+    ctx.fillText('H₁', m.X(mu), m.Y(normPdf(0))-6);
+    // cutoff caption
+    ctx.font='11px IBM Plex Mono';
+    ctx.fillStyle=COL.accent;
+    ctx.textBaseline='top';
+    const capX=clamp(cpx, m.plotL+22, m.plotR-22);
+    ctx.textAlign='center';
+    ctx.fillText('cutoff', capX, 6);
+    ctx.restore();
+  }
+
+  function update(){
+    draw();
+    const mu=getMu(), c=getC();
+    const a=1-normCdf(c);
+    const b=normCdf(c-mu);
+    const pw=1-b;
+    if(aEl) aEl.textContent=fmtProb(a);
+    if(bEl) bEl.textContent=fmtProb(b);
+    if(pEl) pEl.textContent=fmtProb(pw);
+  }
+
+  // ---- interaction: drag cutoff ----
+  let dragging=false;
+  function pointerX(e){
+    const r=cv.getBoundingClientRect();
+    return e.clientX-r.left;
+  }
+  function xToData(px){
+    const mu=getMu();
+    const xMax=mu+3.5;
+    const plotL=PAD.l, plotW=(w-PAD.r)-PAD.l;
+    return X_MIN+(px-plotL)/plotW*(xMax-X_MIN);
+  }
+  function cutoffPx(){
+    const mu=getMu();
+    const xMax=mu+3.5;
+    const plotL=PAD.l, plotW=(w-PAD.r)-PAD.l;
+    return plotL+(getC()-X_MIN)/(xMax-X_MIN)*plotW;
+  }
+  function setFromPx(px){
+    const x=xToData(px);
+    const c=clamp(x, 0.80, 3.40);
+    cutEl.value=String(Math.round(c*100));
+    update();
+  }
+  function onDown(e){
+    const px=pointerX(e);
+    // grab if near the line, else jump-and-grab anywhere in the plot
+    dragging=true;
+    if(Math.abs(px-cutoffPx())>16) setFromPx(px);
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    setFromPx(pointerX(e));
+    e.preventDefault();
+  }
+  function onUp(){ dragging=false; }
+
+  cv.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove, {passive:false});
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+
+  if(cutEl) cutEl.addEventListener('input', update);
+  if(effEl) effEl.addEventListener('input', update);
+
+  let rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt=setTimeout(function(){ init(); update(); }, 160);
+  });
+
+  init();
+  update();
+})();
+  /* FIG 6 · SURPRISAL */ (function(){
+  const cv=document.getElementById('surpCanvas'); if(!cv) return;
+  const slider=document.getElementById('surpP');
+  const pvEl=document.getElementById('surpPv');
+  const bitsEl=document.getElementById('surpBits');
+  const headsEl=document.getElementById('surpHeads');
+  const isVisible=inView(cv);
+
+  const BG='#0c0a12';
+  const LIGHT='rgba(244,239,230,0.90)';
+  const DIM='rgba(244,239,230,0.52)';
+  const FAINT='rgba(244,239,230,0.30)';
+  const A=RGB.accent;
+  const accRGBA=(a)=>`rgba(${A[0]},${A[1]},${A[2]},${a})`;
+  const S05=-Math.log2(0.05); // 4.3219 reference
+  const CAP_S=14;
+  const FLIP_DUR=360;
+
+  let ctx,w,h;
+  let flipT0=-1, raf=0;
+
+  function computeP(val){
+    const t=(val-1)/999;
+    const log10p=lerp(Math.log10(0.5), Math.log10(0.0001), t);
+    return Math.pow(10, log10p);
+  }
+  function readVal(){ return slider ? +slider.value : 271; }
+
+  function updateReadouts(){
+    const p=computeP(readVal());
+    const S=-Math.log2(p);
+    if(pvEl) pvEl.textContent=fmtP(p);
+    if(bitsEl) bitsEl.textContent=S.toFixed(1);
+    if(headsEl) headsEl.textContent=S.toFixed(1);
+  }
+
+  function init(){
+    const cssH=Math.min(Math.max(cv.clientWidth*0.55,300),440);
+    const s=setupCanvas(cv, cssH, 2);
+    ctx=s.ctx; w=s.w; h=s.h;
+  }
+
+  function rr(x,y,ww,hh,r){
+    r=Math.min(r,ww/2,hh/2);
+    ctx.beginPath();
+    if(ctx.roundRect){ ctx.roundRect(x,y,ww,hh,r); }
+    else{
+      ctx.moveTo(x+r,y);
+      ctx.arcTo(x+ww,y,x+ww,y+hh,r);
+      ctx.arcTo(x+ww,y+hh,x,y+hh,r);
+      ctx.arcTo(x,y+hh,x,y,r);
+      ctx.arcTo(x,y,x+ww,y,r);
+      ctx.closePath();
+    }
+  }
+
+  function drawSegs(segs,cy){
+    ctx.textBaseline='middle';
+    let total=0;
+    for(const s of segs){ ctx.font=s.font; total+=ctx.measureText(s.t).width; }
+    let x=(w-total)/2;
+    ctx.textAlign='left';
+    for(const s of segs){
+      ctx.font=s.font; ctx.fillStyle=s.col;
+      ctx.fillText(s.t,x,cy);
+      x+=ctx.measureText(s.t).width;
+    }
+  }
+
+  function drawCoin(x,y,r,alpha,scaleX){
+    ctx.save();
+    ctx.globalAlpha=alpha;
+    ctx.translate(x,y);
+    ctx.scale(scaleX,1);
+    ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
+    ctx.fillStyle='rgba(244,239,230,0.055)'; ctx.fill();
+    ctx.lineWidth=1.4;
+    ctx.strokeStyle=accRGBA(0.72);
+    ctx.stroke();
+    // inner faint ring
+    ctx.beginPath(); ctx.arc(0,0,r-3,0,Math.PI*2);
+    ctx.strokeStyle=accRGBA(0.22); ctx.lineWidth=1; ctx.stroke();
+    // H glyph, only legible when coin is roughly face-on
+    if(scaleX>0.35){
+      ctx.globalAlpha=alpha*Math.min(1,(scaleX-0.3)/0.5);
+      ctx.fillStyle=accRGBA(0.9);
+      ctx.font=`600 ${Math.round(r*0.95)}px IBM Plex Mono`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('H',0,1);
+    }
+    ctx.restore();
+  }
+
+  function draw(flipProg){
+    ctx.save();
+    ctx.fillStyle=BG;
+    ctx.fillRect(0,0,w,h);
+    ctx.restore();
+
+    const p=computeP(readVal());
+    const S=-Math.log2(p);
+    const full=Math.floor(S);
+    const frac=S-full;
+    const hasPartial=frac>0.02;
+
+    const padX=24;
+
+    // header
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    ctx.font='600 11px IBM Plex Mono';
+    ctx.fillStyle=DIM;
+    ctx.fillText('p-value  →  surprisal', padX, 26);
+    ctx.font='11px IBM Plex Mono';
+    ctx.fillStyle=FAINT;
+    ctx.fillText('how many fair coin-flips would surprise you this much', padX, 42);
+
+    // ---- coin streak ----
+    const coinR=clamp(Math.round(w*0.017),9,13);
+    const spacing=2*coinR+10;
+    const startX=padX+coinR;
+    let cx=startX;
+    let cy=74+coinR;
+    const rowH=2*coinR+16;
+
+    const totalCoins=full+(hasPartial?1:0);
+    const lastIndex=totalCoins-1;
+
+    for(let i=0;i<totalCoins;i++){
+      if(cx+coinR>w-padX){ cx=startX; cy+=rowH; }
+      const isPartial=hasPartial && i===full;
+      const alpha=isPartial ? clamp(frac,0.14,1) : 1;
+      let sx=1;
+      if(flipProg!=null && i===lastIndex){
+        sx=Math.max(0.05,Math.abs(Math.cos(flipProg*Math.PI)));
+      }
+      drawCoin(cx,cy,coinR,alpha,sx);
+      cx+=spacing;
+    }
+    const coinsBottom=cy+coinR;
+
+    // ---- bits bar ----
+    const barH=11;
+    const barMaxW=w-2*padX;
+    const barY=Math.min(coinsBottom+34, h-96);
+    const filled=Math.max(barH, Math.min(S,CAP_S)/CAP_S*barMaxW);
+
+    // track
+    ctx.fillStyle='rgba(244,239,230,0.08)';
+    rr(padX,barY,barMaxW,barH,barH/2); ctx.fill();
+    // fill w/ glow
+    ctx.save();
+    ctx.shadowColor=COL.accent; ctx.shadowBlur=16;
+    ctx.fillStyle=COL.accent;
+    rr(padX,barY,filled,barH,barH/2); ctx.fill();
+    ctx.restore();
+
+    // 0.05 reference tick
+    const xRef=padX+(S05/CAP_S)*barMaxW;
+    ctx.strokeStyle='rgba(244,239,230,0.40)';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(xRef,barY-6); ctx.lineTo(xRef,barY+barH+6); ctx.stroke();
+    ctx.font='600 9px IBM Plex Mono';
+    ctx.fillStyle=DIM; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText('p=.05', xRef, barY-9);
+
+    // scale end label
+    ctx.textAlign='right'; ctx.fillStyle=FAINT; ctx.font='9px IBM Plex Mono';
+    ctx.fillText('14 bits', padX+barMaxW, barY+barH+16);
+    ctx.textAlign='left';
+    ctx.fillText('1 bit', padX, barY+barH+16);
+
+    // ---- main annotation ----
+    const bF='600 15px IBM Plex Mono';
+    const sV=S.toFixed(1);
+    drawSegs([
+      {t:'S = ', col:LIGHT, font:bF},
+      {t:sV+' bits', col:COL.accent, font:bF},
+      {t:'  ≈  '+sV+' heads in a row', col:LIGHT, font:bF}
+    ], barY+barH+44);
+
+    // ---- fixed caption (non-linearity) ----
+    ctx.font='11px IBM Plex Mono';
+    ctx.fillStyle=FAINT;
+    ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText('0.01 → 0.001 adds only ~3.3 bits', w/2, h-16);
+    ctx.textAlign='left';
+  }
+
+  function loop(){
+    if(REDUCED){ raf=0; return; }
+    if(!isVisible()){ raf=0; return; }
+    const now=performance.now();
+    const prog=(now-flipT0)/FLIP_DUR;
+    if(flipT0<0 || prog>=1){ flipT0=-1; draw(null); raf=0; return; }
+    draw(prog);
+    raf=requestAnimationFrame(loop);
+  }
+
+  function onInput(){
+    updateReadouts();
+    if(REDUCED){ draw(null); return; }
+    flipT0=performance.now();
+    if(!raf) raf=requestAnimationFrame(loop);
+  }
+
+  if(slider) slider.addEventListener('input', onInput);
+
+  let rt=0;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt=setTimeout(function(){
+      init();
+      updateReadouts();
+      draw(null);
+    },160);
+  });
+
+  init();
+  updateReadouts();
+  draw(null);
+})();
+
+  /* ================= scroll: reveal, progress, active nav ================= */
+  (function(){
+    const prog=document.getElementById('progress');
+    function onScroll(){const sc=window.scrollY||document.documentElement.scrollTop; const dh=document.documentElement.scrollHeight-window.innerHeight; prog.style.width=(dh>0?(sc/dh*100):0)+'%';}
+    window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+    const items=[...document.querySelectorAll('.reveal')];
+    if('IntersectionObserver' in window && !REDUCED){
+      const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in'); io.unobserve(e.target);}});},{threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+      document.querySelectorAll('section').forEach(sec=>{sec.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=Math.min(i*60,260)+'ms';});});
+      items.forEach(el=>io.observe(el));
+    } else { items.forEach(el=>el.classList.add('in')); }
+    const links=[...document.querySelectorAll('#toc a')], map={}; links.forEach(a=>map[a.dataset.sec]=a);
+    const secs=[...document.querySelectorAll('section[id], header[id]')];
+    if('IntersectionObserver' in window){
+      const io2=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active')); const a=map[e.target.id]; if(a)a.classList.add('active');}});},{threshold:0.01, rootMargin:'-45% 0px -50% 0px'});
+      secs.forEach(s=>io2.observe(s));
+    }
+  })();
+
+  // hand the shared library to the figure modules on window for the workflow build
+  window.__PV_LIB__ = LIB;
+})();
+</script>
+</body>
+</html>

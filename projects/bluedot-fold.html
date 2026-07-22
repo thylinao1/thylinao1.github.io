@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Fold · how a network hid a feature where no straight line could find it</title>
+<meta name="description" content="My solution to BlueDot's Technical AI Safety Puzzle #1. A small classifier represents seven of its eight features as clean linear directions and hides the eighth — country — as a magnitude: the L2 norm of a low-dimensional subspace, built by a ReLU absolute-value fold and confirmed causally with activation patching. Then I try to hide it in stranger ways (an angular ring, two features in superposition, a topological link) and find that a network has a limited budget for representational complexity: the fold is the cheapest non-linear code and the only one that emerges unsupervised. Interactive figures you can drag, fold, and spin." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8;
+  --ink:#15110b; --ink-2:#3b3527; --ink-3:#6b6452; --ink-4:#968d77;
+  --rule:rgba(21,17,11,0.12); --rule-strong:rgba(21,17,11,0.28);
+  /* BlueDot blue is the UI accent; the data spine below matches the analysis figures */
+  --accent:#2558c6; --accent-deep:#16357e; --accent-soft:#a9c0ee; --accent-bright:#4d84f0;
+  --core:#dd7a3c; --core-soft:#eeb98f;   /* country PRESENT — the tight core */
+  --halo:#4a8fd6;                         /* country ABSENT — the surrounding shell */
+  --calm:#2f9e5c;                         /* the seven well-behaved features */
+  --danger:#d23a28; --warn:#b88200;
+  --font-display:"Instrument Serif","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --ease-inout:cubic-bezier(.77,0,.175,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink-2);
+  font-family:var(--font-body); font-size:20px; line-height:1.62;
+  font-weight:400; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+::selection{background:var(--accent-soft); color:var(--ink);}
+
+#progress{position:fixed; top:0; left:0; height:2px; width:0; background:var(--accent); z-index:60; transition:width .12s linear;}
+nav#toc{position:fixed; top:50%; left:28px; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px;}
+nav#toc a{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9b927e; text-decoration:none; display:flex; align-items:center; gap:9px; transition:color .35s var(--ease);}
+nav#toc a .dot{width:6px; height:6px; border-radius:50%; background:rgba(150,141,119,.6); transition:all .35s var(--ease);}
+nav#toc a .lbl{opacity:0; transform:translateX(-4px); transition:all .35s var(--ease); white-space:nowrap;}
+nav#toc a:hover{color:var(--accent);}
+nav#toc a:hover .lbl{opacity:1; transform:none;}
+nav#toc a.active{color:var(--accent);}
+nav#toc a.active .dot{background:var(--accent); transform:scale(1.5);}
+nav#toc a.active .lbl{opacity:1; transform:none;}
+@media(max-width:1220px){nav#toc{display:none;}}
+
+.home-btn{position:fixed; top:20px; left:26px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(37,88,198,0.08); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease-out), color .25s var(--ease-out), border-color .25s var(--ease-out); animation:homeSlide .9s var(--ease) .35s both;}
+.home-btn svg{display:block;}
+.home-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+.home-btn:active{transform:scale(.97);}
+@keyframes homeSlide{from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:none;}}
+@media(max-width:600px){.home-btn{top:14px; left:14px; padding:7px 12px; font-size:10px;}}
+
+.wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+.col{max-width:var(--read); margin:0 auto;}
+section{padding:52px 0;}
+.eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px; display:block;}
+.eyebrow .num{color:var(--accent);}
+
+h1,h2,h3{font-family:var(--font-display); font-weight:400; color:var(--ink); line-height:1.0; margin:0;}
+h2{font-size:clamp(34px,5vw,52px); letter-spacing:-.01em; margin-bottom:18px;}
+h3{font-size:clamp(25px,3.2vw,33px); letter-spacing:-.005em; line-height:1.05; margin:44px 0 10px;}
+p{margin:0 0 22px;}
+.lead{font-family:var(--font-display); font-size:clamp(23px,2.8vw,29px); line-height:1.32; color:var(--ink-2); margin-bottom:26px;}
+strong{font-weight:600; color:var(--ink);}
+em{font-style:italic;}
+a.inline{color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft); transition:border-color .2s var(--ease-out);}
+a.inline:hover{border-color:var(--accent);}
+.country{color:var(--accent); font-weight:600;}
+.core{color:var(--core); font-weight:600;}
+.halo{color:var(--halo); font-weight:600;}
+.calm{color:var(--calm); font-weight:600;}
+.blind{color:var(--danger); font-weight:600;}
+.mono{font-family:var(--font-mono); font-size:.9em;}
+
+/* ---------- dark hero ---------- */
+#hero{padding:0 0 13vh; min-height:100vh; display:flex; flex-direction:column; justify-content:center; position:relative; background:#07060a; isolation:isolate;}
+#hero canvas{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
+#hero::after{content:""; position:absolute; left:0; right:0; bottom:0; height:16vh; z-index:1; background:linear-gradient(180deg, rgba(7,6,10,0), var(--bg)); pointer-events:none;}
+#hero .col{max-width:1080px; position:relative; z-index:2; animation:heroReveal 1.9s var(--ease) .15s both;}
+@keyframes heroReveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+.hero-mark{font-family:var(--font-mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.62); margin-bottom:30px; display:flex; align-items:center; gap:12px;}
+.hero-mark .bd{width:9px; height:9px; border-radius:50%; background:var(--accent-bright); box-shadow:0 0 14px 2px rgba(77,132,240,.8);}
+#hero h1{font-size:clamp(60px,14vw,178px); line-height:.9; letter-spacing:-.03em; color:#f6f2ea; margin-bottom:24px; text-shadow:0 2px 80px rgba(0,0,0,.55);}
+#hero h1 .it{font-style:italic; color:var(--core);}
+.hero-sub{font-family:var(--font-display); font-size:clamp(20px,2.6vw,28px); line-height:1.34; color:rgba(244,239,230,.84); max-width:900px; margin-top:clamp(30px,7vh,110px); margin-bottom:32px;}
+.hero-meta{font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; color:rgba(244,239,230,.64); line-height:1.95;}
+.hero-meta b{color:rgba(244,239,230,.94); font-weight:500;}
+.scrollcue{position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:3; font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.45); display:flex; flex-direction:column; align-items:center; gap:8px;}
+.scrollcue .bar{width:1px; height:34px; background:linear-gradient(rgba(244,239,230,.5),transparent); animation:cue 2.4s var(--ease) infinite;}
+@keyframes cue{0%{transform:scaleY(.3);transform-origin:top;opacity:0}40%{opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+
+/* ---------- figures / panels ---------- */
+figure{margin:34px 0; position:relative;}
+.figure-wide{width:min(980px,calc(100vw - 56px)); margin-left:50%; transform:translateX(-50%);}
+.panel{background:var(--bg-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 18px 40px -28px rgba(21,17,11,.4);}
+.panel.dark{background:#0c0a12; border-color:rgba(255,255,255,.08); box-shadow:0 18px 50px -28px rgba(0,0,0,.6);}
+.panel.dark .legend{color:rgba(244,239,230,.55);}
+.panel.dark .readout{color:rgba(244,239,230,.8);}
+.panel.dark .controls label{color:rgba(244,239,230,.55);}
+figcaption{font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--ink-3); margin-top:14px; letter-spacing:.01em;}
+figcaption b{color:var(--ink-2); font-weight:500;}
+canvas.fig{display:block; width:100%; border-radius:8px; touch-action:pan-y; aspect-ratio:2/1;}
+#probeCanvas,#layerCanvas,#foldCanvas,#patchCanvas{aspect-ratio:16/7;}
+#emergeCanvas,#ladderCanvas{aspect-ratio:16/7.4;}
+#ringCanvas,#superCanvas{aspect-ratio:1/1; max-width:420px; margin:0 auto;}
+#torusCanvas{aspect-ratio:16/7;}
+@media(max-width:600px){#probeCanvas,#layerCanvas,#patchCanvas,#torusCanvas{aspect-ratio:4/3;} #foldCanvas{aspect-ratio:5/6;}}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-top:16px;}
+.controls .grp{display:flex; align-items:center; gap:9px;}
+.controls label{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3);}
+button.btn{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:var(--bg-3); border:1px solid var(--rule-strong); border-radius:7px; padding:8px 14px; cursor:pointer; transition:background .2s var(--ease-out), color .2s var(--ease-out), border-color .2s var(--ease-out), transform .12s var(--ease-out);}
+button.btn:hover{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+button.btn:active{transform:scale(.97);}
+button.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+button.btn.primary:hover{background:var(--accent-deep);}
+input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:4px; background:var(--rule-strong); outline:none; cursor:pointer; width:160px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); box-shadow:0 1px 4px rgba(21,17,11,.35); transition:transform .15s var(--ease-out);}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); cursor:pointer;}
+.panel.dark input[type=range]{background:rgba(255,255,255,.18);}
+.panel.dark input[type=range]::-webkit-slider-thumb{border-color:#0c0a12;}
+.toggle{display:inline-flex; border:1px solid var(--rule-strong); border-radius:8px; overflow:hidden;}
+.toggle button{font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:8px 13px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; transition:background .2s var(--ease-out), color .2s var(--ease-out);}
+.toggle button.on{background:var(--ink); color:var(--bg);}
+.panel.dark .toggle{border-color:rgba(255,255,255,.2);}
+.panel.dark .toggle button{color:rgba(244,239,230,.55);}
+.panel.dark .toggle button.on{background:var(--bg); color:var(--ink);}
+.readout{font-family:var(--font-mono); font-size:12px; color:var(--ink-2);}
+.readout b{color:var(--accent); font-weight:500;}
+
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3); margin-top:14px;}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.legend i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+
+.pull{border-left:2px solid var(--accent); padding:4px 0 4px 22px; margin:30px 0; font-family:var(--font-display); font-size:clamp(22px,2.7vw,27px); line-height:1.34; color:var(--ink);}
+.redline{border-left:2px solid var(--accent); padding-left:22px;}
+.note{background:var(--bg-2); border:1px solid var(--rule); border-left:2px solid var(--accent-soft); border-radius:10px; padding:18px 22px; margin:26px 0; font-size:18px; line-height:1.56;}
+.note .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;}
+.note.caution{border-left-color:var(--warn);}
+.note.caution .tag{color:var(--warn);}
+.note.safety{border-left-color:var(--danger);}
+.note.safety .tag{color:var(--danger);}
+.note p:last-child{margin-bottom:0;}
+.eq{font-family:var(--font-mono); font-size:.9em; background:var(--bg-2); border:1px solid var(--rule); border-radius:6px; padding:2px 8px; white-space:nowrap; color:var(--ink);}
+
+/* ---------- feature chip row ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:9px; margin:26px 0 8px;}
+.chip{font-family:var(--font-mono); font-size:12px; letter-spacing:.03em; padding:7px 13px; border-radius:999px; border:1px solid var(--rule-strong); color:var(--ink-3); background:var(--bg-2); transition:transform .18s var(--ease-out);}
+.chip.hot{border-color:var(--accent); color:#fff; background:var(--accent); box-shadow:0 8px 22px -12px var(--accent);}
+.chip .n{opacity:.5; margin-right:7px;}
+
+/* ---------- stat tiles ---------- */
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:30px 0;}
+.stat{background:var(--bg-2); border:1px solid var(--rule); border-radius:12px; padding:18px 18px 16px; position:relative; overflow:hidden;}
+.stat .k{font-family:var(--font-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-4); display:block; margin-bottom:10px;}
+.stat .v{font-family:var(--font-display); font-size:clamp(30px,4vw,44px); line-height:1; color:var(--ink);}
+.stat .v small{font-size:.42em; color:var(--ink-3); letter-spacing:.02em;}
+.stat .d{font-size:14px; line-height:1.45; color:var(--ink-3); margin-top:9px;}
+.stat.hot .v{color:var(--accent);}
+.stat.warmv .v{color:var(--core);}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);}}
+
+/* ---------- bento (the zoo) ---------- */
+.bento{display:grid; grid-template-columns:repeat(6,1fr); gap:16px; margin:30px 0;}
+.card{background:var(--bg-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 16px 36px -30px rgba(21,17,11,.5); position:relative; overflow:hidden;}
+.card .kick{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; display:block;}
+.card h4{font-family:var(--font-display); font-weight:400; font-size:26px; line-height:1.05; color:var(--ink); margin:0 0 8px;}
+.card p{font-size:16px; line-height:1.5; color:var(--ink-3); margin:0 0 14px;}
+.card p b{color:var(--ink-2);}
+.card canvas.fig{background:#0c0a12;}
+.card .probes{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+.mchip{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.02em; padding:5px 9px; border-radius:6px; border:1px solid var(--rule); color:var(--ink-3); background:var(--bg-3);}
+.mchip b{color:var(--danger); font-weight:600;}
+.mchip.ok b{color:var(--calm);}
+.col-6{grid-column:span 6;} .col-3{grid-column:span 3;} .col-2{grid-column:span 2;}
+@media(max-width:820px){.bento{grid-template-columns:1fr;} .col-6,.col-3,.col-2{grid-column:1/-1;}}
+
+/* ---------- verdict flip (activation patching) ---------- */
+.verdict{display:inline-flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3);}
+.verdict .tag{font-family:var(--font-display); font-size:22px; letter-spacing:0; text-transform:none; padding:2px 12px; border-radius:8px; transition:background .25s var(--ease-out), color .25s var(--ease-out);}
+.verdict .tag.present{background:var(--core); color:#fff;}
+.verdict .tag.absent{background:var(--halo); color:#fff;}
+
+/* ---------- receipts (real analysis figures) ---------- */
+.receipt{margin:30px 0;}
+.receipt-frame{background:#fff; border:1px solid var(--rule-strong); border-radius:12px; padding:12px; box-shadow:0 20px 44px -30px rgba(21,17,11,.55); overflow:hidden;}
+.receipt-frame img{display:block; width:100%; height:auto; border-radius:5px;}
+.receipt .rk{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); display:inline-block; margin-right:8px;}
+
+hr.rule{border:none; border-top:1px solid var(--rule); margin:0;}
+
+/* ---------- glossary ---------- */
+.gloss{display:grid; grid-template-columns:1fr; gap:0; margin-top:20px; border-top:1px solid var(--rule);}
+.gloss .row{display:grid; grid-template-columns:minmax(150px,215px) 1fr; gap:18px; padding:18px 0; border-bottom:1px solid var(--rule); align-items:baseline;}
+.gloss .term{font-family:var(--font-display); font-size:23px; color:var(--ink); line-height:1.1;}
+.gloss .term .alt{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.04em; color:var(--ink-4); text-transform:uppercase; margin-top:5px;}
+.gloss .def{font-size:17px; line-height:1.55; color:var(--ink-3);}
+.gloss .def b{color:var(--ink-2); font-weight:600;}
+@media(max-width:620px){.gloss .row{grid-template-columns:1fr; gap:6px;}}
+
+footer{padding:70px 0 90px; border-top:1px solid var(--rule); margin-top:40px;}
+footer .col{display:flex; flex-direction:column; gap:18px;}
+footer .sig{font-family:var(--font-display); font-size:26px; color:var(--ink);}
+footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); line-height:1.9; letter-spacing:.02em;}
+footer .runbox{font-family:var(--font-mono); font-size:12.5px; line-height:1.7; color:var(--ink-2); background:var(--bg-2); border:1px solid var(--rule); border-radius:10px; padding:16px 18px;}
+footer .runbox .c{color:var(--accent);}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+.reveal.in{opacity:1; transform:none;}
+.figure-wide.reveal{transform:translateX(-50%) translateY(26px);}
+.figure-wide.reveal.in{transform:translateX(-50%);}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1!important; transform:none!important; transition:none!important;}
+  .figure-wide.reveal{transform:translateX(-50%)!important;}
+  #hero .col{animation:none!important;}
+  .home-btn{animation:none!important;}
+  .scrollcue .bar{animation:none;}
+}
+@media(max-width:600px){
+  body{font-size:18px;}
+  section{padding:40px 0;}
+  .wrap{padding:0 20px;}
+  .panel{padding:14px;}
+  .stats{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<a class="home-btn" href="https://thylinao1.github.io/index.html" aria-label="Back to portfolio home">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+  <span>Home</span>
+</a>
+
+<nav id="toc" aria-label="Sections">
+  <a href="#hero" data-sec="hero"><span class="dot"></span><span class="lbl">Top</span></a>
+  <a href="#lineup" data-sec="lineup"><span class="dot"></span><span class="lbl">The line-up</span></a>
+  <a href="#fold" data-sec="fold"><span class="dot"></span><span class="lbl">The fold</span></a>
+  <a href="#proof" data-sec="proof"><span class="dot"></span><span class="lbl">The proof</span></a>
+  <a href="#zoo" data-sec="zoo"><span class="dot"></span><span class="lbl">Stranger hiding places</span></a>
+  <a href="#budget" data-sec="budget"><span class="dot"></span><span class="lbl">The budget</span></a>
+  <a href="#takeaway" data-sec="takeaway"><span class="dot"></span><span class="lbl">The takeaway</span></a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="col">
+      <div class="hero-mark"><span class="bd"></span> BlueDot · Technical AI Safety Puzzle #1 · my solution</div>
+      <h1>The <span class="it">Fold</span></h1>
+      <p class="hero-sub">A small network was handed eight features to represent. Seven of them it laid out neatly, one clean direction each, exactly the way our interpretability tools assume. The eighth it hid. Not by throwing it away, but by folding a straight line in half, so that a linear probe, the workhorse of the whole field, reads pure noise while the feature sits there in plain sight. This is which feature it was, the origami trick the network used to bury it, and what happened when I tried to hide things in stranger ways still.</p>
+      <div class="hero-meta">
+        <b>Needs</b> &nbsp;comfort with vectors and a mental picture of ReLU, no heavy math<br>
+        <b>Reading</b> &nbsp;~12 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;figures you can drag, fold, and spin, next to the real analysis plots
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue"><span>scroll</span><span class="bar"></span></div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- ============ 01 · THE LINE-UP ============ -->
+<section id="lineup">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">01</span> · The line-up</span>
+    <h2 class="reveal">Seven behave, one hides</h2>
+    <p class="lead reveal">The puzzle is small enough to hold in your head. A classifier reads a short scrap of text and flags eight things about it at once, and somewhere in the middle of the network, seven of those eight live as a single clean direction each. One does not. Find it, say how it is stored instead, and then, if you can, hide something in a stranger way than the network did.</p>
+    <p class="reveal">The model is deliberately ordinary. A frozen <span class="mono">all-MiniLM</span> sentence encoder turns the text into a 384-dimensional vector, and a five-layer ReLU network on top predicts the eight labels, each with its own sigmoid, at better than 95% accuracy. The eight features are these, and one of them is the odd one out.</p>
+    <div class="chips reveal">
+      <span class="chip"><span class="n">0</span>number</span>
+      <span class="chip"><span class="n">1</span>question</span>
+      <span class="chip"><span class="n">2</span>color</span>
+      <span class="chip"><span class="n">3</span>food</span>
+      <span class="chip"><span class="n">4</span>sentiment</span>
+      <span class="chip hot"><span class="n">5</span>country</span>
+      <span class="chip"><span class="n">6</span>person</span>
+      <span class="chip"><span class="n">7</span>body_part</span>
+    </div>
+    <p class="reveal">Here is the part that should bother an interpretability person, and it is the reason I think this puzzle is worth more than a puzzle. Point the standard tool at layer L, a linear probe, and ask it whether the network represents <span class="country">country</span>, and it says no. The AUC is <b>0.507</b>, a coin flip. Ask the same tool about the other seven and every one of them answers yes at 0.995 or better. The tool that most published claims of the form &ldquo;the model does or does not represent X&rdquo; quietly rest on is, here, confidently and completely wrong. Swap in a non-linear probe and country comes straight back out at <b>0.99</b>. So the information was never gone. The linear probe simply could not see it.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="probeCanvas" class="fig" aria-label="Interactive: AUC for all eight features under a linear probe versus a non-linear probe. Seven read near 1.0 with either probe; country reads at chance under the linear probe and 0.99 under the non-linear one."></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="probeMode" role="group" aria-label="probe type">
+            <button data-mode="lin" class="on" aria-pressed="true">Linear probe</button>
+            <button data-mode="nl" aria-pressed="false">Non-linear probe</button>
+            <button data-mode="both" aria-pressed="false">Both</button>
+          </div>
+          <span class="readout" id="probeReadout">linear probe · <b id="probeCountry">country 0.507</b> (chance)</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--halo)"></i>linear probe AUC</span>
+          <span><i style="background:var(--accent)"></i>non-linear probe AUC</span>
+          <span style="color:var(--ink-4)">dashed line = chance (0.5)</span>
+        </div>
+      </div>
+      <figcaption><b>One feature refuses the line.</b> Every feature but country is a single readable direction at layer L. Country is the only one where a linear probe and a non-linear probe disagree, and they disagree by almost half an AUC point. Flip to <b>Both</b> to see the gap side by side.</figcaption>
+    </figure>
+
+    <p class="reveal">Before reading anything into that, I wanted to be sure it was not just a weak probe. Six standard linear methods, logistic regression across a range of regularization strengths, a linear SVM, a ridge classifier, all land between 0.50 and 0.53 on country. An RBF-kernel SVM reaches 0.99. Bootstrapping the test set 2,000 times puts the linear AUC at 0.515 with a 95% interval of [0.501, 0.540], the non-linear AUC at 0.993, [0.988, 0.997], and the gap between them at 0.478, [0.452, 0.493], with no overlap at all. This is not an underpowered linear probe missing a faint linear signal. There is no linear signal to miss.</p>
+
+    <h3 class="reveal">A surgical blind spot</h3>
+    <p class="reveal">The next clue is where the blindness lives. If you run the linear probe on country at every stage of the network, it is perfectly readable going in and perfectly readable coming out, and blind at exactly one layer in between. Entering the head it is linear at 1.00, one hidden layer in it is still 1.00, and then at layer L it collapses to 0.51, and the very next layer it is back at 0.99. No other feature does this. Whatever the network is doing to country, it does it inside a single layer and undoes it one layer later, which already tells you this is a construction, not an accident of the encoder.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="layerCanvas" class="fig" aria-label="Interactive: linear-probe AUC for country across network stages, dropping sharply to 0.51 at layer L and recovering to 0.99 at the next layer, while the other seven features stay near 1.0 throughout."></canvas>
+        <div class="controls">
+          <button class="btn primary" id="layerReplay">Replay the drop</button>
+          <span class="readout">country is linear entering and leaving layer L &nbsp;·&nbsp; blind only <b>at L</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--calm)"></i>the other seven (linear throughout)</span>
+          <span><i style="background:var(--accent)"></i>country (linear probe)</span>
+        </div>
+      </div>
+      <figcaption><b>The V.</b> Country is linearly present at the input (1.00) and at the previous hidden layer (0.999), goes dark at layer L (0.51), and is linear again the next layer (0.99). The dip is one layer wide. Something in layer L folds the feature away and the following layer unfolds it.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/1-the-feature-found.png" width="1960" height="728" loading="lazy" decoding="async" alt="Left: bar chart of test AUC for all eight features under a linear and non-linear probe at layer L; every feature is near 1.0 except country, whose linear bar sits at chance. Right: linear-probe AUC for country across stages input, h0, h1, h2, h3 forming a sharp V that bottoms out at h2 (layer L).">
+      </div>
+      <figcaption><span class="rk">the receipt</span> The actual run. Left, the probe bench: country is the lone linear failure. Right, the V across layers, drawn from the model itself.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 02 · THE FOLD ============ -->
+<section id="fold">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">02</span> · The fold</span>
+    <h2 class="reveal">A straight line, folded in half</h2>
+    <p class="reveal">Knowing country is non-linear is the easy half. The interesting half is <em>which</em> non-linear shape, because there are many, and the geometry itself rules most of them out if you let it. I started by throwing away the obvious ones. The two classes share a centroid, the distance between their means is 0.013 and a linear discriminant scores 0.516, so nothing is separated by a mean shift. Country is also statistically independent of the other seven features, absolute correlation at most 0.02, so it is not quietly riding on some other label. The model went out of its way to store this the hard way.</p>
+    <p class="reveal">The single most useful measurement is almost embarrassingly simple. A linear probe on the raw activations scores 0.49. A linear probe on the <em>squared</em> activations, a per-dimension magnitude readout, scores <b>0.935</b>. Squaring is the entire difference between blind and sighted, which means the signal lives in a magnitude and not in any direction. And it is a magnitude in a <em>specific</em> little subspace, not overall activation energy, because the full activation norm is uninformative at 0.54. A handful of dimensions carry it.</p>
+    <div class="stats reveal">
+      <div class="stat hot"><span class="k">linear on raw</span><div class="v">0.49</div><div class="d">a direction reads nothing</div></div>
+      <div class="stat warmv"><span class="k">linear on squared</span><div class="v">0.935</div><div class="d">a magnitude reads it</div></div>
+      <div class="stat"><span class="k">centroid distance</span><div class="v">0.013</div><div class="d">the classes share a center</div></div>
+      <div class="stat"><span class="k">variance ratio</span><div class="v">6.5<small>×</small></div><div class="d">absent spreads wider than present</div></div>
+    </div>
+    <p class="reveal">Now the shape. Along the dominant direction, the <span class="halo">absent</span> class has roughly 6.5 times the variance of the <span class="core">present</span> class. Present sits as a tight core at the center, absent forms a loose shell around it. And the covariance-difference spectrum has a single dominant eigenvalue, which is the detail that pins it down: an XOR or checkerboard code would leave two eigenvalues of opposite sign, an isotropic shell would leave many comparable ones. One eigenvalue means one axis, one fold.</p>
+
+    <div class="note reveal">
+      <span class="tag">The mechanism, in one line</span>
+      <p>Country arrives at layer L as an ordinary signed feature <span class="eq">s</span>. The layer holds units that read <span class="eq">+s</span> and units that read <span class="eq">&minus;s</span>, and because <span class="eq">ReLU(s) + ReLU(&minus;s) = |s|</span>, adding the two opposing projections throws the sign away and keeps the magnitude. That is the fold. It bends the signed line onto a radial shell, present near the origin and absent out on the surface, and the next layer inverts it so country is linear again at 0.99.</p>
+    </div>
+
+    <p class="reveal">Drag the slider below and watch the identity <span class="eq">ReLU(s)+ReLU(&minus;s)=|s|</span> do its work. On the left the two ReLU units trade off as you move: for positive <span class="eq">s</span> only the <span class="eq">+s</span> unit fires, for negative <span class="eq">s</span> only the <span class="eq">&minus;s</span> unit fires, and their sum traces a perfect V. On the right is what that does to the data, your value landing on a radial shell at distance <span class="eq">|s|</span>. Notice that <span class="eq">s</span> and <span class="eq">&minus;s</span> drop onto the exact same place. The fold cannot tell them apart, and that is the point: it has erased the one thing a linear probe needs.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="foldCanvas" class="fig" aria-label="Interactive: on the left, the functions ReLU(+s), ReLU(-s) and their sum |s| with a draggable marker; on the right, a radial view where the chosen s lands on a shell at distance |s|, with present clustered at the core and absent on the shell."></canvas>
+        <div class="controls">
+          <div class="grp"><label for="foldS">signed coordinate&nbsp;s</label><input type="range" id="foldS" min="-300" max="300" value="145"></div>
+          <span class="readout">ReLU(+s)=<b id="foldPos">1.45</b> · ReLU(&minus;s)=<b id="foldNeg">0.00</b> · |s|=<b id="foldAbs">1.45</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--core)"></i>present (tight core)</span>
+          <span><i style="background:var(--halo)"></i>absent (outer shell)</span>
+          <span style="color:rgba(244,239,230,.5)">drag s · watch s and &minus;s fold to the same radius</span>
+        </div>
+      </div>
+      <figcaption><b>The absolute value, built from two ReLUs.</b> The sum of an up-ramp and a down-ramp is a V, the absolute value. Feed a signed feature through it and every pair of opposite values collapses to one radius. Present, packed near zero, lands in the core; absent, spread wide, lands on the shell.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/2-the-fold-geometry.png" width="1960" height="1540" loading="lazy" decoding="async" alt="Four panels. A: along the fold axis both classes share the same mean, linear AUC 0.49. B: a 2D view showing present as a dense core and absent as a surrounding halo at a shared centroid. C: linear fails at 0.49 while a 1-D fold, a magnitude, and three ReLU units succeed up to 0.98. D: on the code dimensions, the present class variance collapses toward a point.">
+      </div>
+      <figcaption><span class="rk">the receipt</span> Same mean, different spread (A); core-and-halo geometry (B); only non-linear magnitude readouts work (C); the present class squeezes the code dimensions to a point (D).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 03 · THE PROOF ============ -->
+<section id="proof">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">03</span> · The proof</span>
+    <h2 class="reveal">Make the model change its mind</h2>
+    <p class="reveal">Everything up to here is a picture of the activations, and a picture can lie. Maybe the core-and-shell geometry is real but the network reads country off something else entirely, and the fold is a coincidence I have talked myself into. The only way to settle that is to stop looking and start intervening. So I did: pick the fold coordinate, overwrite it by hand with a value <span class="eq">&tau;</span> of my choosing, and read the country logit out through the rest of the network, unchanged.</p>
+    <p class="reveal">The result is as clean as this kind of thing ever gets. The country logit is an <em>even</em> function of <span class="eq">&tau;</span>, an inverted U that peaks at <span class="eq">&tau;=0</span>. Drive the magnitude to zero and the model predicts <span class="core">present</span>. Push it out, in either direction, and it flips to <span class="core">absent</span>, both directions, symmetrically. The readout depends on <span class="eq">|&tau;|</span> and ignores the sign entirely, which is the fold restated as a fact about the model's behavior rather than about my choice of axes. Move the slider and watch the verdict flip.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="patchCanvas" class="fig" aria-label="Interactive: activation patching. Setting the fold coordinate to tau and reading the country logit produces an even, inverted-U curve peaking at tau equals zero. A draggable marker shows the logit and the resulting prediction, present near zero and absent for large magnitudes in either direction."></canvas>
+        <div class="controls">
+          <div class="grp"><label for="patchTau">intervened coordinate&nbsp;&tau;</label><input type="range" id="patchTau" min="-300" max="300" value="20"></div>
+          <span class="verdict">the model now predicts <span class="tag present" id="patchVerdict">present</span></span>
+          <span class="readout">logit=<b id="patchLogit">1.9</b> · p=<b id="patchP">0.87</b></span>
+        </div>
+        <div class="legend">
+          <span style="color:rgba(244,239,230,.6)">your &tau;</span>
+          <span style="color:rgba(244,239,230,.4)">its mirror &minus;&tau; lands on the same logit</span>
+        </div>
+      </div>
+      <figcaption><b>Causal, not correlational.</b> I set the magnitude and the model's own prediction follows the absolute value. Zero magnitude reads present, large magnitude in either direction reads absent. A signed code would be a slope through the origin; an even inverted-U is the signature of <span class="eq">|&tau;|</span>.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/3-the-fold-proof.png" width="1820" height="728" loading="lazy" decoding="async" alt="Left: histogram of the fold coordinate showing both classes with the same mean but present a tight core, standard deviation 0.62, versus absent 1.28. Right: the country logit read through the network as a function of the intervened coordinate tau, an even inverted-U peaking at tau equals zero.">
+      </div>
+      <figcaption><span class="rk">the receipt</span> The present class is a tight core in the fold coordinate (left), and intervening on that coordinate bends the country logit into an even inverted-U (right).</figcaption>
+    </figure>
+    <p class="reveal pull">At layer L, country is the magnitude of a low-dimensional projection, a distance from a shared center, built by a ReLU absolute value and undone one layer later.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 04 · THE ZOO ============ -->
+<section id="zoo">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">04</span> · Stranger hiding places</span>
+    <h2 class="reveal">How weird can it get?</h2>
+    <p class="reveal">The fold is the network's own trick, and it is elegant, but it is also the mildest thing a non-linearity can do. The open-ended part of the puzzle asked whether I could build something weirder, so I had to decide what weirder even means. My bar was this: a representation is stranger if it defeats <em>more</em> of the standard interpretability tools while the feature stays fully decodable, and if it takes more probe capacity to pull back out. That is the property an audit actually cares about, because a linear-probe audit pointed at any of the three models below would report that country is not represented, and every one of them predicts country at 86 to 99 percent.</p>
+    <p class="reveal">Each runs on the same frozen encoder. I shape a small subspace of one hidden layer into a target geometry with an auxiliary objective, while the head still has to classify all eight features, and the exotic feature is decodable only from the shaped subspace. Three hiding places, each worse than the fold for a probe.</p>
+
+    <div class="bento">
+      <article class="card col-3 reveal">
+        <span class="kick">W1 · metric, by angle</span>
+        <h4>An angular ring</h4>
+        <p>Country becomes the <b>parity</b> of which of eight clusters on a ring you land in. A nuisance variable picks the cluster pair, so both classes fill the whole ring at the same radius. Country is now the <b>fourth angular harmonic</b>, and a quadratic probe only reaches the second, so it is blind.</p>
+        <canvas id="ringCanvas" class="fig" aria-label="Eight clusters arranged on a ring, colored by parity of the cluster index, slowly rotating."></canvas>
+        <div class="probes">
+          <span class="mchip">linear <b>0.51</b></span>
+          <span class="mchip">quadratic <b>0.51</b></span>
+          <span class="mchip">radial <b>0.51</b></span>
+          <span class="mchip ok">matched harmonic <b>0.97</b></span>
+        </div>
+      </article>
+      <article class="card col-3 reveal">
+        <span class="kick">W2 · two features, one plane</span>
+        <h4>Superposition</h4>
+        <p>One 2-D plane stores <b>two</b> features at once, country at the <b>sixth</b> harmonic and food at the <b>third</b>. Color by country and it alternates fast; color by food and it alternates slow. Each is at chance for linear, quadratic, and radial probes, and recovers only at its own frequency.</p>
+        <canvas id="superCanvas" class="fig" aria-label="A ring of points that can be recolored by country at the sixth harmonic or by food at the third harmonic, showing two features stored in one plane."></canvas>
+        <div class="controls" style="margin-top:12px">
+          <div class="grp toggle" id="superMode" role="group" aria-label="color by">
+            <button data-f="country" class="on" aria-pressed="true">Color by country</button>
+            <button data-f="food" aria-pressed="false">Color by food</button>
+          </div>
+        </div>
+        <div class="probes">
+          <span class="mchip">country lin <b>0.51</b> · matched <b class="ok" style="color:var(--calm)">0.94</b></span>
+          <span class="mchip">food lin <b>0.57</b> · matched <b class="ok" style="color:var(--calm)">0.94</b></span>
+        </div>
+      </article>
+      <article class="card col-6 reveal">
+        <span class="kick">W3 · topological</span>
+        <h4>A knot you can't cut with a plane</h4>
+        <p>The first two hide country by distance and angle. This one hides it in <b>topology</b>. I shape a 3-D subspace so the two classes become the two loops of a <b>(2,6) torus link</b>, wound on a torus and linked through each other, sharing a center and a radius. No plane, quadric, or sphere can separate two linked loops without one passing through it, so linear, quadratic, and radial probes all sit near 0.51. The proof that it is a genuine link, not a curved blob, is the <b>Gauss linking number</b> computed on the model's own learned activations: <b>&minus;3.01</b>, a clean integer, stable from &minus;3.00 to &minus;3.07 across bin counts, and exactly zero on unlinked controls. A nonzero linking number is a topological invariant, so only a network deep enough to unlink the manifold can read the feature. Drag to spin it.</p>
+        <canvas id="torusCanvas" class="fig" aria-label="A rotating (2,6) torus link: two closed loops wound on a torus and linked through each other. Draggable to change the viewing angle." style="aspect-ratio:16/7"></canvas>
+        <div class="probes">
+          <span class="mchip">linear <b>0.51</b></span>
+          <span class="mchip">quadratic <b>0.51</b></span>
+          <span class="mchip">radial <b>0.51</b></span>
+          <span class="mchip ok">deep MLP <b>0.96</b></span>
+          <span class="mchip ok">Gauss linking number <b style="color:var(--core)">&minus;3.01</b></span>
+        </div>
+      </article>
+    </div>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/4-ring-code.png" width="1820" height="840" loading="lazy" decoding="async" alt="W1 ring code. Left: points on a ring colored by country, showing eight interleaved clusters where country is the parity; linear, quadratic, and radial probes all score about 0.51 while a deep probe reaches 0.97. Right: the same ring colored by template group, the nuisance variable that selects which cluster pair an example lands in.">
+      </div>
+      <figcaption><span class="rk">the receipt · W1</span> Country as ring parity. The template picks the cluster pair; country flips the parity within it, so both classes cover the whole ring at one radius.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/5-two-features-one-plane.png" width="1820" height="840" loading="lazy" decoding="async" alt="W2 superposition. The same ring of points colored two ways: by country at the sixth harmonic, alternating quickly, and by food at the third harmonic, alternating slowly. Linear, quadratic, and radial probes are near chance for both; a matched-harmonic probe recovers each at about 0.94.">
+      </div>
+      <figcaption><span class="rk">the receipt · W2</span> One plane, two features, at different angular frequencies. No linear or quadratic probe can separate them; a frequency-matched readout can.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/6-linked-loops.png" width="2100" height="910" loading="lazy" decoding="async" alt="W3 topological link, shown from two 3D viewing angles: two loops wound on a torus and linked through each other, Gauss linking number minus 3. A flat 2D projection at right shows the two classes fully overlapping, so no plane, quadric, or sphere separates them.">
+      </div>
+      <figcaption><span class="rk">the receipt · W3</span> Two linked loops from two angles, and a flat projection where the classes overlap completely. The linking number, computed on the model's activations, comes out a clean integer.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 05 · THE BUDGET ============ -->
+<section id="budget">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">05</span> · The budget</span>
+    <h2 class="reveal">Weirdness doesn't come for free</h2>
+    <p class="reveal">There is an obvious objection to the whole zoo, and it is the right one: I <em>forced</em> every one of those geometries with an auxiliary loss, so maybe a network left to itself would never build such a thing, and I have just proven that I can draw knots, not that networks do. So I tested it as directly as I could. I trained country with the ordinary classification loss but added a penalty on the class-conditional mean and covariance of the subspace, which makes the feature unreadable to linear and quadratic probes by construction, and, crucially, I specified <em>no target shape</em>. If a network can discover an exotic non-linear code on its own, there should be some penalty strength where the standard probes go blind but a deep probe still finds country. A window where weirdness pays for itself.</p>
+    <p class="reveal">There is no such window. The moment the penalty is strong enough to beat the linear probe, the deep probe and the model's own accuracy fall with it, straight to chance, together. The network never re-encodes country in a cleverer code. It <b>drops the feature</b>.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="emergeCanvas" class="fig" aria-label="Interactive: as a moment-matching penalty increases, the linear probe, quadratic probe, deep probe, and model accuracy for country all collapse together to chance. There is no penalty strength where the deep probe stays high while the linear probe fails."></canvas>
+        <div class="controls">
+          <button class="btn primary" id="emergeReplay">Replay the sweep</button>
+          <span class="readout">no gap ever opens between the <b>deep probe</b> and the linear one</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>linear probe</span>
+          <span><i style="background:var(--halo)"></i>quadratic probe</span>
+          <span><i style="background:var(--core)"></i>deep probe</span>
+          <span><i style="background:var(--calm)"></i>model accuracy</span>
+        </div>
+      </div>
+      <figcaption><b>Exotic codes don't arise for free.</b> If a hidden non-linear code were cheap to discover, the deep-probe line would stay high while the linear line dropped, opening a gap. It never does. The network jumps straight from &ldquo;linear and decodable&rdquo; to &ldquo;gone.&rdquo;</figcaption>
+    </figure>
+
+    <p class="reveal">The reading I trust is a description-length one. Keeping a topologically complex manifold alive costs more parameters than the feature ever saves in loss, so under ordinary training the model would rather forget country than tie a knot to hide it. That is exactly why the fold is the code that emerges: an absolute value is the <em>cheapest</em> non-linear encoding there is, one op, and everything fancier has to be paid for out of a budget the network does not want to spend.</p>
+    <p class="reveal">You can put a number on the cheapness. I measured the smallest non-linear probe, counted in hidden ReLU units, needed to recover country to AUC 0.90 from each representation. The fold needs about three units, the ring eight, the torus link twelve, and the two-feature superposition more than twenty-four. The codes line up on a single axis of decoding complexity, and the cheapest to decode is the only one that ever showed up unforced.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="ladderCanvas" class="fig" aria-label="A ladder of decoding complexity: the fold needs about three ReLU units to reach AUC 0.90, the ring eight, the torus link twelve, and the superposition more than twenty-four. The fold sits inside a reachable frontier; the others sit beyond it, only reachable when the geometry is explicitly imposed."></canvas>
+        <div class="controls">
+          <button class="btn primary" id="ladderReplay">Grow the bars</button>
+          <span class="readout">left of the frontier <b>emerges unsupervised</b> · right of it, only when forced</span>
+        </div>
+      </div>
+      <figcaption><b>The difficulty ladder.</b> Probe capacity needed to read each code. The fold sits at the reachable end, just inside the frontier where training will find it on its own. Every geometry I built by hand sits past that line, both harder to decode and out of reach without an explicit target.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/7-weirdness-doesnt-emerge.png" width="1120" height="728" loading="lazy" decoding="async" alt="Line plot: as the moment-matching penalty lambda increases, the linear probe, quadratic probe, deep probe, and model accuracy for country all drop together from near 1.0 to chance around lambda 4 and stay there. No window where the deep probe stays high while the probes fail.">
+      </div>
+      <figcaption><span class="rk">the receipt</span> The emergence test. Every line falls together. There is no regime where a hidden code survives that a linear probe can't already see.</figcaption>
+    </figure>
+    <figure class="receipt reveal">
+      <div class="receipt-frame">
+        <img src="assets/bluedot/8-difficulty-ladder.png" width="1176" height="756" loading="lazy" decoding="async" alt="Line plot of held-out country AUC against probe capacity in ReLU units for four codes: the original fold reaches 0.9 at about three units, the arc-parity ring at eight, the topological link at twelve, and superposition beyond twenty-four.">
+      </div>
+      <figcaption><span class="rk">the receipt</span> Country AUC against probe capacity. The fold (green) is readable with a handful of units; every constructed code demands far more.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 06 · THE TAKEAWAY ============ -->
+<section id="takeaway">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">06</span> · The takeaway</span>
+    <h2 class="reveal">What a blind probe costs</h2>
+    <p class="reveal">Strip the puzzle down and it is a tiny, clean existence proof: a feature can be fully present in a network, fully used by it, and read out at 99% by the right probe, while the linear probe, the tool a great deal of interpretability leans on, reports chance. If you had audited this model with the standard method you would have written down &ldquo;does not represent country&rdquo; and moved on, and you would have been wrong about a feature the model uses on every single input.</p>
+    <p class="reveal">The budget finding is the part that is quietly reassuring, and the part that is quietly worrying, at the same time. Reassuring, because the cheapest place a feature can hide, the fold, is also the one a second-order probe catches: run your linear probe on the squared activations and the fold lights up at 0.94. That is a small, cheap addition to an audit. Worrying, because the reason the exotic codes never emerged in my test is that nothing was <em>pushing</em> for them, and the one pressure I left out is the one that matters for safety. A training process rewarded for evading an interpretability check is exactly the force that would pay the budget the fold never had to.</p>
+    <div class="note safety reveal">
+      <span class="tag">Why this sits in an AI-safety course</span>
+      <p>Interpretability is a lot of our plan for catching a model doing something we would not want. That plan mostly assumes features are linear, or at least that our probes can see them. This is a worked, reproducible case where that assumption fails completely and silently, and a first measurement of how much a network has to <em>want</em> to make it fail worse.</p>
+    </div>
+
+    <h3 class="reveal">How I actually got here</h3>
+    <p class="reveal">The path was not clever so much as it was a matter of letting each measurement narrow the next. First I probed every feature at every layer, linear and non-linear, and the V for country fell out immediately: one feature, one layer, blind only there. Then the question was which non-linear shape, and I let the geometry throw candidates out rather than guessing. The shared centroid killed anything mean-based. The squared-activation probe scoring 0.94 said &ldquo;second order, a magnitude.&rdquo; The single dominant eigenvalue in the covariance-difference spectrum said &ldquo;one axis, a fold,&rdquo; not an XOR and not a shell. Activation patching then turned that picture into a cause I could stand behind. The whole of Task 3 was really me asking how far past the fold you can push a feature, and the emergence test was the part that genuinely surprised me, because I went in expecting to find a window where weirdness pays off, and there just wasn't one.</p>
+    <p class="reveal">I tried to break every claim before believing it. Every linear method I could think of left country at chance while non-linear ones recovered it, so it is not an underpowered probe. I cross-validated the magnitude probe five ways and bootstrapped the headline numbers for intervals. For the topological model I checked that the linking number is stable across bin counts and drops to exactly zero on unlinked controls. And the honest limitations: the Task 3 models classify country at 86 to 99 percent, under the original model's 96, because a code that is harder for a probe to decode is harder for the model's own head too; and W2's food feature keeps a small linear leak at 0.57 rather than a clean 0.50, a residue of uneven template-group sizes.</p>
+
+    <h3 class="reveal">The name map</h3>
+    <div class="gloss reveal">
+      <div class="row"><div class="term">The fold<span class="alt">the answer</span></div><div class="def"><b>ReLU(s) + ReLU(&minus;s) = |s|.</b> Two opposing ReLU units add up to an absolute value, folding a signed feature onto a magnitude and discarding the sign a linear probe would need.</div></div>
+      <div class="row"><div class="term">Layer L<span class="alt">where it hides</span></div><div class="def">The post-ReLU output of hidden layer 2. Country is linear entering it and leaving it, and non-linear only at L itself.</div></div>
+      <div class="row"><div class="term">Linear probe<span class="alt">the blind tool</span></div><div class="def">A single direction fit to read a feature off activations. Scores country at chance (0.507) despite the feature being fully present.</div></div>
+      <div class="row"><div class="term">Activation patching<span class="alt">the proof</span></div><div class="def">Overwriting the fold coordinate with a chosen value and reading the logit downstream. The even inverted-U response is causal evidence for <span class="eq">|&tau;|</span>.</div></div>
+      <div class="row"><div class="term">Gauss linking number<span class="alt">W3's invariant</span></div><div class="def">An integer counting how many times two loops wind through each other. Computed on the model's activations it comes out &minus;3.01, proving a genuine topological link.</div></div>
+      <div class="row"><div class="term">The budget<span class="alt">the real finding</span></div><div class="def">A network has limited room for representational complexity. The fold is the cheapest non-linear code and the only one that emerges unsupervised; everything stranger has to be paid for.</div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="col">
+      <div class="runbox">
+        <div>Everything runs on the frozen <span class="c">all-MiniLM</span> encoder plus the provided head, embeddings cached once.</div>
+        <div style="margin-top:8px">$ <span class="c">pip install -r requirements.txt</span></div>
+        <div>$ <span class="c">bash run_all.sh</span></div>
+        <div style="margin-top:8px; color:var(--ink-3)"># first run downloads the encoder and caches embeddings; re-runs are immediate</div>
+      </div>
+      <div class="sig">The fold was the cheapest way to hide.</div>
+      <div class="meta">
+        BlueDot Impact · Technical AI Safety Puzzle #1 · submitted 2026<br>
+        Answer: <b>country</b>, encoded at layer L as the magnitude of a low-dimensional projection via a ReLU absolute-value fold.<br>
+        Figures are from the actual runs, reproducible with <span style="color:var(--accent)">run_all.sh</span>. Written by Maksim.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===================================================================
+   The Fold — interactive figures
+   Self-contained, no libraries. Canvas + rAF, DPR-aware.
+   =================================================================== */
+(function(){
+  "use strict";
+  const RM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- chrome: progress, toc scrollspy, reveal ---------- */
+  const progress = document.getElementById("progress");
+  function onScroll(){
+    const st = window.pageYOffset || document.documentElement.scrollTop;
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h > 0 ? (st / h) * 100 : 0) + "%";
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  const secs = Array.from(document.querySelectorAll("section[id], header[id]"));
+  const tocLinks = Array.from(document.querySelectorAll("nav#toc a"));
+  const tocMap = {};
+  tocLinks.forEach(a => tocMap[a.dataset.sec] = a);
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        tocLinks.forEach(a => a.classList.remove("active"));
+        const a = tocMap[e.target.id];
+        if(a) a.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-45% 0px -50% 0px"});
+  secs.forEach(s => spy.observe(s));
+
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); revealObs.unobserve(e.target); } });
+  }, {rootMargin:"0px 0px -8% 0px", threshold:0.05});
+  document.querySelectorAll(".reveal").forEach(el => revealObs.observe(el));
+
+  /* ---------- canvas helper ---------- */
+  function hidpi(canvas){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(rect.width));
+    const h = Math.max(1, Math.round(rect.height || (w * 0.5)));
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return {ctx, w, h};
+  }
+  // deterministic PRNG so figures are stable across resizes
+  function rng(seed){ let s = seed >>> 0; return function(){ s = (s*1664525 + 1013904223) >>> 0; return s/4294967296; }; }
+  function gauss(r){ let u=0,v=0; while(u===0)u=r(); while(v===0)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  const css = getComputedStyle(document.documentElement);
+  const C = k => css.getPropertyValue(k).trim();
+  const easeOut = t => 1 - Math.pow(1-t, 3);
+  const easeInOut = t => t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+  // register a figure that redraws on resize and (optionally) when in view
+  function mount(id, draw, opts){
+    const canvas = document.getElementById(id);
+    if(!canvas) return null;
+    opts = opts || {};
+    const state = {canvas, draw, inView:false, started:false, raf:0};
+    function render(){ const g = hidpi(canvas); draw(g, state); }
+    state.render = render;
+    let scheduled = false;
+    const ro = new ResizeObserver(() => { if(scheduled) return; scheduled = true; requestAnimationFrame(()=>{ scheduled=false; render(); if(state.onResize) state.onResize(); }); });
+    ro.observe(canvas);
+    if(opts.whenVisible){
+      const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ state.inView=true; if(!state.started){ state.started=true; opts.whenVisible(state); } } }), {threshold:0.25});
+      io.observe(canvas);
+    }
+    requestAnimationFrame(render);
+    return state;
+  }
+
+  /* ---------- lightweight figure harness ---------- */
+  function figure(id){
+    const canvas = document.getElementById(id);
+    if(!canvas) return null;
+    let g = hidpi(canvas);
+    const cbs = [];
+    let sched = false;
+    new ResizeObserver(() => {
+      if(sched) return; sched = true;
+      requestAnimationFrame(() => { sched = false; g = hidpi(canvas); cbs.forEach(f => f(g)); });
+    }).observe(canvas);
+    return {
+      canvas,
+      get ctx(){ return g.ctx; }, get w(){ return g.w; }, get h(){ return g.h; },
+      onResize(cb){ cbs.push(cb); }
+    };
+  }
+  function toggleGroup(id, onChange){
+    const grp = document.getElementById(id); if(!grp) return;
+    grp.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      grp.querySelectorAll("button").forEach(x => { x.classList.remove("on"); x.setAttribute("aria-pressed","false"); });
+      b.classList.add("on"); b.setAttribute("aria-pressed","true");
+      onChange(b.dataset);
+    }));
+  }
+  function tween(dur, cb, done){
+    const s = performance.now();
+    (function step(n){
+      const t = clamp((n - s) / dur, 0, 1);
+      cb(easeOut(t));
+      if(t < 1) requestAnimationFrame(step); else if(done) done();
+    })(performance.now());
+  }
+  // ambient animation gated to visibility
+  function ambient(fig, frame){
+    let raf = 0, vis = false;
+    function step(now){ frame(now / 1000); raf = requestAnimationFrame(step); }
+    if(RM){ frame(0); fig.onResize(() => frame(performance.now()/1000)); return; }
+    new IntersectionObserver(es => es.forEach(e => {
+      if(e.isIntersecting && !vis){ vis = true; if(!raf) raf = requestAnimationFrame(step); }
+      else if(!e.isIntersecting && vis){ vis = false; if(raf){ cancelAnimationFrame(raf); raf = 0; } }
+    }), {threshold:0.05}).observe(fig.canvas);
+    fig.onResize(() => { if(!vis) frame(performance.now()/1000); });
+  }
+  function dot(ctx, x, y, r, fill, glow){
+    if(glow){ ctx.save(); ctx.shadowColor = glow; ctx.shadowBlur = r*3.2; }
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = fill; ctx.fill();
+    if(glow) ctx.restore();
+  }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+
+  /* =========================================================
+     HERO — the fold: signed → folded → radial, looping
+     ========================================================= */
+  (function(){
+    const fig = figure("heroCanvas"); if(!fig) return;
+    const r = rng(7), N = 320, pts = [];
+    for(let i=0;i<N;i++){
+      const present = (i % 2) === 0;
+      let s = (present ? gauss(r)*0.62 : gauss(r)*1.28);
+      s = clamp(s, -3.3, 3.3);
+      pts.push({ present, s, theta: r()*6.2832, band: (r()*2-1) });
+    }
+    const cCore = C("--core"), cHalo = C("--halo");
+    const seg = [
+      [0.00,0.14,"signed","signed"],
+      [0.14,0.34,"signed","fold"],
+      [0.34,0.46,"fold","fold"],
+      [0.46,0.68,"fold","radial"],
+      [0.68,0.86,"radial","radial"],
+      [0.86,1.00,"radial","signed"]
+    ];
+    function coord(p, sys, w, h){
+      const uni = Math.min(w,h)*0.40, cx = w/2, cy = h/2;
+      if(sys === "signed") return [cx + (p.s/3.4)*(w*0.44), cy + p.band*(h*0.26)];
+      if(sys === "fold")   return [cx + (Math.abs(p.s)/3.4)*uni, cy + p.band*(h*0.10)];
+      const rad = (Math.abs(p.s)/3.4)*uni;
+      return [cx + rad*Math.cos(p.theta), cy + rad*Math.sin(p.theta)];
+    }
+    function frame(t){
+      const ctx = fig.ctx, w = fig.w, h = fig.h;
+      ctx.clearRect(0,0,w,h);
+      const period = 10, ph = RM ? 0.77 : ((t % period)/period);
+      let a="radial", b="radial", k=1;
+      for(const s of seg){ if(ph>=s[0] && ph<s[1]){ a=s[2]; b=s[3]; k = easeInOut((ph-s[0])/(s[1]-s[0])); break; } }
+      const radialness = (a==="radial"?1:0)*(1-k) + (b==="radial"?1:0)*k;
+      for(const p of pts){
+        const A = coord(p, a, w, h), B = coord(p, b, w, h);
+        const x = lerp(A[0],B[0],k), y = lerp(A[1],B[1],k);
+        const isCore = p.present && Math.abs(p.s) < 0.9;
+        const col = p.present ? cCore : cHalo;
+        ctx.globalAlpha = p.present ? 0.92 : 0.62;
+        dot(ctx, x, y, p.present?1.9:1.6, col, (isCore && radialness>0.4) ? cCore : null);
+      }
+      ctx.globalAlpha = 1;
+    }
+    ambient(fig, frame);
+  })();
+
+  /* =========================================================
+     §01 — probe bench: 8 features, linear vs non-linear
+     ========================================================= */
+  (function(){
+    const fig = figure("probeCanvas"); if(!fig) return;
+    const feats = [
+      ["number",0.997,0.997],["question",1.0,1.0],["color",0.997,0.996],["food",0.994,0.993],
+      ["sentiment",0.995,0.995],["country",0.507,0.99],["person",1.0,1.0],["body_part",0.998,0.997]
+    ];
+    let mode = "lin";
+    const disp = feats.map(f => f[1]); // start at linear
+    let prev = disp.slice();
+    const cHalo = C("--halo"), cAcc = C("--accent"), cCore = C("--core"), cInk3 = C("--ink-3"), cInk4 = C("--ink-4"), cRule = C("--rule-strong");
+    function draw(){
+      const ctx = fig.ctx, w = fig.w, h = fig.h;
+      ctx.clearRect(0,0,w,h);
+      const m = {l:34, r:12, t:16, b:44};
+      const lo = 0.4, hi = 1.0, iw = w-m.l-m.r, ih = h-m.t-m.b;
+      const Y = v => m.t + ih - (v-lo)/(hi-lo)*ih;
+      // gridlines
+      ctx.strokeStyle = cRule; ctx.lineWidth = 1; ctx.font = "10px "+C("--font-mono"); ctx.fillStyle = cInk4; ctx.textAlign="right";
+      [0.5,0.75,1.0].forEach(v => { const y=Y(v); ctx.globalAlpha=v===0.5?0.9:0.4; ctx.beginPath(); if(v===0.5){ctx.setLineDash([4,4]);}else{ctx.setLineDash([]);} ctx.moveTo(m.l,y); ctx.lineTo(w-m.r,y); ctx.stroke(); ctx.globalAlpha=1; ctx.fillText(v.toFixed(2), m.l-6, y+3); });
+      ctx.setLineDash([]);
+      const gw = iw/feats.length;
+      ctx.textAlign = "center";
+      feats.forEach((f,i) => {
+        const cx = m.l + gw*i + gw/2;
+        if(mode === "both"){
+          const bw = Math.min(15, gw*0.28);
+          const bars = [[f[1],cHalo,-bw*0.62],[f[2],cAcc,bw*0.62]];
+          bars.forEach(bb => { const y=Y(bb[0]); ctx.fillStyle=bb[1]; ctx.globalAlpha= (f[0]==="country")?1:0.85; roundRect(ctx, cx+bb[2]-bw/2, y, bw, m.t+ih-y, 3); ctx.fill(); ctx.globalAlpha=1; });
+        } else {
+          const bw = Math.min(30, gw*0.5), v = disp[i], y = Y(v);
+          const col = (f[0]==="country") ? (mode==="lin"?cCore:cAcc) : (mode==="lin"?cHalo:cAcc);
+          ctx.fillStyle = col; ctx.globalAlpha = (f[0]==="country")?1:0.8;
+          roundRect(ctx, cx-bw/2, y, bw, m.t+ih-y, 4); ctx.fill(); ctx.globalAlpha=1;
+          if(f[0]==="country"){
+            ctx.fillStyle = col; ctx.font = "600 11px "+C("--font-mono");
+            ctx.fillText(v.toFixed(3), cx, y-7);
+          }
+        }
+        ctx.fillStyle = (f[0]==="country") ? cAcc : cInk3;
+        ctx.font = (f[0]==="country"?"600 ":"")+"10px "+C("--font-mono");
+        ctx.save(); ctx.translate(cx, h-m.b+14); ctx.rotate(-0.34); ctx.textAlign="right"; ctx.fillText(f[0], 0, 0); ctx.restore();
+      });
+    }
+    function roundRect(ctx,x,y,ww,hh,rr){ hh=Math.max(0,hh); rr=Math.min(rr,ww/2,hh/2); ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+ww,y,x+ww,y+hh,rr); ctx.arcTo(x+ww,y+hh,x,y+hh,rr); ctx.arcTo(x,y+hh,x,y,rr); ctx.arcTo(x,y,x+ww,y,rr); ctx.closePath(); }
+    fig.onResize(draw);
+    const readout = document.getElementById("probeReadout");
+    function setMode(mval){
+      mode = mval;
+      if(mode !== "both"){
+        prev = disp.slice();
+        const tgt = feats.map(f => mode==="lin" ? f[1] : f[2]);
+        tween(RM?0:520, k => { for(let i=0;i<feats.length;i++) disp[i] = lerp(prev[i], tgt[i], k); draw(); });
+      } else { draw(); }
+      if(readout){
+        if(mode==="lin") readout.innerHTML = 'linear probe · <b>country 0.507</b> (chance)';
+        else if(mode==="nl") readout.innerHTML = 'non-linear probe · <b>country 0.990</b> (recovered)';
+        else readout.innerHTML = 'both probes · the gap on <b>country</b> is 0.478';
+      }
+    }
+    toggleGroup("probeMode", d => setMode(d.mode));
+    draw();
+  })();
+
+  /* =========================================================
+     §01 — the V: linear-probe AUC across layers
+     ========================================================= */
+  (function(){
+    const fig = figure("layerCanvas"); if(!fig) return;
+    const labels = ["input","h0","h1","L","h3"];
+    const country = [1.0,1.0,1.0,0.51,0.99];
+    const other   = [1.0,1.0,1.0,0.997,0.998];
+    const cAcc=C("--accent"), cCalm=C("--calm"), cInk4=C("--ink-4"), cRule=C("--rule-strong"), cDanger=C("--danger");
+    let prog = 0;
+    function draw(){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const m={l:38,r:16,t:18,b:38}, lo=0.45, hi=1.02, iw=w-m.l-m.r, ih=h-m.t-m.b;
+      const X = i => m.l + i/(labels.length-1)*iw;
+      const Y = v => m.t + ih - (v-lo)/(hi-lo)*ih;
+      ctx.strokeStyle=cRule; ctx.lineWidth=1; ctx.font="10px "+C("--font-mono"); ctx.fillStyle=cInk4; ctx.textAlign="right";
+      [0.5,0.75,1.0].forEach(v=>{ const y=Y(v); ctx.globalAlpha=v===0.5?0.9:0.4; ctx.setLineDash(v===0.5?[4,4]:[]); ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(w-m.r,y); ctx.stroke(); ctx.globalAlpha=1; ctx.fillText(v.toFixed(2),m.l-6,y+3); });
+      ctx.setLineDash([]); ctx.textAlign="center";
+      labels.forEach((L,i)=>{ ctx.fillStyle = L==="L"?cAcc:cInk4; ctx.font=(L==="L"?"600 ":"")+"11px "+C("--font-mono"); ctx.fillText(L, X(i), h-m.b+18); });
+      // other-7 (static, calm)
+      ctx.strokeStyle=cCalm; ctx.lineWidth=2.4; ctx.globalAlpha=0.9; ctx.beginPath();
+      other.forEach((v,i)=>{ const x=X(i),y=Y(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.stroke(); ctx.globalAlpha=1;
+      // country line, animated draw
+      const total = country.length-1, drawn = prog*total;
+      ctx.strokeStyle=cAcc; ctx.lineWidth=3; ctx.lineJoin="round"; ctx.beginPath();
+      for(let i=0;i<country.length;i++){
+        if(i>drawn+1) break;
+        const x=X(i), y=Y(country[i]);
+        if(i===0){ ctx.moveTo(x,y); continue; }
+        if(i<=drawn){ ctx.lineTo(x,y); }
+        else { const f=drawn-(i-1); ctx.lineTo(lerp(X(i-1),x,f), lerp(Y(country[i-1]),y,f)); break; }
+      }
+      ctx.stroke();
+      for(let i=0;i<country.length;i++){ if(i>drawn+0.001) break; const x=X(i),y=Y(country[i]); dot(ctx,x,y,3.4,cAcc); }
+      if(prog>0.85){ const x=X(3),y=Y(0.51); ctx.globalAlpha=(prog-0.85)/0.15; dot(ctx,x,y,7,"transparent",null); ctx.strokeStyle=cDanger; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y,9,0,6.2832); ctx.stroke(); ctx.fillStyle=cDanger; ctx.font="600 11px "+C("--font-mono"); ctx.textAlign="left"; ctx.fillText("0.51 · blind here", x+14, y+4); ctx.globalAlpha=1; }
+    }
+    function play(){ prog=0; tween(RM?0:1400, k=>{ prog=k; draw(); }); }
+    fig.onResize(draw);
+    new IntersectionObserver((es,o)=>es.forEach(e=>{ if(e.isIntersecting){ play(); o.unobserve(e.target); } }),{threshold:0.4}).observe(fig.canvas);
+    const btn=document.getElementById("layerReplay"); if(btn) btn.addEventListener("click",play);
+    if(RM){ prog=1; draw(); }
+  })();
+
+  /* =========================================================
+     §02 — the fold machine: ReLU(+s)+ReLU(-s)=|s| + radial
+     ========================================================= */
+  (function(){
+    const fig = figure("foldCanvas"); if(!fig) return;
+    const r = rng(21), bg=[];
+    for(let i=0;i<260;i++){ const present=(i%2)===0; let s=present?gauss(r)*0.62:gauss(r)*1.28; s=clamp(s,-3.3,3.3); bg.push({present, rad:Math.abs(s), theta:r()*6.2832}); }
+    let s0 = 1.45;
+    const cCore=C("--core"), cHalo=C("--halo"), cAccB=C("--accent-bright"), cSoft="rgba(244,239,230,.5)", cLine="rgba(244,239,230,.14)";
+    const el = { pos:document.getElementById("foldPos"), neg:document.getElementById("foldNeg"), abs:document.getElementById("foldAbs") };
+    const FM = C("--font-mono");
+    function panelFns(rx,ry,rw,rh){
+      const ctx=fig.ctx, m={l:26,r:12,t:22,b:22};
+      const L=rx+m.l, R=rx+rw-m.r, T=ry+m.t, B=ry+rh-m.b, IW=R-L, IH=B-T;
+      const X=s=> L+(s+3)/6*IW, Y=v=> B - v/3.2*IH;
+      ctx.strokeStyle=cLine; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(L,Y(0)); ctx.lineTo(R,Y(0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(0),T); ctx.lineTo(X(0),B); ctx.stroke();
+      ctx.font="9px "+FM; ctx.fillStyle=cSoft; ctx.textAlign="center"; ctx.fillText("s",R-6,Y(0)+13); ctx.fillText("0",X(0)-8,Y(0)+13);
+      function curve(fn,col){ ctx.strokeStyle=col; ctx.lineWidth=2.8; ctx.beginPath(); for(let s=-3;s<=3.001;s+=0.06){ const x=X(s),y=Y(fn(s)); s<=-3?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke(); }
+      curve(s=>Math.max(0,-s), cCore);   // ReLU(-s): amber left arm
+      curve(s=>Math.max(0,s), cHalo);    // ReLU(+s): blue right arm
+      ctx.fillStyle=cAccB; ctx.font="9.5px "+FM; ctx.textAlign="left"; ctx.fillText("ReLU(+s)+ReLU(−s)=|s|", L, T-8);
+      ctx.strokeStyle="rgba(244,239,230,.35)"; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(X(s0),T); ctx.lineTo(X(s0),B); ctx.stroke(); ctx.setLineDash([]);
+      const posOn=s0>=0;
+      dot(ctx,X(s0),Y(Math.max(0,s0)),posOn?5:3.2,cHalo,posOn?cHalo:null);
+      dot(ctx,X(s0),Y(Math.max(0,-s0)),posOn?3.2:5,cCore,posOn?null:cCore);
+    }
+    function panelRadial(rx,ry,rw,rh){
+      const ctx=fig.ctx, cx=rx+rw/2, cy=ry+rh/2, uni=Math.min(rw*0.5,rh*0.5)-18;
+      bg.forEach(p=>{ const rr=p.rad/3.4*uni; const x=cx+rr*Math.cos(p.theta), y=cy+rr*Math.sin(p.theta); ctx.globalAlpha=p.present?0.8:0.5; dot(ctx,x,y,p.present?1.7:1.5,p.present?cCore:cHalo); }); ctx.globalAlpha=1;
+      const rs=Math.abs(s0)/3.4*uni;
+      ctx.strokeStyle="rgba(244,239,230,.5)"; ctx.lineWidth=1.4; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.arc(cx,cy,rs,0,6.2832); ctx.stroke(); ctx.setLineDash([]);
+      dot(ctx,cx+rs*Math.cos(-0.5),cy+rs*Math.sin(-0.5),5,cAccB,cAccB);
+      dot(ctx,cx+rs*Math.cos(-0.5+Math.PI),cy+rs*Math.sin(-0.5+Math.PI),5,cAccB,cAccB);
+      ctx.fillStyle=cSoft; ctx.font="9px "+FM; ctx.textAlign="center"; ctx.fillText("radius |s| = "+Math.abs(s0).toFixed(2), cx, cy+uni+8);
+      ctx.fillStyle="rgba(244,239,230,.32)"; ctx.fillText("s and −s → same radius", cx, cy-uni-4);
+    }
+    function draw(){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      if(w<560){ panelFns(0,0,w,h*0.5); panelRadial(0,h*0.5,w,h*0.5); }
+      else { const split=w*0.54; panelFns(0,0,split,h); panelRadial(split,0,w-split,h); }
+    }
+    function setS(v){ s0=clamp(v,-3,3); if(el.pos)el.pos.textContent=Math.max(0,s0).toFixed(2); if(el.neg)el.neg.textContent=Math.max(0,-s0).toFixed(2); if(el.abs)el.abs.textContent=Math.abs(s0).toFixed(2); draw(); }
+    fig.onResize(draw);
+    const sl=document.getElementById("foldS"); if(sl) sl.addEventListener("input",()=>setS(+sl.value/100));
+    setS(1.45);
+  })();
+
+  /* =========================================================
+     §03 — activation patching: even inverted-U, verdict flip
+     ========================================================= */
+  (function(){
+    const fig = figure("patchCanvas"); if(!fig) return;
+    const logit = t => 2 - 5.8*t*t;
+    const sig = z => 1/(1+Math.exp(-z));
+    let tau = 0.2;
+    const cCore=C("--core"), cHalo=C("--halo"), cAccB=C("--accent-bright"), cSoft="rgba(244,239,230,.5)", cLine="rgba(244,239,230,.14)";
+    const elL=document.getElementById("patchLogit"), elP=document.getElementById("patchP"), elV=document.getElementById("patchVerdict");
+    function draw(){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const m={l:44,r:16,t:20,b:34}, lo=-52, hi=8, iw=w-m.l-m.r, ih=h-m.t-m.b;
+      const X=t=> m.l + (t+3)/6*iw;
+      const Y=v=> m.t + ih - (v-lo)/(hi-lo)*ih;
+      ctx.strokeStyle=cLine; ctx.lineWidth=1; ctx.font="9px "+C("--font-mono"); ctx.fillStyle=cSoft; ctx.textAlign="right";
+      [0,-20,-40].forEach(v=>{ const y=Y(v); ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(w-m.r,y); ctx.stroke(); ctx.fillText(v.toString(), m.l-6, y+3); });
+      ctx.textAlign="center"; [-3,-1.5,0,1.5,3].forEach(t=>{ ctx.fillText(t.toString(), X(t), h-m.b+16); });
+      ctx.fillStyle="rgba(244,239,230,.4)"; ctx.fillText("intervened τ", (m.l+w-m.r)/2, h-6);
+      // curve
+      ctx.strokeStyle=cAccB; ctx.lineWidth=3; ctx.beginPath(); for(let t=-3;t<=3.001;t+=0.05){ const x=X(t),y=Y(logit(t)); (t<=-3)?ctx.moveTo(x,y):ctx.lineTo(x,y);} ctx.stroke();
+      // peak
+      dot(ctx,X(0),Y(logit(0)),3,cCore);
+      // mirror marker
+      ctx.strokeStyle="rgba(244,239,230,.28)"; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(X(-tau),Y(logit(-tau))); ctx.lineTo(X(-tau),m.t+ih); ctx.stroke(); ctx.setLineDash([]);
+      dot(ctx,X(-tau),Y(logit(-tau)),3.5,"rgba(244,239,230,.5)");
+      // main marker
+      const pres = sig(logit(tau))>0.5;
+      ctx.strokeStyle="rgba(244,239,230,.45)"; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(X(tau),Y(logit(tau))); ctx.lineTo(X(tau),m.t+ih); ctx.stroke(); ctx.setLineDash([]);
+      dot(ctx,X(tau),Y(logit(tau)),6,pres?cCore:cHalo,pres?cCore:cHalo);
+    }
+    function setTau(v){ tau=clamp(v,-3,3); const z=logit(tau), p=sig(z); if(elL)elL.textContent=z.toFixed(1); if(elP)elP.textContent=p.toFixed(2); if(elV){ const pres=p>0.5; elV.textContent=pres?"present":"absent"; elV.className="tag "+(pres?"present":"absent"); } draw(); }
+    fig.onResize(draw);
+    const sl=document.getElementById("patchTau"); if(sl) sl.addEventListener("input",()=>setTau(+sl.value/100));
+    setTau(0.2);
+  })();
+
+  /* =========================================================
+     §04 W1 — angular ring, colored by parity, slow spin
+     ========================================================= */
+  (function(){
+    const fig = figure("ringCanvas"); if(!fig) return;
+    const r=rng(41), K=8, per=22, clusters=[];
+    for(let k=0;k<K;k++){ const pts=[]; for(let j=0;j<per;j++){ pts.push({dr:gauss(r)*0.055, da:gauss(r)*0.10}); } clusters.push(pts); }
+    const cCore=C("--core"), cHalo=C("--halo");
+    function frame(t){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const cx=w/2, cy=h/2, R=Math.min(w,h)*0.34, rot=RM?0:t*0.18;
+      for(let k=0;k<K;k++){ const base=k/K*6.2832+rot; const col=(k%2===0)?cCore:cHalo;
+        for(const p of clusters[k]){ const ang=base+p.da, rad=R*(1+p.dr); const x=cx+rad*Math.cos(ang), y=cy+rad*Math.sin(ang); ctx.globalAlpha=0.9; dot(ctx,x,y,2.4,col); }
+      }
+      ctx.globalAlpha=1;
+    }
+    ambient(fig, frame);
+  })();
+
+  /* =========================================================
+     §04 W2 — superposition: recolor by country(6th)/food(3rd)
+     ========================================================= */
+  (function(){
+    const fig = figure("superCanvas"); if(!fig) return;
+    const r=rng(59), n=240, pts=[];
+    for(let i=0;i<n;i++){ const phi=i/n*6.2832; pts.push({phi, jr:gauss(r)*0.04}); }
+    let mode="country", mix=1; // mix animates 0..1 on toggle
+    const cCore=C("--core"), cHalo=C("--halo");
+    function colFor(p, m){ const val = m==="country" ? Math.cos(6*p.phi) : Math.cos(3*p.phi); return val>=0 ? cCore : cHalo; }
+    let fromMode="country";
+    function frame(t){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const cx=w/2, cy=h/2, R=Math.min(w,h)*0.34, rot=RM?0:t*0.10;
+      for(const p of pts){ const ang=p.phi+rot, rad=R*(1+p.jr); const x=cx+rad*Math.cos(ang), y=cy+rad*Math.sin(ang);
+        const c = (mix>=1)? colFor(p,mode) : colFor(p, mix>0.5?mode:fromMode);
+        ctx.globalAlpha= (mix<1 && Math.abs(mix-0.5)<0.06)?0.35:0.92; dot(ctx,x,y,2.5,c);
+      }
+      ctx.globalAlpha=1;
+    }
+    ambient(fig, frame);
+    toggleGroup("superMode", d=>{ if(d.f===mode) return; fromMode=mode; mode=d.f; mix=0; if(RM){mix=1; return;} tween(420,k=>{mix=k;}); });
+  })();
+
+  /* =========================================================
+     §04 W3 — rotating (2,6) torus link; drag to spin
+     ========================================================= */
+  (function(){
+    const fig = figure("torusCanvas"); if(!fig) return;
+    const Rm=1.0, rm=0.42, q=3, Ncurve=260;
+    const cCore=C("--core"), cHalo=C("--halo");
+    function pt(th, off){ const a=th, b=q*th+off; return [ (Rm+rm*Math.cos(b))*Math.cos(a), (Rm+rm*Math.cos(b))*Math.sin(a), rm*Math.sin(b) ]; }
+    let yaw=0.6, pitch=0.5, spin=0, lastT=null, dragging=false, px=0, py=0;
+    function rot(p){ let [x,y,z]=p;
+      let x1=x*Math.cos(yaw+spin)+z*Math.sin(yaw+spin), z1=-x*Math.sin(yaw+spin)+z*Math.cos(yaw+spin);
+      let y2=y*Math.cos(pitch)-z1*Math.sin(pitch), z2=y*Math.sin(pitch)+z1*Math.cos(pitch);
+      return [x1,y2,z2];
+    }
+    function frame(t){
+      if(lastT===null) lastT=t; const dt=Math.min(0.05,t-lastT); lastT=t; if(!dragging && !RM) spin+=dt*0.5;
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const cx=w/2, cy=h/2, sc=Math.min(w,h)*0.30, d=3.4;
+      const loops=[[0,cHalo],[Math.PI,cCore]];
+      const segs=[];
+      loops.forEach(([off,col])=>{ let prev=null; for(let i=0;i<=Ncurve;i++){ const th=i/Ncurve*6.2832; const P=rot(pt(th,off)); const f=sc/(d-P[2]); const x=cx+P[0]*f, y=cy-P[1]*f; if(prev) segs.push({x0:prev.x,y0:prev.y,x1:x,y1:y,z:(prev.z+P[2])/2,col}); prev={x,y,z:P[2]}; } });
+      segs.sort((a,b)=>a.z-b.z);
+      segs.forEach(s=>{ const al=clamp(0.35+(s.z+1.4)/3,0.18,1); ctx.strokeStyle=s.col; ctx.globalAlpha=al; ctx.lineWidth=clamp(1.4+(s.z+1.4),1,3.6); ctx.lineCap="round"; ctx.beginPath(); ctx.moveTo(s.x0,s.y0); ctx.lineTo(s.x1,s.y1); ctx.stroke(); });
+      ctx.globalAlpha=1;
+    }
+    ambient(fig, frame);
+    const cv=fig.canvas;
+    cv.addEventListener("pointerdown",e=>{ dragging=true; px=e.clientX; py=e.clientY; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener("pointermove",e=>{ if(!dragging) return; yaw+=(e.clientX-px)*0.01; pitch=clamp(pitch+(e.clientY-py)*0.01,-1.3,1.3); px=e.clientX; py=e.clientY; if(RM) frame(0); });
+    cv.addEventListener("pointerup",e=>{ dragging=false; try{cv.releasePointerCapture(e.pointerId);}catch(_){} });
+    cv.addEventListener("pointercancel",()=>{ dragging=false; });
+  })();
+
+  /* =========================================================
+     §05 — emergence sweep: 4 lines collapse together
+     ========================================================= */
+  (function(){
+    const fig = figure("emergeCanvas"); if(!fig) return;
+    const lam=[0,2,4,6,8,10,14];
+    const series=[
+      [[1.0,0.995,0.502,0.511,0.615,0.556,0.505], C("--accent")],
+      [[1.0,0.993,0.535,0.527,0.537,0.520,0.542], C("--halo")],
+      [[0.994,0.992,0.552,0.540,0.583,0.535,0.568], C("--core")],
+      [[0.994,0.992,0.545,0.542,0.563,0.535,0.550], C("--calm")]
+    ];
+    const cInk4=C("--ink-4"), cRule=C("--rule-strong");
+    let prog=0;
+    function draw(){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const m={l:38,r:14,t:18,b:36}, lo=0.45, hi=1.03, iw=w-m.l-m.r, ih=h-m.t-m.b;
+      const X=v=> m.l + v/14*iw, Y=v=> m.t+ih-(v-lo)/(hi-lo)*ih;
+      ctx.strokeStyle=cRule; ctx.lineWidth=1; ctx.font="10px "+C("--font-mono"); ctx.fillStyle=cInk4; ctx.textAlign="right";
+      [0.5,0.75,1.0].forEach(v=>{ const y=Y(v); ctx.globalAlpha=v===0.5?0.9:0.4; ctx.setLineDash(v===0.5?[4,4]:[]); ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(w-m.r,y); ctx.stroke(); ctx.globalAlpha=1; ctx.fillText(v.toFixed(2),m.l-6,y+3); });
+      ctx.setLineDash([]); ctx.textAlign="center";
+      lam.forEach(v=>ctx.fillText(v.toString(), X(v), h-m.b+16));
+      ctx.fillStyle="rgba(107,100,82,.8)"; ctx.fillText("penalty λ", (m.l+w-m.r)/2, h-4);
+      const maxX=prog*14;
+      series.forEach(([ys,col])=>{ ctx.strokeStyle=col; ctx.lineWidth=2.2; ctx.globalAlpha=0.92; ctx.lineJoin="round"; ctx.beginPath(); let started=false;
+        for(let i=0;i<lam.length;i++){ if(lam[i]>maxX){ // partial
+            if(i>0){ const f=(maxX-lam[i-1])/(lam[i]-lam[i-1]); const x=lerp(X(lam[i-1]),X(lam[i]),f), y=lerp(Y(ys[i-1]),Y(ys[i]),f); ctx.lineTo(x,y);} break; }
+          const x=X(lam[i]),y=Y(ys[i]); started?ctx.lineTo(x,y):(ctx.moveTo(x,y),started=true);
+        }
+        ctx.stroke(); ctx.globalAlpha=1;
+        for(let i=0;i<lam.length;i++){ if(lam[i]>maxX) break; dot(ctx,X(lam[i]),Y(ys[i]),2.6,col); }
+      });
+    }
+    function play(){ prog=0; tween(RM?0:1500, k=>{prog=k; draw();}); }
+    fig.onResize(draw);
+    new IntersectionObserver((es,o)=>es.forEach(e=>{ if(e.isIntersecting){ play(); o.unobserve(e.target);} }),{threshold:0.4}).observe(fig.canvas);
+    const btn=document.getElementById("emergeReplay"); if(btn) btn.addEventListener("click",play);
+    if(RM){ prog=1; draw(); }
+  })();
+
+  /* =========================================================
+     §05 — difficulty ladder: probe capacity lollipops
+     ========================================================= */
+  (function(){
+    const fig = figure("ladderCanvas"); if(!fig) return;
+    const codes=[
+      {n:"the fold", u:3, lbl:"~3", col:C("--calm"), emerge:true},
+      {n:"angular ring", u:8, lbl:"8", col:C("--accent")},
+      {n:"torus link", u:12, lbl:"12", col:C("--halo")},
+      {n:"superposition", u:26, lbl:">24", col:C("--core")}
+    ];
+    const cInk3=C("--ink-3"), cInk4=C("--ink-4"), cRule=C("--rule-strong"), cCalm=C("--calm");
+    const MAXU=28; let prog=0;
+    function draw(){
+      const ctx=fig.ctx, w=fig.w, h=fig.h; ctx.clearRect(0,0,w,h);
+      const m={l:118,r:44,t:20,b:34}, iw=w-m.l-m.r, ih=h-m.t-m.b;
+      const X=u=> m.l + u/MAXU*iw;
+      // frontier band
+      const fx=X(4.5); ctx.fillStyle="rgba(47,158,92,.10)"; ctx.fillRect(m.l,m.t,fx-m.l,ih);
+      ctx.strokeStyle=cCalm; ctx.globalAlpha=0.5; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(fx,m.t); ctx.lineTo(fx,m.t+ih); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+      ctx.fillStyle=cCalm; ctx.font="9.5px "+C("--font-mono"); ctx.textAlign="left"; ctx.fillText("emerges", m.l+6, m.t+12);
+      // axis
+      ctx.strokeStyle=cRule; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(m.l,m.t+ih); ctx.lineTo(w-m.r,m.t+ih); ctx.stroke();
+      ctx.fillStyle=cInk4; ctx.font="10px "+C("--font-mono"); ctx.textAlign="center";
+      [0,8,16,24].forEach(u=>ctx.fillText(u.toString(), X(u), m.t+ih+16));
+      ctx.fillStyle="rgba(107,100,82,.85)"; ctx.fillText("probe capacity (ReLU units to reach AUC 0.90)", (m.l+w-m.r)/2, h-4);
+      const rowH=ih/codes.length;
+      codes.forEach((c,i)=>{ const y=m.t+rowH*(i+0.5); const xe=X(c.u*prog);
+        ctx.strokeStyle=c.col; ctx.globalAlpha=0.5; ctx.lineWidth=3; ctx.lineCap="round"; ctx.beginPath(); ctx.moveTo(m.l,y); ctx.lineTo(xe,y); ctx.stroke(); ctx.globalAlpha=1;
+        dot(ctx,xe,y,6,c.col, c.emerge?c.col:null);
+        ctx.fillStyle=cInk3; ctx.font="12px "+C("--font-mono"); ctx.textAlign="right"; ctx.fillText(c.n, m.l-12, y+4);
+        ctx.fillStyle=c.col; ctx.font="600 12px "+C("--font-mono"); ctx.textAlign="left"; if(prog>0.9) ctx.fillText(c.lbl, xe+12, y+4);
+      });
+    }
+    function play(){ prog=0; tween(RM?0:1300, k=>{prog=k; draw();}); }
+    fig.onResize(draw);
+    new IntersectionObserver((es,o)=>es.forEach(e=>{ if(e.isIntersecting){ play(); o.unobserve(e.target);} }),{threshold:0.4}).observe(fig.canvas);
+    const btn=document.getElementById("ladderReplay"); if(btn) btn.addEventListener("click",play);
+    if(RM){ prog=1; draw(); }
+  })();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Return of the Superheroes · a bottleneck-matching solution</title>
+<meta name="description" content="My solution to IBM Ponder This, July 2026, 'Return of the Superheroes'. Pair every hero with a villain so the weakest pairing is as strong as possible; that best-possible floor is the answer: 349 for the main challenge and 408 for the bonus. Interactive figures for the orbit that scores each pairing, the bottleneck matching, and the plateau where 408 holds all the way to n = 999." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f2ecdf; --bg-2:#eae2d1; --bg-3:#e1d7c2;
+  --ink:#17130d; --ink-2:#3a332a; --ink-3:#6a6251; --ink-4:#978d76;
+  --rule:rgba(23,19,13,0.12); --rule-strong:rgba(23,19,13,0.28);
+  /* teal is the UI accent; the data spine below keeps its own meanings */
+  --accent:#12736a; --accent-soft:#a8d2cc; --accent-bright:#2fa89b; --accent-deep:#0b4e48;
+  --gold:#a9791c; --gold-soft:#e0c184;
+  --good:#1f6b3a; --warn:#b8820a;
+  /* data spine: heroes (blue), villains (warm red), a made pairing (green), a broken matching (red) */
+  --hero-c:#2f6fd0;    /* the heroes, a = 1..n */
+  --villain:#c2452f;   /* the villains, b = 1..n */
+  --bond:#3f9d6b;      /* a pairing that survives the threshold */
+  --danger:#c2452f;    /* the matching breaks */
+  --font-display:"Fraunces","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink-2);
+  font-family:var(--font-body); font-size:20px; line-height:1.62;
+  font-weight:400; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+::selection{background:var(--accent-soft); color:var(--ink);}
+
+#progress{position:fixed; top:0; left:0; height:2px; width:0; background:var(--accent); z-index:60; transition:width .12s linear;}
+nav#toc{position:fixed; top:50%; left:28px; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px;}
+nav#toc a{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9b927e; text-decoration:none; display:flex; align-items:center; gap:9px; transition:color .35s var(--ease);}
+nav#toc a .dot{width:6px; height:6px; border-radius:50%; background:rgba(150,141,119,.6); transition:all .35s var(--ease);}
+nav#toc a .lbl{opacity:0; transform:translateX(-4px); transition:all .35s var(--ease); white-space:nowrap;}
+nav#toc a:hover{color:var(--accent);}
+nav#toc a:hover .lbl{opacity:1; transform:none;}
+nav#toc a.active{color:var(--accent);}
+nav#toc a.active .dot{background:var(--accent); transform:scale(1.5);}
+nav#toc a.active .lbl{opacity:1; transform:none;}
+@media(max-width:1220px){nav#toc{display:none;}}
+
+.home-btn{position:fixed; top:20px; left:26px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(18,115,106,0.09); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease); animation:homeSlide .9s var(--ease) .35s both;}
+.home-btn svg{display:block;}
+.home-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+@keyframes homeSlide{from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:none;}}
+@media(max-width:600px){.home-btn{top:14px; left:14px; padding:7px 12px; font-size:10px;}}
+
+.wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+.col{max-width:var(--read); margin:0 auto;}
+section{padding:56px 0; position:relative;}
+section.tint::before{content:""; position:absolute; z-index:-1; top:0; bottom:0; left:50%; margin-left:-50vw; width:100vw; background:var(--bg-2);}
+.eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px; display:block;}
+.eyebrow .num{color:var(--accent);}
+
+h1,h2,h3{font-family:var(--font-display); font-weight:460; color:var(--ink); line-height:1.03; margin:0;}
+h2{font-size:clamp(34px,5vw,52px); letter-spacing:-.01em; margin-bottom:18px;}
+h3{font-size:clamp(25px,3.2vw,33px); letter-spacing:-.005em; line-height:1.05; margin:46px 0 10px;}
+p{margin:0 0 22px;}
+.lead{font-family:var(--font-display); font-weight:420; font-size:clamp(23px,2.8vw,29px); line-height:1.34; color:var(--ink-2); margin-bottom:26px;}
+strong{font-weight:600; color:var(--ink);}
+em{font-style:italic;}
+.heroword{color:var(--hero-c); font-weight:600;}
+.villainword{color:var(--villain); font-weight:600;}
+.bondword{color:var(--bond); font-weight:600;}
+.dangerword{color:var(--danger); font-weight:600;}
+.mono{font-family:var(--font-mono); font-size:.9em;}
+a.inline{color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft); transition:border-color .2s;}
+a.inline:hover{border-color:var(--accent);}
+
+/* ---------- dark hero ---------- */
+#hero{padding:0 0 13vh; min-height:100vh; display:flex; flex-direction:column; justify-content:center; position:relative; background:#07060a; isolation:isolate;}
+#hero canvas{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
+#hero::after{content:""; position:absolute; left:0; right:0; bottom:0; height:15vh; z-index:1; background:linear-gradient(180deg, rgba(7,6,10,0), var(--bg)); pointer-events:none;}
+#hero .col{max-width:1080px; position:relative; z-index:2; animation:heroReveal 1.9s var(--ease) .15s both;}
+@keyframes heroReveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+.hero-mark{font-family:var(--font-mono); font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.62); margin-bottom:32px;}
+#hero h1{font-size:clamp(56px,12vw,150px); line-height:.92; letter-spacing:-.02em; color:#f6f2ea; margin-bottom:24px; text-shadow:0 2px 80px rgba(0,0,0,.55);}
+#hero h1 .it{font-style:italic; color:var(--accent-bright);}
+.hero-sub{font-family:var(--font-display); font-weight:420; font-size:clamp(20px,2.6vw,28px); line-height:1.36; color:rgba(244,239,230,.86); max-width:900px; margin-top:clamp(30px,7vh,110px); margin-bottom:32px;}
+#hero strong{color:var(--gold-soft); font-weight:600;}
+.hero-meta{font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; color:rgba(244,239,230,.64); line-height:1.95;}
+.hero-meta b{color:rgba(244,239,230,.94); font-weight:500;}
+.scrollcue{position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:3; font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,239,230,.45); display:flex; flex-direction:column; align-items:center; gap:8px;}
+.scrollcue .bar{width:1px; height:34px; background:linear-gradient(rgba(244,239,230,.5),transparent); animation:cue 2.4s var(--ease) infinite;}
+@keyframes cue{0%{transform:scaleY(.3);transform-origin:top;opacity:0}40%{opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+
+/* ---------- figures ---------- */
+figure{margin:34px 0; position:relative;}
+.figure-wide{width:min(980px,calc(100vw - 56px)); margin-left:50%; transform:translateX(-50%);}
+.panel{background:var(--bg-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 18px 40px -28px rgba(21,17,11,.4);}
+.panel.dark{background:#0c0a12; border-color:rgba(255,255,255,.08); box-shadow:0 18px 50px -28px rgba(0,0,0,.6);}
+.panel.dark .legend{color:rgba(244,239,230,.55);}
+.panel.dark .readout{color:rgba(244,239,230,.8);}
+.panel.dark .controls label{color:rgba(244,239,230,.55);}
+figcaption{font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--ink-3); margin-top:14px; letter-spacing:.01em;}
+figcaption b{color:var(--ink-2); font-weight:500;}
+canvas.fig{display:block; width:100%; border-radius:8px; touch-action:none;}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-top:16px;}
+.controls .grp{display:flex; align-items:center; gap:9px;}
+.controls label{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3);}
+button.btn{font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:var(--bg-3); border:1px solid var(--rule-strong); border-radius:7px; padding:8px 14px; cursor:pointer; transition:all .2s var(--ease);}
+button.btn:hover{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+button.btn:active{transform:translateY(1px);}
+button.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+button.btn.primary:hover{background:#a8350f;}
+input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:4px; background:var(--rule-strong); outline:none; cursor:pointer; width:150px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); box-shadow:0 1px 4px rgba(21,17,11,.35); transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); cursor:pointer;}
+.panel.dark input[type=range]{background:rgba(255,255,255,.18);}
+.panel.dark input[type=range]::-webkit-slider-thumb{border-color:#0c0a12;}
+.toggle{display:inline-flex; border:1px solid var(--rule-strong); border-radius:8px; overflow:hidden;}
+.toggle button{font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:8px 13px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; transition:all .2s;}
+.toggle button.on{background:var(--ink); color:var(--bg);}
+.panel.dark .toggle{border-color:rgba(255,255,255,.2);}
+.panel.dark .toggle button{color:rgba(244,239,230,.55);}
+.panel.dark .toggle button.on{background:var(--bg); color:var(--ink);}
+.readout{font-family:var(--font-mono); font-size:12px; color:var(--ink-2);}
+.readout b{color:var(--accent); font-weight:500;}
+
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3); margin-top:14px;}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.legend i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+
+.pull{border-left:2px solid var(--accent); padding:4px 0 4px 22px; margin:30px 0; font-family:var(--font-display); font-size:clamp(22px,2.7vw,27px); line-height:1.34; color:var(--ink);}
+.redline{border-left:2px solid var(--accent); padding-left:22px;}
+.note{background:var(--bg-2); border:1px solid var(--rule); border-left:2px solid var(--accent-soft); border-radius:10px; padding:18px 22px; margin:26px 0; font-size:18px; line-height:1.56;}
+.note .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;}
+.note p:last-child{margin-bottom:0;}
+.kbd{font-family:var(--font-mono); font-size:.82em; background:var(--bg-3); border:1px solid var(--rule); border-radius:4px; padding:1px 6px;}
+.eq{font-family:var(--font-mono); font-size:.9em; background:var(--bg-2); border:1px solid var(--rule); border-radius:6px; padding:2px 8px; white-space:nowrap; color:var(--ink);}
+
+/* ---------- dossier: the two challenges (bento) ---------- */
+.dossier{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:30px 0;}
+.dossier .card{background:var(--bg-2); border:1px solid var(--rule); border-radius:13px; padding:22px 24px; position:relative; overflow:hidden;}
+.dossier .card::after{content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:var(--accent); opacity:.8;}
+.dossier .card.star::after{background:var(--hero-c);}
+.dossier .k{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; display:block;}
+.dossier .card.star .k{color:var(--hero-c);}
+.dossier .card::after{}
+.dossier h4{font-family:var(--font-display); font-weight:460; font-size:25px; color:var(--ink); margin:0 0 12px; line-height:1.06;}
+.dossier .params{font-family:var(--font-mono); font-size:12.5px; line-height:1.9; color:var(--ink-2);}
+.dossier .params b{color:var(--accent); font-weight:500;}
+.dossier .card.star .params b{color:var(--hero-c);}
+.dossier .ans{font-family:var(--font-display); font-weight:460; font-size:44px; color:var(--ink); line-height:1; margin-top:14px;}
+.dossier .ans .u{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); letter-spacing:.04em;}
+@media(max-width:620px){.dossier{grid-template-columns:1fr;}}
+
+/* ---------- dark answer feature card ---------- */
+.answer{position:relative; margin:32px 0 10px; border-radius:18px; padding:clamp(26px,4vw,40px); overflow:hidden;
+  background:radial-gradient(130% 150% at 12% 0%, #16211e 0%, #0d120f 58%, #0a0d0b 100%);
+  border:1px solid rgba(255,255,255,.08); box-shadow:0 26px 60px -34px rgba(0,0,0,.55);
+  display:flex; align-items:center; gap:clamp(20px,4vw,36px); flex-wrap:wrap;}
+.answer::after{content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(65% 130% at 92% 12%, rgba(47,168,155,.20), transparent 62%);}
+.answer .num{position:relative; font-family:var(--font-display); font-weight:460; font-size:clamp(78px,14vw,146px); line-height:.82; color:var(--gold-soft); letter-spacing:-.02em;}
+.answer .lab{position:relative; font-family:var(--font-mono); font-size:12px; letter-spacing:.05em; line-height:1.75; color:rgba(242,236,223,.72); max-width:330px;}
+.answer .lab b{color:rgba(242,236,223,.96); font-weight:500;}
+.answer .lab .hv{color:var(--accent-bright); font-weight:600;}
+
+.kpirow{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:26px 0;}
+.kpi{background:var(--bg-2); border:1px solid var(--rule); border-radius:11px; padding:16px 18px;}
+.kpi .n{font-family:var(--font-display); font-weight:460; font-size:36px; color:var(--ink); line-height:1;}
+.kpi .l{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); margin-top:7px; line-height:1.5;}
+.kpi.hot{background:radial-gradient(130% 170% at 18% 0%, #16211e, #0c110f); border-color:rgba(255,255,255,.08);}
+.kpi.hot .n{color:var(--gold-soft);}
+.kpi.hot .l{color:rgba(242,236,223,.64);}
+@media(max-width:620px){.kpirow{grid-template-columns:1fr 1fr;}}
+
+/* ---------- verification ledger ---------- */
+.ledger{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:26px 0;}
+.ledger .item{background:var(--bg-2); border:1px solid var(--rule); border-radius:12px; padding:18px 20px; display:flex; gap:14px; align-items:flex-start;}
+.ledger .chk{flex:0 0 auto; width:26px; height:26px; border-radius:50%; background:rgba(47,158,68,.13); border:1px solid rgba(47,158,68,.4); display:grid; place-items:center; margin-top:2px;}
+.ledger .chk svg{width:14px; height:14px; stroke:var(--bond);}
+.ledger .h{font-family:var(--font-display); font-weight:460; font-size:21px; color:var(--ink); line-height:1.12; margin-bottom:5px;}
+.ledger .d{font-size:15.5px; line-height:1.5; color:var(--ink-3);}
+.ledger .d b{color:var(--ink-2); font-weight:600;}
+@media(max-width:620px){.ledger{grid-template-columns:1fr;}}
+
+hr.rule{border:none; border-top:1px solid var(--rule); margin:0;}
+
+footer{padding:70px 0 90px; border-top:1px solid var(--rule); margin-top:40px;}
+footer .col{display:flex; flex-direction:column; gap:18px;}
+footer .sig{font-family:var(--font-display); font-weight:420; font-size:26px; color:var(--ink);}
+footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); line-height:1.9; letter-spacing:.02em;}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+.reveal.in{opacity:1; transform:none;}
+.figure-wide.reveal{transform:translateX(-50%) translateY(26px);}
+.figure-wide.reveal.in{transform:translateX(-50%);}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1!important; transform:none!important; transition:none!important;}
+  .figure-wide.reveal{transform:translateX(-50%)!important;}
+  #hero .col{animation:none!important;}
+  .home-btn{animation:none!important;}
+  .scrollcue .bar{animation:none;}
+}
+@media(max-width:600px){
+  body{font-size:18px;}
+  section{padding:42px 0;}
+  .wrap{padding:0 20px;}
+  .panel{padding:14px;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<a class="home-btn" href="https://thylinao1.github.io/index.html" aria-label="Back to portfolio home">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+  <span>Home</span>
+</a>
+
+<nav id="toc" aria-label="Sections">
+  <a href="#hero" data-sec="hero"><span class="dot"></span><span class="lbl">Top</span></a>
+  <a href="#puzzle" data-sec="puzzle"><span class="dot"></span><span class="lbl">The puzzle</span></a>
+  <a href="#score" data-sec="score"><span class="dot"></span><span class="lbl">Scoring a pairing</span></a>
+  <a href="#match" data-sec="match"><span class="dot"></span><span class="lbl">The strongest floor</span></a>
+  <a href="#plateau" data-sec="plateau"><span class="dot"></span><span class="lbl">The plateau</span></a>
+  <a href="#trust" data-sec="trust"><span class="dot"></span><span class="lbl">Trusting it</span></a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="col">
+      <div class="hero-mark">IBM Research · Ponder This · July 2026 · solved</div>
+      <h1>Return of the<br><span class="it">Superheroes</span></h1>
+      <p class="hero-sub">The correct solution to IBM Research's <em>Ponder This</em> puzzle for July 2026. Every hero is paired off with a villain, one to one, and each pairing earns a score. The whole matching is only ever judged by its <em>weakest</em> pairing, so the task is to arrange the pairs so that weakest link is as strong as it can be. The largest floor you can guarantee is the answer: <strong>349</strong> for the main challenge, and <strong>408</strong> for the bonus.</p>
+      <div class="hero-meta">
+        <b>Puzzle</b> &nbsp;heroes a = 1..n, villains b = 1..n, score f(a,b) over a prime p<br>
+        <b>Answers</b> &nbsp;A: n = 611, p = 14411 → 349 &nbsp;·&nbsp; B: p = 17377, 1 &lt; n &lt; 1000 → 408<br>
+        <b>Method</b> &nbsp;bottleneck assignment &nbsp;·&nbsp; <b>Checked</b> &nbsp;two ways for f, two ways for the matching
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue"><span>scroll</span><span class="bar"></span></div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- ============ 01 · THE PUZZLE ============ -->
+<section id="puzzle">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">01</span> · The puzzle</span>
+    <h2 class="reveal">Heroes, villains, and one prime</h2>
+    <p class="lead reveal">You are handed <span class="heroword">n heroes</span>, numbered a = 1 up to n, and <span class="villainword">n villains</span>, numbered b = 1 up to n. A single prime p sets the arena. Your job is to pair every hero with exactly one villain.</p>
+    <p class="reveal">Each possible pairing of a hero a with a villain b has a strength, and it comes from a little dynamical system. Start at zero and repeatedly apply the map <span class="eq">T(x) = x² + a·x + b (mod p)</span>, so <span class="mono">x₀ = 0</span>, then <span class="mono">x₁ = T(x₀)</span>, then <span class="mono">x₂ = T(x₁)</span>, and so on. Because there are only p possible values, the sequence must eventually revisit somewhere it has already been. The score <span class="eq">f(a,b)</span> is <strong>how many steps it takes before that first repeat</strong>, which is one way of measuring how long the hero survives the villain's map before it falls into a loop.</p>
+    <p class="reveal">Now pair everyone up, one hero to one villain, a clean one-to-one matching. Every matching has a whole set of scores, one per pair, but you are graded on a single number: the <em>smallest</em> score in your matching, its weakest pairing. The <span class="villainword">hero-villain value</span> is the largest weakest-link you can reach, taken over every possible way of pairing them. Push the floor as high as it will go, and report the point where it stops.</p>
+
+    <div class="dossier reveal">
+      <div class="card">
+        <span class="k">Main challenge</span>
+        <h4>Return of the Superheroes</h4>
+        <div class="params"><b>n</b> = 611 heroes &amp; villains<br><b>p</b> = 14411<br>find the hero-villain value</div>
+        <div class="ans">349 <span class="u">← answer</span></div>
+      </div>
+      <div class="card star">
+        <span class="k">Bonus ★</span>
+        <h4>How high can it go</h4>
+        <div class="params"><b>p</b> = 17377<br><b>n</b> ranges over 1 &lt; n &lt; 1000<br>find the maximum value, and where</div>
+        <div class="ans">408 <span class="u">← answer</span></div>
+      </div>
+    </div>
+
+    <div class="note reveal">
+      <span class="tag">The worked example, reproduced</span>
+      <p>The puzzle ships a small case to check your understanding: with <span class="mono">n = 5</span> and <span class="mono">p = 101</span>, the hero-villain value is <strong>14</strong>. My solver lands on 14 for that case before it is allowed to touch anything larger, which is the first sign the scoring and the matching are both wired up correctly.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 02 · SCORING A PAIRING ============ -->
+<section id="score" class="tint">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">02</span> · One number per pairing</span>
+    <h2 class="reveal">The orbit behind each score</h2>
+    <p class="reveal">Before any matching, you need the score for every single hero-villain pair, and that score is a walk. Fix a hero a and a villain b and set the map loose from zero. Each step lands on a new residue mod p, and for a while the walk keeps finding fresh ground, a straight-ish <span class="heroword">tail</span> of never-seen values. Then it steps onto somewhere it has already stood, and from that point on it is trapped forever in a <span class="villainword">cycle</span>. The picture this traces is the shape mathematicians call a <em>rho</em>: a tail leading into a loop, like the Greek letter ρ.</p>
+    <p class="reveal">The score <span class="eq">f(a,b)</span> is the total number of distinct places the walk visits before it repeats, the tail length μ plus the cycle length λ. A hero who wanders a long way before getting caught scores high; one who falls into a short loop almost immediately scores low. Drag the two sliders below to choose a hero and a villain, and watch the walk build its rho in real time, at the small prime <span class="mono">p = 101</span> so the whole thing fits on screen.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="orbCanvas" class="fig" aria-label="Interactive: the sequence x0=0, x=x^2+ax+b mod p walks until it repeats, tracing a rho shape of a tail into a cycle; the score f is the tail length plus the cycle length"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="orbPlay">Replay the walk</button>
+          <div class="grp"><label for="orbA">Hero&nbsp;a</label><input type="range" id="orbA" min="1" max="16" value="1"><span class="readout">a = <b id="orbAV">1</b></span></div>
+          <div class="grp"><label for="orbB">Villain&nbsp;b</label><input type="range" id="orbB" min="1" max="16" value="3"><span class="readout">b = <b id="orbBV">3</b></span></div>
+          <span class="readout" style="margin-left:auto">tail μ = <b id="orbMu">–</b> &nbsp;·&nbsp; cycle λ = <b id="orbLam">–</b> &nbsp;·&nbsp; f = <b id="orbF">–</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--hero-c)"></i>tail, the fresh ground the hero covers</span>
+          <span><i style="background:var(--villain)"></i>cycle, the loop it is caught in</span>
+          <span style="color:var(--ink-4)">drag a or b · f = μ + λ is the pairing's score</span>
+        </div>
+      </div>
+      <figcaption><b>Every score is a rho.</b> The walk starts at x₀ = 0 and steps along T(x) = x² + a·x + b mod p. The straight run is the tail; the ring is the cycle it can never escape. At <span class="mono">p = 101</span>, hero a = 1 against villain b = 3 traces a walk of length <b>14</b>, the exact score the puzzle's worked example puts on that pair. Long walks make strong pairings and short loops make weak ones, and the matching has to keep the weakest one as long as it can.</figcaption>
+    </figure>
+
+    <p class="reveal">Do this for all n heroes against all n villains and you get an <span class="mono">n × n</span> table of scores, one row per hero, one column per villain. That table is the entire input to the matching problem. For the main challenge it is a 611 × 611 grid of walk-lengths; every answer on this page is a statement about how you are allowed to pick one entry from each row and each column of that grid.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 03 · THE STRONGEST FLOOR ============ -->
+<section id="match">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">03</span> · The strongest weakest link</span>
+    <h2 class="reveal">Raising the floor as high as it will go</h2>
+    <p class="reveal">The problem has a simple shape. You have that grid of scores, you choose a <span class="bondword">one-to-one matching</span>, one villain per hero with no villain used twice, and you are judged only by the smallest score you picked. The task is to make that minimum as large as possible. This is a classic setup with a classic name, the <strong>bottleneck assignment problem</strong>, and there is a neat way to solve it.</p>
+    <p class="reveal">Instead of hunting for the best matching directly, pick a target floor <span class="mono">t</span> and ask a yes-or-no question: <em>can I pair everyone using only pairings that score at least t?</em> Throw away every grid entry below t, and see whether a perfect one-to-one matching still survives in what is left. If it does, the floor t is reachable; if it does not, t is set too high. This question only gets harder as t rises, since a low floor leaves the grid dense and easy to match, while a high floor leaves it sparse and eventually impossible. So the answer is the highest t that still lets everyone pair up, and you can find it by binary search.</p>
+    <p class="reveal">Drag the threshold below on a small <span class="mono">p = 101</span> board. Every cell is a hero-villain score; raise t and the cells that fall below it dim out. A matching engine re-solves live on what remains, lighting the pairs it chooses. As you push t up the matching thins out and eventually <span class="dangerword">fails</span>. The last floor that still holds is the hero-villain value for this small board.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="matCanvas" class="fig" aria-label="Interactive: an n by n grid of hero-villain scores; a threshold slider dims cells below t and a matching engine finds a perfect one-to-one matching on the survivors, showing the largest threshold that still admits a perfect matching"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="matAuto">Climb to the value</button>
+          <button class="btn" id="matReset">Reset</button>
+          <div class="grp"><label for="matT">Floor&nbsp;t</label><input type="range" id="matT" min="1" max="30" value="1"><span class="readout">t = <b id="matTV">1</b></span></div>
+          <span class="readout" style="margin-left:auto" id="matStatus">–</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--bond)"></i>a chosen pair (score ≥ t)</span>
+          <span><i style="background:var(--accent-soft)"></i>eligible, unused</span>
+          <span><i style="background:var(--ink-4)"></i>below the floor, discarded</span>
+          <span style="color:var(--ink-4)">bottleneck value here = <b id="matBottleneck">–</b></span>
+        </div>
+      </div>
+      <figcaption><b>Binary search on the floor.</b> Feasibility only ever decreases as the floor rises, so the largest floor that still admits a perfect matching is exactly the hero-villain value. On this <span class="mono">p = 101</span> board the top-left 5 × 5 corner reproduces the puzzle's worked value of 14; the full board settles higher. The real challenge runs the identical procedure on a 611 × 611 grid at p = 14411.</figcaption>
+    </figure>
+
+    <h3 class="reveal">The main challenge, and its certificate</h3>
+    <p class="reveal">Run that procedure on the real grid, with 611 heroes, 611 villains and p = 14411, and the floor rises to a point where it can go no higher.</p>
+
+    <div class="answer reveal">
+      <div class="num">349</div>
+      <div class="lab">the <span class="hv">hero-villain value</span> for <b>n = 611, p = 14411</b>. A perfect matching exists with every pair scoring ≥ 349, and none exists at 350.</div>
+    </div>
+    <p class="reveal">That last sentence is really the whole proof, and it comes in two halves. One is a <span class="bondword">witness</span>: an actual list of 611 pairs, each villain used once, whose weakest pairing scores exactly 349, which I submitted as a file. The other is a <span class="dangerword">wall</span>: once the floor is pushed to 350 no perfect matching survives, so nothing higher than 349 is possible. With a witness sitting at the value and no matching just above it, the number is fixed on both sides.</p>
+    <p class="reveal">One quiet detail makes the value trustworthy rather than lucky. The matching is free to make <em>most</em> pairs much stronger than the floor, and only a handful are forced down to 349. The histogram below is the real distribution of the 611 scores in my submitted matching: a firm edge on the left at 349, most of the weight in the 350s and 360s, and a thin tail of pairings that reach past 500. The bottleneck is set by that left edge alone, and everything to its right is spare strength the matching kept because it did not need to give it up.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="histCanvas" class="fig" aria-label="Histogram of the 611 pairing scores in the submitted optimal matching, from a hard minimum at 349 out to a maximum of 536, with the bottleneck floor marked at 349"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="histReplay">Replay</button>
+          <span class="readout" id="histHover" style="margin-left:auto">611 pairs · floor 349 · longest 536</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>pairs in the matching, by score</span>
+          <span><i style="background:var(--bond)"></i>the floor at 349, the value</span>
+          <span style="color:var(--ink-4)">hover a bar for its count</span>
+        </div>
+      </div>
+      <figcaption><b>Only the left edge is binding.</b> Of the 611 pairs, 139 land in the 340 to 360 band, right against the floor, and those are the pairings that set the answer. The rest of the matching is comfortably stronger, which is why raising the floor to 350 removes that leftmost group and leaves no perfect matching.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 04 · THE PLATEAU ============ -->
+<section id="plateau" class="tint">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">04</span> · The bonus, and a plateau</span>
+    <h2 class="reveal">How high it can go, and where it stops</h2>
+    <p class="reveal">The bonus changes the prime to <span class="mono">p = 17377</span> and lets n roam across the whole range <span class="mono">1 &lt; n &lt; 1000</span>. Every n gives its own board and its own hero-villain value. The question is where that value peaks. So I computed it for all of them, 998 boards and 998 values, and drew the curve.</p>
+    <p class="reveal">The climb is not smooth. For small n the value is jittery, because a board with only a handful of heroes can be unlucky and get dragged down by one forced weak pairing, or be lucky and sit high. As n grows the matching has more room to work with, and the value settles into a steady rise: past 300 around n = 58, past 350 near n = 193, past 400 at n = 671. Near the top of the range it flattens out.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="plCanvas" class="fig" aria-label="Line chart of the hero-villain value versus n for p=17377, n from 2 to 999, rising from noisy small-n values to a flat plateau at 408 spanning n=924 to 999"></canvas>
+        <div class="controls">
+          <button class="btn primary" id="plReplay">Replay draw</button>
+          <div class="grp toggle" id="plZoom" role="group" aria-label="range">
+            <button data-z="full" class="on" aria-pressed="true">Full range</button>
+            <button data-z="top" aria-pressed="false">Zoom the plateau</button>
+          </div>
+          <span class="readout" style="margin-left:auto" id="plHover">peak 408 · n ∈ [924, 999]</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>hero-villain value at each n</span>
+          <span><i style="background:var(--hero-c)"></i>the plateau at 408</span>
+          <span style="color:var(--ink-4)">hover the curve to read any n</span>
+        </div>
+      </div>
+      <figcaption><b>The maximum is 408, and it is reached at more than one value of n.</b> The value first reaches 408 at n = 924 and then holds it for every n from 924 up to the top of the range at 999, a contiguous plateau 76 values wide. What stands out is how wide the top is: the puzzle asks for the peak, and the peak is a flat stretch that continues to the end of the allowed range.</figcaption>
+    </figure>
+
+    <div class="kpirow reveal">
+      <div class="kpi hot"><div class="n">408</div><div class="l">maximum hero-villain value</div></div>
+      <div class="kpi"><div class="n">924</div><div class="l">smallest n that reaches it</div></div>
+      <div class="kpi"><div class="n">76</div><div class="l">values of n on the plateau</div></div>
+      <div class="kpi"><div class="n">999</div><div class="l">plateau runs to the endpoint</div></div>
+    </div>
+    <p class="reveal">So the bonus answer is <strong>408</strong>, and the fuller story is that it is reached by every n in the contiguous stretch <span class="mono">[924, 999]</span>, first arriving at 924 and not dropping again within the allowed range.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============ 05 · TRUSTING IT ============ -->
+<section id="trust">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">05</span> · Why I trust the numbers</span>
+    <h2 class="reveal">Computed two independent ways</h2>
+    <p class="reveal">Two numbers, 349 and 408, are easy to state and easy to get subtly wrong, so nothing on this page rests on a single code path. Every load-bearing quantity is computed two independent ways, and the answer is only reported where they agree.</p>
+
+    <div class="ledger reveal">
+      <div class="item">
+        <span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <div><div class="h">The score f, two ways</div><div class="d">A plain <b>seen-set counter</b> that walks until it recognises a value, and <b>Brent's cycle detection</b> computing the tail and loop lengths separately. They agree on 3,000 random pairings across both primes.</div></div>
+      </div>
+      <div class="item">
+        <span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <div><div class="h">The matching, two ways</div><div class="d">A library solver (<b>SciPy's bipartite matching</b>) and a <b>hand-written Kuhn</b> augmenting-path matcher, run against each other on every threshold. They never disagree on feasibility.</div></div>
+      </div>
+      <div class="item">
+        <span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <div><div class="h">A boundary certificate</div><div class="d">For 349, an explicit perfect matching <b>at</b> the value and a proof that <b>none exists one above it</b>. The witness list of 611 pairs is re-validated: every hero and villain used exactly once, every score ≥ 349.</div></div>
+      </div>
+      <div class="item">
+        <span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <div><div class="h">The worked example, as a gate</div><div class="d">The solver must reproduce the puzzle's own <b>n = 5, p = 101 → 14</b> before it is trusted on anything bigger. It does, on both scoring methods and both matchers.</div></div>
+      </div>
+    </div>
+
+    <p class="reveal">The submission went to IBM Research on 13 July 2026, with the full 611-pair matching attached, and was confirmed correct. The rest is just the pleasure of a problem that turned a question about looping sequences into a question about the strongest way to pair off a room full of heroes and villains.</p>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="col">
+      <div class="sig">Return of the Superheroes.</div>
+      <p style="margin:0; color:var(--ink-3); font-size:18px; max-width:780px;">A bottleneck matching over a grid of looping sequences: score each hero-villain pair by how long its orbit runs before repeating, then pair everyone so the weakest pairing is as strong as possible. Main challenge <b style="color:var(--ink-2)">349</b>, bonus <b style="color:var(--ink-2)">408</b> across n ∈ [924, 999]. Submitted to IBM Research and confirmed correct.</p>
+      <div class="meta">
+        Maksim Silchenko · IBM Ponder This, July 2026 · submitted 13 July 2026<br>
+        Official challenge: <a class="inline" href="https://research.ibm.com/blog/ponder-this-july-2026" target="_blank" rel="noopener">research.ibm.com · Ponder This, July 2026</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== SHARED LIBRARY + DATA + HERO + SCAFFOLDING ==================== -->
+<script>
+"use strict";
+window.__PT_LIB__ = (function(){
+  const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setupCanvas(cv, h, maxDpr){
+    const dpr = Math.min(window.devicePixelRatio||1, maxDpr||2);
+    const w = cv.clientWidth || 600;
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    cv.style.height = h+'px';
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx, w, h, dpr};
+  }
+  function inView(cv){
+    let v=true;
+    if('IntersectionObserver' in window){
+      const io=new IntersectionObserver(es=>{ v=es[0].isIntersecting; },{rootMargin:'160px'});
+      io.observe(cv);
+    }
+    return ()=>v;
+  }
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  function gauss(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  function clamp(x,lo,hi){return x<lo?lo:(x>hi?hi:x);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function easeOutCubic(t){return 1-Math.pow(1-t,3);}
+  function easeInOut(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+
+  // ---- the puzzle's math, shared so every figure agrees ----
+  // orbit of x0=0 under T(x)=x^2+a x+b (mod p) until first repeat.
+  // returns the visited sequence, tail length mu, cycle length lam, and f=mu+lam.
+  function fOrbit(a,b,p){
+    const seen=new Map(); let x=0, k=0; const seq=[];
+    while(!seen.has(x)){ seen.set(x,k); seq.push(x); x=(((x*x + a*x + b)%p)+p)%p; k++; }
+    const mu=seen.get(x);           // first-visit index of the repeated value
+    const f=k;                      // number of distinct iterates
+    const lam=f-mu;                 // cycle length
+    return {seq, first:x, firstIdx:mu, mu, lam, f};
+  }
+  function buildF(n,p){
+    const F=[];
+    for(let i=0;i<n;i++){ const row=new Int32Array(n); for(let j=0;j<n;j++){ row[j]=fOrbit(i+1,j+1,p).f; } F.push(row); }
+    return F;
+  }
+  // Kuhn augmenting-path matching on adjacency lists. matchCol[c]=row or -1.
+  function kuhn(adj,n,m){
+    const matchCol=new Int32Array(m).fill(-1);
+    function aug(u,vis){
+      const nb=adj[u];
+      for(let i=0;i<nb.length;i++){ const v=nb[i];
+        if(!vis[v]){ vis[v]=1; if(matchCol[v]===-1 || aug(matchCol[v],vis)){ matchCol[v]=u; return true; } }
+      }
+      return false;
+    }
+    let size=0;
+    for(let u=0;u<n;u++){ if(aug(u,new Uint8Array(m))) size++; }
+    return {matchCol,size};
+  }
+  function adjAt(F,t){ const n=F.length; const adj=[]; for(let u=0;u<n;u++){ const r=F[u], a=[]; for(let v=0;v<r.length;v++) if(r[v]>=t) a.push(v); adj.push(a);} return adj; }
+  function feasible(F,t){ const n=F.length; return kuhn(adjAt(F,t),n,F[0].length).size===n; }
+  function bottleneck(F){
+    let lo=1, hi=1; for(const r of F) for(const x of r) if(x>hi) hi=x;
+    while(lo<hi){ const mid=(lo+hi+1)>>1; if(feasible(F,mid)) lo=mid; else hi=mid-1; }
+    return lo;
+  }
+  function matchingAt(F,t){ const n=F.length; const {matchCol,size}=kuhn(adjAt(F,t),n,F[0].length); if(size!==n) return null; const pairMate=new Int32Array(n).fill(-1); for(let c=0;c<n;c++){ if(matchCol[c]!==-1) pairMate[matchCol[c]]=c; } return pairMate; }
+
+  const CSS = getComputedStyle(document.documentElement);
+  const g = k => CSS.getPropertyValue(k).trim();
+  const COL = {
+    bg:g('--bg'), bg2:g('--bg-2'), bg3:g('--bg-3'),
+    ink:g('--ink'), ink2:g('--ink-2'), ink3:g('--ink-3'), ink4:g('--ink-4'),
+    accent:g('--accent'), accentSoft:g('--accent-soft'), accentBright:g('--accent-bright'),
+    hero:g('--hero-c'), villain:g('--villain'), bond:g('--bond'), danger:g('--danger'),
+    good:g('--good'), warn:g('--warn')
+  };
+  function hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+  const RGB = {accent:hex2rgb(COL.accent), hero:hex2rgb(COL.hero), villain:hex2rgb(COL.villain), bond:hex2rgb(COL.bond), danger:hex2rgb(COL.danger), bg:hex2rgb(COL.bg), ink:hex2rgb(COL.ink)};
+  const rgba=(arr,a)=>`rgba(${arr[0]},${arr[1]},${arr[2]},${a})`;
+
+  return {setupCanvas, inView, mulberry32, gauss, clamp, lerp, easeOutCubic, easeInOut,
+          fOrbit, buildF, kuhn, adjAt, feasible, bottleneck, matchingAt,
+          COL, RGB, rgba, REDUCED};
+})();
+
+// ---- real data, computed from the verified solver ----
+window.__PT_DATA__ = {
+  curveStart: 2,
+  curve: /*__CURVE__*/[228, 224, 224, 135, 225, 168, 224, 224, 225, 228, 228, 247, 247, 247, 247, 253, 253, 253, 253, 253, 254, 263, 268, 268, 268, 268, 268, 271, 271, 271, 265, 265, 271, 277, 277, 277, 277, 277, 277, 277, 277, 277, 277, 285, 281, 281, 281, 281, 281, 281, 281, 281, 281, 281, 281, 281, 303, 303, 291, 291, 291, 291, 291, 291, 308, 308, 308, 308, 308, 308, 308, 314, 317, 317, 317, 317, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 323, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 335, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 385, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 389, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 391, 391, 391, 391, 391, 391, 391, 391, 391, 391, 391, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 400, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 392, 392, 392, 392, 392, 392, 392, 392, 392, 392, 392, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 405, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408, 408]/*__CURVE_END__*/,
+  partAf: /*__PARTAF__*/[349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 349, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 350, 351, 351, 351, 351, 351, 351, 351, 351, 351, 351, 351, 351, 351, 352, 352, 352, 352, 352, 352, 352, 352, 352, 352, 352, 353, 353, 353, 353, 353, 353, 353, 353, 353, 353, 353, 353, 353, 353, 354, 354, 354, 354, 354, 354, 354, 354, 354, 354, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 356, 356, 356, 356, 356, 356, 356, 356, 356, 356, 357, 357, 357, 357, 357, 357, 357, 357, 357, 357, 357, 358, 358, 358, 358, 358, 358, 358, 358, 358, 358, 359, 359, 359, 359, 359, 359, 359, 359, 359, 359, 359, 359, 359, 359, 360, 360, 360, 360, 360, 360, 361, 361, 361, 361, 361, 361, 361, 361, 361, 362, 362, 362, 362, 362, 362, 362, 362, 362, 362, 362, 362, 362, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 363, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 364, 365, 365, 365, 365, 365, 365, 365, 365, 365, 365, 365, 365, 365, 366, 366, 366, 366, 366, 366, 366, 366, 366, 366, 366, 366, 367, 367, 367, 367, 367, 367, 367, 367, 367, 367, 367, 367, 368, 368, 368, 368, 368, 368, 369, 369, 369, 369, 369, 369, 369, 369, 370, 370, 370, 370, 370, 370, 370, 371, 371, 371, 371, 371, 371, 371, 371, 371, 371, 372, 372, 372, 372, 372, 372, 373, 373, 373, 373, 373, 373, 374, 374, 374, 374, 374, 374, 375, 375, 375, 375, 375, 375, 375, 375, 375, 376, 376, 376, 376, 376, 376, 376, 377, 377, 377, 377, 377, 377, 378, 378, 378, 378, 378, 378, 378, 378, 378, 378, 378, 378, 379, 379, 379, 379, 379, 379, 380, 380, 380, 380, 380, 380, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 381, 382, 382, 382, 382, 383, 383, 383, 383, 383, 383, 383, 383, 383, 384, 384, 384, 384, 384, 384, 384, 385, 385, 385, 385, 386, 386, 386, 386, 386, 386, 387, 387, 387, 387, 387, 387, 387, 387, 387, 388, 388, 388, 388, 388, 388, 388, 388, 389, 389, 389, 389, 389, 390, 390, 390, 390, 390, 390, 390, 390, 390, 391, 391, 391, 391, 391, 391, 392, 392, 392, 392, 393, 393, 393, 393, 394, 394, 394, 394, 394, 394, 395, 395, 395, 395, 395, 396, 396, 396, 397, 397, 397, 397, 397, 398, 398, 398, 399, 399, 399, 399, 400, 400, 400, 400, 401, 401, 402, 402, 402, 402, 403, 403, 403, 403, 404, 405, 405, 405, 405, 406, 406, 406, 406, 406, 407, 407, 407, 407, 407, 408, 409, 409, 409, 410, 410, 410, 411, 411, 412, 412, 413, 413, 413, 413, 413, 413, 414, 414, 414, 414, 415, 415, 415, 415, 415, 416, 416, 416, 416, 416, 416, 416, 417, 417, 417, 417, 417, 417, 418, 418, 418, 419, 419, 420, 420, 420, 420, 421, 421, 421, 421, 421, 423, 423, 423, 423, 424, 425, 426, 426, 426, 426, 427, 427, 427, 428, 430, 431, 432, 432, 433, 433, 433, 434, 434, 435, 435, 436, 437, 438, 438, 438, 439, 440, 441, 441, 441, 442, 442, 442, 442, 443, 443, 446, 446, 447, 448, 448, 449, 449, 449, 450, 451, 451, 452, 453, 453, 454, 456, 456, 457, 458, 458, 459, 461, 461, 461, 462, 464, 464, 468, 469, 469, 471, 474, 474, 475, 482, 483, 485, 488, 488, 488, 492, 495, 496, 499, 501, 507, 513, 536]/*__PARTAF_END__*/,
+  partA: {n:611, p:14411, value:349, min:349, max:536},
+  partB: {p:17377, best:408, lo:924, hi:999, count:76}
+};
+
+/* ================= HERO: a perfect matching assembling in the dark ================= */
+(function(){
+  const LIB = window.__PT_LIB__;
+  const cv=document.getElementById('heroCanvas'); if(!cv) return;
+  const {setupCanvas, inView, mulberry32, clamp, lerp, easeOutCubic, RGB, REDUCED} = LIB;
+  let st, raf, t0=null, heroes, villains, edges, cycleT=0, order=[];
+  const N=9, PERIOD=8200;
+  function build(){
+    const h=Math.max(window.innerHeight,560);
+    st=setupCanvas(cv,h,1.35);
+    const rng=mulberry32(7);
+    // a random derangement-ish permutation of villains for the heroes
+    const perm=[...Array(N).keys()];
+    for(let i=N-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [perm[i],perm[j]]=[perm[j],perm[i]]; }
+    heroes=[]; villains=[];
+    for(let i=0;i<N;i++){
+      heroes.push({idx:i, ph:rng()*6.28, sp:0.5+rng()*0.7});
+      villains.push({idx:i, ph:rng()*6.28, sp:0.5+rng()*0.7});
+    }
+    edges=perm.map((v,i)=>({h:i, v, str:0.35+rng()*0.65}));
+    order=[...Array(N).keys()].sort(()=>rng()-0.5);
+  }
+  function nodePos(col,i,w,h,now){
+    const marginX = w<720 ? 0.26 : 0.34;
+    const x = col===0 ? w*(0.5-marginX) : w*(0.5+marginX);
+    const top=h*0.20, bot=h*0.80;
+    const base = lerp(top,bot,i/(N-1));
+    const node = col===0?heroes[i]:villains[i];
+    const drift = Math.sin(now*0.0004*node.sp + node.ph)*h*0.012;
+    return {x, y:base+drift};
+  }
+  function draw(now){
+    if(t0===null)t0=now;
+    const {ctx,w,h}=st;
+    ctx.clearRect(0,0,w,h);
+    const fade=Math.min(1,(now-t0)/1600);
+    // cycle progress: edges ignite in sequence, hold, then dissolve and reform
+    const cp = ((now-t0)%PERIOD)/PERIOD;              // 0..1
+    const lit = easeOutCubic(clamp(cp/0.55,0,1));     // fraction of edges lit
+    const dissolve = clamp((cp-0.82)/0.18,0,1);
+    const H=RGB.hero, V=RGB.villain, B=RGB.bond, A=RGB.accent;
+
+    // find the weakest lit edge (the bottleneck) for a terracotta highlight
+    const nLit = Math.floor(lit*N + 0.0001);
+    let weakest=-1, wmin=9;
+    for(let k=0;k<nLit;k++){ const e=edges[order[k]]; if(e.str<wmin){wmin=e.str; weakest=order[k];} }
+
+    // edges
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    for(let k=0;k<N;k++){
+      const ei=order[k], e=edges[ei];
+      const appear = clamp((lit*N)-(k), 0, 1);
+      if(appear<=0) continue;
+      const a=appear*(1-dissolve)*fade;
+      const p1=nodePos(0,e.h,w,h,now), p2=nodePos(1,e.v,w,h,now);
+      const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2 + Math.sin(now*0.0006+e.h)*8;
+      const isW = ei===weakest;
+      const col = isW ? A : B;
+      const pulse=0.55+0.45*Math.sin(now*0.0016 + e.h*1.3);
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.quadraticCurveTo(mx,my,p2.x,p2.y);
+      ctx.strokeStyle=`rgba(${col[0]},${col[1]},${col[2]},${(isW?0.5:0.28)*a*(0.6+0.4*pulse)})`;
+      ctx.lineWidth=isW?3.0:1.6; ctx.stroke();
+      // crisp thin core
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.quadraticCurveTo(mx,my,p2.x,p2.y);
+      ctx.strokeStyle=`rgba(${col[0]},${col[1]},${col[2]},${(isW?0.85:0.5)*a})`;
+      ctx.lineWidth=isW?1.4:0.9; ctx.stroke();
+    }
+    ctx.restore();
+
+    // nodes
+    for(let col=0;col<2;col++){
+      const C = col===0?H:V;
+      for(let i=0;i<N;i++){
+        const p=nodePos(col,i,w,h,now);
+        const glow=0.5+0.5*Math.sin(now*0.0012*(col===0?heroes[i].sp:villains[i].sp)+(col===0?heroes[i].ph:villains[i].ph));
+        ctx.save(); ctx.globalCompositeOperation='lighter';
+        const rg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,26);
+        rg.addColorStop(0,`rgba(${C[0]},${C[1]},${C[2]},${(0.34+0.16*glow)*fade})`);
+        rg.addColorStop(1,`rgba(${C[0]},${C[1]},${C[2]},0)`);
+        ctx.fillStyle=rg; ctx.fillRect(p.x-26,p.y-26,52,52);
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(p.x,p.y,3.1,0,6.28);
+        ctx.fillStyle=`rgba(${C[0]},${C[1]},${C[2]},${0.92*fade})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x,p.y,3.1,0,6.28);
+        ctx.strokeStyle=`rgba(246,242,234,${0.5*fade})`; ctx.lineWidth=0.8; ctx.stroke();
+      }
+    }
+  }
+  const vis=inView(cv);
+  function loop(now){ if(vis()) draw(now); raf=requestAnimationFrame(loop); }
+  build();
+  if(REDUCED){ requestAnimationFrame(n=>{ t0=n-PERIOD*0.6; draw(n); }); }
+  else loop(0);
+  let to; window.addEventListener('resize',()=>{clearTimeout(to);to=setTimeout(()=>{build();},160);});
+})();
+
+/* ================= scroll: reveal, progress, active nav ================= */
+(function(){
+  const REDUCED = window.__PT_LIB__.REDUCED;
+  const prog=document.getElementById('progress');
+  function onScroll(){const sc=window.scrollY||document.documentElement.scrollTop; const dh=document.documentElement.scrollHeight-window.innerHeight; prog.style.width=(dh>0?(sc/dh*100):0)+'%';}
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  const items=[...document.querySelectorAll('.reveal')];
+  if('IntersectionObserver' in window && !REDUCED){
+    const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in'); io.unobserve(e.target);}});},{threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    document.querySelectorAll('section').forEach(sec=>{sec.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=Math.min(i*60,260)+'ms';});});
+    items.forEach(el=>io.observe(el));
+  } else { items.forEach(el=>el.classList.add('in')); }
+  const links=[...document.querySelectorAll('#toc a')], map={}; links.forEach(a=>map[a.dataset.sec]=a);
+  const secs=[...document.querySelectorAll('section[id], header[id]')];
+  if('IntersectionObserver' in window){
+    const io2=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active')); const a=map[e.target.id]; if(a)a.classList.add('active');}});},{threshold:0.01, rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(s=>io2.observe(s));
+  }
+})();
+</script>
+
+<!-- ==================== FIGURE MODULES ==================== -->
+<script id="fig-orbit">(function(){
+  const LIB = window.__PT_LIB__; const D = window.__PT_DATA__;
+  if(!LIB) return;
+  const cv = document.getElementById('orbCanvas'); if(!cv) return;
+  const clamp = LIB.clamp, lerp = LIB.lerp, rgba = LIB.rgba, RGB = LIB.RGB;
+  const P = 101;
+  const TAU = Math.PI * 2;
+
+  // ---- controls (only the IDs in the spec) ----
+  const elPlay = document.getElementById('orbPlay');
+  const elA = document.getElementById('orbA');
+  const elB = document.getElementById('orbB');
+  const elAV = document.getElementById('orbAV');
+  const elBV = document.getElementById('orbBV');
+  const elMu = document.getElementById('orbMu');
+  const elLam = document.getElementById('orbLam');
+  const elF = document.getElementById('orbF');
+
+  let ctx, w = 0, h = 0;
+  let state = null;
+  let hoverIndex = -1;
+  const anim = { running: false, start: 0, dur: 1600, last: 0 };
+  let rafId = 0;
+  let resizeTimer = 0;
+  const isVis = LIB.inView(cv);
+
+  const RED = !!LIB.REDUCED;
+  const INK = [244, 239, 230];
+  function ink(a){ return 'rgba(244,239,230,' + a + ')'; }
+  function setText(el, v){ if(el) el.textContent = v; }
+  function safe(fn){ try { fn(); } catch(e){} }
+
+  // ---------- setup / layout ----------
+  function setup(){
+    const cw = (cv.clientWidth || (cv.parentElement && cv.parentElement.clientWidth) || 600);
+    const hpx = clamp(cw * 0.60, 300, 420);
+    const s = LIB.setupCanvas(cv, hpx, 2);
+    ctx = s.ctx; w = s.w; h = s.h;
+  }
+
+  function quad(p0, p1, p2, t){
+    const u = 1 - t;
+    return {
+      x: u*u*p0.x + 2*u*t*p1.x + t*t*p2.x,
+      y: u*u*p0.y + 2*u*t*p1.y + t*t*p2.y
+    };
+  }
+
+  function layout(o){
+    const mu = o.mu, lam = o.lam, f = o.f;
+    const cx = w * 0.60;
+    const cy = h * 0.52;
+    let r = Math.min(h * 0.34, (w - cx) - 26, cx * 0.52);
+    r = Math.max(r, 28);
+    const nodeR = clamp(150 / (lam + 6), 3, 8);
+    const loopR = clamp(r * 0.55, 16, 44);
+    const startA = Math.PI; // join node sits at the left of the ring
+
+    const nodes = new Array(f);
+    if(lam === 1){
+      nodes[mu] = { x: cx, y: cy, cyc: true };
+    } else {
+      const step = TAU / lam;
+      for(let k = 0; k < lam; k++){
+        const th = startA + k * step;
+        nodes[mu + k] = { x: cx + r * Math.cos(th), y: cy + r * Math.sin(th), cyc: true };
+      }
+    }
+    const join = nodes[mu];
+
+    if(mu > 0){
+      const tailStart = { x: Math.min(w * 0.11, cx - r - 44), y: cy - r * 0.58 };
+      const cp = { x: (tailStart.x + join.x) / 2, y: Math.min(tailStart.y, join.y) - r * 0.30 };
+      for(let i = 0; i < mu; i++){
+        const t = i / mu;
+        const p = quad(tailStart, cp, join, t);
+        nodes[i] = { x: p.x, y: p.y, cyc: false };
+      }
+    }
+
+    const fPos = (lam >= 3) ? { x: cx, y: cy } : { x: cx, y: cy + r + 26 };
+    state = { o, nodes, cx, cy, r, nodeR, loopR, mu, lam, f, seq: o.seq, join, startA, fPos };
+  }
+
+  function recompute(){
+    const a = +elA.value, b = +elB.value;
+    const o = LIB.fOrbit(a, b, P);
+    setText(elAV, a); setText(elBV, b);
+    setText(elMu, o.mu); setText(elLam, o.lam); setText(elF, o.f);
+    layout(o);
+  }
+
+  // ---------- edge geometry ----------
+  // edge e connects seq[e] -> seq[e+1], except the closing edge (e=f-1) -> seq[mu]
+  function edgeGeom(e){
+    const s = state;
+    if(s.lam === 1 && e === s.f - 1){
+      return { kind: 'loop', node: s.nodes[s.mu] };
+    }
+    if(e >= s.mu){
+      const k = e - s.mu;
+      const step = TAU / s.lam;
+      return { kind: 'arc', th0: s.startA + k * step, step: step };
+    }
+    return { kind: 'line', a: s.nodes[e], b: s.nodes[e + 1] };
+  }
+
+  function tracePath(g, frac){
+    ctx.beginPath();
+    if(g.kind === 'line'){
+      ctx.moveTo(g.a.x, g.a.y);
+      ctx.lineTo(lerp(g.a.x, g.b.x, frac), lerp(g.a.y, g.b.y, frac));
+    } else if(g.kind === 'arc'){
+      ctx.arc(state.cx, state.cy, state.r, g.th0, g.th0 + g.step * frac, false);
+    } else {
+      const lr = state.loopR;
+      const cxo = g.node.x, cyo = g.node.y - lr;
+      ctx.arc(cxo, cyo, lr, Math.PI / 2, Math.PI / 2 + TAU * frac, false);
+    }
+  }
+
+  function pointOnEdge(e, t){
+    const g = edgeGeom(e);
+    if(g.kind === 'line'){
+      return { x: lerp(g.a.x, g.b.x, t), y: lerp(g.a.y, g.b.y, t) };
+    }
+    if(g.kind === 'arc'){
+      const th = g.th0 + g.step * t;
+      return { x: state.cx + state.r * Math.cos(th), y: state.cy + state.r * Math.sin(th) };
+    }
+    const lr = state.loopR;
+    const cxo = g.node.x, cyo = g.node.y - lr;
+    const ang = Math.PI / 2 + TAU * t;
+    return { x: cxo + lr * Math.cos(ang), y: cyo + lr * Math.sin(ang) };
+  }
+
+  // ---------- drawing ----------
+  function drawLitEdge(e, lit){
+    const cyc = e >= state.mu;
+    const rgb = cyc ? RGB.villain : RGB.hero;
+    const g = edgeGeom(e);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    tracePath(g, lit); ctx.strokeStyle = rgba(rgb, 0.16); ctx.lineWidth = 7; ctx.stroke();
+    tracePath(g, lit); ctx.strokeStyle = rgba(rgb, 0.92); ctx.lineWidth = 2; ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawNodes(edgePos, flash){
+    const s = state;
+    for(let i = 0; i < s.f; i++){
+      const n = s.nodes[i]; if(!n) continue;
+      const cyc = i >= s.mu;
+      const rgb = cyc ? RGB.villain : RGB.hero;
+      const arrived = edgePos >= i - 1e-6;
+      if(arrived){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, s.nodeR * 2.3, 0, TAU);
+        ctx.fillStyle = rgba(rgb, 0.10);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, s.nodeR, 0, TAU);
+      ctx.fillStyle = arrived ? rgba(rgb, 1) : rgba(rgb, 0.30);
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = ink(arrived ? 0.72 : 0.22);
+      ctx.stroke();
+      if(i === s.mu && s.mu !== 0){
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, s.nodeR + 4, 0, TAU);
+        ctx.strokeStyle = ink(0.35);
+        ctx.stroke();
+      }
+    }
+    // join pulse on the moment of repeat
+    if(flash > 0){
+      const j = s.join;
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.beginPath();
+      ctx.arc(j.x, j.y, s.nodeR + 4 + (1 - flash) * 16, 0, TAU);
+      ctx.strokeStyle = 'rgba(255,244,232,' + (0.7 * flash) + ')';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawWalker(edgePos){
+    const s = state;
+    let e = Math.floor(edgePos);
+    if(e >= s.f) e = s.f - 1;
+    let t = edgePos - e; if(t > 1) t = 1; if(t < 0) t = 0;
+    const p = pointOnEdge(e, t);
+    const rgb = (e >= s.mu) ? RGB.villain : RGB.hero;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.beginPath(); ctx.arc(p.x, p.y, s.nodeR * 2.6, 0, TAU);
+    ctx.fillStyle = rgba(rgb, 0.22); ctx.fill();
+    ctx.beginPath(); ctx.arc(p.x, p.y, s.nodeR * 0.95, 0, TAU);
+    ctx.fillStyle = 'rgba(255,250,244,0.98)'; ctx.fill();
+    ctx.restore();
+  }
+
+  function drawLabels(){
+    const s = state;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // ring guide
+    if(s.lam >= 3){
+      ctx.beginPath();
+      ctx.arc(s.cx, s.cy, s.r, 0, TAU);
+      ctx.strokeStyle = ink(0.05);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    // f = N (quiet display serif)
+    const fs = clamp(s.r * 0.42, 20, 34);
+    ctx.font = '400 ' + fs + 'px "Instrument Serif", serif';
+    ctx.fillStyle = ink(0.88);
+    ctx.fillText('f = ' + s.f, s.fPos.x, s.fPos.y);
+    // tags
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.fillStyle = rgba(RGB.villain, 0.9);
+    ctx.fillText('cycle', s.cx, s.cy - s.r - 12);
+    if(s.mu > 0){
+      const ti = Math.floor((s.mu - 1) / 2);
+      const tn = s.nodes[ti];
+      if(tn){
+        ctx.fillStyle = rgba(RGB.hero, 0.9);
+        ctx.fillText('tail', tn.x, tn.y - s.nodeR - 12);
+      }
+    }
+    // x0 marker
+    const n0 = s.nodes[0];
+    if(n0){
+      ctx.font = '11px "IBM Plex Mono", monospace';
+      ctx.fillStyle = ink(0.92);
+      ctx.fillText('0', n0.x, n0.y - s.nodeR - 9);
+    }
+    // hover residue tooltip
+    if(hoverIndex >= 0 && hoverIndex < s.f){
+      const n = s.nodes[hoverIndex];
+      if(n){
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, s.nodeR + 5, 0, TAU);
+        ctx.strokeStyle = ink(0.85);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        const val = s.seq[hoverIndex];
+        const label = 'x' + hoverIndex + ' = ' + val;
+        ctx.font = '11px "IBM Plex Mono", monospace';
+        const tw = ctx.measureText(label).width;
+        let bx = n.x, by = n.y + s.nodeR + 14;
+        bx = clamp(bx, tw / 2 + 8, w - tw / 2 - 8);
+        by = clamp(by, 14, h - 10);
+        ctx.fillStyle = 'rgba(14,11,20,0.82)';
+        ctx.fillRect(bx - tw / 2 - 6, by - 9, tw + 12, 18);
+        ctx.fillStyle = ink(0.95);
+        ctx.fillText(label, bx, by);
+      }
+    }
+  }
+
+  function draw(elapsed){
+    if(!state || !ctx) return;
+    const s = state, f = s.f;
+    const dur = anim.dur || clamp(f * 90, 1400, 2200);
+    let edgePos, showWalker = false, flash = 0;
+    if(elapsed >= 1e8){
+      edgePos = f;
+    } else {
+      const prog = clamp(elapsed / dur, 0, 1);
+      edgePos = prog * f;
+      showWalker = prog < 1;
+      const over = elapsed - dur;
+      if(over > 0) flash = Math.max(0, 1 - over / 600);
+    }
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#0c0a12';
+    ctx.fillRect(0, 0, w, h);
+
+    // base (dim) edges
+    ctx.lineCap = 'round';
+    for(let e = 0; e < f; e++){
+      const g = edgeGeom(e);
+      tracePath(g, 1);
+      ctx.strokeStyle = ink(0.08);
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+    // ring guide + f text drawn with labels below, but ring should sit under nodes:
+    if(s.lam >= 3){
+      ctx.beginPath();
+      ctx.arc(s.cx, s.cy, s.r, 0, TAU);
+      ctx.strokeStyle = ink(0.05);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    // lit edges
+    for(let e = 0; e < f; e++){
+      const lit = clamp(edgePos - e, 0, 1);
+      if(lit <= 0) continue;
+      drawLitEdge(e, lit);
+    }
+    // closing-edge flash (the repeat)
+    if(flash > 0){
+      const g = edgeGeom(f - 1);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.lineCap = 'round';
+      tracePath(g, 1); ctx.strokeStyle = 'rgba(255,236,220,' + (0.5 * flash) + ')'; ctx.lineWidth = 10; ctx.stroke();
+      tracePath(g, 1); ctx.strokeStyle = 'rgba(255,248,240,' + (0.85 * flash) + ')'; ctx.lineWidth = 2.4; ctx.stroke();
+      ctx.restore();
+    }
+
+    drawNodes(edgePos, flash);
+    if(showWalker) drawWalker(edgePos);
+    drawLabels();
+  }
+
+  // ---------- animation ----------
+  function frame(ts){
+    rafId = 0;
+    if(!state){ return; }
+    if(!isVis()){
+      anim.start += ts - anim.last;
+      anim.last = ts;
+      rafId = requestAnimationFrame(frame);
+      return;
+    }
+    anim.last = ts;
+    const elapsed = ts - anim.start;
+    safe(function(){ draw(elapsed); });
+    if(elapsed < anim.dur + 680){
+      rafId = requestAnimationFrame(frame);
+    } else {
+      anim.running = false;
+      safe(function(){ draw(1e9); });
+    }
+  }
+
+  function startWalk(){
+    if(!state) return;
+    if(RED){ safe(function(){ draw(1e9); }); return; }
+    anim.dur = clamp(state.f * 90, 1400, 2200);
+    anim.start = performance.now();
+    anim.last = anim.start;
+    anim.running = true;
+    if(!rafId) rafId = requestAnimationFrame(frame);
+  }
+
+  function redrawStatic(){
+    if(!anim.running) safe(function(){ draw(1e9); });
+  }
+
+  // ---------- pointer (mouse + touch) ----------
+  function pointerPos(ev){
+    const rect = cv.getBoundingClientRect();
+    const sx = rect.width ? (w / rect.width) : 1;
+    const sy = rect.height ? (h / rect.height) : 1;
+    return { x: (ev.clientX - rect.left) * sx, y: (ev.clientY - rect.top) * sy };
+  }
+  function onMove(ev){
+    if(!state) return;
+    const p = pointerPos(ev);
+    let best = -1, bd = (state.nodeR + 9) * (state.nodeR + 9);
+    for(let i = 0; i < state.f; i++){
+      const n = state.nodes[i]; if(!n) continue;
+      const dx = n.x - p.x, dy = n.y - p.y, d = dx*dx + dy*dy;
+      if(d < bd){ bd = d; best = i; }
+    }
+    if(best !== hoverIndex){
+      hoverIndex = best;
+      redrawStatic();
+    }
+  }
+  function onLeave(){
+    if(hoverIndex !== -1){ hoverIndex = -1; redrawStatic(); }
+  }
+
+  // ---------- wiring ----------
+  function onInput(){
+    safe(function(){
+      recompute();
+      hoverIndex = -1;
+      startWalk();
+      if(RED) draw(1e9);
+    });
+  }
+
+  if(elA) elA.addEventListener('input', onInput);
+  if(elB) elB.addEventListener('input', onInput);
+  if(elPlay) elPlay.addEventListener('click', function(){ safe(startWalk); });
+  cv.addEventListener('pointermove', function(ev){ safe(function(){ onMove(ev); }); });
+  cv.addEventListener('pointerleave', function(){ safe(onLeave); });
+
+  window.addEventListener('resize', function(){
+    if(resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){
+      safe(function(){
+        setup();
+        if(state) layout(state.o);
+        if(!anim.running) draw(1e9);
+      });
+    }, 150);
+  });
+
+  // ---------- init ----------
+  safe(function(){
+    setup();
+    recompute();
+    if(RED) draw(1e9);
+    else startWalk();
+  });
+})();</script>
+<script id="fig-match">(function(){
+const LIB = window.__PT_LIB__; const D = window.__PT_DATA__;
+const cv = document.getElementById('matCanvas'); if(!cv) return;
+const COL = LIB.COL, RGB = LIB.RGB;
+const clamp = LIB.clamp, lerp = LIB.lerp;
+const N = 12, P = 101;
+const GOOD = COL.good || COL.bond || '#2f9e44';
+const ACC = (RGB && RGB.accent) ? RGB.accent : [200,66,31];
+
+let F, B, maxF, minF;
+try {
+  F = LIB.buildF(N, P);
+  B = LIB.bottleneck(F);
+} catch(e){ return; }
+maxF = 0; minF = 1e9;
+for (let i=0;i<N;i++) for(let j=0;j<N;j++){ const v=F[i][j]; if(v>maxF)maxF=v; if(v<minF)minF=v; }
+
+const elAuto = document.getElementById('matAuto');
+const elReset = document.getElementById('matReset');
+const elT = document.getElementById('matT');
+const elTV = document.getElementById('matTV');
+const elStatus = document.getElementById('matStatus');
+const elBottleneck = document.getElementById('matBottleneck');
+
+if (elT){ elT.min = '1'; elT.max = String(maxF); }
+if (elBottleneck) elBottleneck.textContent = String(B);
+
+let t = 1, M = null, hover = null, auto = null, G = null;
+let running = false, raf = 0;
+const isIn = LIB.inView(cv);
+
+function hexA(hex,a){
+  hex = hex || '#000000';
+  if (hex.charAt(0)==='#') hex = hex.slice(1);
+  if (hex.length===3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  const n = parseInt(hex,16)||0;
+  return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';
+}
+function roundRect(ctx,x,y,w,h,r){
+  r = Math.max(0, Math.min(r, w/2, h/2));
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function rampCss(u){
+  u = clamp(u,0,1);
+  const low = [242,234,219];
+  const hot = [Math.round(ACC[0]*0.55), Math.round(ACC[1]*0.42), Math.round(ACC[2]*0.35)];
+  let c;
+  if (u < 0.5){ const k=u*2; c=[lerp(low[0],ACC[0],k),lerp(low[1],ACC[1],k),lerp(low[2],ACC[2],k)]; }
+  else { const k=(u-0.5)*2; c=[lerp(ACC[0],hot[0],k),lerp(ACC[1],hot[1],k),lerp(ACC[2],hot[2],k)]; }
+  return 'rgb('+(c[0]|0)+','+(c[1]|0)+','+(c[2]|0)+')';
+}
+
+function applyMatchStatus(){
+  if (!elStatus) return;
+  if (M !== null){
+    elStatus.textContent = 'perfect matching holds, all 12 pairs ≥ ' + t;
+    elStatus.style.color = GOOD;
+  } else {
+    let sz = 0;
+    try { sz = LIB.kuhn(LIB.adjAt(F,t), N, N).size; } catch(e){ sz = 0; }
+    elStatus.textContent = 'no perfect matching at t = ' + t + ', the floor is too high (largest partial ' + sz + '/12)';
+    elStatus.style.color = COL.danger;
+  }
+}
+
+function setT(v){
+  t = v;
+  if (elT) elT.value = String(Math.max(1, Math.min(maxF, v)));
+  if (elTV) elTV.textContent = String(v);
+  try { M = LIB.matchingAt(F, t); } catch(e){ M = null; }
+  if (!hover) applyMatchStatus();
+}
+
+function initCanvas(){
+  const cssW = cv.clientWidth || (cv.parentNode && cv.parentNode.clientWidth) || 600;
+  const mL=34, mT=28, mR=16, mB=32;
+  let cell = clamp((cssW-mL-mR)/N, 14, 30);
+  const heightPx = Math.round(mT + N*cell + mB);
+  const s = LIB.setupCanvas(cv, heightPx, 2);
+  const w = s.w, h = s.h, ctx = s.ctx;
+  cell = clamp((w-mL-mR)/N, 14, 30);
+  const gridW = cell*N;
+  const ox = mL + Math.max(0, (w-mL-mR-gridW)/2);
+  const oy = mT;
+  G = { ctx:ctx, w:w, h:h, cell:cell, ox:ox, oy:oy, gap:2, radius:3 };
+}
+
+function draw(now){
+  if (!G) return;
+  const ctx=G.ctx, w=G.w, h=G.h, cell=G.cell, ox=G.ox, oy=G.oy, gap=G.gap, r=G.radius;
+  ctx.clearRect(0,0,w,h);
+
+  for (let i=0;i<N;i++){
+    for (let j=0;j<N;j++){
+      const v = F[i][j];
+      const x = ox + j*cell + gap/2, y = oy + i*cell + gap/2, s = cell-gap;
+      const dim = v < t;
+      const u = maxF>minF ? (v-minF)/(maxF-minF) : 0.5;
+      roundRect(ctx,x,y,s,s,Math.min(r,s/2));
+      if (dim){ ctx.fillStyle='rgba(122,116,104,0.13)'; ctx.fill(); }
+      else { ctx.fillStyle=rampCss(u); ctx.fill(); }
+      if (cell>=19){
+        ctx.globalAlpha = dim ? 0.26 : 0.82;
+        ctx.fillStyle = (!dim && u>0.55) ? '#f6efe2' : COL.ink2;
+        ctx.font = '9px "IBM Plex Mono", monospace';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(String(v), x+s/2, y+s/2+0.5);
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+
+  // 5x5 worked-example corner
+  ctx.save();
+  ctx.setLineDash([3,3]);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = hexA(COL.ink3, 0.7);
+  ctx.strokeRect(ox+0.5, oy+0.5, 5*cell-1, 5*cell-1);
+  ctx.restore();
+
+  // axis labels
+  ctx.font = '11px "IBM Plex Mono", monospace';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'right';
+  for (let i=0;i<N;i++){
+    ctx.globalAlpha = 0.58; ctx.fillStyle = COL.hero;
+    ctx.fillText(String(i+1), ox-6, oy + i*cell + cell/2);
+  }
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'center';
+  for (let j=0;j<N;j++){
+    ctx.globalAlpha = 0.58; ctx.fillStyle = COL.villain;
+    ctx.fillText(String(j+1), ox + j*cell + cell/2, oy-7);
+  }
+  ctx.globalAlpha = 1;
+
+  // corner note
+  ctx.font = '10px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.globalAlpha = 0.72; ctx.fillStyle = COL.ink3;
+  ctx.fillText('5×5 corner → 14', ox, oy + N*cell + 20);
+  ctx.globalAlpha = 1;
+
+  // matching markers
+  if (M){
+    const pu = LIB.REDUCED ? 0 : (Math.sin(now/650)*0.5+0.5);
+    for (let i=0;i<N;i++){
+      const j = M[i];
+      if (j<0 || j>=N) continue;
+      const x = ox + j*cell + gap/2, y = oy + i*cell + gap/2, s = cell-gap;
+      const inset = 3;
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = hexA(GOOD, 0.72+0.24*pu);
+      roundRect(ctx, x+inset, y+inset, s-2*inset, s-2*inset, Math.min(r,(s-2*inset)/2));
+      ctx.stroke();
+      ctx.restore();
+      const cx = x+s/2, cy = y+s/2;
+      const dr = Math.max(2, cell*0.11*(1+0.14*pu));
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const g = ctx.createRadialGradient(cx,cy,0,cx,cy,dr*2.4);
+      g.addColorStop(0, hexA(GOOD,0.5));
+      g.addColorStop(1, hexA(GOOD,0));
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx,cy,dr*2.4,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = GOOD;
+      ctx.beginPath(); ctx.arc(cx,cy,dr,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  // hover outline
+  if (hover){
+    const i = hover.i, j = hover.j;
+    const x = ox + j*cell + gap/2, y = oy + i*cell + gap/2, s = cell-gap;
+    ctx.save();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = COL.ink2;
+    roundRect(ctx, x-0.5, y-0.5, s+1, s+1, Math.min(r,s/2));
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function needLoop(){ return !!auto || !LIB.REDUCED; }
+function kick(){ if(!running && needLoop()){ running=true; raf=requestAnimationFrame(loop); } }
+function loop(now){
+  if (!needLoop()){ running=false; raf=0; return; }
+  raf = requestAnimationFrame(loop);
+  if (!isIn()) return;
+  if (auto) stepAuto(now);
+  draw(now);
+}
+
+function startAuto(){
+  if (auto) return;
+  hover = null;
+  auto = { phase:'rise', t0: performance.now(),
+           dur: LIB.REDUCED ? 420 : 1600,
+           holdMs: LIB.REDUCED ? 320 : 800,
+           brokeSet: false };
+  setT(1);
+  kick();
+  if (LIB.REDUCED) draw(performance.now());
+}
+function stepAuto(now){
+  const a = auto;
+  if (a.phase==='rise'){
+    const frac = (now - a.t0)/a.dur;
+    if (frac >= 1){ setT(B); a.phase='break'; a.t0=now; a.brokeSet=false; }
+    else { setT(1 + Math.round((B-1)*LIB.easeInOut(clamp(frac,0,1)))); }
+  } else if (a.phase==='break'){
+    if (!a.brokeSet){ setT(B+1); a.brokeSet=true; a.t0=now; }
+    else if (now - a.t0 > a.holdMs){ a.phase='settle'; }
+  } else {
+    setT(B); auto = null;
+  }
+}
+
+function evtCell(e){
+  if (!G) return null;
+  const rect = cv.getBoundingClientRect();
+  const px = e.clientX - rect.left, py = e.clientY - rect.top;
+  const j = Math.floor((px - G.ox)/G.cell);
+  const i = Math.floor((py - G.oy)/G.cell);
+  if (i<0 || i>=N || j<0 || j>=N) return null;
+  return { i:i, j:j };
+}
+function onHover(e){
+  const c = evtCell(e);
+  const changed = (!!c !== !!hover) || (c && hover && (c.i!==hover.i || c.j!==hover.j));
+  if (!changed) return;
+  hover = c;
+  if (hover){
+    if (elStatus){
+      elStatus.textContent = 'hero a='+(hover.i+1)+', villain b='+(hover.j+1)+', f='+F[hover.i][hover.j];
+      elStatus.style.color = COL.ink2;
+    }
+  } else {
+    applyMatchStatus();
+  }
+  draw(performance.now());
+}
+function onLeave(){
+  if (!hover) return;
+  hover = null;
+  applyMatchStatus();
+  draw(performance.now());
+}
+
+cv.addEventListener('pointermove', onHover);
+cv.addEventListener('pointerdown', onHover);
+cv.addEventListener('pointerleave', onLeave);
+
+if (elT) elT.addEventListener('input', function(){
+  auto = null; hover = null;
+  setT(parseInt(elT.value,10)||1);
+  draw(performance.now());
+});
+if (elReset) elReset.addEventListener('click', function(){
+  auto = null; hover = null;
+  setT(1);
+  draw(performance.now());
+});
+if (elAuto) elAuto.addEventListener('click', startAuto);
+
+let rz = 0;
+window.addEventListener('resize', function(){
+  clearTimeout(rz);
+  rz = setTimeout(function(){ initCanvas(); draw(performance.now()); }, 150);
+});
+
+initCanvas();
+setT(1);
+draw(performance.now());
+if (!LIB.REDUCED) kick();
+})();</script>
+<script id="fig-plateau">(function(){
+  const LIB = window.__PT_LIB__; const D = window.__PT_DATA__;
+  if(!LIB || !D) return;
+  const cv = document.getElementById('plCanvas'); if(!cv) return;
+
+  const COL = LIB.COL, RGB = LIB.RGB;
+  const MONO = '11px "IBM Plex Mono", monospace';
+  const PANEL = '#ece6d8';
+  const PADL = 48, PADR = 16, PADT = 18, PADB = 36;
+  const DUR = 1400;
+
+  const CS = (typeof D.curveStart === 'number') ? D.curveStart : 2;
+  const CURVE = D.curve || [];
+  const NMAXALL = CS + CURVE.length - 1;
+  const pb = D.partB || {};
+  const BEST = (typeof pb.best === 'number') ? pb.best : 408;
+  const LO = (typeof pb.lo === 'number') ? pb.lo : 924;
+  const HI = (typeof pb.hi === 'number') ? pb.hi : 999;
+  const DEFAULT_HOVER = 'peak ' + BEST + ' · n ∈ [' + LO + ', ' + HI + ']';
+
+  const val = function(n){ return CURVE[n - CS]; };
+
+  const replayEl = document.getElementById('plReplay');
+  const zoomWrap = document.getElementById('plZoom');
+  const hoverEl = document.getElementById('plHover');
+  if(hoverEl) hoverEl.textContent = DEFAULT_HOVER;
+
+  // ---- state ----
+  let ctx, W = 0, Hh = 0;
+  let zoom = 'full';
+  let nMin = CS, nMax = NMAXALL, yLo = 0, yHi = 500, yStep = 100;
+  let prog = LIB.REDUCED ? 1 : 0;
+  let animating = false, startT = 0, raf = 0;
+  let hoverN = null;
+  const vis = LIB.inView(cv);
+
+  // ---- axis helpers ----
+  function niceNum(x, round){
+    if(x <= 0) x = 1;
+    const exp = Math.floor(Math.log10(x));
+    const f = x / Math.pow(10, exp);
+    let nf;
+    if(round){ nf = f < 1.5 ? 1 : (f < 3 ? 2 : (f < 7 ? 5 : 10)); }
+    else { nf = f <= 1 ? 1 : (f <= 2 ? 2 : (f <= 5 ? 5 : 10)); }
+    return nf * Math.pow(10, exp);
+  }
+  function niceAxis(mn, mx, ticks){
+    const range = niceNum(Math.max(1e-6, mx - mn), false);
+    const step = niceNum(range / Math.max(1, ticks - 1), true);
+    const lo = Math.floor(mn / step) * step;
+    const hi = Math.ceil(mx / step) * step;
+    return { lo: lo, hi: hi, step: step };
+  }
+
+  function computeRanges(){
+    if(zoom === 'top'){ nMin = Math.max(CS, 850); nMax = NMAXALL; }
+    else { nMin = CS; nMax = NMAXALL; }
+    let vmin = Infinity, vmax = -Infinity;
+    for(let n = nMin; n <= nMax; n++){
+      const v = val(n);
+      if(v == null) continue;
+      if(v < vmin) vmin = v;
+      if(v > vmax) vmax = v;
+    }
+    if(!isFinite(vmin)){ vmin = 0; vmax = BEST; }
+    if(zoom === 'top'){
+      const ax = niceAxis(vmin, vmax, 4);
+      yLo = ax.lo; yHi = ax.hi; yStep = ax.step;
+    } else {
+      const ax = niceAxis(0, vmax, 5);
+      yLo = 0; yHi = ax.hi; yStep = ax.step;
+    }
+  }
+
+  function xTicks(){
+    return zoom === 'top' ? [850, 900, 950, NMAXALL] : [CS, 250, 500, 750, NMAXALL];
+  }
+  function yTicks(){
+    const out = [];
+    for(let v = yLo; v <= yHi + yStep * 0.5; v += yStep) out.push(Math.round(v));
+    return out;
+  }
+
+  // ---- setup / measure ----
+  function measure(){
+    const rect = cv.getBoundingClientRect();
+    const wpx = rect.width || 640;
+    return Math.round(LIB.clamp(wpx * 0.46, 300, 420));
+  }
+  function setup(){
+    const H = measure();
+    const s = LIB.setupCanvas(cv, H, 2);
+    ctx = s.ctx; W = s.w; Hh = s.h;
+  }
+
+  // ---- render ----
+  function render(){
+    if(!ctx) return;
+    const x0 = PADL, x1 = W - PADR, y0 = PADT, y1 = Hh - PADB;
+    const plotW = x1 - x0, plotH = y1 - y0;
+    if(plotW <= 4 || plotH <= 4) return;
+
+    const xAt = function(n){ return x0 + (n - nMin) / (nMax - nMin) * plotW; };
+    const yAt = function(v){ return y1 - (v - yLo) / (yHi - yLo) * plotH; };
+
+    const ep = LIB.easeOutCubic(LIB.clamp(prog, 0, 1));
+    const xClip = x0 + ep * plotW + 0.5;
+
+    ctx.clearRect(0, 0, W, Hh);
+
+    // ---- gridlines + y ticks + axes (always) ----
+    ctx.font = MONO;
+    ctx.textBaseline = 'middle';
+    const yt = yTicks();
+    ctx.textAlign = 'right';
+    for(let i = 0; i < yt.length; i++){
+      const gy = yAt(yt[i]);
+      ctx.strokeStyle = LIB.rgba(RGB.ink, 0.07);
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, gy + 0.5); ctx.lineTo(x1, gy + 0.5); ctx.stroke();
+      ctx.fillStyle = COL.ink3;
+      ctx.fillText(String(yt[i]), x0 - 7, gy);
+    }
+
+    // axis lines (hairline solid)
+    ctx.strokeStyle = COL.ink4; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x0 + 0.5, y0); ctx.lineTo(x0 + 0.5, y1);
+    ctx.moveTo(x0, y1 + 0.5); ctx.lineTo(x1, y1 + 0.5);
+    ctx.stroke();
+
+    // x ticks
+    ctx.fillStyle = COL.ink3; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const xt = xTicks();
+    for(let i = 0; i < xt.length; i++){
+      const gx = xAt(xt[i]);
+      ctx.strokeStyle = COL.ink4; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(gx + 0.5, y1); ctx.lineTo(gx + 0.5, y1 + 4); ctx.stroke();
+      ctx.fillText(String(xt[i]), gx, y1 + 7);
+    }
+
+    // axis titles
+    ctx.fillStyle = COL.ink3; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center';
+    ctx.fillText('n (heroes = villains)', (x0 + x1) / 2, Hh - 6);
+    ctx.save();
+    ctx.translate(13, (y0 + y1) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('hero-villain value', 0, 0);
+    ctx.restore();
+
+    // ---- clipped data region (wipe reveal) ----
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x0, y0, Math.max(0, xClip - x0), plotH);
+    ctx.clip();
+
+    // plateau vertical band
+    const bandX = xAt(LO), bandR = xAt(HI);
+    ctx.fillStyle = LIB.rgba(RGB.hero, 0.07);
+    ctx.fillRect(bandX, y0, Math.max(1, bandR - bandX), plotH);
+
+    // area wash under curve
+    ctx.beginPath();
+    ctx.moveTo(xAt(nMin), y1);
+    for(let n = nMin; n <= nMax; n++){
+      const v = val(n); if(v == null) continue;
+      ctx.lineTo(xAt(n), yAt(v));
+    }
+    ctx.lineTo(xAt(nMax), y1);
+    ctx.closePath();
+    ctx.fillStyle = LIB.rgba(RGB.accent, 0.10);
+    ctx.fill();
+
+    // horizontal reference line at BEST
+    const refY = yAt(BEST);
+    ctx.strokeStyle = LIB.rgba(RGB.ink, 0.30);
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(x0, refY + 0.5); ctx.lineTo(x1, refY + 0.5); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // main line
+    ctx.beginPath();
+    let started = false;
+    for(let n = nMin; n <= nMax; n++){
+      const v = val(n); if(v == null) continue;
+      const px = xAt(n), py = yAt(v);
+      if(!started){ ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+    }
+    ctx.strokeStyle = COL.accent;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // plateau overlay (thicker blue)
+    ctx.beginPath();
+    ctx.moveTo(xAt(LO), yAt(BEST));
+    ctx.lineTo(xAt(HI), yAt(BEST));
+    ctx.strokeStyle = COL.hero;
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ctx.restore();
+
+    // ---- ref label "408" at right (fade with reveal) ----
+    ctx.globalAlpha = ep;
+    ctx.fillStyle = COL.ink3; ctx.font = MONO;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(BEST), x1 - 2, refY - 8);
+    ctx.globalAlpha = 1;
+
+    // ---- annotation dot + label ----
+    const frac924 = (LO - nMin) / (nMax - nMin);
+    const annA = LIB.clamp((ep - frac924) / 0.05, 0, 1);
+    if(annA > 0){
+      const dotX = xAt(LO), dotY = yAt(BEST);
+      ctx.globalAlpha = annA;
+      // ring + dot
+      ctx.beginPath(); ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
+      ctx.fillStyle = PANEL; ctx.fill();
+      ctx.beginPath(); ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = COL.hero; ctx.fill();
+
+      // label
+      const L = 'first reaches ' + BEST + ' · n = ' + LO;
+      ctx.font = MONO;
+      const tw = ctx.measureText(L).width;
+      let lx = dotX - tw - 10;
+      if(lx < x0 + 4){ lx = dotX + 10; }
+      if(lx + tw > x1 - 4){ lx = x1 - 4 - tw; }
+      if(lx < x0 + 4){ lx = x0 + 4; }
+      let ly = dotY - 12;
+      if(ly < y0 + 12) ly = dotY + 20;
+      if(ly > y1 - 4) ly = y1 - 4;
+      ctx.fillStyle = COL.ink2;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(L, lx, ly);
+      ctx.globalAlpha = 1;
+    }
+
+    // ---- hover crosshair ----
+    if(hoverN != null && hoverN >= nMin && hoverN <= nMax){
+      const hv = val(hoverN);
+      if(hv != null){
+        const hx = xAt(hoverN), hy = yAt(hv);
+        ctx.strokeStyle = LIB.rgba(RGB.ink, 0.28);
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(hx + 0.5, y0); ctx.lineTo(hx + 0.5, y1); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath(); ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = PANEL; ctx.fill();
+        ctx.beginPath(); ctx.arc(hx, hy, 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = COL.accent; ctx.fill();
+      }
+    }
+  }
+
+  // ---- animation ----
+  function loop(t){
+    if(!animating){ raf = 0; return; }
+    if(!vis()){ startT = 0; raf = requestAnimationFrame(loop); return; }
+    if(!startT) startT = t;
+    prog = LIB.clamp((t - startT) / DUR, 0, 1);
+    render();
+    if(prog >= 1){ animating = false; raf = 0; return; }
+    raf = requestAnimationFrame(loop);
+  }
+  function triggerAnim(){
+    if(LIB.REDUCED){ prog = 1; render(); return; }
+    prog = 0; animating = true; startT = 0;
+    if(!raf) raf = requestAnimationFrame(loop);
+  }
+
+  // ---- interaction ----
+  function nFromX(px){
+    const x0 = PADL, x1 = W - PADR;
+    let t = (px - x0) / (x1 - x0);
+    t = LIB.clamp(t, 0, 1);
+    return Math.round(nMin + t * (nMax - nMin));
+  }
+  function onMove(e){
+    const rect = cv.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    if(px < PADL - 4 || px > W - PADR + 4 || py < PADT - 4 || py > Hh - PADB + 4){
+      onLeave();
+      return;
+    }
+    const n = LIB.clamp(nFromX(px), nMin, nMax);
+    hoverN = n;
+    const v = val(n);
+    if(hoverEl && v != null) hoverEl.textContent = 'n = ' + n + ' · value = ' + v;
+    if(!animating) render();
+  }
+  function onLeave(){
+    if(hoverN == null) return;
+    hoverN = null;
+    if(hoverEl) hoverEl.textContent = DEFAULT_HOVER;
+    if(!animating) render();
+  }
+
+  cv.addEventListener('pointermove', onMove);
+  cv.addEventListener('pointerdown', onMove);
+  cv.addEventListener('pointerleave', onLeave);
+  cv.addEventListener('pointercancel', onLeave);
+
+  if(replayEl){
+    replayEl.addEventListener('click', function(){ hoverN = null; if(hoverEl) hoverEl.textContent = DEFAULT_HOVER; triggerAnim(); });
+  }
+  if(zoomWrap){
+    zoomWrap.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest ? e.target.closest('[data-z]') : null;
+      if(!btn) return;
+      const z = btn.getAttribute('data-z');
+      if(z !== 'full' && z !== 'top') return;
+      if(z === zoom) return;
+      zoom = z;
+      const all = zoomWrap.querySelectorAll('[data-z]');
+      for(let i = 0; i < all.length; i++){
+        all[i].classList.toggle('on', all[i].getAttribute('data-z') === z);
+      }
+      hoverN = null;
+      if(hoverEl) hoverEl.textContent = DEFAULT_HOVER;
+      computeRanges();
+      triggerAnim();
+    });
+  }
+
+  // ---- resize ----
+  let rzT = 0;
+  function onResize(){
+    clearTimeout(rzT);
+    rzT = setTimeout(function(){
+      setup();
+      if(!animating){ prog = LIB.REDUCED ? 1 : prog; render(); }
+    }, 150);
+  }
+  window.addEventListener('resize', onResize);
+
+  // ---- init ----
+  setup();
+  computeRanges();
+  if(LIB.REDUCED){ prog = 1; render(); }
+  else { triggerAnim(); }
+})();</script>
+<script id="fig-hist">(function(){
+  const LIB = window.__PT_LIB__; const D = window.__PT_DATA__;
+  if(!LIB || !D) return;
+  const cv = document.getElementById('histCanvas'); if(!cv) return;
+  const COL = LIB.COL, RGB = LIB.RGB, rgba = LIB.rgba;
+
+  // ---- data / binning ----------------------------------------------------
+  const vals = D.partAf || [];
+  const FLOOR = (D.partA && D.partA.value) || 349;
+  const DOM_LO = 340, DOM_HI = 540, BIN_W = 10;
+  const NB = Math.round((DOM_HI - DOM_LO) / BIN_W); // 20 bins
+  const counts = new Array(NB).fill(0);
+  let dataMax = -Infinity, dataMin = Infinity;
+  for(let i=0;i<vals.length;i++){
+    const v = vals[i];
+    if(v>dataMax) dataMax = v; if(v<dataMin) dataMin = v;
+    let idx = Math.floor((v - DOM_LO) / BIN_W);
+    if(idx < 0) idx = 0; if(idx >= NB) idx = NB - 1;
+    counts[idx]++;
+  }
+  let maxCount = 0, maxIdx = 0;
+  for(let i=0;i<NB;i++){ if(counts[i] > maxCount){ maxCount = counts[i]; maxIdx = i; } }
+  const TOTAL = vals.length;
+  const LONGEST = isFinite(dataMax) ? dataMax : 536;
+
+  // nice y axis
+  function niceStep(m){ if(m<=50) return 10; if(m<=120) return 20; if(m<=300) return 50; return 100; }
+  const yStep = niceStep(maxCount);
+  const yMax = Math.max(yStep, Math.ceil(maxCount / yStep) * yStep);
+
+  // ---- layout / state ----------------------------------------------------
+  let ctx, W, H, DPR;
+  const PL = 48, PR_PAD = 18, PT = 34, PB_PAD = 46;
+  let plotL, plotR, plotT, plotB;
+  let hoverIdx = -1;
+  let animStart = 0, animating = false, curProg = 1;
+  const DUR = 1100;
+
+  const DEFAULT_READOUT = TOTAL + " pairs · floor " + FLOOR + " · longest " + LONGEST;
+  const hoverEl = document.getElementById('histHover');
+  function setReadout(s){ if(hoverEl) hoverEl.textContent = s; }
+  setReadout(DEFAULT_READOUT);
+
+  function computeLayout(){
+    plotL = PL; plotR = W - PR_PAD; plotT = PT; plotB = H - PB_PAD;
+  }
+  function setup(){
+    const r = LIB.setupCanvas(cv, chooseHeight(), 2);
+    ctx = r.ctx; W = r.w; H = r.h; DPR = r.dpr;
+    computeLayout();
+  }
+  function chooseHeight(){
+    const w = cv.clientWidth || cv.getBoundingClientRect().width || 640;
+    return Math.round(Math.min(400, Math.max(320, w * 0.52)));
+  }
+
+  const xScale = (score) => plotL + ((score - DOM_LO) / (DOM_HI - DOM_LO)) * (plotR - plotL);
+  const yScale = (c) => plotB - (c / yMax) * (plotB - plotT);
+
+  // rounded-top rect path
+  function topRoundRect(x, y, w, h, r){
+    r = Math.max(0, Math.min(r, w/2, h));
+    ctx.beginPath();
+    ctx.moveTo(x, y + h);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h);
+    ctx.closePath();
+  }
+
+  function barT(i, g){
+    const start = (i / NB) * 0.30;
+    const t = (g - start) / (1 - 0.30);
+    return LIB.easeOutCubic(LIB.clamp(t, 0, 1));
+  }
+
+  // ---- render ------------------------------------------------------------
+  function render(g){
+    curProg = g;
+    ctx.clearRect(0, 0, W, H);
+
+    // hard-wall tint left of the floor
+    const wallX = xScale(FLOOR);
+    ctx.save();
+    ctx.fillStyle = rgba(RGB.ink, 0.045);
+    ctx.fillRect(plotL, plotT, Math.max(0, wallX - plotL), plotB - plotT);
+    ctx.restore();
+
+    // y gridlines + ticks
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'right';
+    for(let c = 0; c <= yMax + 0.5; c += yStep){
+      const y = yScale(c);
+      ctx.strokeStyle = rgba(RGB.ink, c === 0 ? 0.32 : 0.10);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(plotL, Math.round(y) + 0.5);
+      ctx.lineTo(plotR, Math.round(y) + 0.5);
+      ctx.stroke();
+      ctx.fillStyle = COL.ink3;
+      ctx.fillText(String(c), plotL - 8, y);
+    }
+
+    // bars
+    const gap = 1; // px inset per side -> 2px surface gap
+    for(let i = 0; i < NB; i++){
+      const c = counts[i]; if(c <= 0) continue;
+      const lo = DOM_LO + i * BIN_W;
+      const x0 = xScale(lo) + gap;
+      const x1 = xScale(lo + BIN_W) - gap;
+      const cw = x1 - x0; if(cw <= 0) continue;
+      const fullH = (c / yMax) * (plotB - plotT);
+      const h = fullH * barT(i, g);
+      if(h < 0.5) continue;
+      const y = plotB - h;
+      const isHov = i === hoverIdx;
+      topRoundRect(x0, y, cw, h, 4);
+      ctx.fillStyle = COL.accent;
+      ctx.fill();
+      if(isHov){
+        ctx.save();
+        ctx.fillStyle = rgba(RGB.ink, 0.14);
+        ctx.fill();
+        ctx.restore();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = COL.ink2;
+        ctx.stroke();
+      }
+    }
+
+    // tallest-bar direct label (only near end of anim)
+    if(g > 0.9 && hoverIdx < 0){
+      const c = counts[maxIdx];
+      const lo = DOM_LO + maxIdx * BIN_W;
+      const cx = (xScale(lo) + xScale(lo + BIN_W)) / 2;
+      const topY = plotB - (c / yMax) * (plotB - plotT);
+      ctx.font = '11px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = COL.ink2;
+      ctx.fillText(String(c), cx, topY - 6);
+    }
+
+    // floor line (green), drawn over bars
+    ctx.save();
+    ctx.strokeStyle = COL.bond;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(wallX) + 0.5, plotT);
+    ctx.lineTo(Math.round(wallX) + 0.5, plotB);
+    ctx.stroke();
+    // small notch marker at top
+    ctx.fillStyle = COL.bond;
+    ctx.beginPath();
+    ctx.moveTo(wallX, plotT);
+    ctx.lineTo(wallX - 4, plotT - 6);
+    ctx.lineTo(wallX + 4, plotT - 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // floor label
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = COL.bond;
+    const flLabel = "floor " + FLOOR;
+    ctx.fillText(flLabel, wallX + 7, plotT + 12);
+    ctx.fillStyle = COL.ink2;
+    ctx.fillText("= the value", wallX + 7, plotT + 26);
+
+    // x axis line
+    ctx.strokeStyle = rgba(RGB.ink, 0.32);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(plotL, Math.round(plotB) + 0.5);
+    ctx.lineTo(plotR, Math.round(plotB) + 0.5);
+    ctx.stroke();
+
+    // x ticks
+    const xticks = [350, 400, 450, 500];
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for(let k = 0; k < xticks.length; k++){
+      const t = xticks[k];
+      const x = xScale(t);
+      ctx.strokeStyle = rgba(RGB.ink, 0.32);
+      ctx.beginPath();
+      ctx.moveTo(Math.round(x) + 0.5, plotB);
+      ctx.lineTo(Math.round(x) + 0.5, plotB + 5);
+      ctx.stroke();
+      ctx.fillStyle = COL.ink3;
+      ctx.fillText(String(t), x, plotB + 8);
+    }
+
+    // axis titles (quiet)
+    ctx.fillStyle = COL.ink4;
+    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText("pairing score f", (plotL + plotR) / 2, H - 8);
+    ctx.save();
+    ctx.translate(13, (plotT + plotB) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText("pairs", 0, 0);
+    ctx.restore();
+
+    // quiet total note top-right
+    ctx.fillStyle = COL.ink4;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillText(TOTAL + " pairs", plotR, 6);
+  }
+
+  // ---- animation ---------------------------------------------------------
+  const isVis = LIB.inView(cv);
+  function frame(now){
+    if(!animating) return;
+    if(!isVis()){ requestAnimationFrame(frame); return; }
+    if(!animStart) animStart = now;
+    const g = LIB.clamp((now - animStart) / DUR, 0, 1);
+    render(g);
+    if(g >= 1){ animating = false; return; }
+    requestAnimationFrame(frame);
+  }
+  function play(){
+    if(LIB.REDUCED){ animating = false; render(1); return; }
+    animStart = 0; animating = true;
+    requestAnimationFrame(frame);
+  }
+
+  // ---- interaction -------------------------------------------------------
+  function binAtX(px, py){
+    if(px < plotL || px > plotR || py < plotT || py > plotB + 4) return -1;
+    let idx = Math.floor(((px - plotL) / (plotR - plotL)) * (DOM_HI - DOM_LO) / BIN_W);
+    if(idx < 0 || idx >= NB) return -1;
+    if(counts[idx] <= 0) return -1;
+    return idx;
+  }
+  function pointer(e){
+    const r = cv.getBoundingClientRect();
+    const t = e.touches && e.touches[0];
+    const cx = (t ? t.clientX : e.clientX) - r.left;
+    const cy = (t ? t.clientY : e.clientY) - r.top;
+    const idx = binAtX(cx, cy);
+    if(idx !== hoverIdx){
+      hoverIdx = idx;
+      if(idx >= 0){
+        const lo = DOM_LO + idx * BIN_W, hi = lo + BIN_W - 1;
+        setReadout("scores " + lo + "–" + hi + " · " + counts[idx] + " pairs");
+      } else {
+        setReadout(DEFAULT_READOUT);
+      }
+      if(!animating) render(curProg < 1 ? 1 : curProg);
+    }
+  }
+  function leave(){
+    if(hoverIdx !== -1){
+      hoverIdx = -1;
+      setReadout(DEFAULT_READOUT);
+      if(!animating) render(1);
+    }
+  }
+  cv.addEventListener('mousemove', pointer);
+  cv.addEventListener('mouseleave', leave);
+  cv.addEventListener('touchstart', pointer, {passive:true});
+  cv.addEventListener('touchmove', pointer, {passive:true});
+  cv.addEventListener('touchend', leave);
+
+  const replay = document.getElementById('histReplay');
+  if(replay) replay.addEventListener('click', function(){ hoverIdx = -1; setReadout(DEFAULT_READOUT); play(); });
+
+  // ---- resize ------------------------------------------------------------
+  let rzTimer = 0;
+  window.addEventListener('resize', function(){
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(function(){
+      setup();
+      render(LIB.REDUCED ? 1 : (animating ? curProg : 1));
+    }, 150);
+  });
+
+  // ---- boot --------------------------------------------------------------
+  setup();
+  if(LIB.REDUCED){ render(1); }
+  else { render(0); play(); }
+})();</script>
+
+</body>
+</html>

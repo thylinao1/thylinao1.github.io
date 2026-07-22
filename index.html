@@ -557,6 +557,9 @@
   .res-badge.win{background:var(--accent); color:#fff}
   .res-badge.finalist{border:1px solid var(--rule-strong); color:var(--ink-2)}
   .res-badge.ongoing{border:1px solid var(--good); color:var(--good)}
+  a.res-badge{text-decoration:none; cursor:pointer; transition:filter .18s ease, transform .18s ease}
+  a.res-badge:hover{filter:brightness(1.08); transform:translateY(-1px)}
+  a.res-badge:active{transform:translateY(0) scale(.98)}
   .proof{
     font-family:var(--font-mono); font-size:11px; letter-spacing:.02em; color:var(--ink-4);
     text-decoration:none; white-space:nowrap; border-bottom:1px dotted var(--rule-strong);
@@ -826,8 +829,7 @@
           <div class="led-note">Mechanistic interpretability.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win">Correct solution found</span>
-          <a class="proof" href="https://lnkd.in/gHRKzd7F" target="_blank" rel="noopener">solution &#8599;</a>
+          <a class="res-badge win" href="projects/bluedot-fold.html" target="_blank" rel="noopener">Correct solution found &#8599;</a>
         </div>
       </div>
 
@@ -1181,6 +1183,36 @@
     <div class="section-num">§ 03 · Blog</div>
 
     <div class="blog-list">
+
+      <!-- The Fold / BlueDot puzzle solution -->
+      <a class="blog-entry" href="projects/bluedot-fold.html" target="_blank" rel="noopener">
+        <div class="exp-meta">
+          <span class="date">2026 · ~12 min read</span>
+          <span class="type essay">Solution</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">The Fold</h3>
+          <p class="sub">My solution to BlueDot&rsquo;s AI-safety puzzle: the feature a linear probe couldn&rsquo;t see</p>
+          <p class="blog-excerpt">
+            A small classifier was given eight features to represent. Seven it laid out as clean linear
+            directions; the eighth &mdash; country &mdash; it hid, by folding a signed line in half so a linear probe,
+            the workhorse of interpretability, reads pure noise while the feature sits there in plain sight.
+            I show which feature it was, prove the mechanism is a ReLU absolute value with activation patching,
+            then try to hide it in stranger ways &mdash; an angular ring, two features in superposition, a
+            topological link &mdash; and find a network has a limited budget for weirdness: the fold is the
+            cheapest non-linear code and the only one that emerges unsupervised. Interactive figures you can
+            drag, fold, and spin, next to the real analysis plots.
+          </p>
+          <div class="tags">
+            <span class="tag">Mechanistic Interpretability</span>
+            <span class="tag">Non-linear Features</span>
+            <span class="tag">ReLU Fold</span>
+            <span class="tag">Activation Patching</span>
+            <span class="tag">AI Safety</span>
+          </div>
+          <span class="blog-read">Read the solution <span class="arrow">&rarr;</span></span>
+        </div>
+      </a>
 
       <!-- One in Twenty / p-values -->
       <a class="blog-entry" href="projects/p-values.html" target="_blank" rel="noopener">

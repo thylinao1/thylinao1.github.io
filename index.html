@@ -560,6 +560,10 @@
   a.res-badge{text-decoration:none; cursor:pointer; transition:filter .18s ease, transform .18s ease}
   a.res-badge:hover{filter:brightness(1.08); transform:translateY(-1px)}
   a.res-badge:active{transform:translateY(0) scale(.98)}
+  /* glowing "Correct solution found" button (matches the BAREC solution-btn glow) */
+  .res-badge.win.glow{box-shadow:0 0 10px 1px rgba(200,66,31,.45), 0 6px 18px -8px rgba(200,66,31,.7); animation:solutionGlow 2.4s ease-in-out infinite}
+  .res-badge.win.glow:hover{box-shadow:0 0 22px 3px rgba(200,66,31,.6), 0 10px 24px -6px rgba(200,66,31,.85)}
+  @media(prefers-reduced-motion:reduce){.res-badge.win.glow{animation:none}}
   /* BAREC badge: keep the label, drop the solid fill */
   .res-badge.win-plain{background:none; color:var(--accent); border:1px solid var(--accent-soft)}
   /* orange glowing button that links to the BAREC solution write-up */
@@ -847,10 +851,10 @@
         <div class="led-date">Jul 2026</div>
         <div class="led-main">
           <div class="led-title">BlueDot Impact&rsquo;s Technical AI Puzzle</div>
-          <div class="led-note">Mechanistic interpretability.</div>
+          <div class="led-note">Reverse-engineering a hidden non-linear feature.</div>
         </div>
         <div class="led-side">
-          <a class="res-badge win" href="projects/bluedot-fold.html" target="_blank" rel="noopener">Correct solution found &#8599;</a>
+          <a class="res-badge win glow" href="projects/bluedot-fold.html" target="_blank" rel="noopener">Correct solution found &#8599;</a>
         </div>
       </div>
 
@@ -861,7 +865,7 @@
           <div class="led-note">Bottleneck matching over iterated maps modulo a prime.</div>
         </div>
         <div class="led-side">
-          <a class="res-badge win" href="projects/ponder-superheroes.html" target="_blank" rel="noopener">Correct solution found &#8599;</a>
+          <a class="res-badge win glow" href="projects/ponder-superheroes.html" target="_blank" rel="noopener">Correct solution &#8599;</a>
         </div>
       </div>
 

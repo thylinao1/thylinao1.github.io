@@ -49,13 +49,13 @@
     padding:0 32px; max-width:var(--maxw); margin:0 auto;
   }
   .topbar .brand{font-family:var(--font-display); font-style:italic; font-size:17px; color:var(--ink); text-decoration:none; white-space:nowrap; justify-self:start}
-  .topbar nav{display:flex; gap:22px; color:var(--ink-3); justify-self:center}
+  .topbar nav{display:flex; gap:17px; color:var(--ink-3); justify-self:center}
   .topbar nav a{color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:600; letter-spacing:.02em}
   .topbar nav a:hover{color:var(--accent)}
   .topbar .pill{border:1px solid var(--rule-strong); border-radius:999px; padding:4px 12px; text-decoration:none; color:var(--ink-2)}
   .topbar .pill:hover{color:var(--accent); border-color:var(--accent)}
-  .topbar .right{display:flex; gap:10px; flex-wrap:wrap; justify-self:end}
-  @media(max-width:900px){
+  .topbar .right{display:flex; gap:8px; flex-wrap:wrap; justify-self:end}
+  @media(max-width:1100px){
     .topbar-inner{grid-template-columns:1fr auto; gap:14px}
     .topbar nav{display:none}
     .topbar .right{display:none}
@@ -318,7 +318,14 @@
   /* awards (compact, dark) */
   section.awards-section{padding:38px 0 44px; margin-top:12px}
   .awards{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border-top:1px solid rgba(243,237,224,.18); margin-top:24px}
-  .award{padding:22px 22px; border-right:1px solid rgba(243,237,224,.18); border-bottom:1px solid rgba(243,237,224,.18)}
+  .award{position:relative; padding:22px 22px; border-right:1px solid rgba(243,237,224,.18); border-bottom:1px solid rgba(243,237,224,.18)}
+  .award-head{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:10px}
+  .award-head h4{margin:0}
+  .award-logos{display:flex; gap:7px; align-items:center; flex-shrink:0; position:relative; top:-6px}
+  .award-logos .chip{width:30px; height:30px; border-radius:7px; background:#f4efe6; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.28)}
+  .award-logos .chip.wide{width:auto; padding:0 8px}
+  .award-logos .chip img{width:22px; height:22px; object-fit:contain; display:block}
+  .award-logos .chip.wide img{width:auto; height:15px}
   .award:nth-child(3n){border-right:none}
   .award .ord{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; color:rgba(243,237,224,.6); margin-bottom:10px}
   .award h4{font-family:var(--font-display); font-size:22px; font-weight:400; line-height:1.2; margin:0 0 10px; color:#f3ede0}
@@ -359,10 +366,20 @@
   .feature-cta{
     display:inline-flex; align-items:center; gap:8px;
     font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
-    color:var(--accent); font-weight:600;
+    color:var(--accent); font-weight:600; text-decoration:none;
   }
+  .feature-cta:hover{color:#a8341a}
   .feature-cta .arrow{transition:transform .18s}
-  .feature-card:hover .feature-cta .arrow{transform:translateX(4px)}
+  .feature-card:hover .feature-cta .arrow,
+  .feature-cta:hover .arrow{transform:translateX(4px)}
+  .feature-actions{display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:2px}
+  .feature-grant{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; font-weight:600;
+    color:var(--accent); background:transparent; border:1px solid var(--accent);
+    border-radius:999px; padding:8px 16px; text-decoration:none; transition:background .15s, color .15s;
+  }
+  .feature-grant:hover{background:var(--accent-bg); color:var(--accent)}
   .feature-aside{flex:1 1 0; display:flex; justify-content:flex-end; align-items:center; transform:translateY(-16px)}
   .feature-aside svg{width:100%; height:auto; max-width:351px}
   @media(max-width:680px){
@@ -501,6 +518,106 @@
     .exp-body h3{font-size:24px}
     .display-l{font-size:30px}
   }
+
+  /* ================= featured band: two equal hero cards ================= */
+  .feature-band{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:stretch}
+  .feature-band .feature-card{display:flex; flex-direction:column; height:100%; padding:22px 26px 20px}
+  .feature-band .feature-grid{display:block}
+  .feature-band .feature-title{font-size:clamp(19px, 1.85vw, 25px); margin:0 0 8px}
+  .feature-band .feature-desc{margin:0 0 12px; max-width:none}
+  .feature-stat{font-family:var(--font-mono); font-size:12px; letter-spacing:.03em; color:var(--ink-2); margin:0 0 14px}
+  .feature-stat b{color:var(--accent); font-weight:600}
+  .feature-figure{margin:auto 0 16px; display:flex; justify-content:center}
+  .feature-figure svg{width:100%; height:auto; max-width:340px}
+  .feature-band .feature-cta{margin-top:0}
+  .feature-tag.win{color:var(--ink)}
+  .feature-tag.win .dot{background:var(--ink); box-shadow:0 0 0 4px rgba(21,17,11,.10)}
+  .feature-card--flat .feature-cta{margin-top:auto}
+  .feature-card--flat .feature-stat{margin-bottom:0}
+  /* Google wordmark (logo colours + sans-serif) */
+  .google-wm{font-family:Arial, "Helvetica Neue", Helvetica, sans-serif; font-weight:500; letter-spacing:0; position:relative; top:-0.12em}
+  /* BlueDot wordmark (brand blue + bold) */
+  .bluedot-wm{color:#3d6dff; font-weight:700}
+  @media(max-width:900px){ .feature-band{grid-template-columns:1fr} }
+  @media(max-width:680px){ .feature-band .feature-card{padding:18px 18px 16px} }
+
+  /* ================= recent-results ledger ================= */
+  .ledger{margin-top:8px; border-top:1px solid var(--rule-strong)}
+  .led-row{
+    display:grid; grid-template-columns:118px 1fr auto; gap:10px 22px;
+    align-items:baseline; padding:16px 0; border-bottom:1px solid var(--rule);
+  }
+  .led-date{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+  .led-main{min-width:0}
+  .led-title{font-weight:600; color:var(--ink); font-size:16.5px; line-height:1.3}
+  .led-note{color:var(--ink-2); font-size:14.5px; margin-top:4px; line-height:1.55}
+  .led-note a, .led-title a{color:inherit}
+  .led-side{display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:flex-end}
+  .res-badge{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap}
+  .res-badge.win{background:var(--accent); color:#fff}
+  .res-badge.finalist{border:1px solid var(--rule-strong); color:var(--ink-2)}
+  .res-badge.ongoing{border:1px solid var(--good); color:var(--good)}
+  .proof{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.02em; color:var(--ink-4);
+    text-decoration:none; white-space:nowrap; border-bottom:1px dotted var(--rule-strong);
+    background:none; border-left:none; border-right:none; border-top:none; padding:0 0 1px; cursor:pointer;
+  }
+  .proof:hover{color:var(--accent); border-bottom-color:var(--accent)}
+  /* combined puzzles line + forthcoming note reuse the ledger grid */
+  .led-inline{color:var(--ink-2); font-size:14.5px; line-height:1.7}
+  .led-inline a{color:var(--ink); text-underline-offset:3px; margin-right:2px}
+  .led-inline .sep{color:var(--ink-4); margin:0 6px}
+  @media(max-width:640px){
+    .led-row{grid-template-columns:1fr; gap:8px}
+    .led-side{justify-content:flex-start}
+  }
+
+  /* ================= incoming internship badge ================= */
+  .exp-meta .type.incoming{background:var(--accent); color:#fff}
+
+  /* ================= image lightbox (rounded popup) ================= */
+  .lightbox-card{
+    position:relative; background:var(--bg); color:var(--ink);
+    max-width:940px; width:100%; max-height:88vh; display:flex; flex-direction:column; overflow:hidden;
+    border:1px solid var(--rule); border-radius:16px; box-shadow:0 30px 80px rgba(21,17,11,.4);
+  }
+  .lightbox-head{
+    flex-shrink:0; padding:16px 22px 15px; border-bottom:1px solid var(--rule);
+    font-family:var(--font-display); font-size:21px; padding-right:56px;
+  }
+  .lightbox-head small{display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-top:4px}
+  .lightbox-scroll{overflow-y:auto; padding:18px}
+  figure.lb-fig{margin:0 0 18px}
+  figure.lb-fig:last-child{margin-bottom:0}
+  .lb-fig img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--rule); background:#fff}
+  .lb-fig figcaption{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink-3); margin-top:9px; text-align:center}
+  .lb-missing{padding:44px 20px; text-align:center; font-family:var(--font-mono); font-size:12.5px; letter-spacing:.03em; color:var(--ink-3)}
+
+  /* inline lightbox link (inside ledger text) */
+  .lb-link{background:none; border:none; padding:0; cursor:pointer; font:inherit; color:var(--ink); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--rule-strong)}
+  .lb-link:hover{color:var(--accent); text-decoration-color:var(--accent)}
+  /* ledger trailing note (e.g. ongoing paper submission) */
+  .led-tail{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--good)}
+  /* puzzles: one entry per line */
+  .led-inline .pz{display:block}
+  .led-inline .pz + .pz{margin-top:7px}
+
+  /* education: bootcamps subsection */
+  .edu-subhead{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); font-weight:500; margin:0 0 14px}
+  .edu-bootcamps{margin:0; padding:0; list-style:none}
+  .edu-bootcamps li{position:relative; padding-left:20px; margin:0 0 16px; color:var(--ink-2); font-size:15px; line-height:1.55}
+  .edu-bootcamps li:last-child{margin-bottom:0}
+  .edu-bootcamps li::before{content:""; position:absolute; left:0; top:.62em; width:8px; height:1px; background:var(--accent)}
+  .edu-bootcamps strong{color:var(--ink); font-weight:600}
+  .edu-bootcamps .bc-meta{display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3); margin-top:3px}
+
+  /* ================= forthcoming blog entries ================= */
+  .exp-meta .type.forthcoming{border:1px dashed var(--rule-strong); color:var(--ink-3)}
+  .blog-entry.is-forthcoming{cursor:default}
+  .blog-entry.is-forthcoming .blog-title{text-decoration:none}
+  .blog-entry.is-forthcoming:hover .blog-title{color:var(--ink)}
+  .blog-forthcoming-note{display:inline-flex; align-items:center; gap:10px; margin-top:4px; font-family:var(--font-mono); font-size:12px; color:var(--ink-3); flex-wrap:wrap}
+  .blog-forthcoming-note .dot{width:7px; height:7px; border-radius:50%; background:var(--ink-4)}
 </style>
 </head>
 <body>
@@ -511,6 +628,7 @@
     <a href="#top" class="brand">M. Silchenko</a>
     <nav>
       <a href="#awards">Distinctions</a>
+      <a href="#results">Results</a>
       <a href="#internships">Internships</a>
       <a href="#projects">Projects</a>
       <a href="#blog">Blog</a>
@@ -535,6 +653,7 @@
     <div class="meta">
       <span><strong>Based</strong> · Singapore</span>
       <span><strong>NUS</strong> · MSc, School of Computing (Business Analytics), Specialised in Statistics</span>
+      <span><strong>Tazapay</strong> · AI &amp; Analytics Intern</span>
     </div>
 
     <div class="hero-card">
@@ -547,23 +666,18 @@
         <div class="hero-bio">
           <p>
             I&rsquo;m an MSc student at NUS School of Computing (Business Analytics),
-            specializing in Statistics. BlueDot AI Safety Grant recipient for
-            chain-of-thought interpretability (Jun&nbsp;&rsquo;26), Jane Street
-            Quantitative Reasoning Competition winner (Feb&nbsp;&amp;&nbsp;Jun&nbsp;&rsquo;26), and
-            National Mathematics Olympiad winner (top 0.015% nationally).
+            specializing in Statistics. Recently I won the Google Cloud Rapid&nbsp;Agent
+            Hackathon (1st place), received a BlueDot Impact grant for chain-of-thought
+            interpretability, and previously won the National Mathematics Olympiad
+            (top 0.015% nationally).
           </p>
           <p>
-            My work sits at the intersection of causal inference and production
-            machine learning systems, translating complex models into strategic
-            decisions. My past experience includes quantitative research at Orbuc,
-            a London-based crypto startup, where I built statistical-arbitrage
-            strategies and an LLM news agent; and a data &amp; analytics consultancy at
-            The TCM Group, where I introduced statistical methods for evaluating training
-            outcomes and built an LLM agent to score and automate that evaluation.
-            Two recent projects: an A/B-test guardrail that decides whether an experiment
-            is safe to act on, and a hierarchical Bayesian difference-in-differences on
-            Olist&rsquo;s Brazilian e-commerce data that reversed a free-shipping policy&rsquo;s
-            apparent effect once confounding was removed.
+            My work sits at the intersection of causal inference and production machine
+            learning systems. I&rsquo;m currently an AI &amp; Analytics intern at Tazapay, an
+            innovative, fast-growing cross-border payments company, and my previous experience
+            spans quantitative research at Orbuc, a London-based crypto startup, and a data
+            &amp; analytics consultancy at The TCM Group, alongside independent projects in
+            causal inference and Bayesian experimentation.
           </p>
         </div>
       </div>
@@ -574,7 +688,7 @@
 <!-- ============ FEATURED RESEARCH ============ -->
 <section id="research" class="s research-feature">
   <div class="wrap">
-    <a class="feature-card" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">
+    <div class="feature-card">
       <div class="feature-tag"><span class="dot"></span>Funded AI-Safety Research (ongoing) · BlueDot Impact Rapid Grant</div>
       <div class="feature-grid">
         <div class="feature-main">
@@ -583,7 +697,10 @@
             A Bayesian causal-mediation test of whether an LLM&rsquo;s stated reasoning truly drives
             its answer or is just post-hoc, with calibrated uncertainty for scalable oversight.
           </p>
-          <span class="feature-cta">Explore the funded AI-safety research <span class="arrow">&rarr;</span></span>
+          <div class="feature-actions">
+            <a class="feature-cta" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Explore the funded AI-safety research <span class="arrow">&rarr;</span></a>
+            <a class="feature-grant" href="https://app.grantmaking.ai/projects/efb4131f-820a-41ed-a4a7-88e7ec14c98d" target="_blank" rel="noopener">Ongoing fundraising &#8599;</a>
+          </div>
         </div>
         <div class="feature-aside">
           <svg viewBox="0 0 380 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
@@ -606,7 +723,7 @@
           </svg>
         </div>
       </div>
-    </a>
+    </div>
   </div>
 </section>
 
@@ -618,34 +735,160 @@
     <div class="awards">
       <div class="award">
         <div class="ord">01</div>
-        <h4>BlueDot Impact Rapid Grant · AI Safety</h4>
-        <p>Awarded a <a href="https://bluedot.org/programs/rapid-grants" target="_blank" rel="noopener">BlueDot Impact Rapid Grant</a> (Jun&nbsp;&rsquo;26) to fund <a href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Bayesian Causal Faithfulness for LLM Chain-of-Thought</a>: calibrated uncertainty for whether a model&rsquo;s reasoning is faithful or post-hoc.</p>
+        <h4><span class="google-wm"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></span> Cloud Rapid Agent Hackathon · 1st Place <span style="color:#d8b34a">(Gold)</span></h4>
+        <p>First place ($5k prize), 15,000 teams, for <a href="https://devpost.com/software/autosre-the-autonomous-on-call-engineer" target="_blank" rel="noopener">AutoSRE</a>, an autonomous on-call engineer that triages and resolves production incidents (Jul&nbsp;&rsquo;26).</p>
       </div>
       <div class="award">
         <div class="ord">02</div>
-        <h4>MIPT National Mathematics Olympiad</h4>
-        <p>Winner of the Russian National Mathematics Olympiad (Moscow Institute of Physics &amp; Technology), top 0.015% nationally.</p>
+        <div class="award-head">
+          <h4><span class="bluedot-wm">BlueDot Impact</span> Rapid Grant</h4>
+          <div class="award-logos"><span class="chip"><img src="assets/logos/bluedot.png" alt="BlueDot Impact" width="22" height="22"></span></div>
+        </div>
+        <p>Awarded a <a href="https://bluedot.org/programs/rapid-grants" target="_blank" rel="noopener">BlueDot Impact Rapid Grant</a> (Jun&nbsp;&rsquo;26) to fund <a href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Bayesian Causal Faithfulness for LLM Chain-of-Thought</a>: calibrated uncertainty for whether a model&rsquo;s reasoning is faithful or post-hoc.</p>
       </div>
       <div class="award">
         <div class="ord">03</div>
-        <h4>Jane Street Quantitative-Reasoning Puzzle</h4>
-        <p>Winner, February 2026 and June 2026 monthly quantitative-reasoning and probability competition run by Jane Street&rsquo;s research team.</p>
+        <h4>National Mathematics Olympiad Winner</h4>
+        <p>Winner of the Russian National Mathematics Olympiad (Moscow Institute of Physics &amp; Technology), top 0.015% nationally.</p>
       </div>
       <div class="award">
         <div class="ord">04</div>
-        <h4>Extracurricular Coursework</h4>
-        <p>Stanford CS229 / CS230 · MIT RES.6-012 Probability · Imperial Mathematics for ML · IBM Data Science Specialization · McElreath&rsquo;s Statistical Rethinking (2026).</p>
+        <div class="award-head">
+          <h4><span style="color:var(--accent)">First-Class Honours</span> &amp; Top of Cohort</h4>
+          <div class="award-logos"><span class="chip"><img src="assets/logos/bayes.png" alt="Bayes Business School" width="22" height="22"></span></div>
+        </div>
+        <p>Graduated with First-Class Honours (highest distinction) from Bayes Business School; top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>, and ESADE <em>Mergers &amp; Acquisitions</em>.</p>
       </div>
       <div class="award">
         <div class="ord">05</div>
-        <h4>Top of Cohort · Bayes Business School</h4>
-        <p>Top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>; ESADE <em>Mergers &amp; Acquisitions</em>.</p>
+        <div class="award-head">
+          <h4>Full Scholarships</h4>
+          <div class="award-logos">
+            <span class="chip"><img src="assets/logos/nus.png" alt="National University of Singapore" width="22" height="22"></span>
+            <span class="chip wide"><img src="assets/logos/esade.png" alt="ESADE"></span>
+            <span class="chip"><img src="assets/logos/bupt.png" alt="BUPT" width="22" height="22"></span>
+          </div>
+        </div>
+        <p>Full Scholarships at the National University of Singapore (Spring 2025) and ESADE Business School (Autumn 2024) exchanges, plus a fully-funded scholarship for the Beijing University of Posts &amp; Telecommunications Agentic AI Bootcamp (Jun&ndash;Jul 2026).</p>
       </div>
       <div class="award">
         <div class="ord">06</div>
-        <h4>Full Scholarships</h4>
-        <p>Full Scholarships at the National University of Singapore (Spring 2025) and ESADE Business School (Autumn 2024) exchanges, plus a fully-funded scholarship for the Beijing University of Posts &amp; Telecommunications Agentic AI Bootcamp (Jun&ndash;Jul 2026).</p>
+        <div class="award-head">
+          <h4>Extracurricular Coursework</h4>
+          <div class="award-logos">
+            <span class="chip"><img src="assets/logos/mit.png" alt="MIT" width="22" height="22"></span>
+            <span class="chip"><img src="assets/logos/stanford.png" alt="Stanford" width="22" height="22"></span>
+            <span class="chip"><img src="assets/logos/imperial.png" alt="Imperial College London" width="22" height="22"></span>
+          </div>
+        </div>
+        <p>Stanford CS229 / CS230 · MIT RES.6-012 Probability · Imperial Mathematics for ML · IBM Data Science Specialization · McElreath&rsquo;s Statistical Rethinking (2026).</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RECENT RESULTS (dated ledger) ============ -->
+<section id="results" class="s">
+  <div class="wrap">
+    <h2 class="display display-l section-title-tight">Other recent <span class="italic">results.</span></h2>
+    <p style="font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; color:var(--ink-3); margin:0 0 8px">2026 · competitions &amp; challenges</p>
+
+    <div class="ledger">
+
+      <div class="led-row">
+        <div class="led-date">Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">BAREC Shared Task · Sentence-level Readability Assessment</div>
+          <div class="led-note">1st place in both the Strict and Open tracks of the shared task on Arabic sentence-level readability.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win">1st Place · Strict &amp; Open Tracks</span>
+          <a class="proof" href="https://www.codabench.org/competitions/16545/" target="_blank" rel="noopener">strict track &#8599;</a>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Jun&ndash;Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">Beijing Agentic AI Bootcamp · Final Competition</div>
+          <div class="led-note">1st place in the closing TruFar Agent Competition of the fully-funded BUPT bootcamp.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win">1st place</span>
+          <button type="button" class="proof lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">certificate &#8599;</button>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">BlueDot Impact&rsquo;s Technical AI Puzzle</div>
+          <div class="led-note">Mechanistic interpretability.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win">Correct solution found</span>
+          <a class="proof" href="https://lnkd.in/gHRKzd7F" target="_blank" rel="noopener">solution &#8599;</a>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">Wincent DragonByte 2026</div>
+          <div class="led-note">1st Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-quals.png" data-title="Wincent DragonByte 2026" data-cap="Qualification Round 2026 · results are final">Top 5</button>, &nbsp;2nd Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-online.png" data-title="Wincent DragonByte 2026" data-cap="Online Round 2026 · 2nd, fastest solution time">Top 2</button>.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge ongoing">Finalist · Ongoing</span>
+          <a class="proof" href="https://www.wincentdragonbyte.com/scoreboard/qual2026" target="_blank" rel="noopener">quals &#8599;</a>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">UbiComp 2026 · Trustworthy Agentic AI Challenge</div>
+          <div class="led-note">1st place in the workshop challenge on trustworthy agentic AI systems.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win">1st place</span>
+          <span class="led-tail">· Ongoing paper submission</span>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Jun&ndash;Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">Stanford AIMS Foundations · Predictive AI Evaluation Challenge</div>
+          <div class="led-note">Finalist in Stanford&rsquo;s predictive-AI evaluation challenge (currently ongoing).</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge ongoing">Finalist · Ongoing</span>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">IBM Research &lsquo;Ponder This&rsquo;</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win">Correct solution found</span>
+          <a class="proof" href="https://lnkd.in/giumpw5q" target="_blank" rel="noopener">solution &#8599;</a>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">2026</div>
+        <div class="led-main">
+          <div class="led-title">Jane Street Quantitative-Reasoning</div>
+          <div class="led-note">Feb, Jun and Jul 2026.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win">Correct solution found</span>
+          <a class="proof" href="https://lnkd.in/gFHJK63C" target="_blank" rel="noopener">solution &#8599;</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -656,6 +899,19 @@
     <div class="section-num">§ 01 · Internships</div>
 
     <div class="exp-list">
+
+      <!-- Tazapay (incoming) -->
+      <article class="exp">
+        <div class="exp-meta">
+          <span class="date">2026 – Present</span>
+          <span class="type incoming">Current</span>
+        </div>
+        <div class="exp-body">
+          <h3>Tazapay · AI &amp; Analytics Intern</h3>
+          <p class="sub">Innovative, fast-growing cross-border payments start-up, backed by Sequoia Capital &amp; Circle Ventures · Singapore</p>
+          <p style="color:var(--ink-2); margin:0">Applied AI, deployment and data science work.</p>
+        </div>
+      </article>
 
       <!-- Orbuc Research -->
       <article class="exp project-card" data-project-id="orbuc" tabindex="0" role="button" aria-haspopup="dialog">
@@ -926,31 +1182,29 @@
 
     <div class="blog-list">
 
-      <!-- p-values / the 0.05 significance threshold -->
-      <a class="blog-entry" href="https://thylinao1.github.io/projects/p-values.html" target="_blank" rel="noopener">
+      <!-- One in Twenty / p-values -->
+      <a class="blog-entry" href="projects/p-values.html" target="_blank" rel="noopener">
         <div class="exp-meta">
           <span class="date">2026 · ~15 min read</span>
           <span class="type essay">Essay</span>
         </div>
         <div class="blog-body">
           <h3 class="blog-title">One in Twenty</h3>
-          <p class="sub">A critique of the 0.05 significance threshold, and why that hard line is wrong</p>
+          <p class="sub">The most overhyped threshold in statistics</p>
           <p class="blog-excerpt">
-            p &lt; 0.05 is the most overhyped and misinterpreted threshold in statistics, and this is a
-            critique of it. Not of the p-value, which is fine, but of the hard line we draw across it, the
-            reflex of checking whether a number sits above or below 0.05 and calling the result significant
-            or not. I tell it as a courtroom, where the p-value is the evidence, &ldquo;significant&rdquo; is
-            the verdict, and 0.05 is a fixed sentence nobody really justified. It goes through where the
-            number came from, why the significant / not-significant verdict misleads, when the ritual has
-            hurt people, and the tools that do better. There are interactive figures throughout, for the tail
-            area, the false-discovery rate, the dance of the p-values, the Type I/II tradeoff, and surprisal.
+            Like a lot of people, when I was first introduced to the 0.05 significance threshold, I
+            just took it for granted. Later, as I learned more statistics, I realized how confusing
+            and misleading that hard line actually is. This essay explores why: a courtroom retelling
+            where the p-value is the evidence, &lsquo;significant&rsquo; is the verdict, and 0.05 is a
+            fixed sentence nobody ever justified, with interactive figures for the tail area, the
+            false-discovery rate, the dance of the p-values, and the Type I/II tradeoff.
           </p>
           <div class="tags">
             <span class="tag">p-values</span>
-            <span class="tag">Statistical Significance</span>
-            <span class="tag">Fisher &amp; 0.05</span>
-            <span class="tag">False Discovery</span>
-            <span class="tag">Equivalence / TOST</span>
+            <span class="tag">Significance Testing</span>
+            <span class="tag">False Discovery Rate</span>
+            <span class="tag">Statistical Inference</span>
+            <span class="tag">Interactive</span>
           </div>
           <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
         </div>
@@ -983,6 +1237,28 @@
         </div>
       </a>
 
+      <!-- Forthcoming: marimo x alphaXiv molab notebook -->
+      <div class="blog-entry is-forthcoming">
+        <div class="exp-meta">
+          <span class="date">2026 · in progress</span>
+          <span class="type forthcoming">Forthcoming</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">A molab Notebook from an alphaXiv Paper</h3>
+          <p class="sub">marimo &times; alphaXiv molab Notebook Competition #2</p>
+          <p class="blog-excerpt">
+            My entry for the marimo &times; alphaXiv molab competition: take one of the offered
+            alphaXiv papers and build something new on marimo&rsquo;s molab platform. A write-up of
+            the idea and what I built is on the way.
+          </p>
+          <div class="tags">
+            <span class="tag">marimo / molab</span>
+            <span class="tag">Reproducible Notebooks</span>
+          </div>
+          <span class="blog-forthcoming-note"><span class="dot"></span>Write-up in progress</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -998,14 +1274,12 @@
         <div class="edu-body">
           <h3>National University of Singapore (NUS)</h3>
           <p class="role">MSc in NUS School of Computing (Business Analytics), Specialised in Statistics</p>
-        </div>
-      </div>
-
-      <div class="edu">
-        <div class="edu-meta">Jun – Jul 2026<br><span style="opacity:.7">Beijing, China</span></div>
-        <div class="edu-body">
-          <h3>Beijing University of Posts &amp; Telecommunications (BUPT)</h3>
-          <p class="role">Agentic AI Bootcamp · Fully-Funded Scholarship</p>
+          <p style="margin-top:14px"><strong style="color:var(--ink)">Bootcamps:</strong></p>
+          <ul class="exchanges">
+            <li><strong>National University of Singapore (NUS)</strong> · bootcamp covering Probability &amp; Statistics, Calculus, Linear Algebra, Cloud Computing, and Data Analytics &amp; ML.</li>
+            <li><strong>University of Oxford</strong> · ML Representation Learning &amp; Generative AI Bootcamp 2026. Standout lectures from Tom Rainforth (intelligent data gathering) and Ricardo Silva (causal discovery and the extrapolation of causal effects).</li>
+            <li><strong>Beijing University of Posts &amp; Telecommunications (BUPT)</strong>, Agentic AI Bootcamp (Jun&ndash;Jul 2026) · Fully-Funded Scholarship · 1st Place, Final Project.</li>
+          </ul>
         </div>
       </div>
 
@@ -1093,7 +1367,7 @@
         <p>
           English (Fluent), Russian (Native),
           Ukrainian (Native), Belarusian (Fluent),
-          Spanish (Professional Working).
+          Spanish (Professional Working; advanced certification, 2026).
         </p>
       </div>
 
@@ -1129,6 +1403,7 @@
   <button type="button" class="drawer-close" aria-label="Close menu">&times;</button>
   <div class="drawer-links">
     <a href="#awards">Distinctions</a>
+    <a href="#results">Results</a>
     <a href="#internships">Internships</a>
     <a href="#projects">Projects</a>
     <a href="#blog">Blog</a>
@@ -1174,6 +1449,21 @@
     <button type="button" class="modal-close" aria-label="Close">&times;</button>
     <div class="modal-scroll exp-body"></div>
     <div class="modal-foot" hidden></div>
+  </div>
+</div>
+
+<!-- ============ IMAGE LIGHTBOX (generic) ============ -->
+<div id="lightbox" class="modal-overlay" hidden>
+  <div class="lightbox-card" role="dialog" aria-modal="true" aria-label="Image viewer">
+    <button type="button" class="modal-close" aria-label="Close">&times;</button>
+    <div class="lightbox-head" id="lb-title"></div>
+    <div class="lightbox-scroll">
+      <figure class="lb-fig" id="lb-fig">
+        <img id="lb-img" src="" alt="" loading="lazy">
+        <figcaption id="lb-cap"></figcaption>
+      </figure>
+      <div class="lb-missing" id="lb-missing" hidden>This image hasn&rsquo;t been added yet.</div>
+    </div>
   </div>
 </div>
 
@@ -1275,6 +1565,48 @@
     cvModal.addEventListener('click', function (e) { if (e.target === cvModal) closeCv(); });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !cvModal.hidden) closeCv();
+    });
+  }
+
+  // image lightbox (generic, driven by trigger data attributes)
+  var lb = document.getElementById('lightbox');
+  if (lb) {
+    var lbClose = lb.querySelector('.modal-close');
+    var lbImg = document.getElementById('lb-img');
+    var lbFig = document.getElementById('lb-fig');
+    var lbCap = document.getElementById('lb-cap');
+    var lbTitle = document.getElementById('lb-title');
+    var lbMissing = document.getElementById('lb-missing');
+    var lbLast = null;
+    lbImg.addEventListener('error', function () { lbFig.hidden = true; lbMissing.hidden = false; });
+    lbImg.addEventListener('load', function () { lbFig.hidden = false; lbMissing.hidden = true; });
+    var openLb = function (btn) {
+      lbLast = btn;
+      var cap = btn.getAttribute('data-cap') || '';
+      lbTitle.textContent = btn.getAttribute('data-title') || '';
+      lbCap.textContent = cap;
+      lbFig.hidden = false;
+      lbMissing.hidden = true;
+      lbImg.alt = cap || lbTitle.textContent;
+      lbImg.src = btn.getAttribute('data-img') || '';
+      lb.hidden = false;
+      document.body.style.overflow = 'hidden';
+      lb.querySelector('.lightbox-scroll').scrollTop = 0;
+      lbClose.focus();
+    };
+    var closeLb = function () {
+      lb.hidden = true;
+      document.body.style.overflow = '';
+      if (lbLast) lbLast.focus();
+    };
+    var lbBtns = document.querySelectorAll('.lightbox-open');
+    for (var k = 0; k < lbBtns.length; k++) {
+      (function (b) { b.addEventListener('click', function () { openLb(b); }); })(lbBtns[k]);
+    }
+    lbClose.addEventListener('click', closeLb);
+    lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !lb.hidden) closeLb();
     });
   }
 

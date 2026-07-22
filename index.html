@@ -560,6 +560,25 @@
   a.res-badge{text-decoration:none; cursor:pointer; transition:filter .18s ease, transform .18s ease}
   a.res-badge:hover{filter:brightness(1.08); transform:translateY(-1px)}
   a.res-badge:active{transform:translateY(0) scale(.98)}
+  /* BAREC badge: keep the label, drop the solid fill */
+  .res-badge.win-plain{background:none; color:var(--accent); border:1px solid var(--accent-soft)}
+  /* orange glowing button that links to the BAREC solution write-up */
+  .solution-btn{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    color:#fff; text-decoration:none; white-space:nowrap;
+    padding:6px 14px; border-radius:999px;
+    background:var(--accent); border:1px solid var(--accent);
+    box-shadow:0 0 10px 1px rgba(200,66,31,.45), 0 6px 18px -8px rgba(200,66,31,.7);
+    transition:box-shadow .25s ease, transform .18s ease, background .2s ease;
+    animation:solutionGlow 2.4s ease-in-out infinite;
+  }
+  .solution-btn svg{display:block; transition:transform .2s ease}
+  .solution-btn:hover{background:#e2551f; color:#fff; transform:translateY(-1px); box-shadow:0 0 22px 3px rgba(200,66,31,.6), 0 10px 24px -6px rgba(200,66,31,.85)}
+  .solution-btn:hover svg{transform:translateX(3px)}
+  .solution-btn:active{transform:translateY(0) scale(.98)}
+  @keyframes solutionGlow{0%,100%{box-shadow:0 0 8px 0 rgba(200,66,31,.38), 0 6px 18px -8px rgba(200,66,31,.6)} 50%{box-shadow:0 0 20px 3px rgba(200,66,31,.62), 0 8px 22px -6px rgba(200,66,31,.82)}}
+  @media(prefers-reduced-motion:reduce){.solution-btn{animation:none}}
   .proof{
     font-family:var(--font-mono); font-size:11px; letter-spacing:.02em; color:var(--ink-4);
     text-decoration:none; white-space:nowrap; border-bottom:1px dotted var(--rule-strong);
@@ -805,8 +824,10 @@
           <div class="led-note">1st place in both the Strict and Open tracks of the shared task on Arabic sentence-level readability.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win">1st Place · Strict &amp; Open Tracks</span>
-          <a class="proof" href="https://www.codabench.org/competitions/16545/" target="_blank" rel="noopener">strict track &#8599;</a>
+          <span class="res-badge win-plain">1st Place</span>
+          <a class="solution-btn" href="projects/barec.html" target="_blank" rel="noopener" aria-label="Read the BAREC solution write-up">solution
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
         </div>
       </div>
 
@@ -872,10 +893,13 @@
         <div class="led-date">Jul 2026</div>
         <div class="led-main">
           <div class="led-title">IBM Research &lsquo;Ponder This&rsquo;</div>
+          <div class="led-note">Return of the Superheroes &middot; pairing heroes with villains to maximise the weakest link.</div>
         </div>
         <div class="led-side">
           <span class="res-badge win">Correct solution found</span>
-          <a class="proof" href="https://lnkd.in/giumpw5q" target="_blank" rel="noopener">solution &#8599;</a>
+          <a class="solution-btn" href="projects/ponder-superheroes.html" target="_blank" rel="noopener" aria-label="Read the IBM Ponder This solution write-up">solution
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
         </div>
       </div>
 

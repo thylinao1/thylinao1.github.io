@@ -555,7 +555,6 @@
   .led-side{display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:flex-end}
   .res-badge{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap}
   .res-badge.win{background:var(--accent); color:#fff}
-  .res-badge.win.outline{background:transparent; color:var(--accent); border:1px solid var(--accent)}
   .res-badge.finalist{border:1px solid var(--rule-strong); color:var(--ink-2)}
   .res-badge.ongoing{border:1px solid var(--good); color:var(--good)}
   a.res-badge{text-decoration:none; cursor:pointer; transition:filter .18s ease, transform .18s ease}
@@ -621,8 +620,10 @@
   .lb-missing{padding:44px 20px; text-align:center; font-family:var(--font-mono); font-size:12.5px; letter-spacing:.03em; color:var(--ink-3)}
 
   /* inline lightbox link (inside ledger text) */
-  .lb-link{background:none; border:none; padding:0; cursor:pointer; font:inherit; color:var(--ink); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--rule-strong)}
-  .lb-link:hover{color:var(--accent); text-decoration-color:var(--accent)}
+  .lb-link{background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:500; color:var(--accent); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--accent); animation:linkGlow 2.4s ease-in-out infinite}
+  .lb-link:hover{color:#a8341a; text-decoration-color:#a8341a}
+  @keyframes linkGlow{0%,100%{text-shadow:0 0 4px rgba(200,66,31,.2)} 50%{text-shadow:0 0 10px rgba(200,66,31,.55)}}
+  @media(prefers-reduced-motion:reduce){.lb-link{animation:none}}
   /* ledger trailing note (e.g. ongoing paper submission) */
   .led-tail{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--good)}
   /* puzzles: one entry per line */
@@ -843,7 +844,7 @@
           <div class="led-note">1st place in the final AI Agent Competition.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win outline">1st place</span>
+          <span class="res-badge win-plain">1st Place</span>
           <button type="button" class="proof lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">certificate &#8599;</button>
         </div>
       </div>
@@ -877,7 +878,7 @@
           <div class="led-note">1st Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-quals.png" data-title="Wincent DragonByte 2026" data-cap="Qualification Round 2026 · results are final">Top 5</button>, &nbsp;2nd Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-online.png" data-title="Wincent DragonByte 2026" data-cap="Online Round 2026 · 2nd, fastest solution time">Top 2</button>.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge ongoing">Finalist · Ongoing</span>
+          <span class="res-badge ongoing">Finalist</span>
           <a class="proof" href="https://www.wincentdragonbyte.com/scoreboard/qual2026" target="_blank" rel="noopener">quals &#8599;</a>
         </div>
       </div>
@@ -889,7 +890,7 @@
           <div class="led-note">1st place in the workshop challenge on trustworthy agentic AI systems.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win outline">1st place</span>
+          <span class="res-badge win-plain">1st Place</span>
           <a class="solution-btn" href="projects/medlongtrust.html" target="_blank" rel="noopener" aria-label="Read the MedLongTrust-EHR solution write-up">solution
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
           </a>

@@ -10,19 +10,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
 :root{
-  /* cool clinical-dossier paper, distinct from the warm reference */
-  --paper:#e9edf3; --paper-2:#e0e5ee; --paper-3:#d4dbe6;
-  --ink:#0e1320; --ink-2:#28303f; --ink-3:#525c6e; --ink-4:#616a7d;
-  --rule:rgba(14,19,32,0.10); --rule-strong:rgba(14,19,32,0.22);
-  /* indigo is the UI/evidence accent; the verdict trio below is the data spine */
-  /* deep navy accent; --accent-bright stays lighter for use on dark panels */
-  --accent:#233163; --accent-deep:#151f3d; --accent-soft:#b0b9d6; --accent-bright:#6274cf;
-  /* the three trust labels, one colour each, kept consistent through every figure */
-  --trusted:#1f9d70; --insufficient:#c9902f; --untrusted:#d44b45;
-  --trusted-soft:#a6dcc6; --insufficient-soft:#e7cf9b; --untrusted-soft:#e7b6b2;
-  --flag:#b57d1a;
-  --gold:#c9a63f; --gold-deep:#8a6a1e; --gold-soft:#e6cf9c; --gold-bright:#e7c458;
-  --night:#0c0f18; --night-ink:#eef2f7;
+  /* deep navy dossier, dark luxury: navy background, light text */
+  --paper:#0e1626; --paper-2:#16213a; --paper-3:#202d4b;
+  --ink:#eef2fa; --ink-2:#c6d0e2; --ink-3:#93a1bd; --ink-4:#6a7794;
+  --rule:rgba(255,255,255,0.09); --rule-strong:rgba(255,255,255,0.20);
+  /* refined periwinkle accent that reads on navy; --accent-bright is the lightest */
+  --accent:#7089dd; --accent-deep:#3a4ca0; --accent-soft:#2b3a60; --accent-bright:#9db0f2;
+  /* the three trust labels, one colour each, tuned for the dark background */
+  --trusted:#3cc08c; --insufficient:#e2ab4d; --untrusted:#e86a5f;
+  --trusted-soft:#2f6f58; --insufficient-soft:#6f5a2f; --untrusted-soft:#6f403c;
+  --flag:#d4a23f;
+  --gold:#d3ab48; --gold-deep:#a07e2a; --gold-soft:#e6cf9c; --gold-bright:#ecc85c;
+  --night:#0a1120; --night-ink:#eef2fa;
   --font-display:"Newsreader",Georgia,"Times New Roman",serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -42,7 +41,7 @@ body::before{
   content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
-::selection{background:var(--accent-soft); color:var(--ink);}
+::selection{background:rgba(112,137,221,0.32); color:#fff;}
 
 #progress{position:fixed; top:0; left:0; height:2px; width:0; background:var(--accent); z-index:60; transition:width .12s linear;}
 nav#toc{position:fixed; top:50%; left:26px; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px;}
@@ -107,8 +106,8 @@ a.inline:hover{border-color:var(--accent);}
 /* ---------- figures / panels ---------- */
 figure{margin:34px 0; position:relative;}
 .figure-wide{width:min(1000px,calc(100vw - 56px)); margin-left:50%; transform:translateX(-50%);}
-.panel{background:var(--paper-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 18px 40px -28px rgba(14,19,32,.4);}
-.panel.dark{background:#0d1119; border-color:rgba(255,255,255,.08); box-shadow:0 18px 50px -28px rgba(0,0,0,.6);}
+.panel{background:var(--paper-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 20px 44px -30px rgba(0,0,0,.6);}
+.panel.dark{background:#0a1120; border-color:rgba(255,255,255,.07); box-shadow:0 20px 52px -30px rgba(0,0,0,.75);}
 .panel.dark .legend{color:rgba(238,242,247,.55);}
 .panel.dark .readout{color:rgba(238,242,247,.82);}
 .panel.dark .controls label{color:rgba(238,242,247,.55);}
@@ -135,7 +134,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
 input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--paper); cursor:pointer;}
 input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
 .panel.dark input[type=range]{background:rgba(255,255,255,.18);}
-.panel.dark input[type=range]::-webkit-slider-thumb{border-color:#0d1119;}
+.panel.dark input[type=range]::-webkit-slider-thumb{border-color:#0a1120;}
 .toggle{display:inline-flex; border:1px solid var(--rule-strong); border-radius:8px; overflow:hidden;}
 .toggle button{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; padding:8px 13px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; transition:background .2s var(--ease-out), color .2s var(--ease-out);}
 .toggle button.on{background:var(--ink); color:var(--paper);}
@@ -181,7 +180,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:
 
 /* ---------- bento ---------- */
 .bento{display:grid; grid-template-columns:repeat(6,1fr); gap:16px; margin:30px 0;}
-.card{background:var(--paper-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 16px 36px -30px rgba(14,19,32,.5); position:relative; overflow:hidden;}
+.card{background:var(--paper-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 16px 40px -30px rgba(0,0,0,.6); position:relative; overflow:hidden;}
 .card .kick{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; display:block;}
 .card h4{font-family:var(--font-display); font-weight:500; font-size:24px; line-height:1.1; color:var(--ink); margin:0 0 8px;}
 .card p{font-size:15.5px; line-height:1.5; color:var(--ink-3); margin:0 0 6px;}
@@ -205,8 +204,8 @@ input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:
 .node.dim{opacity:.4;}
 .node.term{flex:0 1 108px; background:transparent; border-style:dashed;}
 .node.term.lit{background:var(--accent-soft); border-style:solid; border-color:var(--accent); box-shadow:0 10px 22px -16px rgba(21,31,61,.6);}
-.node.term.lit .role{color:var(--accent);}
-.node.term.lit .name{color:var(--accent-deep);}
+.node.term.lit .role{color:var(--accent-bright);}
+.node.term.lit .name{color:var(--accent-bright);}
 .pipe-arrows{display:none;}
 .pipe-read{font-family:var(--font-mono); font-size:12.5px; line-height:1.6; color:var(--ink-2); background:var(--paper-2); border:1px solid var(--rule); border-radius:10px; padding:14px 16px; margin-top:16px;}
 .pipe-read b{color:var(--accent);}
@@ -214,7 +213,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:
 @media(max-width:640px){.pipe-row{gap:6px;} .node{flex:1 1 44%;}}
 
 /* ---------- band variations (different colour schemes per section) ---------- */
-.band-night{background:linear-gradient(180deg, #0b0e15, #0e131d); position:relative; color:rgba(238,242,247,.82);}
+.band-night{background:linear-gradient(180deg, #0a1120, #0b1425); position:relative; color:rgba(238,242,247,.82);}
 .band-night .eyebrow{color:rgba(238,242,247,.55);}
 .band-night .eyebrow .num{color:var(--accent-bright);}
 .band-night h2,.band-night h3,.band-night h4{color:#f3f6fa;}
@@ -225,9 +224,9 @@ input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:
 .band-night .note b, .band-night .note strong{color:#fff;}
 .band-night figcaption{color:rgba(238,242,247,.6);}
 .band-night figcaption b{color:rgba(238,242,247,.85);}
-.band-warm{background:linear-gradient(180deg, #f0e9d8, #ece3cf); position:relative;}
-.band-warm .panel{background:#f5efe0; border-color:rgba(120,90,30,.16);}
-.band-warm .note.honest{background:#f6f0e2;}
+.band-warm{background:linear-gradient(180deg, #171526, #14121f); position:relative;}
+.band-warm .panel{background:#1b1830; border-color:rgba(211,171,72,.18);}
+.band-warm .note.honest{background:#1c1830;}
 .band-edge{border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);}
 
 hr.rule{border:none; border-top:1px solid var(--rule); margin:0;}
@@ -1243,7 +1242,7 @@ footer .runbox .c{color:var(--accent);}
         const val=cur[i].toFixed(2);
         ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
         const vw=ctx.measureText(val).width, xEnd=padL+fillW;
-        if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle="#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
+        if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle=(i===2)?C("--paper"):"#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
         else { ctx.textAlign="left"; ctx.fillStyle=C("--ink"); ctx.fillText(val, xEnd+12, y+rowH*0.72); }
         // 1.00 marker
         ctx.setLineDash([3,3]); ctx.strokeStyle=C("--rule-strong"); ctx.lineWidth=1;
@@ -1298,7 +1297,7 @@ footer .runbox .c{color:var(--accent);}
         // score bar (fades as the evidence overlay comes up)
         const scoreW=barMax*(e.score/100);
         ctx.globalAlpha = 1-mix*0.5;
-        ctx.fillStyle = e.mine ? navyGrad(ctx, y, y+rowH) : C("--ink-4");
+        ctx.fillStyle = e.mine ? navyGrad(ctx, y, y+rowH) : "#57648a";
         ctx.save(); roundRect(ctx,padL,y,barMax,rowH,6); ctx.clip(); ctx.fillRect(padL,y,scoreW,rowH); ctx.restore();
         ctx.globalAlpha=1;
         // evidence overlay
@@ -1316,7 +1315,7 @@ footer .runbox .c{color:var(--accent);}
         const barW = showEvid ? (e.evid!==null?evW:0) : scoreW;
         ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
         const vw=ctx.measureText(val).width, xEnd=padL+barW;
-        if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle= (showEvid||!e.mine)? C("--ink") : "#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
+        if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle= showEvid ? C("--paper") : "#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
         else { ctx.textAlign="left"; ctx.fillStyle=C("--ink"); ctx.fillText(val, xEnd+12, y+rowH*0.72); }
       });
       // caption

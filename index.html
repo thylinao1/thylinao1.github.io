@@ -622,7 +622,7 @@
   /* inline lightbox link (inside ledger text) */
   .lb-link{background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:500; color:var(--accent); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--accent); animation:linkGlow 2.4s ease-in-out infinite}
   .lb-link:hover{color:#a8341a; text-decoration-color:#a8341a}
-  @keyframes linkGlow{0%,100%{text-shadow:0 0 4px rgba(200,66,31,.2)} 50%{text-shadow:0 0 10px rgba(200,66,31,.55)}}
+  @keyframes linkGlow{0%,100%{text-shadow:0 0 2px rgba(200,66,31,.1)} 50%{text-shadow:0 0 5px rgba(200,66,31,.28)}}
   @media(prefers-reduced-motion:reduce){.lb-link{animation:none}}
   /* ledger trailing note (e.g. ongoing paper submission) */
   .led-tail{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--good)}
@@ -878,7 +878,7 @@
           <div class="led-note">1st Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-quals.png" data-title="Wincent DragonByte 2026" data-cap="Qualification Round 2026 · results are final">Top 5</button>, &nbsp;2nd Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-online.png" data-title="Wincent DragonByte 2026" data-cap="Online Round 2026 · 2nd, fastest solution time">Top 2</button>.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge ongoing">Finalist</span>
+          <span class="res-badge win-plain">Finalist</span>
           <a class="proof" href="https://www.wincentdragonbyte.com/scoreboard/qual2026" target="_blank" rel="noopener">quals &#8599;</a>
         </div>
       </div>
@@ -904,7 +904,7 @@
           <div class="led-note">Finalist in Stanford&rsquo;s predictive-AI evaluation challenge (currently ongoing).</div>
         </div>
         <div class="led-side">
-          <span class="res-badge ongoing">Finalist · Ongoing</span>
+          <span class="res-badge win-plain">Finalist · Ongoing</span>
         </div>
       </div>
 
@@ -939,7 +939,6 @@
         <div class="exp-body">
           <h3>Tazapay · AI &amp; Analytics Intern</h3>
           <p class="sub">Innovative, fast-growing cross-border payments start-up, backed by Sequoia Capital &amp; Circle Ventures · Singapore</p>
-          <p style="color:var(--ink-2); margin:0">Applied AI, deployment and data science work.</p>
         </div>
       </article>
 
@@ -1211,36 +1210,6 @@
     <div class="section-num">§ 03 · Blog</div>
 
     <div class="blog-list">
-
-      <!-- The Fold / BlueDot puzzle solution -->
-      <a class="blog-entry" href="projects/bluedot-fold.html" target="_blank" rel="noopener">
-        <div class="exp-meta">
-          <span class="date">2026 · ~12 min read</span>
-          <span class="type essay">Solution</span>
-        </div>
-        <div class="blog-body">
-          <h3 class="blog-title">The Fold</h3>
-          <p class="sub">My solution to BlueDot&rsquo;s AI-safety puzzle: the feature a linear probe couldn&rsquo;t see</p>
-          <p class="blog-excerpt">
-            A small classifier was given eight features to represent. Seven it laid out as clean linear
-            directions; the eighth &mdash; country &mdash; it hid, by folding a signed line in half so a linear probe,
-            the workhorse of interpretability, reads pure noise while the feature sits there in plain sight.
-            I show which feature it was, prove the mechanism is a ReLU absolute value with activation patching,
-            then try to hide it in stranger ways &mdash; an angular ring, two features in superposition, a
-            topological link &mdash; and find a network has a limited budget for weirdness: the fold is the
-            cheapest non-linear code and the only one that emerges unsupervised. Interactive figures you can
-            drag, fold, and spin, next to the real analysis plots.
-          </p>
-          <div class="tags">
-            <span class="tag">Mechanistic Interpretability</span>
-            <span class="tag">Non-linear Features</span>
-            <span class="tag">ReLU Fold</span>
-            <span class="tag">Activation Patching</span>
-            <span class="tag">AI Safety</span>
-          </div>
-          <span class="blog-read">Read the solution <span class="arrow">&rarr;</span></span>
-        </div>
-      </a>
 
       <!-- One in Twenty / p-values -->
       <a class="blog-entry" href="projects/p-values.html" target="_blank" rel="noopener">

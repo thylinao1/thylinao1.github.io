@@ -15,7 +15,8 @@
   --ink:#0e1320; --ink-2:#28303f; --ink-3:#525c6e; --ink-4:#616a7d;
   --rule:rgba(14,19,32,0.10); --rule-strong:rgba(14,19,32,0.22);
   /* indigo is the UI/evidence accent; the verdict trio below is the data spine */
-  --accent:#4a5bd6; --accent-deep:#2c37a4; --accent-soft:#bcc4f0; --accent-bright:#8a97f2;
+  /* deep navy accent; --accent-bright stays lighter for use on dark panels */
+  --accent:#233163; --accent-deep:#151f3d; --accent-soft:#b0b9d6; --accent-bright:#6274cf;
   /* the three trust labels, one colour each, kept consistent through every figure */
   --trusted:#1f9d70; --insufficient:#c9902f; --untrusted:#d44b45;
   --trusted-soft:#a6dcc6; --insufficient-soft:#e7cf9b; --untrusted-soft:#e7b6b2;
@@ -55,7 +56,7 @@ nav#toc a.active .dot{background:var(--accent); transform:scale(1.5);}
 nav#toc a.active .lbl{opacity:1; transform:none;}
 @media(max-width:1240px){nav#toc{display:none;}}
 
-.home-btn{position:fixed; top:20px; left:24px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(74,91,214,0.08); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease-out), color .25s var(--ease-out), border-color .25s var(--ease-out); animation:homeSlide .9s var(--ease) .35s both;}
+.home-btn{position:fixed; top:20px; left:24px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent-bright); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(98,116,207,0.10); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease-out), color .25s var(--ease-out), border-color .25s var(--ease-out); animation:homeSlide .9s var(--ease) .35s both;}
 .home-btn svg{display:block;}
 .home-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
 .home-btn:active{transform:scale(.97);}
@@ -126,7 +127,7 @@ canvas.fig{display:block; width:100%; border-radius:8px; touch-action:pan-y; asp
 button.btn{font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink); background:var(--paper-3); border:1px solid var(--rule-strong); border-radius:7px; padding:8px 14px; cursor:pointer; transition:background .2s var(--ease-out), color .2s var(--ease-out), border-color .2s var(--ease-out), transform .12s var(--ease-out);}
 button.btn:hover{background:var(--ink); color:var(--paper); border-color:var(--ink);}
 button.btn:active{transform:scale(.97);}
-button.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+button.btn.primary{background:linear-gradient(158deg, var(--accent), var(--accent-deep)); color:#fff; border-color:var(--accent-deep);}
 button.btn.primary:hover{background:var(--accent-deep);}
 input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:4px; background:var(--rule-strong); outline:none; cursor:pointer; width:150px;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--paper); box-shadow:0 1px 4px rgba(14,19,32,.35); transition:transform .15s var(--ease-out);}
@@ -198,12 +199,12 @@ input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:
 .node{flex:1 1 130px; min-width:112px; background:var(--paper-2); border:1px solid var(--rule-strong); border-radius:11px; padding:14px 12px; text-align:center; position:relative; transition:background .25s var(--ease-out), border-color .25s var(--ease-out), color .25s var(--ease-out), transform .25s var(--ease-out), box-shadow .25s var(--ease-out);}
 .node .role{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-4); display:block; margin-bottom:5px;}
 .node .name{font-family:var(--font-display); font-weight:500; font-size:16px; color:var(--ink); line-height:1.14;}
-.node.lit{background:var(--accent); border-color:var(--accent); transform:translateY(-3px); box-shadow:0 12px 26px -14px rgba(74,91,214,.7);}
+.node.lit{background:linear-gradient(158deg, var(--accent), var(--accent-deep)); border-color:var(--accent-deep); transform:translateY(-3px); box-shadow:0 12px 26px -14px rgba(21,31,61,.75);}
 .node.lit .role{color:rgba(255,255,255,.72);}
 .node.lit .name{color:#fff;}
 .node.dim{opacity:.4;}
 .node.term{flex:0 1 108px; background:transparent; border-style:dashed;}
-.node.term.lit{background:var(--accent-soft); border-style:solid; border-color:var(--accent); box-shadow:0 10px 22px -16px rgba(74,91,214,.7);}
+.node.term.lit{background:var(--accent-soft); border-style:solid; border-color:var(--accent); box-shadow:0 10px 22px -16px rgba(21,31,61,.6);}
 .node.term.lit .role{color:var(--accent);}
 .node.term.lit .name{color:var(--accent-deep);}
 .pipe-arrows{display:none;}
@@ -764,6 +765,12 @@ footer .runbox .c{color:var(--accent);}
     const n = parseInt(hex,16);
     return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";
   }
+  // subtle vertical navy gradient for the accent bars (top lighter -> bottom deep)
+  function navyGrad(ctx, top, bottom){
+    const g = ctx.createLinearGradient(0, top, 0, bottom);
+    g.addColorStop(0, C("--accent")); g.addColorStop(1, C("--accent-deep"));
+    return g;
+  }
 
   /* =========================================================
      HERO - a gold ECG trace: the patient signal under review,
@@ -852,7 +859,7 @@ footer .runbox .c{color:var(--accent);}
         ctx.fillStyle = withAlpha(COL[i], 0.14);
         ctx.fillRect(x, barY, slot, barH);
         // filled portion
-        ctx.fillStyle = COL[i];
+        ctx.fillStyle = (i===0) ? navyGrad(ctx, barY, barY+barH) : COL[i];
         ctx.fillRect(x, barY, slot*shown[i], barH);
         x += slot;
       }
@@ -1231,7 +1238,7 @@ footer .runbox .c{color:var(--accent);}
         // fill
         const fillW=barMax*cur[i];
         ctx.save(); roundRect(ctx,padL,y,barMax,rowH,rowH/2); ctx.clip();
-        ctx.fillStyle=COLS[i]; ctx.fillRect(padL,y,fillW,rowH); ctx.restore();
+        ctx.fillStyle=(i===0)?navyGrad(ctx,y,y+rowH):COLS[i]; ctx.fillRect(padL,y,fillW,rowH); ctx.restore();
         // value, inside the fill when it fits, otherwise just past the end
         const val=cur[i].toFixed(2);
         ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
@@ -1291,7 +1298,7 @@ footer .runbox .c{color:var(--accent);}
         // score bar (fades as the evidence overlay comes up)
         const scoreW=barMax*(e.score/100);
         ctx.globalAlpha = 1-mix*0.5;
-        ctx.fillStyle = e.mine ? C("--accent") : C("--ink-4");
+        ctx.fillStyle = e.mine ? navyGrad(ctx, y, y+rowH) : C("--ink-4");
         ctx.save(); roundRect(ctx,padL,y,barMax,rowH,6); ctx.clip(); ctx.fillRect(padL,y,scoreW,rowH); ctx.restore();
         ctx.globalAlpha=1;
         // evidence overlay

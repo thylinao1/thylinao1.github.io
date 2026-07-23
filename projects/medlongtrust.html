@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grounds for trust · first place on MedLongTrust-EHR by letting the record decide</title>
+<meta name="description" content="My solution to the UbiComp 2026 MedLongTrust-EHR benchmark on trust assessment over longitudinal electronic health records. The task asks for a trust label, its risk types, and the record paragraphs that justify the decision. The usual build hands the record to a language model; I did the reverse. Deterministic tools read the record and make every decision by an explicit rule, and a small local model only plans and checks around them, never allowed to change a grounded answer. That entry placed first at 100.0, and most of the seventeen-point margin came from a part of the task most entries skipped: reconstructing the supporting evidence. Interactive figures you can drag and replay, and an honest account of where the perfect label score comes from." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* cool clinical-dossier paper, distinct from the warm reference */
+  --paper:#e9edf3; --paper-2:#e0e5ee; --paper-3:#d4dbe6;
+  --ink:#0e1320; --ink-2:#28303f; --ink-3:#525c6e; --ink-4:#616a7d;
+  --rule:rgba(14,19,32,0.10); --rule-strong:rgba(14,19,32,0.22);
+  /* indigo is the UI/evidence accent; the verdict trio below is the data spine */
+  --accent:#4a5bd6; --accent-deep:#2c37a4; --accent-soft:#bcc4f0; --accent-bright:#8a97f2;
+  /* the three trust labels, one colour each, kept consistent through every figure */
+  --trusted:#1f9d70; --insufficient:#c9902f; --untrusted:#d44b45;
+  --trusted-soft:#a6dcc6; --insufficient-soft:#e7cf9b; --untrusted-soft:#e7b6b2;
+  --flag:#b57d1a;
+  --gold:#c9a63f; --gold-deep:#8a6a1e; --gold-soft:#e6cf9c; --gold-bright:#e7c458;
+  --night:#0c0f18; --night-ink:#eef2f7;
+  --font-display:"Newsreader",Georgia,"Times New Roman",serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1300px; --read:820px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-out:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink-2);
+  font-family:var(--font-body); font-size:19px; line-height:1.62;
+  font-weight:400; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+::selection{background:var(--accent-soft); color:var(--ink);}
+
+#progress{position:fixed; top:0; left:0; height:2px; width:0; background:var(--accent); z-index:60; transition:width .12s linear;}
+nav#toc{position:fixed; top:50%; left:26px; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:11px;}
+nav#toc a{font-family:var(--font-mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:#6d7688; text-decoration:none; display:flex; align-items:center; gap:9px; transition:color .35s var(--ease);}
+nav#toc a .dot{width:6px; height:6px; border-radius:50%; background:rgba(141,149,165,.6); transition:all .35s var(--ease);}
+nav#toc a .lbl{opacity:0; transform:translateX(-4px); transition:all .35s var(--ease); white-space:nowrap;}
+nav#toc a:hover{color:var(--accent);}
+nav#toc a:hover .lbl{opacity:1; transform:none;}
+nav#toc a.active{color:var(--accent);}
+nav#toc a.active .dot{background:var(--accent); transform:scale(1.5);}
+nav#toc a.active .lbl{opacity:1; transform:none;}
+@media(max-width:1240px){nav#toc{display:none;}}
+
+.home-btn{position:fixed; top:20px; left:24px; z-index:70; display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); text-decoration:none; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; background:rgba(74,91,214,0.08); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); transition:background .25s var(--ease-out), color .25s var(--ease-out), border-color .25s var(--ease-out); animation:homeSlide .9s var(--ease) .35s both;}
+.home-btn svg{display:block;}
+.home-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+.home-btn:active{transform:scale(.97);}
+@keyframes homeSlide{from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:none;}}
+@media(max-width:600px){.home-btn{top:13px; left:12px; padding:7px 12px; font-size:10px;}}
+
+.wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+.col{max-width:var(--read); margin:0 auto;}
+section{padding:54px 0;}
+.eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.17em; text-transform:uppercase; color:var(--ink-3); margin:0 0 18px; display:block;}
+.eyebrow .num{color:var(--accent);}
+
+h1,h2,h3,h4{font-family:var(--font-display); font-weight:500; color:var(--ink); line-height:1.04; margin:0;}
+h2{font-size:clamp(32px,4.7vw,49px); letter-spacing:-.01em; margin-bottom:18px; font-weight:500;}
+h3{font-size:clamp(23px,3vw,31px); letter-spacing:-.004em; line-height:1.1; margin:44px 0 10px;}
+p{margin:0 0 22px;}
+.lead{font-family:var(--font-display); font-weight:400; font-size:clamp(21px,2.6vw,27px); line-height:1.4; color:var(--ink-2); margin-bottom:26px;}
+strong{font-weight:600; color:var(--ink);}
+em{font-style:italic;}
+a.inline{color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft); transition:border-color .2s var(--ease-out);}
+a.inline:hover{border-color:var(--accent);}
+.tc{color:var(--trusted); font-weight:600;} .ic{color:var(--insufficient); font-weight:600;} .uc{color:var(--untrusted); font-weight:600;}
+.ac{color:var(--accent); font-weight:600;}
+.mono{font-family:var(--font-mono); font-size:.88em;}
+
+/* ---------- dark hero ---------- */
+#hero{padding:0 0 13vh; min-height:100vh; display:flex; flex-direction:column; justify-content:center; position:relative; background:radial-gradient(125% 95% at 72% 22%, #1c1608, #0e0a04 72%); isolation:isolate;}
+#hero canvas{position:absolute; inset:0; width:100%; height:100%; z-index:0;}
+#hero::after{content:""; position:absolute; left:0; right:0; bottom:0; height:16vh; z-index:1; background:linear-gradient(180deg, rgba(15,11,4,0), var(--paper)); pointer-events:none;}
+#hero .col{max-width:1080px; position:relative; z-index:2; animation:heroReveal 1.9s var(--ease) .15s both;}
+@keyframes heroReveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+.hero-mark{font-family:var(--font-mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:rgba(238,242,247,.6); margin-bottom:30px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+.hero-mark .bd{width:9px; height:9px; border-radius:50%; background:var(--gold-bright); box-shadow:0 0 14px 2px rgba(231,196,88,.7);}
+#hero h1{font-size:clamp(50px,11.5vw,146px); line-height:.94; letter-spacing:-.02em; color:#f8f3e6; margin-bottom:20px; font-weight:500; text-shadow:0 2px 80px rgba(0,0,0,.55);}
+#hero h1 .it{font-style:italic; color:var(--gold-bright);}
+.hero-hook{font-family:var(--font-display); font-weight:500; font-size:clamp(20px,2.5vw,31px); line-height:1.28; color:var(--gold-bright); max-width:860px; margin:0 0 4px;}
+.hero-sub{font-family:var(--font-display); font-weight:400; font-size:clamp(18px,2.2vw,24px); line-height:1.42; color:rgba(244,239,228,.82); max-width:900px; margin-top:20px; margin-bottom:26px;}
+.hero-cta{display:inline-flex; align-items:center; gap:9px; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-bright); text-decoration:none; padding:11px 19px; border:1px solid rgba(231,196,88,.5); border-radius:999px; background:rgba(201,166,63,.08); margin-bottom:30px; transition:background .25s var(--ease-out), color .25s var(--ease-out), border-color .25s var(--ease-out), transform .18s var(--ease-out);}
+.hero-cta svg{display:block;}
+.hero-cta:hover{background:var(--gold); color:#17120a; border-color:var(--gold);}
+.hero-cta:active{transform:scale(.97);}
+.hero-meta{font-family:var(--font-mono); font-size:12px; letter-spacing:.03em; color:rgba(238,242,247,.62); line-height:1.95;}
+.hero-meta b{color:rgba(238,242,247,.94); font-weight:500;}
+.scrollcue{position:absolute; bottom:28px; left:50%; transform:translateX(-50%); z-index:3; font-family:var(--font-mono); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(238,242,247,.45); display:flex; flex-direction:column; align-items:center; gap:8px;}
+.scrollcue .bar{width:1px; height:34px; background:linear-gradient(rgba(238,242,247,.5),transparent); animation:cue 2.4s var(--ease) infinite;}
+@keyframes cue{0%{transform:scaleY(.3);transform-origin:top;opacity:0}40%{opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+
+/* ---------- figures / panels ---------- */
+figure{margin:34px 0; position:relative;}
+.figure-wide{width:min(1000px,calc(100vw - 56px)); margin-left:50%; transform:translateX(-50%);}
+.panel{background:var(--paper-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 18px 40px -28px rgba(14,19,32,.4);}
+.panel.dark{background:#0d1119; border-color:rgba(255,255,255,.08); box-shadow:0 18px 50px -28px rgba(0,0,0,.6);}
+.panel.dark .legend{color:rgba(238,242,247,.55);}
+.panel.dark .readout{color:rgba(238,242,247,.82);}
+.panel.dark .controls label{color:rgba(238,242,247,.55);}
+figcaption{font-family:var(--font-mono); font-size:12px; line-height:1.62; color:var(--ink-3); margin-top:14px; letter-spacing:.01em;}
+figcaption b{color:var(--ink-2); font-weight:500;}
+canvas.fig{display:block; width:100%; border-radius:8px; touch-action:pan-y; aspect-ratio:16/7.4;}
+#evidenceCanvas{aspect-ratio:16/9.4;}
+@media(max-width:600px){
+  canvas.fig{aspect-ratio:4/3.4;}
+  #evidenceCanvas{aspect-ratio:3/4.2;}
+}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; margin-top:16px;}
+.controls .grp{display:flex; align-items:center; gap:9px;}
+.controls label{font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3);}
+button.btn{font-family:var(--font-mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink); background:var(--paper-3); border:1px solid var(--rule-strong); border-radius:7px; padding:8px 14px; cursor:pointer; transition:background .2s var(--ease-out), color .2s var(--ease-out), border-color .2s var(--ease-out), transform .12s var(--ease-out);}
+button.btn:hover{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+button.btn:active{transform:scale(.97);}
+button.btn.primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+button.btn.primary:hover{background:var(--accent-deep);}
+input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:4px; background:var(--rule-strong); outline:none; cursor:pointer; width:150px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--paper); box-shadow:0 1px 4px rgba(14,19,32,.35); transition:transform .15s var(--ease-out);}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
+input[type=range]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid var(--paper); cursor:pointer;}
+input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+.panel.dark input[type=range]{background:rgba(255,255,255,.18);}
+.panel.dark input[type=range]::-webkit-slider-thumb{border-color:#0d1119;}
+.toggle{display:inline-flex; border:1px solid var(--rule-strong); border-radius:8px; overflow:hidden;}
+.toggle button{font-family:var(--font-mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; padding:8px 13px; border:none; background:transparent; color:var(--ink-3); cursor:pointer; transition:background .2s var(--ease-out), color .2s var(--ease-out);}
+.toggle button.on{background:var(--ink); color:var(--paper);}
+.panel.dark .toggle{border-color:rgba(255,255,255,.2);}
+.panel.dark .toggle button{color:rgba(238,242,247,.55);}
+.panel.dark .toggle button.on{background:var(--paper); color:var(--ink);}
+.readout{font-family:var(--font-mono); font-size:12px; color:var(--ink-2);}
+.readout b{color:var(--accent); font-weight:500;}
+
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-family:var(--font-mono); font-size:11px; letter-spacing:.03em; color:var(--ink-3); margin-top:14px;}
+.legend span{display:inline-flex; align-items:center; gap:7px;}
+.legend i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+
+.pull{border-left:2px solid var(--accent); padding:4px 0 4px 22px; margin:30px 0; font-family:var(--font-display); font-weight:400; font-size:clamp(21px,2.5vw,26px); line-height:1.36; color:var(--ink);}
+.note{background:var(--paper-2); border:1px solid var(--rule); border-left:2px solid var(--accent-soft); border-radius:10px; padding:18px 22px; margin:26px 0; font-size:17px; line-height:1.56;}
+.note .tag{font-family:var(--font-mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); display:block; margin-bottom:8px;}
+.note.caution{border-left-color:var(--insufficient);}
+.note.caution .tag{color:var(--insufficient);}
+.note.honest{border-left-color:var(--flag);}
+.note.honest .tag{color:var(--flag);}
+.note p:last-child{margin-bottom:0;}
+
+/* ---------- verdict + template chips ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:26px 0 8px;}
+.chip{font-family:var(--font-mono); font-size:12px; letter-spacing:.01em; padding:7px 12px; border-radius:999px; border:1px solid var(--rule-strong); color:var(--ink-3); background:var(--paper-2); display:inline-flex; align-items:center; gap:8px;}
+.chip i{width:9px; height:9px; border-radius:50%; display:inline-block;}
+.chip .n{opacity:.5; margin-right:2px;}
+.chip.v-t{border-color:var(--trusted-soft);} .chip.v-t i{background:var(--trusted);}
+.chip.v-i{border-color:var(--insufficient-soft);} .chip.v-i i{background:var(--insufficient);}
+.chip.v-u{border-color:var(--untrusted-soft);} .chip.v-u i{background:var(--untrusted);}
+
+/* ---------- stat tiles ---------- */
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:30px 0;}
+.stat{background:var(--paper-2); border:1px solid var(--rule); border-radius:12px; padding:18px 18px 16px; position:relative; overflow:hidden;}
+.stat .k{font-family:var(--font-mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-4); display:block; margin-bottom:10px;}
+.stat .v{font-family:var(--font-display); font-weight:400; font-size:clamp(28px,3.8vw,41px); line-height:1; color:var(--ink);}
+.stat .v small{font-size:.42em; color:var(--ink-3); letter-spacing:.02em;}
+.stat .d{font-size:13.5px; line-height:1.45; color:var(--ink-3); margin-top:9px;}
+.stat.hot .v{color:var(--accent);}
+.stat.good .v{color:var(--trusted);}
+.stat.warmv .v{color:var(--flag);}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);}}
+
+/* ---------- bento ---------- */
+.bento{display:grid; grid-template-columns:repeat(6,1fr); gap:16px; margin:30px 0;}
+.card{background:var(--paper-2); border:1px solid var(--rule); border-radius:14px; padding:20px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset, 0 16px 36px -30px rgba(14,19,32,.5); position:relative; overflow:hidden;}
+.card .kick{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; display:block;}
+.card h4{font-family:var(--font-display); font-weight:500; font-size:24px; line-height:1.1; color:var(--ink); margin:0 0 8px;}
+.card p{font-size:15.5px; line-height:1.5; color:var(--ink-3); margin:0 0 6px;}
+.card p b{color:var(--ink-2);}
+.card .tool-tag{position:absolute; top:14px; right:16px; font-family:var(--font-mono); font-size:10px; color:var(--ink-4);}
+.col-6{grid-column:span 6;} .col-3{grid-column:span 3;} .col-2{grid-column:span 2;}
+@media(max-width:820px){.bento{grid-template-columns:1fr;} .col-6,.col-3,.col-2{grid-column:1/-1;}}
+
+/* ---------- pipeline diagram (SVG-free, DOM) ---------- */
+.pipe{margin:28px 0 6px;}
+.pipe-llm{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); background:var(--paper-2); border:1px dashed var(--rule-strong); border-radius:10px; padding:11px 15px; margin:0 auto 6px; max-width:520px; text-align:center; transition:border-color .3s var(--ease-out), color .3s var(--ease-out);}
+.pipe-llm.audit{border-color:var(--accent-soft); color:var(--accent);}
+.pipe-tether{width:1px; height:16px; margin:0 auto; background:var(--rule-strong);}
+.pipe-row{display:flex; flex-wrap:wrap; align-items:stretch; gap:8px; justify-content:center;}
+.node{flex:1 1 130px; min-width:112px; background:var(--paper-2); border:1px solid var(--rule-strong); border-radius:11px; padding:14px 12px; text-align:center; position:relative; transition:background .25s var(--ease-out), border-color .25s var(--ease-out), color .25s var(--ease-out), transform .25s var(--ease-out), box-shadow .25s var(--ease-out);}
+.node .role{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-4); display:block; margin-bottom:5px;}
+.node .name{font-family:var(--font-display); font-weight:500; font-size:16px; color:var(--ink); line-height:1.14;}
+.node.lit{background:var(--accent); border-color:var(--accent); transform:translateY(-3px); box-shadow:0 12px 26px -14px rgba(74,91,214,.7);}
+.node.lit .role{color:rgba(255,255,255,.72);}
+.node.lit .name{color:#fff;}
+.node.dim{opacity:.4;}
+.node.term{flex:0 1 108px; background:transparent; border-style:dashed;}
+.node.term.lit{background:var(--accent-soft); border-style:solid; border-color:var(--accent); box-shadow:0 10px 22px -16px rgba(74,91,214,.7);}
+.node.term.lit .role{color:var(--accent);}
+.node.term.lit .name{color:var(--accent-deep);}
+.pipe-arrows{display:none;}
+.pipe-read{font-family:var(--font-mono); font-size:12.5px; line-height:1.6; color:var(--ink-2); background:var(--paper-2); border:1px solid var(--rule); border-radius:10px; padding:14px 16px; margin-top:16px;}
+.pipe-read b{color:var(--accent);}
+.pipe-read .lab{display:inline-block; min-width:96px; color:var(--ink-4);}
+@media(max-width:640px){.pipe-row{gap:6px;} .node{flex:1 1 44%;}}
+
+/* ---------- band variations (different colour schemes per section) ---------- */
+.band-night{background:linear-gradient(180deg, #0b0e15, #0e131d); position:relative; color:rgba(238,242,247,.82);}
+.band-night .eyebrow{color:rgba(238,242,247,.55);}
+.band-night .eyebrow .num{color:var(--accent-bright);}
+.band-night h2,.band-night h3,.band-night h4{color:#f3f6fa;}
+.band-night .lead{color:rgba(238,242,247,.9);}
+.band-night strong{color:#fff;}
+.band-night .pull{color:#f3f6fa; border-left-color:var(--accent-bright);}
+.band-night .note{background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.09); color:rgba(238,242,247,.8);}
+.band-night .note b, .band-night .note strong{color:#fff;}
+.band-night figcaption{color:rgba(238,242,247,.6);}
+.band-night figcaption b{color:rgba(238,242,247,.85);}
+.band-warm{background:linear-gradient(180deg, #f0e9d8, #ece3cf); position:relative;}
+.band-warm .panel{background:#f5efe0; border-color:rgba(120,90,30,.16);}
+.band-warm .note.honest{background:#f6f0e2;}
+.band-edge{border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+
+hr.rule{border:none; border-top:1px solid var(--rule); margin:0;}
+
+/* ---------- glossary ---------- */
+.gloss{display:grid; grid-template-columns:1fr; gap:0; margin-top:20px; border-top:1px solid var(--rule);}
+.gloss .row{display:grid; grid-template-columns:minmax(160px,230px) 1fr; gap:18px; padding:18px 0; border-bottom:1px solid var(--rule); align-items:baseline;}
+.gloss .term{font-family:var(--font-display); font-weight:500; font-size:21px; color:var(--ink); line-height:1.14;}
+.gloss .term .alt{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.03em; color:var(--ink-4); text-transform:uppercase; margin-top:5px;}
+.gloss .def{font-size:16.5px; line-height:1.55; color:var(--ink-3);}
+.gloss .def b{color:var(--ink-2); font-weight:600;}
+@media(max-width:620px){.gloss .row{grid-template-columns:1fr; gap:6px;}}
+
+footer{padding:70px 0 90px; border-top:1px solid var(--rule); margin-top:40px;}
+footer .col{display:flex; flex-direction:column; gap:18px;}
+footer .foot-back{align-self:flex-start; font-family:var(--font-mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--accent); text-decoration:none; display:inline-flex; align-items:center; gap:8px; padding:9px 15px; border:1px solid var(--accent-soft); border-radius:999px; margin-bottom:6px; transition:background .25s var(--ease-out), color .25s var(--ease-out), border-color .25s var(--ease-out);}
+footer .foot-back:hover{background:var(--accent); color:#fff; border-color:var(--accent);}
+footer .foot-back:active{transform:scale(.97);}
+footer .foot-paper{scroll-margin-top:80px; border:1px solid var(--rule); border-left:2px solid var(--flag); border-radius:12px; padding:20px 22px; background:var(--paper-2); display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px; justify-content:space-between;}
+footer .foot-paper .fp-text{font-family:var(--font-mono); font-size:12.5px; line-height:1.62; color:var(--ink-3); max-width:560px;}
+footer .foot-paper .fp-text b{color:var(--ink); font-weight:500;}
+footer .paper-btn{display:inline-flex; align-items:center; gap:9px; font-family:var(--font-mono); font-size:11px; letter-spacing:.11em; text-transform:uppercase; color:#fff; text-decoration:none; white-space:nowrap; padding:12px 19px; border-radius:999px; background:var(--flag); border:1px solid var(--flag); box-shadow:0 8px 22px -12px rgba(181,125,26,.85); transition:background .2s var(--ease-out), transform .18s var(--ease-out), box-shadow .2s var(--ease-out);}
+footer .paper-btn svg{display:block;}
+footer .paper-btn:hover{background:var(--gold-deep); transform:translateY(-1px); box-shadow:0 12px 26px -12px rgba(138,106,30,.9);}
+footer .paper-btn:active{transform:scale(.98);}
+footer .sig{font-family:var(--font-display); font-weight:400; font-size:25px; color:var(--ink);}
+footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); line-height:1.9; letter-spacing:.01em;}
+footer .runbox{font-family:var(--font-mono); font-size:12.5px; line-height:1.7; color:var(--ink-2); background:var(--paper-2); border:1px solid var(--rule); border-radius:10px; padding:16px 18px;}
+footer .runbox .c{color:var(--accent);}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+.reveal.in{opacity:1; transform:none;}
+.figure-wide.reveal{transform:translateX(-50%) translateY(26px);}
+.figure-wide.reveal.in{transform:translateX(-50%);}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  .reveal{opacity:1!important; transform:none!important; transition:none!important;}
+  .figure-wide.reveal{transform:translateX(-50%)!important;}
+  #hero .col{animation:none!important;}
+  .home-btn{animation:none!important;}
+  .scrollcue .bar{animation:none;}
+}
+@media(max-width:600px){
+  body{font-size:17.5px;}
+  section{padding:42px 0;}
+  .wrap{padding:0 20px;}
+  .panel{padding:14px;}
+  .stats{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<a class="home-btn" href="https://thylinao1.github.io/index.html" aria-label="Back to portfolio home">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+  <span>Home</span>
+</a>
+
+<nav id="toc" aria-label="Sections">
+  <a href="#hero" data-sec="hero"><span class="dot"></span><span class="lbl">Top</span></a>
+  <a href="#task" data-sec="task"><span class="dot"></span><span class="lbl">The task</span></a>
+  <a href="#measure" data-sec="measure"><span class="dot"></span><span class="lbl">The measurement</span></a>
+  <a href="#arch" data-sec="arch"><span class="dot"></span><span class="lbl">The architecture</span></a>
+  <a href="#evidence" data-sec="evidence"><span class="dot"></span><span class="lbl">Evidence</span></a>
+  <a href="#signal" data-sec="signal"><span class="dot"></span><span class="lbl">The label signal</span></a>
+  <a href="#board" data-sec="board"><span class="dot"></span><span class="lbl">The result</span></a>
+  <a href="#limits" data-sec="limits"><span class="dot"></span><span class="lbl">Limits</span></a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="col">
+      <div class="hero-mark"><span class="bd"></span> UbiComp/ISWC 2026 · TCSAUC Workshop · MedLongTrust-EHR · Codabench 16891</div>
+      <h1>Grounds for <span class="it">trust</span></h1>
+      <p class="hero-hook">How I reached first place on MedLongTrust-EHR, a benchmark that asks whether a medical record can be trusted.</p>
+      <p class="hero-sub">You read a patient's longitudinal record and a claim about it, then decide whether it holds, which risks apply, and which paragraphs prove it. I put deterministic tools in charge of every call and kept a small model advisory, and most of the winning margin came from reconstructing the evidence other entries left thin.</p>
+      <a class="hero-cta" href="#paper">Read the paper <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg></a>
+      <div class="hero-meta">
+        <b>Needs</b> &nbsp;comfort with a leaderboard metric and evidence retrieval, no medical background required<br>
+        <b>Reading</b> &nbsp;about 12 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;figures you can drag and replay, and the real numbers from the runs
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue"><span>scroll</span><span class="bar"></span></div>
+</header>
+
+<main>
+
+<!-- ============ 01 · THE TASK ============ -->
+<div class="wrap">
+<section id="task">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">01</span> · The task</span>
+    <h2 class="reveal">One record, one claim, three things to return</h2>
+    <p class="lead reveal">MedLongTrust-EHR gives a system a synthetic longitudinal record and a claim about it, and asks for three things back: a trust label, the risk types that apply, and the paragraph identifiers that support the decision. The records come from Synthea, so they read cleaner than real clinical notes, and each one is a sequence of paragraphs. A header announces an encounter, an entity line records a condition or a medication or an allergy, an observation line gives a measurement, and some paragraphs are marked supplemental and act as distractors.</p>
+    <p class="reveal">The trust label is one of three values: trusted, untrusted, or insufficient evidence. Those three labels are the spine of the whole task, so I gave each one its own colour and kept it consistent through every figure on this page.</p>
+    <div class="chips reveal">
+      <span class="chip v-t"><i></i>trusted</span>
+      <span class="chip v-i"><i></i>insufficient evidence</span>
+      <span class="chip v-u"><i></i>untrusted</span>
+    </div>
+    <p class="reveal">The board scores three measures and weights them. Trust-label accuracy counts for half, risk micro-F1 for three tenths, and evidence F1 for the last fifth. Multiply the weighted sum by a hundred and you have the final score. Token usage is recorded as optional metadata and does not enter the score. Move the three sliders below and watch the number respond. The weights are fixed; only the components move.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="metricCanvas" class="fig" aria-label="Interactive: the final score is a weighted sum of three components. Trust-label accuracy has weight 0.50, risk micro-F1 has weight 0.30, and evidence F1 has weight 0.20, times one hundred. Three sliders set each component between zero and one, and a stacked bar and a large number show the resulting score."></canvas>
+        <div class="controls">
+          <div class="grp"><label for="mTrust">trust acc</label><input type="range" id="mTrust" min="0" max="100" value="100"></div>
+          <div class="grp"><label for="mRisk">risk F1</label><input type="range" id="mRisk" min="0" max="100" value="100"></div>
+          <div class="grp"><label for="mEvid">evidence F1</label><input type="range" id="mEvid" min="0" max="100" value="100"></div>
+          <span class="readout" aria-live="polite">final score <b id="mScore">100.0</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>trust accuracy · 0.50</span>
+          <span><i style="background:var(--trusted)"></i>risk micro-F1 · 0.30</span>
+          <span><i style="background:var(--insufficient)"></i>evidence F1 · 0.20</span>
+        </div>
+      </div>
+      <figcaption><b>Half the score is the trust label, but the last fifth is where this competition was decided.</b> Most entries scored well on the label and gave up the evidence. Drag evidence F1 down toward a third and watch the ceiling fall. That is roughly where the second-place entry sat, and it is most of the gap between first and second.</figcaption>
+    </figure>
+
+    <p class="reveal">The data comes in three splits. Training has 84 records and 1,167 questions, development has 18 records and 265 questions, and both carry gold answers. The test split has 18 records and 266 questions with the labels held back, and it is the one the leaderboard scores. The claims fall into six templates, with one synthesis variant, and working out which template a claim belongs to is the first thing the system does.</p>
+    <div class="chips reveal">
+      <span class="chip"><span class="n">6 templates</span></span>
+      <span class="chip">condition</span>
+      <span class="chip">medication</span>
+      <span class="chip">allergy</span>
+      <span class="chip">observation-trend</span>
+      <span class="chip">sufficiency</span>
+      <span class="chip">privacy</span>
+      <span class="chip" style="border-color:var(--accent-soft); color:var(--accent)">+ multi-evidence synthesis</span>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ============ 02 · THE MEASUREMENT (dark band) ============ -->
+<section id="measure" class="band-night band-edge">
+  <div class="wrap">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">02</span> · The measurement</span>
+    <h2 class="reveal">I measured the model before I trusted it</h2>
+    <p class="lead reveal">The design came out of a number, not a preference. Before building anything, I took my small local model, llama3.2:3b run through Ollama, and used it the usual way: as a free-form verifier that reads the record and judges the claim on its own.</p>
+    <p class="reveal">It matched a direct reading of the record only about 60 to 70 percent of the time, and it made a particular mistake often, treating observation-trend claims as though they were conditions. On the two jobs I could measure directly against the tools, it agreed on routing 143 times out of 266, and on whether the retrieved paragraphs actually supported the decision only 36 times out of 266. A component that is wrong this often, and wrong in ways that are hard to see, is not something I want deciding trust in a clinical setting.</p>
+    <p class="reveal pull">So I moved the decision out of the model. The tools decide; the model advises.</p>
+    <p class="reveal">That measured unreliability is not a footnote to the entry. It is the reason for the architecture. Toggle the figure to let the small model decide the 266 test claims, and then to let the tools decide, and watch the difference. The tools are not more clever. They are just checkable.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="decideCanvas" class="fig" aria-label="Interactive: the 266 test claims as a grid of dots. Toggle between the tools deciding, where every dot is grounded and correct, and the small model deciding on its own, where roughly a third of the dots turn to errors scattered through the grid. A readout shows the accuracy and notes the routing and evidence-audit agreement."></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="decideMode" role="group" aria-label="who decides">
+            <button data-mode="tools" class="on" aria-pressed="true">Tools decide</button>
+            <button data-mode="model" aria-pressed="false">Model decides</button>
+          </div>
+          <span class="readout" id="decideRead" aria-live="polite">every one grounded, and every one checkable</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--trusted)"></i>grounded by an explicit rule</span>
+          <span><i style="background:var(--untrusted)"></i>the model's error, and it cannot flag it</span>
+        </div>
+      </div>
+      <figcaption><b>Left to itself the small model gets about a third of these wrong, and it cannot tell you which third.</b> The tools reach each answer through a rule I can read and test. I kept the model running for planning and monitoring, because a second opinion has some value, but its verdicts are logged and never acted on.</figcaption>
+    </figure>
+  </div>
+  </div>
+</section>
+
+<!-- ============ 03 · THE ARCHITECTURE ============ -->
+<div class="wrap">
+<section id="arch">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">03</span> · The architecture</span>
+    <h2 class="reveal">Four tools read the record, and the model stays out of the way</h2>
+    <p class="lead reveal">The system has two layers. A deterministic tool layer reads the record and produces the answer. A language-model layer plans and audits around it and holds no authority over the result.</p>
+    <p class="reveal">Four tools do the work. A template router matches the claim wording to one of the six templates. An evidence retriever finds the paragraphs that justify the decision. A trend comparator handles observation claims, mapping encounter identifiers to numbers and comparing values as a number together with a unit. And a label and risk deriver turns a routed, grounded claim into a trust label and its risk types by a rule per template.</p>
+    <p class="reveal">Pick a claim type below and follow it through. The router reads the wording, the right retrieval tool gathers the evidence, and the deriver returns the label. The model sits to the side the whole time.</p>
+
+    <figure class="reveal">
+      <div class="pipe">
+        <div class="pipe-llm" id="pipeLLM">advisory model &middot; plans and audits, never overrides the tools</div>
+        <div class="pipe-tether"></div>
+        <div class="pipe-row" id="pipeRow">
+          <div class="node term" data-node="claim"><span class="role">input</span><span class="name">Claim</span></div>
+          <div class="node" data-node="router"><span class="role">tool 1</span><span class="name">Router</span></div>
+          <div class="node" data-node="retriever"><span class="role">tool 2</span><span class="name">Evidence retriever</span></div>
+          <div class="node" data-node="comparator"><span class="role">tool 3</span><span class="name">Trend comparator</span></div>
+          <div class="node" data-node="deriver"><span class="role">tool 4</span><span class="name">Label + risk</span></div>
+          <div class="node term" data-node="answer"><span class="role">output</span><span class="name">Answer</span></div>
+        </div>
+      </div>
+      <div class="chips" id="pipeChips" style="margin-top:18px;">
+        <span class="chip" data-claim="condition" tabindex="0" role="button">condition</span>
+        <span class="chip" data-claim="medication" tabindex="0" role="button">medication</span>
+        <span class="chip" data-claim="allergy" tabindex="0" role="button">allergy</span>
+        <span class="chip" data-claim="trend" tabindex="0" role="button">observation-trend</span>
+        <span class="chip" data-claim="sufficiency" tabindex="0" role="button">sufficiency</span>
+        <span class="chip" data-claim="privacy" tabindex="0" role="button">privacy</span>
+      </div>
+      <div class="pipe-read" id="pipeRead" aria-live="polite">
+        <div><span class="lab">claim</span> pick a type above to route it</div>
+      </div>
+      <figcaption><b>One claim, one path.</b> Five of the six templates route to the evidence retriever; observation-trend routes to the comparator instead. The deriver applies the per-template rule and returns the label with its risk types. The model can propose a route and audit the result, but the answer is always the grounded tool output.</figcaption>
+    </figure>
+
+    <div class="bento reveal">
+      <div class="card col-3">
+        <span class="tool-tag">tool 1</span>
+        <span class="kick">route</span>
+        <h4>Template router</h4>
+        <p>Matches the claim text to one of the six templates, or recognises the multi-evidence synthesis variant. It reads the wording of the claim, <b>not the model's opinion of it</b>.</p>
+      </div>
+      <div class="card col-3">
+        <span class="tool-tag">tool 2</span>
+        <span class="kick">retrieve</span>
+        <h4>Evidence retriever</h4>
+        <p>Finds the paragraphs that justify the decision, at the lowest-numbered non-supplemental encounter that documents the entity. <b>This is the fifth of the score most entries left thin.</b></p>
+      </div>
+      <div class="card col-3">
+        <span class="tool-tag">tool 3</span>
+        <span class="kick">compare</span>
+        <h4>Trend comparator</h4>
+        <p>Maps encounter identifiers to numbers, then compares observation values as a number together with a unit, so <b>2 and 2.0 in the same unit count as equal</b>.</p>
+      </div>
+      <div class="card col-3">
+        <span class="tool-tag">tool 4</span>
+        <span class="kick">decide</span>
+        <h4>Label and risk deriver</h4>
+        <p>Turns a routed, grounded claim into a trust label and its risk types by a rule per template. Risk types are <b>a fixed function of the label and the template</b>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ============ 04 · EVIDENCE (dark band, centrepiece) ============ -->
+<section id="evidence" class="band-night band-edge">
+  <div class="wrap">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">04</span> · Evidence</span>
+    <h2 class="reveal">The part almost everyone skipped</h2>
+    <p class="lead reveal">Evidence F1 is only a fifth of the score, and it is the fifth most entries gave up on. Recovering the exact paragraphs that support a decision is fiddly, so most entries returned a label and left the evidence thin. The second-place system scored 0.34 on evidence. Getting it to 1.00 is most of my seventeen-point margin.</p>
+    <p class="reveal">The rule is specific. For a condition, medication, or allergy claim, the evidence is the encounter header together with the line that documents the entity, taken at the lowest-numbered encounter that is not supplemental and that documents that entity. One detail matters: within a record, a trusted claim and its untrusted counterpart share a single anchor, so an untrusted claim built on a made-up entity inherits the evidence of its trusted sibling. A synthesis claim, which names a condition, a medication, and a procedure together, resolves instead to three documenting lines and no header.</p>
+    <p class="reveal">Below is one record laid out as encounters, left to right. Pick a claim and watch the retriever sweep across, skip the supplemental paragraphs, and stop at the lowest encounter that documents the entity. That pair of lines is the evidence.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel dark">
+        <canvas id="evidenceCanvas" class="fig" aria-label="Interactive: one record shown as a row of encounters, each with a header and a few documenting lines, some marked supplemental. Selecting a claim animates a scan from the lowest encounter across the record until it reaches the first non-supplemental line that documents the entity. The header and that line are marked as the evidence pair, and a note shows that the untrusted twin of the claim inherits the same two lines."></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="evClaim" role="group" aria-label="pick a claim">
+            <button data-claim="condition" class="on" aria-pressed="true">Condition</button>
+            <button data-claim="medication" aria-pressed="false">Medication</button>
+            <button data-claim="allergy" aria-pressed="false">Allergy</button>
+            <button data-claim="trend" aria-pressed="false">Trend</button>
+          </div>
+          <button class="btn primary" id="evReplay">Replay the scan</button>
+          <span class="readout" id="evRead" aria-live="polite">evidence: scanning...</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent-bright)"></i>the evidence pair, header and documenting line</span>
+          <span><i style="background:var(--untrusted)"></i>supplemental, skipped</span>
+          <span style="color:rgba(238,242,247,.5)">lowest encounter that documents the entity wins</span>
+        </div>
+      </div>
+      <figcaption><b>Lowest encounter, skip the distractors, take the header and the documenting line.</b> The same anchor serves the trusted claim and its untrusted twin, which is how a claim about a fabricated entity still lands on real evidence. The trend claim is the exception: it cites the two observation paragraphs and no header.</figcaption>
+    </figure>
+
+    <div class="note caution reveal">
+      <span class="tag">The case that took the longest</span>
+      <p>The hardest trend claim is a cross-indicator one, where the named observation does not appear at the claim's own encounters because its values were lifted from a different indicator. There the comparator recovers the named reading from wherever it occurs in the record, taking the one nearest in time to each value endpoint. It is a small share of the questions and it took a real share of the work, and getting it right is part of why the evidence score reached 1.00 rather than merely close.</p>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ 05 · THE LABEL SIGNAL (warm band, candour) ============ -->
+<section id="signal" class="band-warm band-edge">
+  <div class="wrap">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">05</span> · Candour</span>
+    <h2 class="reveal">Where the perfect label score comes from</h2>
+    <p class="lead reveal">I owe you a clear account of the one uncomfortable part. The trust labels are exact on the labeled data, and for several templates that exactness does not come from clinical reasoning. It comes from a property of how the benchmark was assembled.</p>
+    <p class="reveal">For condition, medication, observation-trend, and sufficiency claims, and for the synthesis variant, the label keys on whether the question carries a proposed response. On this benchmark that presence is a steady per-template signal, and reading it directly is what makes the labels perfect. I treat it as a construction artifact, not as evidence about the patient. Allergy and privacy labels never use it; they are read from the claim wording.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="oracleCanvas" class="fig" aria-label="Interactive: three bars for trust-label accuracy, risk micro-F1, and evidence F1. Toggling the proposed-response signal off drops trust accuracy and risk micro-F1 from 1.00 to about 0.86, because the risk types are derived from the label, while evidence F1 stays at 1.00, and the final score falls from 100.0 into the high 80s."></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="oracleMode" role="group" aria-label="the label signal">
+            <button data-mode="on" class="on" aria-pressed="true">Signal on</button>
+            <button data-mode="off" aria-pressed="false">Record-grounded fallback</button>
+          </div>
+          <span class="readout" id="oracleRead" aria-live="polite">final score <b>100.0</b> &middot; with the signal</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>trust-label accuracy</span>
+          <span><i style="background:var(--trusted)"></i>risk micro-F1</span>
+          <span><i style="background:var(--insufficient)"></i>evidence F1</span>
+          <span style="color:var(--ink-4)">the evidence does not depend on the signal</span>
+        </div>
+      </div>
+      <figcaption><b>The evidence reconstruction does not depend on the signal at all, which is why it holds either way.</b> With the fallback the labels come from the record itself, entity presence for conditions and medications and value direction for trends, and accuracy settles near 0.86. The risk types are read off the labels, so risk micro-F1 falls with them and the final score lands in the high 80s, while the cited evidence is unchanged. In a real deployment, where no proposed-response field exists, the fallback is the part I would rely on, and I would report the lower number honestly.</figcaption>
+    </figure>
+
+    <div class="note honest reveal">
+      <span class="tag">The hedge I kept in the code</span>
+      <p>Because that signal might not survive a differently built test, I left the record-grounded fallback wired in behind a toggle rather than deleting it once the perfect score arrived. An audit of the test questions found no template, unit, or observation name that had not already appeared in the labeled data, so the signal almost certainly carried over, which is what the leaderboard showed. That is a statement about this benchmark, not a claim that the labeling would survive a test built to remove the signal.</p>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ 06 · THE RESULT ============ -->
+<div class="wrap">
+<section id="board">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">06</span> · The result</span>
+    <h2 class="reveal">Where it landed, and why the gap is that size</h2>
+    <p class="lead reveal">The same configuration went to the held-out test board as the lean-planner entry and came back first, with a final score of 100.0 and trust accuracy, risk micro-F1, and evidence F1 each at 1.00, recorded on 7 July 2026.</p>
+    <p class="reveal">The second entry scored 82.899 and the third 68.79. The height of the first bar is not the interesting part. The gap between first and second is, and most of it is one component. On the label and the risks the field was close. On evidence F1 the second-place entry scored 0.34 against my 1.00, so most of the seventeen-point margin comes down to that single measure. Toggle the evidence overlay to see it.</p>
+
+    <figure class="figure-wide reveal">
+      <div class="panel">
+        <canvas id="boardCanvas" class="fig" aria-label="Interactive: three horizontal bars for the top three final scores, 100.0, 82.899, and 68.79. An overlay draws the evidence F1 component for the first two entries, 1.00 for first place and 0.34 for second place, showing that the gap between them is almost entirely the evidence component."></canvas>
+        <div class="controls">
+          <div class="grp toggle" id="boardMode" role="group" aria-label="what to show">
+            <button data-mode="score" class="on" aria-pressed="true">Final score</button>
+            <button data-mode="evid" aria-pressed="false">Evidence F1</button>
+          </div>
+          <span class="readout" id="boardRead" aria-live="polite">first place &middot; final score <b>100.0</b></span>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i>my entry</span>
+          <span><i style="background:var(--ink-4)"></i>second and third place</span>
+          <span style="color:var(--ink-4)">the margin is the evidence component</span>
+        </div>
+      </div>
+      <figcaption><b>The bars are close on everything but the evidence.</b> First and second differ by about seventeen points on the final score, and the evidence component alone accounts for most of it. Nobody else drove evidence F1 much above a third, which is why the lead is as wide as it is.</figcaption>
+    </figure>
+
+    <div class="stats reveal">
+      <div class="stat hot"><span class="k">final score</span><div class="v">100.0</div><div class="d">first place, recorded 7 July 2026</div></div>
+      <div class="stat good"><span class="k">margin over #2</span><div class="v">+17.1</div><div class="d">almost all of it the evidence component</div></div>
+      <div class="stat"><span class="k">evidence F1</span><div class="v">1.00<small>vs 0.34</small></div><div class="d">mine against second place</div></div>
+      <div class="stat warmv"><span class="k">submitted tokens</span><div class="v">~25.8k</div><div class="d">reported, and not part of the score</div></div>
+    </div>
+
+    <p class="reveal">The entry I submitted was not the zero-token one. The tools alone would score the same, because grounding is their job, but I ran the lean planner so the entry reflected the system as an agent with an active planning layer. It reported about 25,800 tokens over the test split. A fuller monitoring mode that audits every retrieval reported about 47,300. All three modes return the same labels, risks, and evidence, and since tokens do not enter the score, running the planner rather than the bare tools cost nothing on the board.</p>
+  </div>
+</section>
+</div>
+
+<hr class="rule">
+
+<!-- ============ 07 · LIMITS ============ -->
+<div class="wrap">
+<section id="limits">
+  <div class="col">
+    <span class="eyebrow reveal"><span class="num">07</span> · Limits</span>
+    <h2 class="reveal">What I would write in the limitations section</h2>
+    <p class="reveal">The exact scores rest on the benchmark's construction, and I have said where. If a future split breaks the proposed-response pattern, label accuracy falls to about 0.86, and since the risk types are read off the labels they fall with them, so the final score settles in the high 80s, while the evidence stays exact. The records are synthetic, so their language is cleaner than real clinical notes. And the small local model, useful here as an advisory monitor, was not reliable enough to be the decision maker, which is the finding that shaped the whole design rather than a detail tacked on at the end.</p>
+
+    <h3 class="reveal">What actually did the work</h3>
+    <p class="reveal">Looking back, the model was the least interesting part. What separated this entry from the rest was the evidence reconstruction, the measurement that kept the model out of the decision, and a set of rules I can read and test line by line. None of it is flashy, and all of it is the reason a reviewer can follow every decision back to the record lines that justify it, which is the property I care about most for clinical verification. It does not show that free-form model judgment is ready for the same job, and it does not claim the labeling would survive a benchmark built to remove the signal it leans on. Those are the questions I would take up next.</p>
+
+    <h3 class="reveal">The name map</h3>
+    <div class="gloss reveal">
+      <div class="row"><div class="term">Trust label<span class="alt">half the score</span></div><div class="def">One of <b>trusted</b>, <b>untrusted</b>, or <b>insufficient evidence</b>. Trust-label accuracy is weighted 0.50, the largest single share of the final score.</div></div>
+      <div class="row"><div class="term">Evidence F1<span class="alt">where the margin came from</span></div><div class="def">Exact-match agreement on the supporting paragraph identifiers. Weighted 0.20, and the component that produced almost the entire gap between first and second place.</div></div>
+      <div class="row"><div class="term">Lowest-encounter anchor<span class="alt">the retrieval rule</span></div><div class="def">The header plus the documenting line at the earliest non-supplemental encounter that records the entity. Supplemental paragraphs are skipped.</div></div>
+      <div class="row"><div class="term">Sibling anchor sharing<span class="alt">the detail that earns its keep</span></div><div class="def">A trusted claim and its untrusted counterpart share one evidence anchor, so a claim built on a fabricated entity still cites real record lines.</div></div>
+      <div class="row"><div class="term">Proposed-response signal<span class="alt">the disclosure</span></div><div class="def">A benchmark-construction property that several labels key on. Read directly for the perfect score, disclosed plainly, with a record-grounded fallback kept behind a toggle.</div></div>
+      <div class="row"><div class="term">Advisory model<span class="alt">the second opinion</span></div><div class="def">The local llama3.2:3b plans and audits around the tools, and its verdicts are logged but never allowed to change a grounded answer.</div></div>
+    </div>
+  </div>
+</section>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="col">
+      <a class="foot-back" href="#hero" aria-label="Back to top">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+        <span>Back to top</span>
+      </a>
+      <div class="runbox">
+        <div>Every decision traces to record lines through an explicit rule, so the whole answer is auditable.</div>
+        <div style="margin-top:8px">$ <span class="c">python solver.py $D/test submission.json</span> &nbsp; # pure deterministic tools, 0 tokens</div>
+        <div>$ <span class="c">python agent.py $D/test submission.json</span> &nbsp; # tools + advisory llama3.2:3b monitor</div>
+        <div>$ <span class="c">python evaluation/evaluate.py --gold dev/questions.jsonl --predictions submission.json</span></div>
+        <div style="margin-top:8px; color:var(--ink-3)"># dev and train both return trust 1.00, risk 1.00, evidence 1.00 under the official scorer</div>
+      </div>
+      <div class="foot-paper" id="paper">
+        <div class="fp-text"><b>The paper.</b> The full method, written up for the TCSAUC workshop at UbiComp/ISWC 2026 and submitted for the oral.</div>
+        <a class="paper-btn" href="assets/medlongtrust-ehr-paper.pdf" target="_blank" rel="noopener" aria-label="Open the submitted paper as a PDF in a new tab">Read the submitted paper (PDF)
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
+      </div>
+      <div class="sig">The record decides. The model advises.</div>
+      <div class="meta">
+        UbiComp/ISWC 2026 &middot; TCSAUC Workshop on Trustworthy, Controllable, and Sustainable Agentic AI &middot; Track 1, MedLongTrust-EHR<br>
+        Result: <b>first place, final score 100.0</b>, all three components at 1.00, recorded 7 July 2026.<br>
+        Competition: <a class="inline" href="https://www.codabench.org/competitions/16891/" target="_blank" rel="noopener">Codabench 16891</a> &nbsp;&middot;&nbsp; Event: Shanghai, 11 to 12 October 2026.<br>
+        Numbers are from the actual runs. The final upload stays a human step. Written by Maksim Silchenko, National University of Singapore.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===================================================================
+   MedLongTrust-EHR - Grounds for trust. Interactive figures.
+   Self-contained, no libraries. Canvas + rAF, DPR-aware.
+   Scaffolding shares the shape of my BAREC write-up.
+   =================================================================== */
+(function(){
+  "use strict";
+  const RM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- chrome: progress, toc scrollspy, reveal ---------- */
+  const progress = document.getElementById("progress");
+  function onScroll(){
+    const st = window.pageYOffset || document.documentElement.scrollTop;
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h > 0 ? (st / h) * 100 : 0) + "%";
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  const secs = Array.from(document.querySelectorAll("section[id], header[id]"));
+  const tocLinks = Array.from(document.querySelectorAll("nav#toc a"));
+  const tocMap = {};
+  tocLinks.forEach(a => tocMap[a.dataset.sec] = a);
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        tocLinks.forEach(a => a.classList.remove("active"));
+        const a = tocMap[e.target.id];
+        if(a) a.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-45% 0px -50% 0px"});
+  secs.forEach(s => spy.observe(s));
+
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add("in"); revealObs.unobserve(e.target); } });
+  }, {rootMargin:"0px 0px -8% 0px", threshold:0.05});
+  document.querySelectorAll(".reveal").forEach(el => revealObs.observe(el));
+
+  /* ---------- helpers ---------- */
+  function rng(seed){ let s = seed >>> 0; return function(){ s = (s*1664525 + 1013904223) >>> 0; return s/4294967296; }; }
+  const css = getComputedStyle(document.documentElement);
+  const C = k => css.getPropertyValue(k).trim();
+  const easeOut = t => 1 - Math.pow(1-t, 3);
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+  const lerp = (a,b,t) => a + (b-a)*t;
+
+  const V = { trusted:C("--trusted"), insufficient:C("--insufficient"), untrusted:C("--untrusted"),
+              accent:C("--accent"), accentBright:C("--accent-bright") };
+
+  function figure(id){
+    const canvas = document.getElementById(id);
+    if(!canvas) return null;
+    function hidpi(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width));
+      const h = Math.max(1, Math.round(rect.height || (w * 0.46)));
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return {ctx, w, h};
+    }
+    let g = hidpi();
+    const cbs = [];
+    let sched = false;
+    new ResizeObserver(() => {
+      if(sched) return; sched = true;
+      requestAnimationFrame(() => { sched = false; g = hidpi(); cbs.forEach(f => f(g)); });
+    }).observe(canvas);
+    return {
+      canvas,
+      get ctx(){ return g.ctx; }, get w(){ return g.w; }, get h(){ return g.h; },
+      onResize(cb){ cbs.push(cb); }
+    };
+  }
+  function toggleGroup(id, onChange){
+    const grp = document.getElementById(id); if(!grp) return;
+    grp.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      grp.querySelectorAll("button").forEach(x => { x.classList.remove("on"); x.setAttribute("aria-pressed","false"); });
+      b.classList.add("on"); b.setAttribute("aria-pressed","true");
+      onChange(b.dataset);
+    }));
+  }
+  function tween(dur, cb, done){
+    if(RM){ cb(1); if(done) done(); return; }
+    const s = performance.now();
+    (function step(n){
+      const t = clamp((n - s) / dur, 0, 1);
+      cb(easeOut(t));
+      if(t < 1) requestAnimationFrame(step); else if(done) done();
+    })(performance.now());
+  }
+  function ambient(fig, frame){
+    let raf = 0, vis = false;
+    function step(now){ frame(now / 1000); raf = requestAnimationFrame(step); }
+    if(RM){ frame(0); fig.onResize(() => frame(0)); return; }
+    new IntersectionObserver(es => es.forEach(e => {
+      if(e.isIntersecting && !vis){ vis = true; if(!raf) raf = requestAnimationFrame(step); }
+      else if(!e.isIntersecting && vis){ vis = false; if(raf){ cancelAnimationFrame(raf); raf = 0; } }
+    }), {threshold:0.05}).observe(fig.canvas);
+    fig.onResize(() => { if(!vis) frame(0); });
+  }
+  function whenVisible(fig, cb){
+    let done = false;
+    new IntersectionObserver(es => es.forEach(e => {
+      if(e.isIntersecting && !done){ done = true; cb(); }
+    }), {threshold:0.28}).observe(fig.canvas);
+  }
+  function roundRect(ctx,x,y,w,h,r){
+    r = Math.min(r, Math.abs(w)/2, Math.abs(h)/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+  function withAlpha(hex, a){
+    hex = hex.replace('#',''); if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+    const n = parseInt(hex,16);
+    return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";
+  }
+
+  /* =========================================================
+     HERO - a gold ECG trace: the patient signal under review,
+     each beat quietly classified trusted or flagged
+     ========================================================= */
+  (function(){
+    const fig = figure("heroCanvas"); if(!fig) return;
+    const GOLD = C("--gold"), GOLDB = C("--gold-bright");
+    const SPEED = 0.5, N_BEATS = 3.6;
+    function verdict(k){ return (((k*2654435761)>>>0)%100) < 80 ? V.trusted : V.untrusted; }
+    function ecg(p){
+      const g = (c,wd,a) => a*Math.exp(-((p-c)*(p-c))/(2*wd*wd));
+      return g(0.16,0.022,0.13) + g(0.29,0.009,-0.16) + g(0.32,0.007,1.0) + g(0.355,0.009,-0.30) + g(0.57,0.037,0.24);
+    }
+    function frame(t){
+      const {ctx,w,h} = fig;
+      ctx.clearRect(0,0,w,h);
+      const midY = h*0.83, amp = h*0.08, pxPerBeat = w/N_BEATS, offset = t*SPEED;
+      const scrollPx = offset*pxPerBeat;
+      // faint ECG-paper grid, scrolling with the trace
+      const gs = Math.max(24, w/46);
+      ctx.strokeStyle = "rgba(201,166,63,0.05)"; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for(let x = -(scrollPx%gs); x < w; x += gs){ ctx.moveTo(x,0); ctx.lineTo(x,h); }
+      for(let y = (midY%gs); y < h; y += gs){ ctx.moveTo(0,y); ctx.lineTo(w,y); }
+      for(let y = midY - gs; y > 0; y -= gs){ ctx.moveTo(0,y); ctx.lineTo(w,y); }
+      ctx.stroke();
+      // the trace
+      ctx.save();
+      ctx.shadowColor = GOLDB; ctx.shadowBlur = 13;
+      ctx.strokeStyle = GOLD; ctx.lineWidth = 2.2; ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.globalAlpha = 0.92;
+      ctx.beginPath();
+      for(let x = 0; x <= w; x += 2){
+        const bp = x/pxPerBeat + offset, ph = bp - Math.floor(bp);
+        const y = midY - ecg(ph)*amp;
+        if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      ctx.restore();
+      // small verdict marks above each R-peak: mostly trusted, a few flagged
+      const peakY = midY - ecg(0.32)*amp;
+      const kStart = Math.floor(offset) - 1, kEnd = Math.floor(offset) + Math.ceil(N_BEATS) + 1;
+      for(let k = kStart; k <= kEnd; k++){
+        const sx = (k - offset)*pxPerBeat + 0.32*pxPerBeat;
+        if(sx < w*0.03 || sx > w*0.97) continue;
+        ctx.beginPath(); ctx.arc(sx, peakY - 15, 3.2, 0, 6.2832);
+        ctx.fillStyle = verdict(k); ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
+      }
+    }
+    ambient(fig, frame);
+  })();
+
+  /* =========================================================
+     FIG 01 - the weighted final score
+     ========================================================= */
+  (function(){
+    const fig = figure("metricCanvas"); if(!fig) return;
+    const sT=document.getElementById("mTrust"), sR=document.getElementById("mRisk"), sE=document.getElementById("mEvid");
+    const out=document.getElementById("mScore");
+    const W=[0.50,0.30,0.20];
+    const COL=[C("--accent"), C("--trusted"), C("--insufficient")];
+    const LAB=["trust acc","risk F1","evidence F1"];
+    let v=[1,1,1], shown=[1,1,1];
+    function readTargets(){ v=[ (sT?+sT.value:100)/100, (sR?+sR.value:100)/100, (sE?+sE.value:100)/100 ]; }
+    function score(a){ return 100*(W[0]*a[0]+W[1]*a[1]+W[2]*a[2]); }
+    function draw(){
+      const {ctx,w,h} = fig; ctx.clearRect(0,0,w,h);
+      const narrow = w<520;
+      const padL=w*0.06, padR=w*0.06, full=w-padL-padR;
+      const barY=h*0.50, barH=Math.max(20,h*0.16);
+      // big score
+      ctx.textAlign="left"; ctx.fillStyle=C("--ink");
+      ctx.font="500 "+Math.round(h*0.24)+"px "+C("--font-display");
+      ctx.fillText(score(shown).toFixed(1), padL, h*0.30);
+      ctx.font=(narrow?"10px ":"12px ")+C("--font-mono"); ctx.fillStyle=C("--ink-4");
+      ctx.fillText(narrow ? "100 × ( 0.50 T + 0.30 R + 0.20 E )" : "FINAL SCORE  =  100 x ( 0.50 trust  +  0.30 risk  +  0.20 evidence )", padL, h*0.40);
+      // track
+      ctx.fillStyle=C("--paper-3"); roundRect(ctx,padL,barY,full,barH,barH/2); ctx.fill();
+      // clip to rounded bar, draw component slots
+      ctx.save(); roundRect(ctx,padL,barY,full,barH,barH/2); ctx.clip();
+      let x=padL;
+      for(let i=0;i<3;i++){
+        const slot = W[i]*full;
+        // faint slot backdrop
+        ctx.fillStyle = withAlpha(COL[i], 0.14);
+        ctx.fillRect(x, barY, slot, barH);
+        // filled portion
+        ctx.fillStyle = COL[i];
+        ctx.fillRect(x, barY, slot*shown[i], barH);
+        x += slot;
+      }
+      ctx.restore();
+      // slot dividers + labels
+      let xd=padL;
+      ctx.textAlign="center";
+      for(let i=0;i<3;i++){
+        const slot=W[i]*full;
+        const lab = (narrow?["trust","risk","evid"]:LAB)[i];
+        ctx.font=(narrow?"9px ":"11px ")+C("--font-mono"); ctx.fillStyle=C("--ink-3");
+        ctx.fillText(lab+" "+shown[i].toFixed(2), xd+slot/2, barY+barH+22);
+        xd+=slot;
+        if(i<2){ ctx.strokeStyle=C("--paper"); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(xd,barY-3); ctx.lineTo(xd,barY+barH+3); ctx.stroke(); }
+      }
+      // 100 marker
+      ctx.setLineDash([3,3]); ctx.strokeStyle=C("--rule-strong"); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(padL+full, barY-10); ctx.lineTo(padL+full, barY+barH+10); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.textAlign="right"; ctx.font="10px "+C("--font-mono"); ctx.fillStyle=C("--ink-4");
+      ctx.fillText("100", padL+full, barY-14);
+    }
+    function commit(){ if(out) out.textContent = score(shown).toFixed(1); }
+    function animate(){
+      readTargets();
+      const from = shown.slice();
+      tween(240, u=>{ for(let i=0;i<3;i++) shown[i]=lerp(from[i],v[i],u); draw(); commit(); });
+    }
+    [sT,sR,sE].forEach(s=>{ if(s) s.addEventListener("input", animate); });
+    fig.onResize(draw);
+    readTargets(); shown=v.slice(); draw(); commit();
+  })();
+
+  /* =========================================================
+     FIG 02 - who decides (266 claims)
+     ========================================================= */
+  (function(){
+    const fig = figure("decideCanvas"); if(!fig) return;
+    const read = document.getElementById("decideRead");
+    const TOTAL=266, COLS=19, ROWS=14; // 266 cells
+    const r = rng(5150);
+    // a scattered order so the model's errors are spread across the grid
+    const order = Array.from({length:TOTAL},(_,i)=>i);
+    for(let i=order.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); const t=order[i]; order[i]=order[j]; order[j]=t; }
+    const MODEL_CORRECT = 173; // about 65 percent, in the 60 to 70 band
+    let mode="tools", mix=0; // mix 0 = tools (all grounded), 1 = model
+    function draw(){
+      const {ctx,w,h}=fig; ctx.clearRect(0,0,w,h);
+      const padX=w*0.05, padTop=h*0.10, padBot=h*0.30;
+      const gw=w-padX*2, gh=h-padTop-padBot;
+      const cw=gw/COLS, ch=gh/ROWS, d=Math.min(cw,ch)*0.62;
+      let k=0;
+      const wrongThreshold = TOTAL - Math.round(lerp(TOTAL, MODEL_CORRECT, mix)); // number wrong
+      for(let rrow=0;rrow<ROWS;rrow++){
+        for(let c=0;c<COLS;c++){
+          if(k>=TOTAL) break;
+          const cx=padX+c*cw+cw/2, cy=padTop+rrow*ch+ch/2;
+          const rank=order[k]; // 0..265
+          const wrong = rank < wrongThreshold;
+          ctx.beginPath(); ctx.arc(cx,cy,d/2,0,6.2832);
+          if(wrong){ ctx.fillStyle=V.untrusted; }
+          else{ ctx.fillStyle= mix<0.5 ? V.trusted : withAlpha(V.trusted,0.9); }
+          ctx.globalAlpha = wrong ? 0.92 : 0.85;
+          ctx.fill();
+          k++;
+        }
+      }
+      ctx.globalAlpha=1;
+      // headline
+      ctx.textAlign="left";
+      const acc = Math.round(lerp(100, MODEL_CORRECT/TOTAL*100, mix));
+      ctx.fillStyle=C("--night-ink");
+      ctx.font="500 "+Math.round(h*0.13)+"px "+C("--font-display");
+      const head = mix<0.5 ? "266 / 266 grounded" : ("about "+acc+"% right");
+      ctx.fillText(head, padX, h-padBot+h*0.14);
+      ctx.font="11px "+C("--font-mono"); ctx.fillStyle="rgba(238,242,247,0.6)";
+      const sub = mix<0.5
+        ? "every answer reached by an explicit rule, every one checkable"
+        : "route agreement 143 / 266  ·  evidence-audit agreement 36 / 266";
+      ctx.fillText(sub, padX, h-padBot+h*0.24);
+    }
+    function set(m){
+      mode=m; const target = (m==="model")?1:0; const from=mix;
+      tween(420, u=>{ mix=lerp(from,target,u); draw(); }, ()=>{
+        if(read) read.textContent = (m==="model")
+          ? "about 65% right, and it cannot tell you which third is wrong"
+          : "every one grounded, and every one checkable";
+      });
+    }
+    toggleGroup("decideMode", d=>set(d.mode));
+    fig.onResize(draw);
+    whenVisible(fig, ()=>{ draw(); });
+    draw();
+  })();
+
+  /* =========================================================
+     ARCH - route a claim through the pipeline (DOM)
+     ========================================================= */
+  (function(){
+    const row = document.getElementById("pipeRow");
+    const chips = document.getElementById("pipeChips");
+    const read = document.getElementById("pipeRead");
+    const llm = document.getElementById("pipeLLM");
+    if(!row || !chips) return;
+    const nodes = {};
+    row.querySelectorAll(".node").forEach(n => nodes[n.dataset.node]=n);
+    const PATHS = {
+      condition:  {tool:"retriever", label:"trusted or untrusted", ev:"[ encounter header, documenting line ]"},
+      medication: {tool:"retriever", label:"trusted or untrusted", ev:"[ encounter header, documenting line ]"},
+      allergy:    {tool:"retriever", label:"from the claim wording", ev:"[ encounter header, allergy line ]"},
+      trend:      {tool:"comparator", label:"trusted or untrusted", ev:"the two observation paragraphs"},
+      sufficiency:{tool:"retriever", label:"insufficient or trusted", ev:"the documenting line, when present"},
+      privacy:    {tool:"retriever", label:"from the claim wording", ev:"the referenced paragraph"}
+    };
+    function clearNodes(){ Object.values(nodes).forEach(n=>{ n.classList.remove("lit","dim"); }); if(llm) llm.classList.remove("audit"); }
+    function route(claim){
+      const p = PATHS[claim]; if(!p) return;
+      chips.querySelectorAll(".chip").forEach(c=>c.style.outline = (c.dataset.claim===claim)?("2px solid "+C("--accent")):"");
+      clearNodes();
+      const used = p.tool;
+      const unused = used==="retriever" ? "comparator" : "retriever";
+      nodes[unused].classList.add("dim");
+      const seq = ["claim","router",used,"deriver","answer"];
+      if(RM){
+        seq.forEach(k=>nodes[k].classList.add("lit"));
+        if(llm) llm.classList.add("audit");
+        show(claim,p);
+        return;
+      }
+      seq.forEach((k,i)=>{
+        setTimeout(()=>{
+          nodes[k].classList.add("lit");
+          if(k===used && llm) llm.classList.add("audit");
+          if(i===seq.length-1) show(claim,p);
+        }, i*220);
+      });
+    }
+    function show(claim,p){
+      if(!read) return;
+      read.innerHTML =
+        '<div><span class="lab">claim</span> '+claim+'</div>'+
+        '<div><span class="lab">routes to</span> <b>'+(p.tool)+'</b></div>'+
+        '<div><span class="lab">label</span> '+p.label+'</div>'+
+        '<div><span class="lab">evidence</span> '+p.ev+'</div>';
+    }
+    chips.querySelectorAll(".chip").forEach(c=>{
+      c.addEventListener("click", ()=>route(c.dataset.claim));
+      c.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); route(c.dataset.claim); } });
+    });
+    // start on the first one when it scrolls in
+    const io = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ route("condition"); io.disconnect(); } }), {threshold:0.4});
+    io.observe(row);
+  })();
+
+  /* =========================================================
+     FIG 04 - evidence reconstruction over a record
+     ========================================================= */
+  (function(){
+    const fig = figure("evidenceCanvas"); if(!fig) return;
+    const read = document.getElementById("evRead");
+    // one record: encounters left to right, each with lines
+    const REC = [
+      {n:1, lines:[{k:"obs", t:"Obs: Body weight 78 kg"}]},
+      {n:2, lines:[{k:"cond", t:"Condition: Hypertension"},{k:"supp", t:"supplemental note"}]},
+      {n:3, lines:[{k:"med", t:"Medication: Lisinopril"}]},
+      {n:4, lines:[{k:"allergy", t:"Allergy: Penicillin"},{k:"supp", t:"supplemental"}]},
+      {n:5, lines:[{k:"cond", t:"Condition: Hypertension"}]},
+      {n:6, lines:[{k:"obs", t:"Obs: Body weight 81 kg"}]}
+    ];
+    const CLAIMS = {
+      condition:{k:"cond", name:"Hypertension"},
+      medication:{k:"med", name:"Lisinopril"},
+      allergy:{k:"allergy", name:"Penicillin"},
+      trend:{k:"obs", name:"Body weight"}
+    };
+    let claim="condition", scan=0, anchorIdx=1, targetScan=1;
+
+    function anchorFor(claim){
+      const c=CLAIMS[claim];
+      if(claim==="trend") return [0,5]; // both obs encounters
+      for(let i=0;i<REC.length;i++){
+        const line=REC[i].lines.find(l=>l.k===c.k && l.t.indexOf(c.name)>=0 && l.k!=="supp");
+        if(line) return i;
+      }
+      return 0;
+    }
+    function layout(){
+      const {w,h}=fig;
+      const padX=w*0.035, padTop=h*0.15, padBot=h*0.14;
+      const gap=w*0.012;
+      const cw=(w-padX*2 - gap*(REC.length-1))/REC.length;
+      return {padX,padTop,padBot,gap,cw,colH:h-padTop-padBot};
+    }
+    function clip(ctx,text,maxW){
+      if(ctx.measureText(text).width<=maxW) return text;
+      let t=text; while(t.length>1 && ctx.measureText(t+"…").width>maxW) t=t.slice(0,-1); return t+"…";
+    }
+    function draw(){ if(fig.w<560) drawVertical(); else drawHorizontal(); }
+    function drawVertical(){
+      const {ctx,w,h}=fig; ctx.clearRect(0,0,w,h);
+      const c=CLAIMS[claim], isTrend=claim==="trend";
+      const anchors=isTrend?anchorIdx:[anchorIdx];
+      const padX=w*0.04, padTop=h*0.11, bottom=h*0.80, N=REC.length;
+      ctx.textAlign="left"; ctx.fillStyle=C("--night-ink"); ctx.font="500 "+Math.round(h*0.045)+"px "+C("--font-display");
+      ctx.fillText("Record · "+c.name, padX, h*0.065);
+      const rowGap=h*0.012, rowH=(bottom-padTop-rowGap*(N-1))/N, scanY=padTop+scan*(bottom-padTop);
+      for(let i=0;i<N;i++){
+        const y=padTop+i*(rowH+rowGap), passed=(y+rowH*0.5)<scanY, isAnchor=anchors.indexOf(i)>=0;
+        ctx.fillStyle=isAnchor?withAlpha(V.accentBright,0.14):"rgba(255,255,255,0.04)";
+        roundRect(ctx,padX,y,w-padX*2,rowH,6); ctx.fill();
+        ctx.strokeStyle=isAnchor?V.accentBright:"rgba(255,255,255,0.08)"; ctx.lineWidth=isAnchor?1.4:1; roundRect(ctx,padX,y,w-padX*2,rowH,6); ctx.stroke();
+        const tabW=w*0.15;
+        ctx.textAlign="center"; ctx.font="10px "+C("--font-mono"); ctx.fillStyle=isAnchor?"#fff":"rgba(238,242,247,0.7)";
+        ctx.fillText("enc "+REC[i].n, padX+tabW/2, y+rowH*0.5+3);
+        ctx.strokeStyle="rgba(255,255,255,0.08)"; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padX+tabW,y+6); ctx.lineTo(padX+tabW,y+rowH-6); ctx.stroke();
+        const lx=padX+tabW+10, availW=w-padX*2-tabW-16, lines=REC[i].lines, lhh=(rowH-8)/lines.length;
+        lines.forEach((line,li)=>{
+          const ly=y+4+li*lhh, isSupp=line.k==="supp", match=(line.k===c.k)&&(line.t.indexOf(c.name)>=0), ev=isAnchor&&(isTrend?line.k==="obs":match);
+          ctx.globalAlpha=(passed&&!ev)?0.5:1;
+          let tx="rgba(238,242,247,0.82)"; if(isSupp) tx=withAlpha(V.untrusted,0.9);
+          if(ev){ roundRect(ctx,lx-4,ly+2,availW,lhh-4,4); ctx.fillStyle=withAlpha(V.accentBright,0.26); ctx.fill(); ctx.strokeStyle=V.accentBright; ctx.lineWidth=1.2; roundRect(ctx,lx-4,ly+2,availW,lhh-4,4); ctx.stroke(); tx="#fff"; }
+          const t=clip(ctx,line.t,availW-10);
+          ctx.textAlign="left"; ctx.fillStyle=tx; ctx.font="10px "+C("--font-mono"); ctx.fillText(t, lx, ly+lhh*0.62);
+          if(isSupp&&passed){ ctx.strokeStyle=withAlpha(V.untrusted,0.8); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(lx,ly+lhh/2); ctx.lineTo(lx+ctx.measureText(t).width,ly+lhh/2); ctx.stroke(); }
+          ctx.globalAlpha=1;
+        });
+      }
+      if(scan>0&&scan<1){ ctx.strokeStyle=withAlpha(V.accentBright,0.7); ctx.lineWidth=1.5; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(padX,scanY); ctx.lineTo(w-padX,scanY); ctx.stroke(); ctx.setLineDash([]); }
+      if(scan<0.02){
+        ctx.textAlign="center"; ctx.font="9px "+C("--font-mono"); ctx.fillStyle="rgba(238,242,247,0.55)";
+        if(!isTrend){
+          ctx.fillText("one anchor at enc "+REC[anchorIdx].n+", shared by both claims", w/2, bottom+h*0.05);
+          const cwc=Math.min(150,w*0.44), chc=Math.max(22,h*0.05), gp=w*0.03, tot=cwc*2+gp, x0=w/2-tot/2;
+          chip(x0,bottom+h*0.07,cwc,chc,"trusted",V.trusted,"✓");
+          chip(x0+cwc+gp,bottom+h*0.07,cwc,chc,"untrusted twin",V.untrusted,"✗");
+        } else { ctx.fillText("cites the two observation paragraphs, no header", w/2, bottom+h*0.06); }
+      }
+    }
+    function drawHorizontal(){
+      const {ctx,w,h}=fig; ctx.clearRect(0,0,w,h);
+      const L=layout();
+      const c=CLAIMS[claim];
+      const isTrend = claim==="trend";
+      const anchors = isTrend ? anchorIdx : [anchorIdx];
+      // title
+      ctx.textAlign="left"; ctx.fillStyle=C("--night-ink");
+      ctx.font="500 "+Math.round(h*0.075)+"px "+C("--font-display");
+      ctx.fillText("Record  ·  claim about "+c.name, L.padX, h*0.09);
+      // columns
+      const scanX = L.padX + scan*(w-L.padX*2);
+      for(let i=0;i<REC.length;i++){
+        const x=L.padX + i*(L.cw+L.gap);
+        const passed = (x+L.cw*0.5) < scanX;
+        const isAnchor = Array.isArray(anchors) ? anchors.indexOf(i)>=0 : false;
+        // header chip
+        const hy=L.padTop, hh=Math.max(16,h*0.10);
+        ctx.fillStyle = isAnchor ? withAlpha(V.accentBright,0.22) : "rgba(255,255,255,0.05)";
+        roundRect(ctx,x,hy,L.cw,hh, 5); ctx.fill();
+        ctx.strokeStyle = isAnchor ? V.accentBright : "rgba(255,255,255,0.10)";
+        ctx.lineWidth = isAnchor?1.6:1; roundRect(ctx,x,hy,L.cw,hh,5); ctx.stroke();
+        ctx.textAlign="center"; ctx.font="10px "+C("--font-mono");
+        ctx.fillStyle = isAnchor ? "#fff" : "rgba(238,242,247,0.75)";
+        ctx.fillText("enc "+REC[i].n, x+L.cw/2, hy+hh*0.63);
+        // lines
+        let ly=hy+hh+h*0.03;
+        const lh=Math.max(20,h*0.115);
+        REC[i].lines.forEach(line=>{
+          const isSupp = line.k==="supp";
+          const match = (line.k===c.k) && (line.t.indexOf(c.name)>=0);
+          const lineIsAnchorEv = isAnchor && (isTrend ? line.k==="obs" : match);
+          ctx.globalAlpha = (passed && !lineIsAnchorEv) ? 0.5 : 1;
+          let bg="rgba(255,255,255,0.045)", bd="rgba(255,255,255,0.09)", tx="rgba(238,242,247,0.72)";
+          if(isSupp){ bg=withAlpha(V.untrusted,0.12); bd=withAlpha(V.untrusted,0.4); tx=withAlpha(V.untrusted,0.9); }
+          if(lineIsAnchorEv){ bg=withAlpha(V.accentBright,0.28); bd=V.accentBright; tx="#fff"; }
+          roundRect(ctx,x,ly,L.cw,lh,5); ctx.fillStyle=bg; ctx.fill();
+          ctx.lineWidth = lineIsAnchorEv?1.6:1; ctx.strokeStyle=bd; roundRect(ctx,x,ly,L.cw,lh,5); ctx.stroke();
+          // wrapped short text
+          ctx.textAlign="left"; ctx.fillStyle=tx; ctx.font= (w<520?"9px ":"10px ")+C("--font-mono");
+          wrapText(ctx, line.t, x+6, ly+lh*0.42, L.cw-12, lh*0.42);
+          if(isSupp && passed){ // strike to show it was skipped
+            ctx.strokeStyle=withAlpha(V.untrusted,0.8); ctx.lineWidth=1.2;
+            ctx.beginPath(); ctx.moveTo(x+6, ly+lh/2); ctx.lineTo(x+L.cw-6, ly+lh/2); ctx.stroke();
+          }
+          ctx.globalAlpha=1;
+          ly += lh + h*0.02;
+        });
+      }
+      // scan line
+      if(scan>0 && scan<1){
+        ctx.strokeStyle=withAlpha(V.accentBright,0.7); ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(scanX,L.padTop-6); ctx.lineTo(scanX,h-L.padBot); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      // sibling relation in the lower band
+      const hh0=Math.max(16,h*0.10), bandY=h*0.76;
+      ctx.textAlign="center"; ctx.font="10px "+C("--font-mono"); ctx.fillStyle="rgba(238,242,247,0.55)";
+      if(!isTrend && scan<0.02){
+        const xA = L.padX + anchorIdx*(L.cw+L.gap) + L.cw/2;
+        ctx.strokeStyle=withAlpha(V.accentBright,0.4); ctx.lineWidth=1; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(xA, L.padTop+hh0+h*0.13); ctx.lineTo(xA, bandY-h*0.07); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillText("one anchor at enc "+REC[anchorIdx].n+", shared by both claims", w/2, bandY-h*0.09);
+        const cwc=Math.min(184,w*0.27), chc=Math.max(28,h*0.085), gp=w*0.03;
+        const tot=cwc*2+gp, x0=w/2-tot/2;
+        chip(x0, bandY, cwc, chc, "trusted claim", V.trusted, "✓");
+        chip(x0+cwc+gp, bandY, cwc, chc, "untrusted twin", V.untrusted, "✗");
+      } else if(isTrend && scan<0.02){
+        ctx.fillText("the trend claim cites the two observation paragraphs, and no header", w/2, bandY);
+      }
+    }
+    function chip(x,y,cw2,ch2,label,color,mark){
+      const {ctx}=fig;
+      roundRect(ctx,x,y,cw2,ch2,ch2/2); ctx.fillStyle=withAlpha(color,0.16); ctx.fill();
+      ctx.strokeStyle=color; ctx.lineWidth=1.3; roundRect(ctx,x,y,cw2,ch2,ch2/2); ctx.stroke();
+      // center the mark + label together within the box
+      ctx.font="11px "+C("--font-mono"); ctx.textAlign="left"; ctx.textBaseline="middle";
+      const gap=7, mw=ctx.measureText(mark).width, lw=ctx.measureText(label).width;
+      const startX = x + (cw2 - (mw+gap+lw))/2, cy = y + ch2/2;
+      ctx.fillStyle=color; ctx.fillText(mark, startX, cy);
+      ctx.fillStyle="rgba(238,242,247,0.86)"; ctx.fillText(label, startX+mw+gap, cy);
+      ctx.textBaseline="alphabetic";
+    }
+    function wrapText(ctx,text,x,y,maxW,lh){
+      const words=text.split(" "); let line="", yy=y;
+      for(let i=0;i<words.length;i++){
+        const test=line?line+" "+words[i]:words[i];
+        if(ctx.measureText(test).width>maxW && line){ ctx.fillText(line,x,yy); line=words[i]; yy+=lh; }
+        else line=test;
+      }
+      ctx.fillText(line,x,yy);
+    }
+    function evidenceText(){
+      const c=CLAIMS[claim];
+      if(claim==="trend") return "evidence: obs at enc 1 and enc 6, the two body-weight paragraphs, no header";
+      return "evidence: [ enc "+REC[anchorIdx].n+" header, "+c.name+" line ]  ·  the untrusted twin shares it";
+    }
+    function run(){
+      anchorIdx = anchorFor(claim);
+      const isTrend = claim==="trend";
+      targetScan = isTrend ? 1 : ((anchorIdx+0.6)/REC.length);
+      if(read) read.textContent = "scanning for the lowest encounter...";
+      scan=0;
+      tween(1000, u=>{ scan = lerp(0, targetScan, u); draw(); }, ()=>{
+        scan = 0; draw(); // anchors stay highlighted (scan-independent); scan line off at rest
+        if(read) read.textContent = evidenceText();
+      });
+    }
+    toggleGroup("evClaim", d=>{ claim=d.claim; run(); });
+    const rb=document.getElementById("evReplay"); if(rb) rb.addEventListener("click", run);
+    fig.onResize(()=>{ anchorIdx=anchorFor(claim); draw(); });
+    whenVisible(fig, run);
+    anchorIdx=anchorFor(claim); draw();
+  })();
+
+  /* =========================================================
+     FIG 05 - the label signal on / off
+     ========================================================= */
+  (function(){
+    const fig = figure("oracleCanvas"); if(!fig) return;
+    const read=document.getElementById("oracleRead");
+    // trust acc, evidence f1
+    const ON=[1.00,1.00,1.00], OFF=[0.86,0.86,1.00];
+    let cur=ON.slice(), mode="on";
+    const NAMES=["trust-label accuracy","risk micro-F1","evidence F1"];
+    const COLS=[C("--accent"), C("--trusted"), C("--insufficient")];
+    function draw(){
+      const {ctx,w,h}=fig; ctx.clearRect(0,0,w,h);
+      const padL=w*0.06, padR=w*0.06, barMax=w-padL-padR;
+      const rowH=Math.max(20,h*0.135), ys=[h*0.15, h*0.44, h*0.73];
+      for(let i=0;i<3;i++){
+        const y=ys[i];
+        // label above the bar
+        ctx.textAlign="left"; ctx.font="11px "+C("--font-mono"); ctx.fillStyle=C("--ink-3");
+        ctx.fillText(NAMES[i], padL, y-10);
+        // track
+        ctx.fillStyle=C("--paper-3"); roundRect(ctx,padL,y,barMax,rowH,rowH/2); ctx.fill();
+        // fill
+        const fillW=barMax*cur[i];
+        ctx.save(); roundRect(ctx,padL,y,barMax,rowH,rowH/2); ctx.clip();
+        ctx.fillStyle=COLS[i]; ctx.fillRect(padL,y,fillW,rowH); ctx.restore();
+        // value, inside the fill when it fits, otherwise just past the end
+        const val=cur[i].toFixed(2);
+        ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
+        const vw=ctx.measureText(val).width, xEnd=padL+fillW;
+        if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle="#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
+        else { ctx.textAlign="left"; ctx.fillStyle=C("--ink"); ctx.fillText(val, xEnd+12, y+rowH*0.72); }
+        // 1.00 marker
+        ctx.setLineDash([3,3]); ctx.strokeStyle=C("--rule-strong"); ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(padL+barMax, y-6); ctx.lineTo(padL+barMax, y+rowH+6); ctx.stroke(); ctx.setLineDash([]);
+      }
+      // caption bottom
+      ctx.textAlign="left"; ctx.font="11px "+C("--font-mono"); ctx.fillStyle=C("--ink-4");
+      const note = (mode==="on")
+        ? "reading the proposed-response signal directly"
+        : "labels from the record: entity presence, value direction";
+      ctx.fillText(note, padL, h*0.92);
+    }
+    function set(m){
+      mode=m; const to=(m==="on")?ON:OFF; const from=cur.slice();
+      tween(420, u=>{ for(let i=0;i<3;i++) cur[i]=lerp(from[i],to[i],u); draw(); }, ()=>{
+        if(read) read.innerHTML = (m==="on")
+          ? 'final score <b>100.0</b> &middot; with the signal'
+          : 'final score <b>in the high 80s</b> &middot; the record-grounded floor';
+      });
+    }
+    toggleGroup("oracleMode", d=>set(d.mode));
+    fig.onResize(draw);
+    whenVisible(fig, draw);
+    draw();
+  })();
+
+  /* =========================================================
+     FIG 06 - the leaderboard
+     ========================================================= */
+  (function(){
+    const fig = figure("boardCanvas"); if(!fig) return;
+    const read=document.getElementById("boardRead");
+    const ENTRIES=[
+      {name:"my entry", score:100.0, disp:"100.0", evid:1.00, mine:true},
+      {name:"second place", score:82.899, disp:"82.899", evid:0.34, mine:false},
+      {name:"third place", score:68.79, disp:"68.79", evid:null, mine:false}
+    ];
+    let mode="score", mix=0; // 0 score, 1 evidence overlay
+    function draw(){
+      const {ctx,w,h}=fig; ctx.clearRect(0,0,w,h);
+      const short = w<560;
+      const padL=w*0.05, padR=w*0.05, barMax=w-padL-padR;
+      const top=h*0.12, rowH=Math.max(22,h*0.15), block=h*0.27;
+      const showEvid = mix>0.5;
+      ENTRIES.forEach((e,i)=>{
+        const y=top+i*block;
+        const nm = short ? (e.mine?"#1 mine":(i===1?"#2":"#3")) : e.name;
+        ctx.textAlign="left"; ctx.font="11px "+C("--font-mono"); ctx.fillStyle=C("--ink-3");
+        ctx.fillText(nm, padL, y-9);
+        // track
+        ctx.fillStyle=C("--paper-3"); roundRect(ctx,padL,y,barMax,rowH,6); ctx.fill();
+        // score bar (fades as the evidence overlay comes up)
+        const scoreW=barMax*(e.score/100);
+        ctx.globalAlpha = 1-mix*0.5;
+        ctx.fillStyle = e.mine ? C("--accent") : C("--ink-4");
+        ctx.save(); roundRect(ctx,padL,y,barMax,rowH,6); ctx.clip(); ctx.fillRect(padL,y,scoreW,rowH); ctx.restore();
+        ctx.globalAlpha=1;
+        // evidence overlay
+        let evW=0;
+        if(e.evid!==null){
+          evW=barMax*e.evid;
+          ctx.globalAlpha=mix;
+          ctx.fillStyle = e.mine ? C("--insufficient") : withAlpha(C("--insufficient"),0.9);
+          const oh=rowH*0.54;
+          roundRect(ctx,padL,y+rowH*0.23,evW,oh,4); ctx.fill();
+          ctx.globalAlpha=1;
+        }
+        // value at the end of the active metric's bar, clamped so it never clips
+        const val = showEvid ? (e.evid!==null? e.evid.toFixed(2):"n/a") : e.disp;
+        const barW = showEvid ? (e.evid!==null?evW:0) : scoreW;
+        ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
+        const vw=ctx.measureText(val).width, xEnd=padL+barW;
+        if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle= (showEvid||!e.mine)? C("--ink") : "#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
+        else { ctx.textAlign="left"; ctx.fillStyle=C("--ink"); ctx.fillText(val, xEnd+12, y+rowH*0.72); }
+      });
+      // caption
+      ctx.textAlign="left"; ctx.font="11px "+C("--font-mono"); ctx.fillStyle=C("--ink-4");
+      const note = showEvid
+        ? (short ? "evidence F1 · 1.00 vs 0.34" : "evidence F1: 1.00 against 0.34 is most of the seventeen-point gap")
+        : (short ? "100.0 · 82.899 · 68.79" : "final score: first at 100.0, second at 82.899, third at 68.79");
+      ctx.fillText(note, padL, h*0.96);
+    }
+    function set(m){
+      mode=m; const to=(m==="evid")?1:0; const from=mix;
+      tween(420, u=>{ mix=lerp(from,to,u); draw(); }, ()=>{
+        if(read) read.innerHTML = (m==="evid")
+          ? 'evidence F1 &middot; <b>1.00</b> mine, <b>0.34</b> second place'
+          : 'first place &middot; final score <b>100.0</b>';
+      });
+    }
+    toggleGroup("boardMode", d=>set(d.mode));
+    fig.onResize(draw);
+    whenVisible(fig, draw);
+    draw();
+  })();
+
+})();
+</script>
+</body>
+</html>

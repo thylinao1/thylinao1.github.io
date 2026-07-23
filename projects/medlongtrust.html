@@ -7,7 +7,7 @@
 <meta name="description" content="My solution to the UbiComp 2026 MedLongTrust-EHR benchmark on trust assessment over longitudinal electronic health records. The task asks for a trust label, its risk types, and the record paragraphs that justify the decision. The usual build hands the record to a language model; I did the reverse. Deterministic tools read the record and make every decision by an explicit rule, and a small local model only plans and checks around them, never allowed to change a grounded answer. That entry placed first at 100.0, and most of the seventeen-point margin came from a part of the task most entries skipped: reconstructing the supporting evidence. Interactive figures you can drag and replay, and an honest account of where the perfect label score comes from." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 <style>
 :root{
   /* deep navy dossier, dark luxury: navy background, light text */
@@ -25,6 +25,7 @@
   --font-display:"Newsreader",Georgia,"Times New Roman",serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --font-num:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif;
   --maxw:1300px; --read:820px;
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-out:cubic-bezier(.23,1,.32,1);
@@ -170,7 +171,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent); outline-offset:
 .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:30px 0;}
 .stat{background:var(--paper-2); border:1px solid var(--rule); border-radius:12px; padding:18px 18px 16px; position:relative; overflow:hidden;}
 .stat .k{font-family:var(--font-mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-4); display:block; margin-bottom:10px;}
-.stat .v{font-family:var(--font-display); font-weight:400; font-size:clamp(28px,3.8vw,41px); line-height:1; color:var(--ink);}
+.stat .v{font-family:var(--font-num); font-weight:600; font-size:clamp(27px,3.6vw,39px); line-height:1; letter-spacing:-.01em; color:var(--ink);}
 .stat .v small{font-size:.42em; color:var(--ink-3); letter-spacing:.02em;}
 .stat .d{font-size:13.5px; line-height:1.45; color:var(--ink-3); margin-top:9px;}
 .stat.hot .v{color:var(--accent);}
@@ -714,6 +715,8 @@ footer .runbox .c{color:var(--accent);}
       if(sched) return; sched = true;
       requestAnimationFrame(() => { sched = false; g = hidpi(); cbs.forEach(f => f(g)); });
     }).observe(canvas);
+    // repaint once web fonts finish loading so numbers use Space Grotesk, not the fallback
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(() => { g = hidpi(); cbs.forEach(f => f(g)); }); }
     return {
       canvas,
       get ctx(){ return g.ctx; }, get w(){ return g.w; }, get h(){ return g.h; },
@@ -843,7 +846,7 @@ footer .runbox .c{color:var(--accent);}
       const barY=h*0.50, barH=Math.max(20,h*0.16);
       // big score
       ctx.textAlign="left"; ctx.fillStyle=C("--ink");
-      ctx.font="500 "+Math.round(h*0.24)+"px "+C("--font-display");
+      ctx.font="600 "+Math.round(h*0.24)+"px "+C("--font-num");
       ctx.fillText(score(shown).toFixed(1), padL, h*0.30);
       ctx.font=(narrow?"10px ":"12px ")+C("--font-mono"); ctx.fillStyle=C("--ink-4");
       ctx.fillText(narrow ? "100 × ( 0.50 T + 0.30 R + 0.20 E )" : "FINAL SCORE  =  100 x ( 0.50 trust  +  0.30 risk  +  0.20 evidence )", padL, h*0.40);
@@ -931,7 +934,7 @@ footer .runbox .c{color:var(--accent);}
       ctx.textAlign="left";
       const acc = Math.round(lerp(100, MODEL_CORRECT/TOTAL*100, mix));
       ctx.fillStyle=C("--night-ink");
-      ctx.font="500 "+Math.round(h*0.13)+"px "+C("--font-display");
+      ctx.font="600 "+Math.round(h*0.13)+"px "+C("--font-num");
       const head = mix<0.5 ? "266 / 266 grounded" : ("about "+acc+"% right");
       ctx.fillText(head, padX, h-padBot+h*0.14);
       ctx.font="11px "+C("--font-mono"); ctx.fillStyle="rgba(238,242,247,0.6)";
@@ -1240,7 +1243,7 @@ footer .runbox .c{color:var(--accent);}
         ctx.fillStyle=(i===0)?navyGrad(ctx,y,y+rowH):COLS[i]; ctx.fillRect(padL,y,fillW,rowH); ctx.restore();
         // value, inside the fill when it fits, otherwise just past the end
         const val=cur[i].toFixed(2);
-        ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
+        ctx.font="600 "+Math.round(rowH*0.62)+"px "+C("--font-num");
         const vw=ctx.measureText(val).width, xEnd=padL+fillW;
         if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle=(i===2)?C("--paper"):"#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
         else { ctx.textAlign="left"; ctx.fillStyle=C("--ink"); ctx.fillText(val, xEnd+12, y+rowH*0.72); }
@@ -1313,7 +1316,7 @@ footer .runbox .c{color:var(--accent);}
         // value at the end of the active metric's bar, clamped so it never clips
         const val = showEvid ? (e.evid!==null? e.evid.toFixed(2):"n/a") : e.disp;
         const barW = showEvid ? (e.evid!==null?evW:0) : scoreW;
-        ctx.font="500 "+Math.round(rowH*0.62)+"px "+C("--font-display");
+        ctx.font="600 "+Math.round(rowH*0.62)+"px "+C("--font-num");
         const vw=ctx.measureText(val).width, xEnd=padL+barW;
         if(xEnd - vw - 20 > padL+6){ ctx.textAlign="right"; ctx.fillStyle= showEvid ? C("--paper") : "#fff"; ctx.fillText(val, xEnd-14, y+rowH*0.72); }
         else { ctx.textAlign="left"; ctx.fillStyle=C("--ink"); ctx.fillText(val, xEnd+12, y+rowH*0.72); }

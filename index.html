@@ -554,7 +554,7 @@
   .led-note a, .led-title a{color:inherit}
   .led-side{display:grid; grid-template-columns:168px 140px; column-gap:24px; align-items:center; justify-items:end}
   .led-side > .res-badge:not(.glow){grid-column:1}
-  .led-side > .solution-btn, .led-side > a.res-badge.glow{grid-column:2}
+  .led-side > .solution-btn, .led-side > .res-badge.glow{grid-column:2}
   .res-badge{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap}
   .res-badge.win{background:var(--accent); color:#fff}
   .res-badge.finalist{border:1px solid var(--rule-strong); color:var(--ink-2)}
@@ -910,7 +910,8 @@
           <div class="led-note">Finalist in Stanford&rsquo;s predictive-AI evaluation challenge (currently ongoing).</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win-plain">Finalist · Ongoing</span>
+          <span class="res-badge win-plain">Finalist</span>
+          <span class="res-badge win glow">Ongoing</span>
         </div>
       </div>
 
@@ -921,7 +922,7 @@
           <div class="led-note">Feb, Jun and Jul 2026.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win">Correct solution found</span>
+          <span class="res-badge win glow">Correct solution found</span>
         </div>
       </div>
 

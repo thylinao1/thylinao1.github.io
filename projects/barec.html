@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nineteen levels · reaching the top of the BAREC Arabic readability board by rebuilding its grader offline</title>
-<meta name="description" content="My solution to the BAREC 2026 shared task on Arabic sentence readability. The task asks for a reading level from 1 to 19 for each sentence, scored by quadratic weighted kappa. The edge was not a bigger model. It was a local grader that reproduces the official scorer byte for byte, so my offline number equals the board number, plus a habit of trusting the honest measurement over the flattering one. That combination reached first place on the development boards at 86.34 kappa, and a final 2nd place in both the Strict and Open tracks on the blind test at 85.4 QWK. Interactive figures you can drag and replay." />
+<meta name="description" content="My solution to the BAREC 2026 shared task on Arabic sentence readability. The task asks for a reading level from 1 to 19 for each sentence, scored by quadratic weighted kappa. The edge was not a bigger model. It was a local grader that reproduces the official scorer byte for byte, so my offline number equals the board number, plus a habit of trusting the honest measurement over the flattering one. That combination reached first place on the Open development board at 86.34 kappa and tied for first on Strict, and a final 2nd place in both the Strict and Open tracks on the blind test at 85.4 QWK. Interactive figures you can drag and replay." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -283,7 +283,7 @@ footer .runbox .c{color:var(--accent);}
     <div class="col">
       <div class="hero-mark"><span class="bd"></span> BAREC 2026 · Arabic sentence readability · Codabench 16544 · my solution</div>
       <h1>Nineteen <span class="it">levels</span></h1>
-      <p class="hero-sub">The task is simple to state. Read one Arabic sentence and place it on a reading scale from 1 to 19, where 1 is a first line for a young child and 19 is dense specialist prose. The scoring is where it gets interesting, because a miss three levels away is punished nine times harder than a miss of one. What follows is how I reached <span class="goldc">first place</span> on the development boards and a final <span class="goldc">2nd place</span> in both tracks on the blind test, and the honest version is that the result came less from the model and more from a scorer I could run at home and a rule I kept: believe the measurement you can defend, not the one that flatters you.</p>
+      <p class="hero-sub">The task is simple to state. Read one Arabic sentence and place it on a reading scale from 1 to 19, where 1 is a first line for a young child and 19 is dense specialist prose. The scoring is where it gets interesting, because a miss three levels away is punished nine times harder than a miss of one. What follows is how I reached <span class="goldc">the top</span> of both development boards and a final <span class="goldc">2nd place</span> in both tracks on the blind test, and the honest version is that the result came less from the model and more from a scorer I could run at home and a rule I kept: believe the measurement you can defend, not the one that flatters you.</p>
       <div class="hero-meta">
         <b>Needs</b> &nbsp;comfort with a leaderboard metric and cross-validation, no Arabic required to follow<br>
         <b>Reading</b> &nbsp;about 11 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;figures you can drag and replay, and the real numbers from the runs
@@ -305,7 +305,7 @@ footer .runbox .c{color:var(--accent);}
   <div class="inner">
     <div class="kick"><span class="bd"></span> Result at a glance <span class="ark" lang="ar">النتيجة باختصار</span></div>
     <div class="scoregrid">
-      <div class="sc a"><div class="n">86.34</div><div class="l">best QWK, #1 on both development boards, level with the 2025 winner</div></div>
+      <div class="sc a"><div class="n">86.34</div><div class="l">best QWK on the development boards, first on Open and tied first on Strict</div></div>
       <div class="sc b"><div class="n">2nd</div><div class="l">final rank in Strict &amp; Open on the blind test, at 85.4 QWK</div></div>
       <div class="sc c"><div class="n">7/7</div><div class="l">board metrics reproduced by my local grader</div></div>
       <div class="sc d"><div class="n">0.0000</div><div class="l">gap between my offline score and the board</div></div>
@@ -321,7 +321,7 @@ footer .runbox .c{color:var(--accent);}
   <div class="col">
     <span class="eyebrow reveal"><span class="num">01</span> · The task</span>
     <h2 class="reveal">One sentence, nineteen reading levels</h2>
-    <p class="lead reveal">BAREC is the Balanced Arabic Readability Evaluation Corpus, and the 2026 shared task asks a model to read a single sentence and predict how hard it is to read, on a nineteen point scale. The training set is about 54,845 sentences drawn from 1,518 documents, with a fixed validation split of 7,310 and a test split of 7,286. Every sentence carries a gold level, so this is ordinary supervised learning with an unusual target.</p>
+    <p class="lead reveal">BAREC is the Balanced Arabic Readability Evaluation Corpus, and the 2026 shared task asks a model to read a single sentence and predict how hard it is to read, on a nineteen point scale. The training set is 54,845 sentences drawn from 1,518 documents, with a fixed validation split of 7,310 and a test split of 7,286. Every sentence carries a gold level, so this is ordinary supervised learning with an unusual target.</p>
     <p class="reveal">The label is ordered, and that changes everything about how you are graded. The board ranks entries by <span class="qwk">quadratic weighted kappa</span>, or QWK, which is a version of agreement that cares how far off you are, not just whether you were exactly right. Predict level 9 when the truth is 8 and the penalty is small. Predict 12 and the penalty is much larger, because the weight grows with the square of the distance. A mistake three levels away costs nine times what a one level mistake costs. That single fact set the whole shape of my solution, so I wanted to feel it before I trained anything.</p>
     <p class="reveal">Here is what the scale feels like in practice. The same kind of thought, written five ways, gets harder to read as the level climbs. This is real Arabic, colored from the easy end of the ramp to the hard end.</p>
     <div class="ladder reveal">
@@ -365,7 +365,7 @@ footer .runbox .c{color:var(--accent);}
       <figcaption><b>Distance is squared, so far mistakes dominate.</b> QWK rewards being close. A model that lands within a level or two on almost every sentence will beat one that nails the exact level more often but sometimes lands far away. That is why calibration and rounding mattered as much as the model here.</figcaption>
     </figure>
 
-    <p class="reveal">There are two tracks with the same test set. The Open track (Codabench 16544) lets you train on anything, and a parallel Strict track (16545) allows only BAREC data. I aimed at the Open board first, where the live bar to beat was <b>85.80</b> QWK, held by two entries tied at the top. Last year's winning system landed at 86.4, so that number sat in my head as the real ceiling worth reaching.</p>
+    <p class="reveal">There are two tracks with the same test set. The Open track (Codabench 16544) lets you train on anything, and a parallel Strict track (16545) allows only BAREC data. I aimed at the Open board first, where the live bar to beat was <b>85.80</b> QWK, held by two entries tied at the top. Last year's winning system landed at 86.4 on the 2025 blind test, which is a different set and not directly comparable, but that number sat in my head as the ceiling worth reaching.</p>
   </div>
 </section>
 
@@ -378,7 +378,7 @@ footer .runbox .c{color:var(--accent);}
     <h2 class="reveal">A grader I could run myself</h2>
     <p class="reveal">A public leaderboard gives you five submissions a day and a single number back. That is a slow way to learn anything, and it tempts you to tune against the board by trial and error, which can lead to overfitting the leaderboard rather than the underlying task. So before I trained a single model I did the least glamorous work of the whole project: I rebuilt the official scorer locally and proved it matched, line for line.</p>
     <p class="reveal">The shared task ships its evaluation code, so I wrote my own metrics module and held it to a byte parity test against the official <span class="mono">eval.py</span> on the provided fixture. It reproduces every figure the grader prints: QWK 80.0040%, accuracy 56.6211%, adjacent accuracy 69.8632%, average distance 1.143776, and the coarser 7, 5, and 3 level accuracies. Not close. Identical. That test became the gate the rest of the work had to pass through.</p>
-    <p class="reveal">Then came the part that turned a five per day board into an unlimited one. The 2026 release ships gold labels for the test split, and that test split is what the Open board scores. So my local score on the test set is the board score. When the first real submission went up and came back at 86.10, all seven metrics matched my local numbers exactly, which confirmed the grader in my harness is the grader on the server. From that point I could measure the exact board effect of any change without spending a submission on it.</p>
+    <p class="reveal">Then came the part that turned a five per day board into an unlimited one. The 2026 release ships gold labels for the test split, and that test split is what the Open board scores. So my local score on the test set is the board score. When the first real submission went up and came back at 86.10, all seven metrics matched my local numbers exactly, which confirmed the grader in my harness is the grader on the server. From that point I could measure the exact effect of any change on the development board without spending a submission on it. That held for the whole development phase, and it ends at the blind set, which ships with no labels at all. Believing the same thing about the blind board is the mistake the last part of this piece is about.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel dark">
@@ -393,7 +393,7 @@ footer .runbox .c{color:var(--accent);}
           <span style="color:rgba(242,236,223,.5)">dashed line = local equals board</span>
         </div>
       </div>
-      <figcaption><b>The offline board.</b> Because the test labels are in the release and the test set is what the board scores, my local scorer reads the same gold the board does, so the two numbers match and the gap is zero. I checked this the one time it mattered: the 86.10 upload came back with all seven metrics identical to my local run. After that I could iterate offline with full knowledge of the outcome, and the daily submission limit stopped mattering for tuning.</figcaption>
+      <figcaption><b>The offline board.</b> Because the test labels are in the release and the test set is what the board scores, my local scorer reads the same gold the board does, so the two numbers match and the gap is zero. I checked this the one time it mattered: the 86.10 upload came back with all seven metrics identical to my local run. The board itself reports one decimal, so it prints 86.1 and later 86.3, and the extra digits here are mine. After that I could iterate offline with full knowledge of the development board's outcome, and the daily submission limit stopped mattering for development tuning. The blind board was a different matter.</figcaption>
     </figure>
     <p class="reveal pull">The edge was not a secret model. It was a scorer I trusted enough to stop guessing against the board.</p>
   </div>
@@ -407,11 +407,11 @@ footer .runbox .c{color:var(--accent);}
     <span class="eyebrow reveal"><span class="num">03</span> · Honest numbers</span>
     <h2 class="reveal">The flattering number and the honest one</h2>
     <p class="reveal">Having a trustworthy scorer only helps if you feed it honest predictions. The most useful models to try were the public CAMeL Lab readability checkpoints, four of them, already fine tuned for exactly this task. When I scored them on the training set they looked spectacular, 89 to 95 QWK. If I had believed those numbers I would have tuned the whole ensemble on them and walked into a wall.</p>
-    <p class="reveal">The reason is contamination, and the harness caught it. Those checkpoints were trained on the BAREC corpus, which is the same text as the 2026 training split. Their training predictions are in sample, so they memorize rather than generalize. On clean holdout data the same models score 82 to 85, which is the honest picture. The gap of ten or more points between the flattering number and the honest one is a large part of why disciplined measurement matters here. Toggle the figure to see which number you would have trusted.</p>
+    <p class="reveal">The reason is contamination, and the harness caught it. Those checkpoints were trained on the BAREC corpus, which is the same text as the 2026 training split. Their training predictions are in sample, so they memorize rather than generalize. On clean holdout data the same models score 82 to 84 on validation and 84 to 85 on the test split, which is the honest picture. The gap, five points at its narrowest and more than ten at its widest, is a large part of why disciplined measurement matters here. Toggle the figure to see which number you would have trusted.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
-        <canvas id="honestCanvas" class="fig" aria-label="Interactive: for the four public checkpoints, an in-sample training QWK sitting between 89 and 95, and an honest holdout QWK between 83 and 85. Toggling between the two views shows how large the contamination gap is."></canvas>
+        <canvas id="honestCanvas" class="fig" aria-label="Interactive: for the four public checkpoints, an in-sample training QWK sitting between 89 and 95, and an honest holdout QWK between 84 and 85 on the clean test split. Toggling between the two views shows how large the contamination gap is."></canvas>
         <div class="controls">
           <div class="grp toggle" id="honestMode" role="group" aria-label="which number">
             <button data-mode="both" class="on" aria-pressed="true">Both</button>
@@ -422,10 +422,10 @@ footer .runbox .c{color:var(--accent);}
         </div>
         <div class="legend">
           <span><i style="background:var(--danger)"></i>in-sample training QWK (89 to 95)</span>
-          <span><i style="background:var(--accent)"></i>honest holdout QWK (83 to 85)</span>
+          <span><i style="background:var(--accent)"></i>honest holdout QWK (84 to 85 on the clean test split)</span>
         </div>
       </div>
-      <figcaption><b>The number that would have misled me.</b> The four checkpoints look near perfect on data they were trained on. On a clean holdout they land ten or more points lower. The corrected method is the boring one: tune the blend and the rounding on the validation split, then look at the test split exactly once.</figcaption>
+      <figcaption><b>The number that would have misled me.</b> The four checkpoints look near perfect on data they were trained on. On a clean holdout they land five or more points lower. The corrected method is the boring one: tune the blend and the rounding on the validation split, then look at the test split exactly once.</figcaption>
     </figure>
 
     <div class="note honest reveal">
@@ -444,22 +444,22 @@ footer .runbox .c{color:var(--accent);}
     <span class="eyebrow reveal"><span class="num">04</span> · The climb</span>
     <h2 class="reveal">From a plain baseline to the top of the board</h2>
     <p class="reveal">With the scorer trusted and the measurement honest, the modeling was almost calm. I built it in layers, and each layer had to clear the honest bar before I let it in.</p>
-    <p class="reveal">The first layer was a deliberately plain baseline, a ridge regression on surface features and hashed character and word n-grams. I skipped the heavier gradient boosted trees on purpose, because the full n-gram fit exhausted the memory on my 8GB laptop, and hashing kept the peak under 550MB. This floor scored about 73 on the board. That is far below the bar, which is exactly what a floor is for. It proved the pipeline ran end to end and wrote a valid submission, and it gave me a sanity number that the generalization gap was pointing the right way.</p>
-    <p class="reveal">The real lift came from the four public checkpoints, run over gold preprocessing that I joined in from the corpus rather than recomputing. Scored honestly, the best single model reached about 85.2. Blending two of them cleared the bar at 86.12, and adding a model from a different family took it to <b>86.34</b>, which is level with last year's winning system. The step chart below replays that climb, with the board bar and the prior winner marked.</p>
+    <p class="reveal">The first layer was a deliberately plain baseline, a ridge regression on surface features and hashed character and word n-grams. I skipped the heavier gradient boosted trees on purpose, because a full TF-IDF fit holds a learned vocabulary in memory and exhausted my 8GB laptop, while hashing is stateless and kept the peak near 550MB. This floor scored 72.81 on the test split, and I never spent a submission on it. That is far below the bar, which is exactly what a floor is for. It proved the pipeline ran end to end and wrote a valid submission, and it gave me a sanity number that the generalization gap was pointing the right way.</p>
+    <p class="reveal">The real lift came from the four public checkpoints, run over gold preprocessing that I joined in from the corpus rather than recomputing. Scored honestly on the test split, the best single model reached about 85.2. Blending two of them cleared the bar at 86.12, and adding a model from a different family took it to <b>86.34</b>. The step chart below replays that climb, with the board bar marked.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
-        <canvas id="climbCanvas" class="fig" aria-label="Interactive: a step chart of QWK across the build. The classical floor near 73, the first strong single model near 84.7, the best single model near 85.2, a two-member blend at 86.12, and a three-member blend at 86.34. A dashed line marks the 85.80 board bar and a fainter line marks last year's winner at 86.4."></canvas>
+        <canvas id="climbCanvas" class="fig" aria-label="Interactive: a step chart of QWK across the build. The classical floor near 73, the first strong single model near 84.7, the best single model near 85.2, a two-member blend at 86.12, and a three-member blend at 86.34. A dashed line marks the 85.80 board bar."></canvas>
         <div class="controls">
           <button class="btn primary" id="climbReplay">Replay the climb</button>
           <span class="readout">floor <b>72.8</b> &nbsp;to&nbsp; best blend <b>86.34</b> · bar was <b>85.80</b></span>
         </div>
         <div class="legend">
           <span><i style="background:var(--accent)"></i>my score</span>
-          <span style="color:var(--ink-4)">dashed = board bar 85.80 · faint = 2025 winner 86.4</span>
+          <span style="color:var(--ink-4)">dashed = board bar 85.80</span>
         </div>
       </div>
-      <figcaption><b>Each step had to clear the honest bar.</b> The classical floor validated the plumbing, the single checkpoints proved the approach, and the blend crossed the line. The same 86.34 prediction would also top the Strict track, whose bar sat at 86.30.</figcaption>
+      <figcaption><b>Each step had to clear the honest bar.</b> The classical floor validated the plumbing, the single checkpoints proved the approach, and the blend crossed the line. I uploaded the same file to the Strict development board, where it also came out on top, in a three way tie at the board's one decimal precision.</figcaption>
     </figure>
 
     <div class="note reveal">
@@ -477,7 +477,7 @@ footer .runbox .c{color:var(--accent);}
     <span class="eyebrow reveal"><span class="num">05</span> · Where it stops paying</span>
     <h2 class="reveal">Where adding models stopped helping</h2>
     <p class="reveal">The obvious next move is to keep adding members to the ensemble. It is also where added effort often stops paying, because a blend only improves when a new member is both strong and different. Two accurate models that make the same mistakes add nothing when you average them. The four CAMeL checkpoints are close cousins, correlated 0.94 to 0.97 with each other, so forward selection kept only two of them and dropped the rest as redundant.</p>
-    <p class="reveal">Getting past the bar with margin needed a member from a different lineage. A QARiB model, a different backbone family, was decorrelated enough and strong enough to earn its place and lifted the blend to 86.34. After that the returns thinned out fast. I fine tuned two more models on Kaggle, a MARBERT and an AraELECTRA. Both were rejected by forward selection, one because it was strong but too similar at 0.93 correlation, the other because it was different but too weak at 79 QWK. The figure plots each candidate by how strong it is and how correlated it is with the blend, and the region where a member actually helps is the upper left.</p>
+    <p class="reveal">Getting past the bar with margin needed a member from a different lineage. A QARiB model, a different backbone family, was decorrelated enough and strong enough to earn its place and lifted the blend to 86.34. After that the returns from borrowed checkpoints thinned out fast. I fine tuned two more models on Kaggle, a MARBERT and an AraELECTRA. Both were rejected by forward selection at that point, one because it was strong but too similar at 0.93 correlation, the other because it was different but too weak at 79 QWK. The figure plots each candidate by how strong it is and how correlated it is with the blend, and the region where a member actually helps is the upper left.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
@@ -491,16 +491,18 @@ footer .runbox .c{color:var(--accent);}
           <span><i style="background:var(--ink-4)"></i>rejected</span>
         </div>
       </div>
-      <figcaption><b>Strong and different, or it does not help.</b> A new member has to be accurate on its own and make mistakes the blend is not already making. The Kaggle models failed one test each. Knowing that let me stop, rather than burn more compute chasing a fraction of a point.</figcaption>
+      <figcaption><b>Strong and different, or it does not help.</b> A new member has to be accurate on its own and make mistakes the blend is not already making. The two Kaggle models failed one test each. These are the July verdicts against a three member blend, and they did not all survive: seed averaged MARBERT and AraELECTRA families both earned seats in the fourteen later on, against a much wider blend. The rule itself did survive. A member had to be near 85 on its own or below 0.90 correlated with the blend, and one that was neither did not get a seat.</figcaption>
     </figure>
 
-    <p class="reveal">So I stopped at 86.34, and I am comfortable calling it the honest ceiling for this particular ensemble. The stability check backs that up: the blended test score held between 86.19 and 86.32 whether I used two, three, or four members, so the result is not resting on a lucky pick. Squeezing out more would take several strong and genuinely decorrelated models, which is real and uncertain effort for maybe a fifth of a point, and I would rather report a number I can stand behind than chase one I cannot.</p>
+    <p class="reveal">86.34 was the ceiling for a blend of borrowed checkpoints, and the stability check backs that up: the blended test score held between 86.19 and 86.32 whether I used two, three, or four members, so the result was not resting on a lucky pick. It was not the end of the campaign. Over the following weeks I ran a fine tuning grid on a university cluster, 113 completed runs over 13 backbones and 6 loss families across three input views, which together with the public checkpoints gave a pool of 172 candidate members. The system I actually shipped averages fourteen of them at equal weight: four public checkpoints, nine seed averaged families of my own fine tunes, and one single run.</p>
+    <p class="reveal">Fourteen members is where the same lesson came back in a harder form. Once the ensemble was that wide it absorbed almost everything I put into it. Twenty different ways of combining the members, non negative least squares weights, ridge shrunk variants, direct QWK coordinate ascent, per member isotonic calibration, and median, trimmed and rank means, all landed between 84.74 and 85.12 against a plain equal weight baseline of 85.281. Every one of them was worse than dividing by fourteen. Member level improvements were absorbed too. A word to D3Tok lexicon lifted one member by 0.91 QWK on its own and moved the blend by somewhere between minus 0.02 and plus 0.001, because a cleaner member correlates more with the rest of the pack and trades its solo gain against lost diversity. Retraining the five strongest families on 13% more gold data moved the blend by 0.008.</p>
+    <p class="reveal">So the honest ceiling was never a single number I could push past by adding models. It was the point where the blend stopped noticing what I did to it. Squeezing out more would take several strong and genuinely decorrelated models, which is real and uncertain effort, and I would rather report a number I can stand behind than chase one I cannot.</p>
 
     <div class="stats reveal">
-      <div class="stat"><span class="k">board bar</span><div class="v">85.80</div><div class="d">two entries tied at the top</div></div>
-      <div class="stat hot"><span class="k">my best</span><div class="v">86.34</div><div class="d">level with the 2025 winner</div></div>
+      <div class="stat"><span class="k">board bar</span><div class="v">85.80</div><div class="d">on the Open development board, two entries tied</div></div>
       <div class="stat"><span class="k">checkpoint corr</span><div class="v">.94<small>to</small>.97</div><div class="d">why more of the same did not help</div></div>
-      <div class="stat warmv"><span class="k">strict track</span><div class="v">86.30</div><div class="d">the same file would lead here too</div></div>
+      <div class="stat hot"><span class="k">final blend</span><div class="v">14</div><div class="d">members, equal weight, from a pool of 172</div></div>
+      <div class="stat warmv"><span class="k">fitted weights</span><div class="v">20</div><div class="d">configurations tried, all below equal weight</div></div>
     </div>
   </div>
 </section>
@@ -513,7 +515,7 @@ footer .runbox .c{color:var(--accent);}
     <span class="eyebrow reveal"><span class="num">06</span> · The blind test</span>
     <h2 class="reveal">The blind test, and what actually did the work</h2>
     <p class="reveal">The development board is a good proxy, but the real ranking comes from a blind test, a fresh set of 8,077 sentences with no labels released at the end. New sentences are where a solution meets the truth, because the free gold preprocessing I leaned on no longer exists. I had to compute the tokenization myself, and that is where the last honest lesson showed up.</p>
-    <p class="reveal">Preprocessing here is not a nicety, it is load bearing. Feeding raw sentences to the Word model collapses it from about 84 QWK to about 50, because the model was never trained on untokenized text. Recreating the Word form myself matched the gold to 99.08% of tokens, which is faithful enough to keep the score intact. The morphological D3Tok form was harder, because the exact form was built with a licensed database I do not have, so my version matched about 76% of the gold and cost the affected model close to two points. The figure lets you switch preprocessing on and off and see the score fall.</p>
+    <p class="reveal">Preprocessing here is not a nicety, it is load bearing. Feeding raw sentences to the Word model collapses it from about 84 QWK to about 50, because the model was never trained on untokenized text. Recreating the Word form myself matched the gold to 99.08% of tokens, which is faithful enough to keep the score intact. The morphological D3Tok form was harder, because the exact form was built with a licensed database I do not have, so my version matched about 76% of the gold. It looked at first as though that cost the affected model close to two points, from 84.68 down to 82.75, and on that reading I shipped a word only ensemble. The reading was wrong, and the mistake was not in the tokenizer but in the standardization: I was taking that member's validation scores from the gold column while taking its blind scores from mine, and those are different input distributions that z scoring cannot reconcile. Recomputing validation through the same pipeline as the blind set made the member consistent with itself, and putting it back was worth 0.3 on the board, more than every calibration experiment that came after it. The rule I took from it is that a member's standardization statistics and the scores they are applied to have to come from one pipeline, end to end. The figure lets you switch preprocessing on and off and see the score fall.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
@@ -530,23 +532,30 @@ footer .runbox .c{color:var(--accent);}
           <span><i style="background:var(--hard)"></i>raw text, the model breaks</span>
         </div>
       </div>
-      <figcaption><b>The step that carries the whole thing.</b> The right tokenization is the difference between 84 and 50. My self-computed Word form held the score; my self-computed D3Tok cost a little, because the licensed database that made the gold version is not available to me. I reported the honest expected drop rather than hiding it.</figcaption>
+      <figcaption><b>The step that carries the whole thing.</b> The right tokenization is the difference between 84 and 50. My self-computed Word form held the score. My self-computed D3Tok is genuinely degraded, because the licensed database that made the gold version is not available to me, but the two point cost I first blamed on it turned out to be my own standardization bug, and the member was worth 0.3 on the board once both ends of its pipeline matched.</figcaption>
     </figure>
 
-    <p class="reveal">So the honest expectation for the blind set is about 85 to 86, a touch under the development number, because an unseen set is harder and my D3Tok is imperfect. That is the number I would put my name on, and I would rather set the expectation there than promise the development figure and hope. The submissions are prepared and validated in the exact upload format, waiting on the one step I keep for a human: I built and checked the file, and the actual upload to the public board is mine to send, not something I automate.</p>
+    <p class="reveal">The honest expectation I set before uploading was about 85 to 86, a touch under the development number, because an unseen set is harder and my D3Tok is imperfect. Every member also scored about 1.3 QWK lower on validation than on test, which pointed the same way. It landed at 85.4, second place in both tracks, so the expectation held.</p>
+
+    <h3 class="reveal">What the offline board could not resolve</h3>
+    <p class="reveal">The offline board carried the development phase, but the blind set ships without labels, so it stopped existing at exactly the moment the real ranking began. What replaced it was a harder question: how small a difference can an offline estimate actually see? Midway through the campaign the same ensemble scored 85.44, 85.28 and 85.42 on the same split while I varied nothing but the resolution of the threshold search grid. Measured three ways, the noise floor of my offline evaluation sits between 0.09 and 0.44 QWK, which is as wide as the margins that decided the final ranking. Varying the fold map seed instead returns bit identical results, and that is a trap worth naming, because anyone estimating variance that way on a grid search rounder will conclude their procedure is deterministic when it is not.</p>
+    <p class="reveal">The consequence is uncomfortable. In four paired tests where I had both an offline estimate and a live board reading of the same change, three of the four offline estimates collapsed to zero or reversed sign on the board. The change with the smallest offline estimate of the four, 0.086, was the only one that delivered, at 0.3. A MARBERTv2 member that measured 0.41 offline, the largest gain in either table, returned 0.00 and then minus 0.1. My own priority list, written before those probes, ranked recovering that model as the highest value action left. Following it as written would have shipped 84.7.</p>
+    <p class="reveal">What rescued the measurement was that the two tracks score the same blind gold. Two byte identical files uploaded to Open and to Strict returned identical metric vectors, which proves it, and it turns the Open board into a free instrument for a Strict system as long as the Open runner up is far enough back that a losing probe costs no place. From there, every decision worth a submission was made from a live board reading rather than an offline one. The calibration step was the single lever whose effect cleared the noise floor. Cutpoints tuned on validation put the blind predictions in the wrong place, predicting level 12 for about 8% of blind sentences where the corpus prior puts roughly 21%, so I shipped cutpoints halfway between the validation tuned ones and cutpoints that match the blind prediction histogram to the training label prior. That midpoint scored 84.5 on the board, against 84.1 for the validation end and 84.0 for the full prior match. Both endpoints are worse than the middle.</p>
+    <p class="reveal">The endgame followed from the same reading. With the mean provably capped, I stopped ranking candidates by their offline score and ranked them by how many rows they changed. Five near clones differing on 2% to 6% of rows all came back as ties. The candidate that changed 811 of 8,077 predictions, 10.0% of them, drew the 0.1 that closed the campaign at 85.4 on both boards. In Strict that tied the winner exactly and lost on the earlier timestamp; in Open the winner finished 0.1 ahead at 85.5.</p>
 
     <h3 class="reveal">What actually did the work</h3>
-    <p class="reveal">Looking back, the model was the least interesting part. The public checkpoints did most of the heavy lifting, and anyone could have downloaded them. What separated a top score from a middling one was the plumbing around them. A scorer I trusted enough to iterate offline. A refusal to believe the in sample numbers. A rounder measured without letting it cheat. Preprocessing joined from gold rather than guessed. And the discipline to stop when the ensemble stopped paying. None of it is flashy, and all of it is the reason the number held up.</p>
-    <p class="reveal">I also tried to leave myself honest limitations rather than a clean story. The margin over the bar is real but not huge, and it is somewhat split dependent. The blind number will likely come in under the development one. The Strict track result depends on one member whose training data I could not fully verify, so the provably compliant version of that blend is a little lower. I would rather write those down than pretend they are not there.</p>
+    <p class="reveal">Looking back, the model was the least interesting part. The public checkpoints did the early lifting and anyone could have downloaded them, and the ten seats I added were ordinary fine tunes on a grid anyone with a cluster could run. What separated a top score from a middling one was the plumbing around them. A scorer I trusted enough to iterate offline. A refusal to believe the in sample numbers. A rounder measured without letting it cheat. Preprocessing joined from gold rather than guessed, and standardization that runs end to end through one pipeline. Knowing what my own measurements could and could not resolve. None of it is flashy, and all of it is the reason the result is one I can defend rather than one I got lucky with.</p>
+    <p class="reveal">I also tried to leave myself honest limitations rather than a clean story. The noise floor evidence rests on four paired comparisons, which shows that offline and board can disagree but not how often. Board readings are single measurements on one fixed set of 8,077 rows and carry their own sampling noise, which I cannot estimate because I cannot resample the blind gold. My locally computed D3Tok is systematically degraded next to what a team with the licensed database would produce. Four of the fourteen seats are retrained on train plus the corpus's publicly released test split, which I disclosed to the organizers rather than classify myself. And equal weights and a single calibration scalar are unrefuted at my measurement resolution rather than shown to be optimal. I would rather write those down than pretend they are not there.</p>
 
     <h3 class="reveal">The name map</h3>
     <div class="gloss reveal">
       <div class="row"><div class="term">QWK<span class="alt">the metric</span></div><div class="def">Quadratic weighted kappa. Agreement that penalizes by the square of the distance between prediction and truth, so far mistakes hurt far more than near ones.</div></div>
-      <div class="row"><div class="term">The offline board<span class="alt">the edge</span></div><div class="def">A local grader proven identical to the official scorer, on a test split whose labels are in the release. My local number equals the board number, so tuning happens offline.</div></div>
-      <div class="row"><div class="term">In sample vs holdout<span class="alt">the honest rule</span></div><div class="def">The public checkpoints score 89 to 95 on data they trained on and 83 to 85 on clean holdout. I tuned on validation and looked at test once.</div></div>
+      <div class="row"><div class="term">The offline board<span class="alt">the edge</span></div><div class="def">A local grader proven identical to the official scorer, on a test split whose labels are in the release. My local number equals the board number, so development tuning happens offline. The blind set ships without labels, so it ends there.</div></div>
+      <div class="row"><div class="term">In sample vs holdout<span class="alt">the honest rule</span></div><div class="def">The public checkpoints score 89 to 95 on data they trained on and 82 to 84 on a clean holdout. I tuned on validation and looked at test once.</div></div>
       <div class="row"><div class="term">Nested out of fold<span class="alt">the rounder's honesty</span></div><div class="def">Scoring the rounding step on folds it never saw, so its measured gain is the gain it will actually deliver on new data.</div></div>
       <div class="row"><div class="term">D3Tok<span class="alt">the load-bearing detail</span></div><div class="def">A morphological tokenization the Arabic models expect. Gold on the dev splits by a corpus join, self-computed and slightly imperfect on the blind set.</div></div>
-      <div class="row"><div class="term">Strong and different<span class="alt">why the blend stopped</span></div><div class="def">A new ensemble member only helps if it is both accurate and decorrelated from the blend. Once the pool ran out of both, 86.34 was the ceiling.</div></div>
+      <div class="row"><div class="term">Strong and different<span class="alt">why the blend stopped</span></div><div class="def">A new ensemble member only helps if it is both accurate and decorrelated from the blend. My working rule was near 85 solo or below 0.90 correlated, and a candidate that was neither did not get a seat.</div></div>
+      <div class="row"><div class="term">Noise floor<span class="alt">what an estimate can see</span></div><div class="def">The smallest difference a measurement can resolve. Mine sat between 0.09 and 0.44 QWK, as wide as the margins that decided the final ranking, which is why the live board became the instrument that mattered.</div></div>
     </div>
   </div>
 </section>
@@ -561,15 +570,17 @@ footer .runbox .c{color:var(--accent);}
         <div>Every result reproduces from a frozen fold map and a byte-parity scorer, no per machine regeneration.</div>
         <div style="margin-top:8px">$ <span class="c">python tests/test_qwk_parity.py</span> &nbsp; # the exit gate: matches eval.py</div>
         <div>$ <span class="c">python scripts/blend_all.py</span> &nbsp; # val-tune, test-eval, forward-select, round</div>
-        <div style="margin-top:8px; color:var(--ink-3)"># the harness == the board grader, confirmed when the first upload matched all seven metrics</div>
+        <div>$ <span class="c">python scripts/blind_blend.py --tag fleet14tt4 --members ...</span> &nbsp; # the shipped 14, equal weight, half-match at f = 0.50</div>
+        <div style="margin-top:8px; color:var(--ink-3)"># the harness == the board grader on the development split, confirmed when the first upload matched all seven metrics</div>
+        <div style="color:var(--ink-3)"># rebuilding the shipped file from its member arrays reproduces it byte for byte, sha256 e243ab46...0bf2516</div>
       </div>
       <div class="sig">The scorer was the real weapon.</div>
       <div class="meta">
         BAREC 2026 · Arabic sentence readability · Open track (Codabench 16544) and Strict track (16545)<br>
-        Result: <b>first place at 86.34 QWK</b> on the development boards; <b>final 2nd place in both tracks at 85.4 QWK</b> on the blind test.<br>
-        Paper: <b>&ldquo;thylinao at BAREC Shared Task 2026: Ensembling at the Noise Floor&rdquo;</b>, for the ArabicNLP 2026 proceedings, co-located with EMNLP 2026.<br>
+        Result: <b>first on the Open development board at 86.34 QWK</b> and tied for first on Strict; <b>final 2nd place in both tracks at 85.4 QWK</b> on the blind test.<br>
+        Paper: <b>&ldquo;thylinao at BAREC Shared Task 2026: Ensembling at the Noise Floor&rdquo;</b>, submitted to the BAREC shared task at ArabicNLP 2026, co-located with EMNLP 2026 in Budapest. Notification is 2 September 2026.<br>
         Board: <a class="inline" href="https://www.codabench.org/competitions/16544/" target="_blank" rel="noopener">Codabench 16544 (Open)</a> &nbsp;·&nbsp; <a class="inline" href="https://www.codabench.org/competitions/16545/" target="_blank" rel="noopener">16545 (Strict)</a><br>
-        Numbers are from the actual runs. The final upload stays a human step. Written by Maksim.
+        Numbers are from the actual runs. The final uploads were mine to send, not something I automated, and I sent them on 3 August 2026. Written by Maksim.
       </div>
     </div>
   </div>
@@ -992,7 +1003,7 @@ footer .runbox .c{color:var(--accent);}
       const X = i => padL + i/(steps.length-1)*(w-padL-padR);
       const Y = v => top + (1-(v-lo)/(hi-lo))*(bot-top);
 
-      // gridlines + bar + winner
+      // gridlines + bar
       ctx.font="10px "+C("--font-mono"); ctx.textAlign="right"; ctx.fillStyle=C("--ink-4");
       [70,75,80,85].forEach(g=>{
         ctx.strokeStyle="rgba(23,19,13,0.08)"; ctx.lineWidth=1;
@@ -1004,10 +1015,6 @@ footer .runbox .c{color:var(--accent);}
       ctx.beginPath(); ctx.moveTo(padL,Y(85.80)); ctx.lineTo(w-padR,Y(85.80)); ctx.stroke();
       ctx.setLineDash([]); ctx.textAlign="left"; ctx.fillStyle=C("--accent");
       ctx.fillText("board bar 85.80", padL+4, Y(85.80)-6);
-      // 86.4 winner (faint)
-      ctx.strokeStyle="rgba(169,121,28,0.45)"; ctx.setLineDash([2,4]); ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(padL,Y(86.4)); ctx.lineTo(w-padR,Y(86.4)); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle=C("--gold"); ctx.fillText("2025 winner 86.4", w-padR-118, Y(86.4)-6);
 
       // the climbing line (revealed by prog)
       const shownCount = 1 + prog*(steps.length-1);

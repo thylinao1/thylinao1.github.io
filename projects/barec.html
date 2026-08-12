@@ -476,12 +476,12 @@ footer .runbox .c{color:var(--accent);}
   <div class="col">
     <span class="eyebrow reveal"><span class="num">05</span> · Where it stops paying</span>
     <h2 class="reveal">Where adding models stopped helping</h2>
-    <p class="reveal">The obvious next move is to keep adding members to the ensemble. It is also where added effort often stops paying, because a blend only improves when a new member is both strong and different. Two accurate models that make the same mistakes add nothing when you average them. The four CAMeL checkpoints are close cousins, correlated 0.94 to 0.97 with each other, so forward selection kept only two of them and dropped the rest as redundant.</p>
-    <p class="reveal">Getting past the bar with margin needed a member from a different lineage. A QARiB model, a different backbone family, was decorrelated enough and strong enough to earn its place and lifted the blend to 86.34. After that the returns from borrowed checkpoints thinned out fast. I fine tuned two more models on Kaggle, a MARBERT and an AraELECTRA. Both were rejected by forward selection at that point, one because it was strong but too similar at 0.93 correlation, the other because it was different but too weak at 79 QWK. The figure plots each candidate by how strong it is and how correlated it is with the blend, and the region where a member actually helps is the upper left.</p>
+    <p class="reveal">The obvious next move is to keep adding members to the ensemble. It is also where added effort often stops paying, because a blend only improves when a new member is both strong and different. Two accurate models that make the same mistakes add nothing when you average them. The four CAMeL checkpoints are close cousins, correlated 0.94 to 0.97 with each other on the validation split, so forward selection kept only two of them and dropped the rest as redundant.</p>
+    <p class="reveal">Getting past the bar with margin needed a member from a different lineage. A QARiB model, a different backbone family, was the least correlated of the strong candidates at 0.94 against the blend, and it earned its place and lifted the blend to 86.34. After that the returns from borrowed checkpoints thinned out fast. I fine tuned two more models on Kaggle, a MARBERT and an AraELECTRA, and forward selection rejected both at that point. The reason is plainer than I first wrote it: MARBERT is no less correlated with the blend than QARiB, 0.942 against 0.943, and it is a point weaker on its own, so it brings nothing QARiB has not already brought. AraELECTRA is the one genuinely different candidate at 0.898, and at 79 QWK it is far too weak to pay for the difference. The figure plots each candidate by how strong it is and how correlated it is with the blend, and the region where a member actually helps is the upper right.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
-        <canvas id="diversityCanvas" class="fig" aria-label="Interactive: each candidate model plotted by its correlation with the blend on the horizontal axis and its solo QWK on the vertical axis. Kept members sit in the upper-left region of high accuracy and lower correlation. Rejected members are either too correlated or too weak."></canvas>
+        <canvas id="diversityCanvas" class="fig" aria-label="Interactive: each candidate model plotted by its correlation with the blend on the horizontal axis, decreasing to the right, and its solo QWK on the vertical axis. Members that help sit in the upper-right region of high accuracy and lower correlation. Rejected members are either too correlated or too weak."></canvas>
         <div class="controls">
           <button class="btn primary" id="divReplay">Place the models</button>
           <span class="readout">kept: <b>strong and different</b> · dropped: too similar, or too weak</span>
@@ -491,7 +491,7 @@ footer .runbox .c{color:var(--accent);}
           <span><i style="background:var(--ink-4)"></i>rejected</span>
         </div>
       </div>
-      <figcaption><b>Strong and different, or it does not help.</b> A new member has to be accurate on its own and make mistakes the blend is not already making. The two Kaggle models failed one test each. These are the July verdicts against a three member blend, and they did not all survive: seed averaged MARBERT and AraELECTRA families both earned seats in the fourteen later on, against a much wider blend. The rule itself did survive. A member had to be near 85 on its own or below 0.90 correlated with the blend, and one that was neither did not get a seat.</figcaption>
+      <figcaption><b>Strong and different, or it does not help.</b> A new member has to be accurate on its own and make mistakes the blend is not already making. AraELECTRA is different enough and not strong enough. MARBERT is neither, which is why it went first. These are the July verdicts against a two member blend, and they did not all hold: seed averaged MARBERT and AraELECTRA families both earned seats in the fourteen later on, against a much wider blend where the arithmetic came out differently. What held was the shape of the rule. Across the full pool a member had to be near 85 on its own or below 0.90 correlated, and one that was neither did not get a seat.</figcaption>
     </figure>
 
     <p class="reveal">86.34 was the ceiling for a blend of borrowed checkpoints, and the stability check backs that up: the blended test score held between 86.19 and 86.32 whether I used two, three, or four members, so the result was not resting on a lucky pick. It was not the end of the campaign. Over the following weeks I ran a fine tuning grid on a university cluster, 113 completed runs over 13 backbones and 6 loss families across three input views, which together with the public checkpoints gave a pool of 172 candidate members. The system I actually shipped averages fourteen of them at equal weight: four public checkpoints, nine seed averaged families of my own fine tunes, and one single run.</p>
@@ -1057,15 +1057,16 @@ footer .runbox .c{color:var(--accent);}
      ========================================================= */
   (function(){
     const fig = figure("diversityCanvas"); if(!fig) return;
-    // x = correlation with blend, y = solo QWK
+    // x = correlation with the two-member blend, y = solo QWK. Both on the test split.
+    // Correlations recomputed from the committed score arrays, not quoted from notes.
     const models=[
-      {n:"reg", corr:0.96, q:84.68, kept:true},
-      {n:"word-CE", corr:0.95, q:85.24, kept:true},
-      {n:"d3tok-CE", corr:0.97, q:84.87, kept:false},
-      {n:"camelbert", corr:0.94, q:83.71, kept:false},
-      {n:"QARiB", corr:0.90, q:83.5, kept:true},
-      {n:"MARBERT", corr:0.93, q:82.7, kept:false},
-      {n:"AraELECTRA", corr:0.88, q:79.0, kept:false}
+      {n:"reg", corr:0.985, q:84.68, kept:true},
+      {n:"word-CE", corr:0.985, q:85.24, kept:true},
+      {n:"d3tok-CE", corr:0.974, q:84.87, kept:false},
+      {n:"camelbert", corr:0.958, q:83.71, kept:false},
+      {n:"QARiB", corr:0.943, q:83.5, kept:true},
+      {n:"MARBERT", corr:0.942, q:82.7, kept:false},
+      {n:"AraELECTRA", corr:0.898, q:79.0, kept:false}
     ];
     const replay=document.getElementById("divReplay");
     let prog=1;
@@ -1077,11 +1078,12 @@ footer .runbox .c{color:var(--accent);}
       const X = c => padL + (cHi-c)/(cHi-cLo)*(w-padL-padR); // note: less correlated -> right
       const Y = q => top + (1-(q-qLo)/(qHi-qLo))*(bot-top);
 
-      // "helps" region shading (upper-left = strong and different)
-      const grd=ctx.createLinearGradient(padL,top,w-padR,bot);
+      // "helps" region shading. X puts less correlated on the right, so the corner
+      // that helps is the upper right: strong solo and decorrelated from the blend.
+      const grd=ctx.createLinearGradient(w-padR,top,padL,bot);
       grd.addColorStop(0,"rgba(18,115,106,0.10)"); grd.addColorStop(1,"rgba(18,115,106,0)");
       ctx.fillStyle=grd; ctx.beginPath();
-      ctx.moveTo(X(0.985),Y(86.5)); ctx.lineTo(X(0.90),Y(86.5)); ctx.lineTo(X(0.90),Y(82.5)); ctx.lineTo(X(0.985),Y(84.8)); ctx.closePath(); ctx.fill();
+      ctx.moveTo(X(0.86),Y(86.5)); ctx.lineTo(X(0.955),Y(86.5)); ctx.lineTo(X(0.955),Y(82.5)); ctx.lineTo(X(0.86),Y(82.5)); ctx.closePath(); ctx.fill();
 
       // axes
       ctx.strokeStyle="rgba(23,19,13,0.14)"; ctx.lineWidth=1;

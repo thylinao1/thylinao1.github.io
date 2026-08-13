@@ -28,8 +28,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body)
   font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
 .col{max-width:var(--read);margin:0 auto}
-.secnum,h2{text-align:center}
-h2{max-width:20ch;margin-left:auto;margin-right:auto}
+.secnum{text-align:center}
 .lede{text-align:center;max-width:700px;margin-left:auto;margin-right:auto}
 a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-soft)}
 a:hover{border-bottom-color:var(--accent)}
@@ -42,13 +41,14 @@ code{background:var(--bg-2);padding:.1em .35em;border-radius:3px}
 #heroCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
 #hero .wrap{position:relative}
 .hero-mark{font-family:var(--font-mono);font-size:13px;letter-spacing:.06em;color:var(--ink-3);
-  display:flex;align-items:center;gap:10px;margin-bottom:26px}
+  display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:26px}
 .hero-mark .bd{width:10px;height:10px;background:var(--accent);border-radius:2px;display:inline-block}
+.hero-mark .homeback{color:var(--accent);border-bottom:1px solid var(--accent-soft);margin-right:6px}
 h1{font-family:var(--font-display);font-weight:380;font-size:clamp(48px,7.2vw,96px);
-  line-height:1.02;letter-spacing:-.02em;margin:0 0 26px}
+  line-height:1.02;letter-spacing:-.02em;margin:0 0 26px;text-align:center}
 h1 .it{font-style:italic;font-weight:420;color:var(--accent-deep)}
-.hero-sub{font-size:21px;color:var(--ink-2);max-width:748px;margin:0 0 30px}
-.hero-meta{display:flex;flex-wrap:wrap;gap:12px}
+.hero-sub{font-size:21px;color:var(--ink-2);max-width:748px;margin:0 auto 30px;text-align:center}
+.hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
 .chip{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;color:var(--ink-2);
   background:var(--bg-2);border:1px solid var(--rule);padding:7px 12px;border-radius:999px}
 .chip b{color:var(--ink);font-weight:500}
@@ -64,14 +64,18 @@ h1 .it{font-style:italic;font-weight:420;color:var(--accent-deep)}
   white-space:nowrap;padding:6px 11px;border-radius:6px;transition:.2s var(--ease)}
 #toc a:hover{background:var(--bg-2);color:var(--ink)}
 #toc a.active{background:var(--ink);color:var(--bg)}
+#toc a.homelink{color:var(--accent);border:1px solid var(--accent-soft);margin-right:10px;
+  flex:0 0 auto}
+#toc a.homelink:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
 
 /* ---------- sections ---------- */
 section{padding:78px 0;border-bottom:1px solid var(--rule)}
 .secnum{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.14em;color:var(--ink-4);
   margin-bottom:16px}
 h2{font-family:var(--font-display);font-weight:400;font-size:clamp(30px,3.9vw,46px);
-  line-height:1.13;letter-spacing:-.015em;margin:0 0 26px;max-width:16ch}
-h3{font-family:var(--font-display);font-weight:460;font-size:24px;margin:44px 0 14px}
+  line-height:1.13;letter-spacing:-.015em;margin:0 auto 26px;max-width:20ch;text-align:center}
+h3{font-family:var(--font-display);font-weight:460;font-size:24px;margin:44px auto 14px;
+  text-align:center;max-width:26ch}
 p{margin:0 0 20px;max-width:var(--read)}
 .lede{font-size:22px;color:var(--ink-2)}
 .pull{border-left:3px solid var(--accent);padding:4px 0 4px 22px;margin:34px 0;
@@ -146,13 +150,14 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 <header id="hero">
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="wrap"><div class="col">
-    <div class="hero-mark"><span class="bd"></span> BenchFlow Agent Skill Lift &middot; Static Skills and Meta-Skills &middot; my entry</div>
+    <div class="hero-mark"><a class="homeback" href="https://thylinao1.github.io">Home</a><span class="bd"></span> BenchFlow Agent Skill Lift &middot; Static Skills and Meta-Skills &middot; my entry</div>
     <h1>Reading the <span class="it">Verifier</span></h1>
-    <p class="hero-sub">A spreadsheet can be completely correct and still score zero. The checker opens
-      it with a reader that only sees cached values, openpyxl never wrote any, and every number comes
-      back as <code>None</code>. Eighty-five of the eighty-seven public tasks are all or nothing, so
-      that single detail loses the whole task. This is the trap, the seven skills I built around it,
-      the generator that writes its own, and what all of it actually measured.</p>
+    <p class="hero-sub">A spreadsheet produced by an agent can be entirely correct and still receive a
+      score of zero. The verifier opens it with a reader that returns cached values only, openpyxl
+      does not write those values, and each formula cell is therefore read as <code>None</code>.
+      Because 85 of the 87 public tasks are graded all or nothing, that single detail removes the
+      whole task. This write-up covers the mechanism, the seven skills built around it, the
+      generator that produces its own, and the measurements for both.</p>
     <div class="hero-meta">
       <span class="chip">development set <b>14 tasks</b></span>
       <span class="chip ok">conversions <b>3</b></span>
@@ -165,6 +170,7 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 </header>
 
 <nav id="toc" aria-label="Sections"><div class="wrap">
+  <a class="homelink" href="https://thylinao1.github.io" aria-label="Back to home">Home</a>
   <a href="#s1" data-sec="s1">01 The trap</a>
   <a href="#s2" data-sec="s2">02 What the checker sees</a>
   <a href="#s3" data-sec="s3">03 How much of it</a>
@@ -180,10 +186,10 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 
 <section id="s1"><div class="wrap"><div class="col">
   <div class="secnum reveal">01 &middot; The trap</div>
-  <h2 class="reveal">A spreadsheet that is correct and scores zero</h2>
-  <p class="reveal lede">The benchmark hands an agent a task, a sandbox and a verifier. Most write-ups
-    start from the task prompt. I started from the verifier, because the verifier is the only thing
-    that decides the reward, and it is readable before you spend anything.</p>
+  <h2 class="reveal">A correct spreadsheet that receives a score of zero</h2>
+  <p class="reveal lede">Each task in the benchmark ships with a sandbox and a verifier. Most write-ups begin
+    from the task prompt. This one begins from the verifier, since the verifier alone determines
+    the reward and can be read before any budget is spent.</p>
   <p class="reveal">Reading them statically surfaced one mechanism that recurs and is invisible from
     the prompt. When an agent writes a formula with <code>openpyxl</code>, the library stores the
     formula as text and stores no cached result beside it. A checker that opens the file with
@@ -191,8 +197,8 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
     reads <code>None</code> for every formula cell. The workbook is correct. Open it in Excel and
     every total is right. There is no Excel in the container, and reopening the file with openpyxl
     recalculates nothing at all.</p>
-  <div class="pull reveal">The agent solved the task. The file it produced is right. The reward is
-    still zero.</div>
+  <div class="pull reveal">The task was completed and the output file is correct. The recorded
+    reward is nevertheless zero.</div>
   <div class="receipt reveal"><div class="receipt-frame">
     <canvas id="trapCanvas" class="fig" aria-label="Two views of the same workbook. The author view shows formulas in the total column. The checker view, opened with data_only true, shows None in every one of those cells."></canvas>
     <div class="ctrl">
@@ -207,15 +213,15 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 
 <section id="s2"><div class="wrap"><div class="col">
   <div class="secnum reveal">02 &middot; What the checker sees</div>
-  <h2 class="reveal">One failed assertion loses the whole task</h2>
-  <p class="reveal">This would be a rounding error on a partial-credit benchmark. It is not one here.
-    Of the 87 public tasks, <b>85 are all or nothing</b>: the verifier either passes the task or
-    fails it, with nothing in between. A skill that fixes nine checks out of ten is worth exactly
-    the same as a skill that fixes none.</p>
-  <p class="reveal">That single fact reorders what is worth building. A pack full of good general
-    advice moves check counts. It does not move rewards. What moves a reward is closing the last
-    failing assertion, which means the pack has to know precisely which assertion the verifier is
-    going to make.</p>
+  <h2 class="reveal">A single failed assertion removes the whole task</h2>
+  <p class="reveal">On a partial-credit benchmark this would amount to a rounding error, but the
+    grading here does not work that way. Of the 87 public tasks, <b>85 are all or nothing</b>, meaning
+    the verifier either passes the task or fails it with nothing in between. A skill that resolves
+    nine checks out of ten is therefore worth the same as a skill that resolves none.</p>
+  <p class="reveal">That property changes what is worth building. General advice tends to improve
+    check counts without changing the recorded reward, since the reward only moves once the final
+    failing assertion is closed. A pack is therefore useful in proportion to how precisely it
+    anticipates the assertion the verifier will make.</p>
   <div class="receipt reveal"><div class="receipt-frame">
     <canvas id="corpusCanvas" class="fig" aria-label="Eighty-seven squares, one per public task. Eighty-five are marked all or nothing. Six sit on the recalculation trap. Twenty-four are Office format, the set the packs aim at."></canvas>
     <div class="ctrl">
@@ -241,7 +247,7 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 
 <section id="s3"><div class="wrap"><div class="col">
   <div class="secnum reveal">03 &middot; How much of it</div>
-  <h2 class="reveal">Six tasks, and why that is the honest denominator</h2>
+  <h2 class="reveal">The size of the affected set</h2>
   <p class="reveal">The recalculation trap covers 6 of 87 tasks, which is 6.9 percent of the public
     corpus. That is the ceiling on what this one mechanism can be worth, and it is worth stating
     before any result, because a mechanism that fires on seven tasks in a hundred cannot produce a
@@ -251,33 +257,34 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
     is worth about <b>2.3 percentage points</b> from this mechanism. The published figure for the
     benchmark's own curated skills is +16.4pp, measured across a per-task expert library rather than
     a general one.</p>
-  <div class="pull reveal">Six of eighty-seven, converting one draw in three. Everything else in this
-    entry is downstream of those two numbers.</div>
+  <div class="pull reveal">Six tasks of eighty-seven, converting on one draw in three. Both figures
+    bound what this mechanism can contribute.</div>
 </div></div></section>
 
 <section id="s4"><div class="wrap"><div class="col">
   <div class="secnum reveal">04 &middot; The fix</div>
-  <h2 class="reveal">The fix has to be executable</h2>
-  <p class="reveal">You cannot write your way out of this one. No amount of instruction makes
-    openpyxl compute a formula, because openpyxl does not have an evaluator. The pack has to ship
-    something that actually runs.</p>
+  <h2 class="reveal">The correction has to be executable</h2>
+  <p class="reveal">Instruction alone cannot address this, because openpyxl contains no formula
+    evaluator. The pack therefore has to ship something that executes.</p>
   <p class="reveal">So the <code>xlsx</code> pack ships <code>recalc_xlsx.py</code>. It shells out to
     gnumeric <code>ssconvert</code>, falls back to LibreOffice, evaluates every formula, writes the
     cached values back into the workbook, drops a CSV value mirror beside it for readers that cannot
     evaluate anything, and reports any <code>#REF!</code> or <code>#VALUE!</code> cell so the agent
     can fix it before finishing. Seven packs ship in total, and nine executable scripts between them.</p>
   <div class="receipt reveal"><div class="receipt-frame">
-    <div class="videobox"><video controls preload="metadata" playsinline
-      poster="" src="assets/skill-lift/keynote.mp4"></video></div>
-    <div class="fignote"><b>the receipt.</b> An 80 second silent walkthrough of the same argument.
-      Rendered frame by frame from a self-contained HTML deck, so every frame is a pure function of
-      the timeline position.</div>
+    <div class="videobox"><video controls preload="metadata" playsinline poster="">
+      <source src="assets/skill-lift/keynote.mp4" type="video/mp4">
+      <track kind="captions" src="assets/skill-lift/keynote.vtt" srclang="en" label="English" default>
+    </video></div>
+    <div class="fignote"><b>the receipt.</b> A 93 second narrated walkthrough of the same argument,
+      captioned. Rendered frame by frame from a self-contained HTML deck, so every frame is a pure
+      function of the timeline position.</div>
   </div></div>
 </div></div></section>
 
 <section id="s5"><div class="wrap"><div class="col">
   <div class="secnum reveal">05 &middot; What it scores</div>
-  <h2 class="reveal">Three conversions, no regressions</h2>
+  <h2 class="reveal">Measured results on the public corpus</h2>
   <p class="reveal">Measured paired on the public corpus with Claude Haiku 4.5 on the official
     harness, one arm with the library mounted and one without, reading each reward from the task's
     own <code>reward.txt</code>.</p>
@@ -311,7 +318,7 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 
 <section id="s6"><div class="wrap"><div class="col">
   <div class="secnum reveal">06 &middot; Where it aims</div>
-  <h2 class="reveal">Scope, and why it is a decision</h2>
+  <h2 class="reveal">Scope of the library</h2>
   <p class="reveal">The packs target the Office-format work, 24 of the 87 public tasks, and they load
     on 17 of the 21 I measured. Before spending on wider coverage I classified every failing
     assertion on disk as contract-shaped or analytical. <b>12 of the 18 non-Office tasks fail on the
@@ -336,7 +343,7 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 
 <section id="s7"><div class="wrap"><div class="col">
   <div class="secnum reveal">07 &middot; The generator</div>
-  <h2 class="reveal">A creator that reads the contract first</h2>
+  <h2 class="reveal">A generator that reads the contract first</h2>
   <p class="reveal">The Meta-Skills entry is one <code>skill-creator</code> pack: an environment probe
     that runs against the real task workspace, a grader-view step that makes the agent read the
     verifier's contract before writing anything, and an admit gate that lints a generated pack for
@@ -355,14 +362,14 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 
 <section id="s8"><div class="wrap"><div class="col">
   <div class="secnum reveal">08 &middot; The takeaway</div>
-  <h2 class="reveal">What I would tell someone starting this</h2>
-  <p class="reveal">Read the verifiers before you write anything. They are open, they are static, and
-    they are the only thing that decides the score. Most of what looks like a modelling problem on
-    this benchmark is a contract problem that is legible in the checker source for free.</p>
-  <p class="reveal">Then check whether the contract is the only thing failing. Where a task fails on
-    the computed numbers, no procedural skill helps, and the honest move is to say so and spend the
-    budget somewhere the mechanism can actually fire.</p>
-  <div class="pull reveal">Read the verifier before you write the skill.</div>
+  <h2 class="reveal">Notes for anyone starting on this benchmark</h2>
+  <p class="reveal">The verifiers are open, static, and solely responsible for the score, which makes
+    them worth reading before any skill is written. A substantial part of what presents as a modelling
+    problem on this benchmark is a contract problem that is already legible in the checker source.</p>
+  <p class="reveal">It is also worth establishing whether the contract is the only failing element.
+    Where a task fails on its computed values, a procedural skill offers no remedy, and the budget is
+    better directed at cases where the mechanism applies.</p>
+  <div class="pull reveal">The verifier is worth reading before the skill is written.</div>
 </div></div></section>
 
 <section id="method"><div class="wrap"><div class="col">
@@ -451,21 +458,43 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
     if(!heroCtx) return;
     var x = heroCtx, w = heroW, h = heroH;
     x.clearRect(0,0,w,h);
-    var cell = 42, cols = Math.ceil(w/cell), rows = Math.ceil(h/cell);
-    for(var i=0;i<cols;i++) for(var j=0;j<rows;j++){
-      var ph = i*0.6 + j*0.9;
-      var a = 0.05 + 0.05*Math.sin(t/2600 + ph);
-      x.strokeStyle = "rgba(21,17,11," + a.toFixed(3) + ")";
-      x.lineWidth = 1;
-      x.strokeRect(i*cell+.5, j*cell+.5, cell-1, cell-1);
+    var cell = 46, speed = 11;                   /* px per second, slow enough to read as drift */
+    var off = (t/1000) * speed;
+    var cols = Math.ceil(w/cell) + 2, rows = Math.ceil(h/cell) + 1;
+    var base = Math.floor(off/cell);             /* world column at the left edge */
+    var frac = off - base*cell;
+
+    /* deterministic hash so the same world cell always behaves the same way, no randomness */
+    function hash(a,b){
+      var n = Math.sin(a*127.1 + b*311.7) * 43758.5453;
+      return n - Math.floor(n);
     }
-    /* six cells that pulse amber: the six trap tasks */
-    var spots = [[3,2],[9,1],[14,3],[19,2],[6,4],[16,5]];
-    spots.forEach(function(s,k){
-      var p = 0.5 + 0.5*Math.sin(t/1500 + k*1.1);
-      x.fillStyle = "rgba(221,122,60," + (0.10 + 0.16*p).toFixed(3) + ")";
-      x.fillRect(s[0]*cell, s[1]*cell, cell, cell);
-    });
+
+    for(var i=0;i<cols;i++){
+      var wc = base + i;                          /* world column index */
+      var px = i*cell - frac;
+      /* cells pop in as they arrive at the left edge, then settle */
+      var age = (px + cell) / (cell*3);
+      var pop = age < 0 ? 0 : age > 1 ? 1 : (1 - Math.pow(1-age,3));
+      for(var j=0;j<rows;j++){
+        var hv = hash(wc, j);
+        var a = (0.05 + 0.05*Math.sin(t/2600 + wc*0.6 + j*0.9)) * pop;
+        x.strokeStyle = "rgba(21,17,11," + a.toFixed(3) + ")";
+        x.lineWidth = 1;
+        var inset = (1-pop)*cell*0.34;            /* the square grows into place */
+        x.strokeRect(px+.5+inset, j*cell+.5+inset, cell-1-inset*2, cell-1-inset*2);
+
+        /* a sparse few fill in warm, the same six-in-a-field feeling as the corpus */
+        if(hv > 0.955){
+          var pulse = 0.5 + 0.5*Math.sin(t/1500 + wc*0.7 + j);
+          x.fillStyle = "rgba(221,122,60," + ((0.07 + 0.11*pulse) * pop).toFixed(3) + ")";
+          x.fillRect(px+inset, j*cell+inset, cell-inset*2, cell-inset*2);
+        } else if(hv > 0.93){
+          x.fillStyle = "rgba(37,88,198," + ((0.05 + 0.05*pop) * pop).toFixed(3) + ")";
+          x.fillRect(px+inset, j*cell+inset, cell-inset*2, cell-inset*2);
+        }
+      }
+    }
   }
 
   /* ---------- figure 1: author view vs checker view ---------- */
@@ -873,7 +902,7 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
   function loop(ts){
     if(ts - lastAmb > 40){
       lastAmb = ts;
-      if(scrollY < innerHeight * 1.2) drawHero(ts);   /* hero is off screen after that */
+      if(scrollY < innerHeight * 1.35) drawHero(ts);  /* stop once the hero is well past */
       drawField(ts);
     }
     requestAnimationFrame(loop);

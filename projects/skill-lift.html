@@ -27,13 +27,17 @@ html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
   font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
-.col{max-width:var(--read)}
+.col{max-width:var(--read);margin:0 auto}
+.secnum,h2{text-align:center}
+h2{max-width:20ch;margin-left:auto;margin-right:auto}
+.lede{text-align:center;max-width:700px;margin-left:auto;margin-right:auto}
 a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-soft)}
 a:hover{border-bottom-color:var(--accent)}
 code,.mono{font-family:var(--font-mono);font-size:.88em}
 code{background:var(--bg-2);padding:.1em .35em;border-radius:3px}
 
 /* ---------- hero ---------- */
+#bgfield{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none}
 #hero{position:relative;padding:98px 0 74px;border-bottom:1px solid var(--rule);overflow:hidden}
 #heroCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
 #hero .wrap{position:relative}
@@ -102,9 +106,29 @@ td .good{color:var(--calm)} td .bad{color:var(--danger)} td .warnc{color:var(--w
   overflow:hidden}
 .videobox video{display:block;width:100%;height:auto}
 
+.fig3d{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:3px;
+  cursor:grab;touch-action:none}
+.fig3d:active{cursor:grabbing}
+.grabhint{font-family:var(--font-mono);font-size:12px;color:var(--ink-4);margin-top:10px;
+  display:flex;align-items:center;gap:8px}
+.grabhint .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.bignum{font-family:var(--font-mono);font-size:clamp(38px,6vw,72px);font-weight:500;
+  letter-spacing:-.02em;color:var(--accent-deep);text-align:center;margin:8px 0 4px}
+.bigrow{display:flex;gap:44px;justify-content:center;flex-wrap:wrap;margin:38px 0}
+.bigcell{text-align:center}
+.bigcell .lbl{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4)}
+.bigcell .bignum{margin:6px 0 0}
+.bigcell.g .bignum{color:var(--calm)}
+
 /* ---------- reveal ---------- */
 .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
 .reveal.in{opacity:1;transform:none}
+.wsplit .w{display:inline-block;opacity:0;transform:translateY(16px);
+  transition:opacity .62s var(--ease),transform .62s var(--ease)}
+.wsplit.in .w{opacity:1;transform:none}
 
 footer{padding:64px 0 88px;color:var(--ink-3);font-size:16px}
 footer .wrap{max-width:var(--maxw)}
@@ -117,6 +141,7 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
 </style>
 </head>
 <body>
+<canvas id="bgfield" aria-hidden="true"></canvas>
 
 <header id="hero">
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
@@ -201,6 +226,17 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
     <div class="fignote"><b>the receipt.</b> 87 tasks, 85 all-or-nothing, from
       <code>verifier_census.py</code>. 24 Office-format from <code>reach_census.py</code>.</div>
   </div></div>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <canvas id="corpus3d" class="fig3d" aria-label="A rotatable three dimensional view of the eighty-seven task corpus. Each task is a tile on a plane. The six tasks on the recalculation trap stand proud of the surface."></canvas>
+    <div class="ctrl">
+      <button id="b3trap" class="on">Raise the 6 on the trap</button>
+      <button id="b3office">Raise the 24 Office format</button>
+      <button id="b3flat">Flat</button>
+    </div>
+    <div class="grabhint"><span class="dot"></span> grab it and turn it around</div>
+    <div class="fignote"><b>the receipt.</b> The same 87 tasks, in depth. Height is the only channel
+      carrying the selection, so the count is readable from any angle.</div>
+  </div></div>
 </div></div></section>
 
 <section id="s3"><div class="wrap"><div class="col">
@@ -245,6 +281,13 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
   <p class="reveal">Measured paired on the public corpus with Claude Haiku 4.5 on the official
     harness, one arm with the library mounted and one without, reading each reward from the task's
     own <code>reward.txt</code>.</p>
+  <div class="bigrow reveal" id="counters">
+    <div class="bigcell"><div class="lbl">tasks</div><div class="bignum" data-to="14">0</div></div>
+    <div class="bigcell g"><div class="lbl">conversions</div><div class="bignum" data-to="3">0</div></div>
+    <div class="bigcell"><div class="lbl">regressions</div><div class="bignum" data-to="0">0</div></div>
+    <div class="bigcell g"><div class="lbl">mean delta</div><div class="bignum" data-to="0.3095" data-dec="4" data-sign="1">0</div></div>
+    <div class="bigcell"><div class="lbl">paid rollouts</div><div class="bignum" data-to="154">0</div></div>
+  </div>
   <div class="receipt reveal"><div class="receipt-frame">
     <canvas id="pairedCanvas" class="fig" aria-label="Fourteen development tasks with their paired delta. Three tasks convert from zero to one. None regress. The rest sit at zero."></canvas>
     <div class="fignote"><b>the receipt.</b> <code>recompute_paired.py</code> prints
@@ -278,6 +321,12 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
     <canvas id="reachCanvas" class="fig" aria-label="Load rate by task family. The library loads on seventeen of twenty-one Office-format tasks measured and on one of seventeen non-Office tasks."></canvas>
     <div class="fignote"><b>the receipt.</b> <code>reach_census.py</code> prints
       <b>Office 21 measured, 17 loaded</b> and <b>non-Office 17 measured, 1 loaded</b>.</div>
+  </div></div>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <canvas id="stack3d" class="fig3d" aria-label="A rotatable three dimensional view of the seven shipped packs as stacked slabs, with the two always-on packs marked."></canvas>
+    <div class="grabhint"><span class="dot"></span> grab it and turn it around</div>
+    <div class="fignote"><b>the receipt.</b> Seven packs. <code>deliverable-contract</code> and
+      <code>safety-governor</code> are always on, the other five fire on their own format.</div>
   </div></div>
   <p class="reveal">A pack fires when its format is what the task is <i>about</i>, and not when the
     format is only the container the answer gets saved into. A pack named <code>json</code> loaded on
@@ -375,14 +424,22 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
   document.querySelectorAll("main section").forEach(function(s){ spy.observe(s); });
 
   /* ---------- canvas helper, device pixel ratio aware ---------- */
+  var _hd = new WeakMap();
   function hidpi(c){
     var dpr = Math.min(devicePixelRatio || 1, 2);
     var r = c.getBoundingClientRect();
     var w = Math.max(1, Math.round(r.width));
     var h = Math.max(1, Math.round(r.height || w * 0.5));
+    var cached = _hd.get(c);
+    if(cached && cached.w===w && cached.h===h && cached.dpr===dpr){
+      cached.x.clearRect(0,0,w,h);
+      return cached;
+    }
     c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
     var x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
-    return {x:x, w:w, h:h};
+    var rec = {x:x, w:w, h:h, dpr:dpr};
+    _hd.set(c, rec);
+    return rec;
   }
   var INK="#15110b", INK2="#3b3527", INK3="#6b6452", INK4="#968d77",
       RULE="rgba(21,17,11,0.16)", ACC="#2558c6", CORE="#dd7a3c", CALM="#2f9e5c", BG2="#ece6d8";
@@ -391,7 +448,8 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
   /* ---------- hero: a slow field of cells, a few of which never resolve ---------- */
   var hc = document.getElementById("heroCanvas");
   function drawHero(t){
-    var d = hidpi(hc), x = d.x, w = d.w, h = d.h;
+    if(!heroCtx) return;
+    var x = heroCtx, w = heroW, h = heroH;
     x.clearRect(0,0,w,h);
     var cell = 42, cols = Math.ceil(w/cell), rows = Math.ceil(h/cell);
     for(var i=0;i<cols;i++) for(var j=0;j<rows;j++){
@@ -544,16 +602,295 @@ footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;m
       padL-160, h-16);
   }
 
-  function drawAllStatic(){ drawTrap(); drawCorpus(); drawPaired(); drawReach(); }
+
+  /* ================= per section background field ================= */
+  /* Each section owns a palette and a pattern. The field crossfades between them as you scroll,
+     so the ground under the type changes without ever pulling focus from it. */
+  var PAL = [
+    {rgb:[37,88,198],  a:0.055, mode:"grid"},
+    {rgb:[221,122,60], a:0.070, mode:"grid"},
+    {rgb:[221,122,60], a:0.055, mode:"cells"},
+    {rgb:[184,130,0],  a:0.060, mode:"rings"},
+    {rgb:[47,158,92],  a:0.055, mode:"rays"},
+    {rgb:[47,158,92],  a:0.075, mode:"bars"},
+    {rgb:[37,88,198],  a:0.055, mode:"grid"},
+    {rgb:[37,88,198],  a:0.065, mode:"cells"},
+    {rgb:[21,17,11],   a:0.050, mode:"rings"},
+    {rgb:[21,17,11],   a:0.040, mode:"grid"}
+  ];
+  var PAL_IDS = ["hero","s1","s2","s3","s4","s5","s6","s7","s8","method"];
+  var bg = document.getElementById("bgfield");
+  var palPos = 0, lastDrawn = -99, SEC_TOPS = [], bgCtx = null, bgW = 0, bgH = 0, heroCtx = null, heroW = 0, heroH = 0;
+
+  function measure(){
+    SEC_TOPS = PAL_IDS.map(function(id){
+      var el = document.getElementById(id);
+      return el ? el.getBoundingClientRect().top + scrollY : 0;
+    });
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    [[bg,"bg",0.5],[hc,"hero",1]].forEach(function(pair){
+      var c = pair[0], r = c.getBoundingClientRect(), k = pair[2];
+      var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height || w*0.5));
+      var scale = k * (k < 1 ? 1 : dpr);       /* the field is texture, half resolution is plenty */
+      c.width = Math.round(w*scale); c.height = Math.round(h*scale);
+      var x = c.getContext("2d"); x.setTransform(scale,0,0,scale,0,0);
+      if(pair[1]==="bg"){ bgCtx=x; bgW=w; bgH=h; } else { heroCtx=x; heroW=w; heroH=h; }
+    });
+  }
+
+  function palTarget(){
+    var y = scrollY + innerHeight*0.42, best = 0;
+    for(var i=0;i<SEC_TOPS.length;i++){ if(SEC_TOPS[i] <= y) best = i; }
+    return best;
+  }
+  function drawField(ts){
+    var i0 = Math.max(0, Math.min(PAL.length-1, Math.floor(palPos)));
+    var i1 = Math.min(PAL.length-1, i0+1);
+    var f = palPos - i0;
+    var a = PAL[i0], b = PAL[i1];
+    if(!bgCtx) return;
+    var want = palTarget();
+    palPos += (want - palPos) * 0.08;
+    if(Math.abs(want - palPos) < 0.002) palPos = want;
+    if(Math.abs(palPos - lastDrawn) < 0.004) return;   /* nothing moved, nothing to repaint */
+    lastDrawn = palPos;
+    var x = bgCtx, w = bgW, h = bgH, t = ts/1000;
+    x.clearRect(0,0,w,h);
+
+    /* the wash: one interpolated colour across the whole viewport */
+    var rr=Math.round(a.rgb[0]+(b.rgb[0]-a.rgb[0])*f),
+        gg=Math.round(a.rgb[1]+(b.rgb[1]-a.rgb[1])*f),
+        bb=Math.round(a.rgb[2]+(b.rgb[2]-a.rgb[2])*f),
+        aa=a.a+(b.a-a.a)*f;
+    var g=x.createRadialGradient(w*0.62,h*0.34,0,w*0.62,h*0.34,Math.max(w,h)*0.9);
+    g.addColorStop(0,"rgba("+rr+","+gg+","+bb+","+(aa*2.1).toFixed(3)+")");
+    g.addColorStop(1,"rgba("+rr+","+gg+","+bb+",0)");
+    x.fillStyle=g; x.fillRect(0,0,w,h);
+
+    /* the pattern: draw both neighbours and crossfade, so the switch is never a jump */
+    drawPattern(x,w,h,t,a.mode,[rr,gg,bb],(1-f));
+    if(i1!==i0) drawPattern(x,w,h,t,b.mode,[rr,gg,bb],f);
+  }
+
+  function drawPattern(x,w,h,t,mode,rgb,k){
+    if(k<=0.01) return;
+    var col=function(al){return "rgba("+rgb[0]+","+rgb[1]+","+rgb[2]+","+(al*k).toFixed(3)+")";};
+    x.lineWidth=1;
+    if(mode==="grid"){
+      var s=96;
+      for(var i=0;i<Math.ceil(w/s)+1;i++) for(var j=0;j<Math.ceil(h/s)+1;j++){
+        x.fillStyle=col(0.10+0.10*Math.sin(t*0.5+i*0.5+j*0.4));
+        x.beginPath();
+        x.arc(i*s+Math.sin(t*0.3+j)*4, j*s+Math.cos(t*0.25+i)*4, 1.6, 0, 6.284); x.fill();
+      }
+    } else if(mode==="cells"){
+      var c=128;
+      for(var i2=0;i2<Math.ceil(w/c)+1;i2++) for(var j2=0;j2<Math.ceil(h/c)+1;j2++){
+        x.strokeStyle=col(0.09+0.09*Math.sin(t*0.42+i2*0.7+j2*0.5));
+        x.strokeRect(i2*c+.5, j2*c+.5, c-16, c-16);
+      }
+    } else if(mode==="rings"){
+      for(var r2=0;r2<8;r2++){
+        x.strokeStyle=col(0.10+0.09*Math.sin(t*0.4+r2*0.8));
+        x.beginPath();
+        x.arc(w*0.76,h*0.40, 70+r2*78+Math.sin(t*0.3+r2)*9, 0, 6.284); x.stroke();
+      }
+    } else if(mode==="rays"){
+      for(var r3=0;r3<18;r3++){
+        var ang=r3/18*6.284+t*0.045;
+        x.strokeStyle=col(0.06+0.06*Math.sin(t*0.5+r3));
+        x.beginPath(); x.moveTo(w*0.5,h*0.52);
+        x.lineTo(w*0.5+Math.cos(ang)*w, h*0.52+Math.sin(ang)*w); x.stroke();
+      }
+    } else if(mode==="bars"){
+      for(var b2=0;b2<24;b2++){
+        x.fillStyle=col(0.07+0.06*Math.sin(t*0.55+b2*0.6));
+        x.fillRect(0, b2*(h/24), Math.abs(60+60*Math.sin(t*0.3+b2*0.9))*5, 3);
+      }
+    }
+  }
+
+  /* ================= a small 3D engine: project, sort, draw ================= */
+  /* Hand rolled rather than a library, so the page stays dependency free and the figures use the
+     same drawing surface as every other figure here. */
+  function makeRotator(canvas, onDrag){
+    var st = {rx:-0.62, ry:0.52, drag:false, px:0, py:0, vx:0, vy:0};
+    function down(e){ st.drag=true; st.px=(e.touches?e.touches[0]:e).clientX;
+      st.py=(e.touches?e.touches[0]:e).clientY; }
+    function move(e){
+      if(!st.drag) return;
+      var cx=(e.touches?e.touches[0]:e).clientX, cy=(e.touches?e.touches[0]:e).clientY;
+      st.vy=(cx-st.px)*0.008; st.vx=(cy-st.py)*0.006;
+      st.ry+=st.vy; st.rx+=st.vx;
+      st.rx=Math.max(-1.35,Math.min(-0.08,st.rx));
+      st.px=cx; st.py=cy; if(e.cancelable) e.preventDefault(); if(onDrag) onDrag();
+    }
+    function up(){ st.drag=false; }
+    canvas.addEventListener("mousedown",down); addEventListener("mousemove",move);
+    addEventListener("mouseup",up);
+    canvas.addEventListener("touchstart",down,{passive:true});
+    canvas.addEventListener("touchmove",move,{passive:false});
+    addEventListener("touchend",up);
+    return st;
+  }
+  function project(p, st, w, h, dist, scale){
+    var cy=Math.cos(st.ry), sy=Math.sin(st.ry), cx=Math.cos(st.rx), sx=Math.sin(st.rx);
+    var X=p[0]*cy - p[2]*sy, Z=p[0]*sy + p[2]*cy;
+    var Y=p[1]*cx - Z*sx,    Z2=p[1]*sx + Z*cx;
+    var f=dist/(dist+Z2);
+    return [w/2 + X*f*scale, h/2 + Y*f*scale, Z2, f];
+  }
+  function quad(x, pts, st, w, h, dist, scale, fill, stroke, alpha){
+    var pr=pts.map(function(p){return project(p,st,w,h,dist,scale);});
+    x.globalAlpha=alpha===undefined?1:alpha;
+    x.beginPath(); x.moveTo(pr[0][0],pr[0][1]);
+    for(var i=1;i<pr.length;i++) x.lineTo(pr[i][0],pr[i][1]);
+    x.closePath();
+    if(fill){ x.fillStyle=fill; x.fill(); }
+    if(stroke){ x.strokeStyle=stroke; x.lineWidth=1; x.stroke(); }
+    x.globalAlpha=1;
+    return pr.reduce(function(a,b){return a+b[2];},0)/pr.length;
+  }
+
+  /* --- 3D figure 1: the 87 task corpus as a plane with raised tiles --- */
+  var c3 = document.getElementById("corpus3d");
+  var st3 = makeRotator(c3, function(){ drawCorpus3D(); });
+  var raise = "trap";
+  function drawCorpus3D(){
+    var d = hidpi(c3), x=d.x, w=d.w, h=d.h;
+    x.clearRect(0,0,w,h); x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var cols=15, sz=15, gap=4, dist=900, scale=Math.min(w,h)*0.0092;
+    var faces=[];
+    for(var i=0;i<87;i++){
+      var c=i%cols, r=Math.floor(i/cols);
+      var X=(c-(cols-1)/2)*(sz+gap), Zc=(r-2.5)*(sz+gap);
+      var isTrap=!!TRAP[i], isOff=i<24;
+      var up = (raise==="trap"&&isTrap)?34 : (raise==="office"&&isOff)?22 : 0;
+      var lit = up>0;
+      var col = (raise==="trap"&&isTrap) ? CORE : (raise==="office"&&isOff) ? CALM : "rgba(21,17,11,0.10)";
+      var top=[[X-sz/2,-up,Zc-sz/2],[X+sz/2,-up,Zc-sz/2],[X+sz/2,-up,Zc+sz/2],[X-sz/2,-up,Zc+sz/2]];
+      faces.push({pts:top, fill:col, stroke:"rgba(21,17,11,0.26)", a:lit?1:0.85});
+      if(up>0){
+        faces.push({pts:[[X-sz/2,-up,Zc+sz/2],[X+sz/2,-up,Zc+sz/2],[X+sz/2,0,Zc+sz/2],[X-sz/2,0,Zc+sz/2]],
+          fill:"rgba(21,17,11,0.22)", stroke:null, a:1});
+        faces.push({pts:[[X+sz/2,-up,Zc-sz/2],[X+sz/2,-up,Zc+sz/2],[X+sz/2,0,Zc+sz/2],[X+sz/2,0,Zc-sz/2]],
+          fill:"rgba(21,17,11,0.13)", stroke:null, a:1});
+      }
+    }
+    faces.forEach(function(f){
+      f.depth = f.pts.map(function(p){return project(p,st3,w,h,dist,scale)[2];})
+                     .reduce(function(a,b){return a+b;},0)/f.pts.length;
+    });
+    faces.sort(function(a,b){return b.depth-a.depth;});
+    faces.forEach(function(f){ quad(x,f.pts,st3,w,h,dist,scale,f.fill,f.stroke,f.a); });
+    mono(x,12); x.fillStyle=INK3;
+    x.fillText(raise==="trap" ? "6 of 87 raised: the recalculation trap"
+      : raise==="office" ? "24 of 87 raised: the Office formats the packs aim at"
+      : "87 tasks, flat", 18, h-14);
+  }
+  ["b3trap","b3office","b3flat"].forEach(function(id,k){
+    document.getElementById(id).onclick=function(){
+      raise=["trap","office","flat"][k];
+      ["b3trap","b3office","b3flat"].forEach(function(j,n){
+        document.getElementById(j).classList.toggle("on", n===k); });
+      drawCorpus3D();
+    };
+  });
+
+  /* --- 3D figure 2: the seven packs as stacked slabs --- */
+  var PACKS=[["xlsx",0],["pdf",0],["docx",0],["pptx",0],["csv",0],
+             ["deliverable-contract",1],["safety-governor",1]];
+  var cs = document.getElementById("stack3d");
+  var sts = makeRotator(cs, function(){ drawStack3D(); });
+  function drawStack3D(){
+    var d = hidpi(cs), x=d.x, w=d.w, h=d.h;
+    x.clearRect(0,0,w,h); x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var dist=900, scale=Math.min(w,h)*0.011, sw=120, sd=52, th=13, gap=9;
+    var faces=[];
+    PACKS.forEach(function(pk,i){
+      var y = (i-3)*(th+gap);
+      var col = pk[1] ? "rgba(37,88,198,0.30)" : "rgba(47,158,92,0.26)";
+      var edge = pk[1] ? "rgba(22,53,126,0.7)" : "rgba(47,158,92,0.7)";
+      faces.push({pts:[[-sw/2,y,-sd/2],[sw/2,y,-sd/2],[sw/2,y,sd/2],[-sw/2,y,sd/2]],
+        fill:col, stroke:edge, a:1, label:pk[0], ly:y});
+      faces.push({pts:[[-sw/2,y,sd/2],[sw/2,y,sd/2],[sw/2,y+th,sd/2],[-sw/2,y+th,sd/2]],
+        fill:"rgba(21,17,11,0.16)", stroke:edge, a:1});
+      faces.push({pts:[[sw/2,y,-sd/2],[sw/2,y,sd/2],[sw/2,y+th,sd/2],[sw/2,y+th,-sd/2]],
+        fill:"rgba(21,17,11,0.10)", stroke:edge, a:1});
+    });
+    faces.forEach(function(f){
+      f.depth=f.pts.map(function(p){return project(p,sts,w,h,dist,scale)[2];})
+                   .reduce(function(a,b){return a+b;},0)/f.pts.length;
+    });
+    faces.sort(function(a,b){return b.depth-a.depth;});
+    faces.forEach(function(f){
+      quad(x,f.pts,sts,w,h,dist,scale,f.fill,f.stroke,f.a);
+      if(f.label){
+        var pr=project([-sw/2-6,f.ly,0],sts,w,h,dist,scale);
+        mono(x,11); x.fillStyle=INK2; x.textAlign="right";
+        x.fillText(f.label, pr[0]-4, pr[1]+4); x.textAlign="left";
+      }
+    });
+    mono(x,12); x.fillStyle=INK3;
+    x.fillText("blue: always on. green: fires on its own format.", 18, h-14);
+  }
+
+  /* ================= counters that count up when they arrive ================= */
+  var counterObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      counterObs.unobserve(e.target);
+      [].forEach.call(e.target.querySelectorAll(".bignum"), function(n){
+        var to=parseFloat(n.dataset.to), dec=parseInt(n.dataset.dec||"0",10),
+            sign=n.dataset.sign?"+":"", t0=null, dur=1300;
+        function step(ts){
+          if(t0===null)t0=ts;
+          var p=Math.min(1,(ts-t0)/dur), e2=1-Math.pow(1-p,3);
+          n.textContent = (to===0?0:sign)+(to*e2).toFixed(dec);
+          if(p<1) requestAnimationFrame(step);
+        }
+        if(reduce){ n.textContent=(to===0?0:sign)+to.toFixed(dec); }
+        else requestAnimationFrame(step);
+      });
+    });
+  },{threshold:0.4});
+  var crow=document.getElementById("counters"); if(crow) counterObs.observe(crow);
+
+  /* ================= headings reveal word by word ================= */
+  [].forEach.call(document.querySelectorAll("h2"), function(hd){
+    if(hd.querySelector(".w")) return;
+    hd.classList.add("wsplit","reveal");
+    hd.innerHTML = hd.textContent.trim().split(/\s+/).map(function(word,i){
+      return '<span class="w" style="transition-delay:'+(i*52)+'ms">'+word+'</span>';
+    }).join(" ");
+    revealObs.observe(hd);
+  });
+
+  function drawAllStatic(){ drawTrap(); drawCorpus(); drawPaired(); drawReach(); drawCorpus3D(); drawStack3D(); }
   drawAllStatic();
 
-  var heroRaf=null;
-  function loop(ts){ drawHero(ts); heroRaf=requestAnimationFrame(loop); }
-  if(!reduce) heroRaf=requestAnimationFrame(loop); else drawHero(0);
+  var lastAmb = 0;
+  function loop(ts){
+    if(ts - lastAmb > 40){
+      lastAmb = ts;
+      if(scrollY < innerHeight * 1.2) drawHero(ts);   /* hero is off screen after that */
+      drawField(ts);
+    }
+    requestAnimationFrame(loop);
+  }
+  if(!reduce) requestAnimationFrame(loop); else { drawHero(0); drawField(0); }
 
+
+  measure();
   var to=null;
   addEventListener("resize", function(){
-    clearTimeout(to); to=setTimeout(drawAllStatic, 140);
+    clearTimeout(to); to=setTimeout(function(){ measure(); drawAllStatic(); }, 140);
+  });
+  addEventListener("load", measure);
+  /* requestAnimationFrame is throttled to nothing in a background tab, so the ambient layers
+     never paint there. Repaint once on return rather than leaving a blank field. */
+  addEventListener("visibilitychange", function(){
+    if(!document.hidden){ measure(); lastDrawn = -99; }
   });
 })();
 </script>

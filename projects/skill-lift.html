@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reading the Verifier</title>
+<meta name="description" content="A skill library and a skill generator for BenchFlow SkillsBench, built by reading verifiers rather than task prompts, and measured over 154 paid rollouts." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;0,9..144,600;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8;
+  --ink:#15110b; --ink-2:#3b3527; --ink-3:#6b6452; --ink-4:#968d77;
+  --rule:rgba(21,17,11,0.12); --rule-strong:rgba(21,17,11,0.28);
+  --accent:#2558c6; --accent-deep:#16357e; --accent-soft:#a9c0ee; --accent-bright:#4d84f0;
+  --core:#dd7a3c; --core-soft:#eeb98f; --halo:#4a8fd6;
+  --calm:#2f9e5c; --danger:#d23a28; --warn:#b88200;
+  --font-display:"Fraunces","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+  font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.col{max-width:var(--read)}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-soft)}
+a:hover{border-bottom-color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+code{background:var(--bg-2);padding:.1em .35em;border-radius:3px}
+
+/* ---------- hero ---------- */
+#hero{position:relative;padding:98px 0 74px;border-bottom:1px solid var(--rule);overflow:hidden}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+#hero .wrap{position:relative}
+.hero-mark{font-family:var(--font-mono);font-size:13px;letter-spacing:.06em;color:var(--ink-3);
+  display:flex;align-items:center;gap:10px;margin-bottom:26px}
+.hero-mark .bd{width:10px;height:10px;background:var(--accent);border-radius:2px;display:inline-block}
+h1{font-family:var(--font-display);font-weight:380;font-size:clamp(48px,7.2vw,96px);
+  line-height:1.02;letter-spacing:-.02em;margin:0 0 26px}
+h1 .it{font-style:italic;font-weight:420;color:var(--accent-deep)}
+.hero-sub{font-size:21px;color:var(--ink-2);max-width:748px;margin:0 0 30px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;color:var(--ink-2);
+  background:var(--bg-2);border:1px solid var(--rule);padding:7px 12px;border-radius:999px}
+.chip b{color:var(--ink);font-weight:500}
+.chip.ok b{color:var(--calm)} .chip.warn b{color:var(--warn)}
+
+/* ---------- sticky toc ---------- */
+#toc{position:sticky;top:0;z-index:40;background:rgba(244,239,230,.93);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+#toc .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:11px;padding-bottom:11px;
+  scrollbar-width:none}
+#toc .wrap::-webkit-scrollbar{display:none}
+#toc a{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);border:0;
+  white-space:nowrap;padding:6px 11px;border-radius:6px;transition:.2s var(--ease)}
+#toc a:hover{background:var(--bg-2);color:var(--ink)}
+#toc a.active{background:var(--ink);color:var(--bg)}
+
+/* ---------- sections ---------- */
+section{padding:78px 0;border-bottom:1px solid var(--rule)}
+.secnum{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.14em;color:var(--ink-4);
+  margin-bottom:16px}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(30px,3.9vw,46px);
+  line-height:1.13;letter-spacing:-.015em;margin:0 0 26px;max-width:16ch}
+h3{font-family:var(--font-display);font-weight:460;font-size:24px;margin:44px 0 14px}
+p{margin:0 0 20px;max-width:var(--read)}
+.lede{font-size:22px;color:var(--ink-2)}
+.pull{border-left:3px solid var(--accent);padding:4px 0 4px 22px;margin:34px 0;
+  font-family:var(--font-display);font-size:26px;line-height:1.35;font-style:italic;
+  color:var(--accent-deep);max-width:var(--read)}
+
+/* ---------- figures ---------- */
+.receipt{margin:44px 0}
+.receipt-frame{background:var(--bg-2);border:1px solid var(--rule);border-radius:6px;padding:20px}
+canvas.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:3px}
+.fignote{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);margin-top:14px;
+  line-height:1.6}
+.fignote b{color:var(--ink-2);font-weight:500}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ctrl button{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);background:var(--bg);
+  border:1px solid var(--rule-strong);padding:7px 13px;border-radius:6px;cursor:pointer;
+  transition:.18s var(--ease)}
+.ctrl button:hover{background:var(--bg-3)}
+.ctrl button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ---------- data table ---------- */
+table{border-collapse:collapse;width:100%;max-width:var(--read);margin:26px 0;
+  font-family:var(--font-mono);font-size:15px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--rule)}
+th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);font-weight:500}
+td.num{text-align:right}
+tr.hi td{background:rgba(47,158,92,.09)}
+td .good{color:var(--calm)} td .bad{color:var(--danger)} td .warnc{color:var(--warn)}
+
+/* ---------- video ---------- */
+.videobox{margin:40px 0;background:#0b0e13;border:1px solid var(--rule);border-radius:6px;
+  overflow:hidden}
+.videobox video{display:block;width:100%;height:auto}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+footer{padding:64px 0 88px;color:var(--ink-3);font-size:16px}
+footer .wrap{max-width:var(--maxw)}
+footer .fline{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;margin-bottom:14px}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+@media (max-width:720px){ body{font-size:17.5px} section{padding:56px 0} .wrap{padding:0 20px} }
+</style>
+</head>
+<body>
+
+<header id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap"><div class="col">
+    <div class="hero-mark"><span class="bd"></span> BenchFlow Agent Skill Lift &middot; Static Skills and Meta-Skills &middot; my entry</div>
+    <h1>Reading the <span class="it">Verifier</span></h1>
+    <p class="hero-sub">A spreadsheet can be completely correct and still score zero. The checker opens
+      it with a reader that only sees cached values, openpyxl never wrote any, and every number comes
+      back as <code>None</code>. Eighty-five of the eighty-seven public tasks are all or nothing, so
+      that single detail loses the whole task. This is the trap, the seven skills I built around it,
+      the generator that writes its own, and what all of it actually measured.</p>
+    <div class="hero-meta">
+      <span class="chip">development set <b>14 tasks</b></span>
+      <span class="chip ok">conversions <b>3</b></span>
+      <span class="chip ok">regressions <b>0</b></span>
+      <span class="chip">mean delta <b>+0.3095</b></span>
+      <span class="chip">paid rollouts <b>154</b></span>
+      <span class="chip warn">held-out <b>null</b></span>
+    </div>
+  </div></div>
+</header>
+
+<nav id="toc" aria-label="Sections"><div class="wrap">
+  <a href="#s1" data-sec="s1">01 The trap</a>
+  <a href="#s2" data-sec="s2">02 What the checker sees</a>
+  <a href="#s3" data-sec="s3">03 How much of it</a>
+  <a href="#s4" data-sec="s4">04 The fix</a>
+  <a href="#s5" data-sec="s5">05 What it scores</a>
+  <a href="#s6" data-sec="s6">06 Where it aims</a>
+  <a href="#s7" data-sec="s7">07 The generator</a>
+  <a href="#s8" data-sec="s8">08 The takeaway</a>
+  <a href="#method" data-sec="method">Method</a>
+</div></nav>
+
+<main>
+
+<section id="s1"><div class="wrap"><div class="col">
+  <div class="secnum reveal">01 &middot; The trap</div>
+  <h2 class="reveal">A spreadsheet that is correct and scores zero</h2>
+  <p class="reveal lede">The benchmark hands an agent a task, a sandbox and a verifier. Most write-ups
+    start from the task prompt. I started from the verifier, because the verifier is the only thing
+    that decides the reward, and it is readable before you spend anything.</p>
+  <p class="reveal">Reading them statically surfaced one mechanism that recurs and is invisible from
+    the prompt. When an agent writes a formula with <code>openpyxl</code>, the library stores the
+    formula as text and stores no cached result beside it. A checker that opens the file with
+    <code>load_workbook(path, data_only=True)</code> asks for the cached value, finds nothing, and
+    reads <code>None</code> for every formula cell. The workbook is correct. Open it in Excel and
+    every total is right. There is no Excel in the container, and reopening the file with openpyxl
+    recalculates nothing at all.</p>
+  <div class="pull reveal">The agent solved the task. The file it produced is right. The reward is
+    still zero.</div>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <canvas id="trapCanvas" class="fig" aria-label="Two views of the same workbook. The author view shows formulas in the total column. The checker view, opened with data_only true, shows None in every one of those cells."></canvas>
+    <div class="ctrl">
+      <button id="btnAuthor" class="on">Author view</button>
+      <button id="btnChecker">Checker view, data_only=True</button>
+    </div>
+    <div class="fignote"><b>the receipt.</b> The mechanism is a property of the verifier, not of the
+      model. <code>verifier_census.py</code> greps every task verifier for it and finds it on
+      <b>6 of the 87</b> public tasks.</div>
+  </div></div>
+</div></div></section>
+
+<section id="s2"><div class="wrap"><div class="col">
+  <div class="secnum reveal">02 &middot; What the checker sees</div>
+  <h2 class="reveal">One failed assertion loses the whole task</h2>
+  <p class="reveal">This would be a rounding error on a partial-credit benchmark. It is not one here.
+    Of the 87 public tasks, <b>85 are all or nothing</b>: the verifier either passes the task or
+    fails it, with nothing in between. A skill that fixes nine checks out of ten is worth exactly
+    the same as a skill that fixes none.</p>
+  <p class="reveal">That single fact reorders what is worth building. A pack full of good general
+    advice moves check counts. It does not move rewards. What moves a reward is closing the last
+    failing assertion, which means the pack has to know precisely which assertion the verifier is
+    going to make.</p>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <canvas id="corpusCanvas" class="fig" aria-label="Eighty-seven squares, one per public task. Eighty-five are marked all or nothing. Six sit on the recalculation trap. Twenty-four are Office format, the set the packs aim at."></canvas>
+    <div class="ctrl">
+      <button id="btnAll" class="on">All 87</button>
+      <button id="btnTrap">On the trap, 6</button>
+      <button id="btnOffice">Office format, 24</button>
+    </div>
+    <div class="fignote"><b>the receipt.</b> 87 tasks, 85 all-or-nothing, from
+      <code>verifier_census.py</code>. 24 Office-format from <code>reach_census.py</code>.</div>
+  </div></div>
+</div></div></section>
+
+<section id="s3"><div class="wrap"><div class="col">
+  <div class="secnum reveal">03 &middot; How much of it</div>
+  <h2 class="reveal">Six tasks, and why that is the honest denominator</h2>
+  <p class="reveal">The recalculation trap covers 6 of 87 tasks, which is 6.9 percent of the public
+    corpus. That is the ceiling on what this one mechanism can be worth, and it is worth stating
+    before any result, because a mechanism that fires on seven tasks in a hundred cannot produce a
+    large average lift no matter how well it works.</p>
+  <p class="reveal">Five of the six were measured on both arms. Across those five the library
+    converts at a mean of <b>0.33</b>. Multiply the two together and a private set with a similar mix
+    is worth about <b>2.3 percentage points</b> from this mechanism. The published figure for the
+    benchmark's own curated skills is +16.4pp, measured across a per-task expert library rather than
+    a general one.</p>
+  <div class="pull reveal">Six of eighty-seven, converting one draw in three. Everything else in this
+    entry is downstream of those two numbers.</div>
+</div></div></section>
+
+<section id="s4"><div class="wrap"><div class="col">
+  <div class="secnum reveal">04 &middot; The fix</div>
+  <h2 class="reveal">The fix has to be executable</h2>
+  <p class="reveal">You cannot write your way out of this one. No amount of instruction makes
+    openpyxl compute a formula, because openpyxl does not have an evaluator. The pack has to ship
+    something that actually runs.</p>
+  <p class="reveal">So the <code>xlsx</code> pack ships <code>recalc_xlsx.py</code>. It shells out to
+    gnumeric <code>ssconvert</code>, falls back to LibreOffice, evaluates every formula, writes the
+    cached values back into the workbook, drops a CSV value mirror beside it for readers that cannot
+    evaluate anything, and reports any <code>#REF!</code> or <code>#VALUE!</code> cell so the agent
+    can fix it before finishing. Seven packs ship in total, and nine executable scripts between them.</p>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <div class="videobox"><video controls preload="metadata" playsinline
+      poster="" src="assets/skill-lift/keynote.mp4"></video></div>
+    <div class="fignote"><b>the receipt.</b> An 80 second silent walkthrough of the same argument.
+      Rendered frame by frame from a self-contained HTML deck, so every frame is a pure function of
+      the timeline position.</div>
+  </div></div>
+</div></div></section>
+
+<section id="s5"><div class="wrap"><div class="col">
+  <div class="secnum reveal">05 &middot; What it scores</div>
+  <h2 class="reveal">Three conversions, no regressions</h2>
+  <p class="reveal">Measured paired on the public corpus with Claude Haiku 4.5 on the official
+    harness, one arm with the library mounted and one without, reading each reward from the task's
+    own <code>reward.txt</code>.</p>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <canvas id="pairedCanvas" class="fig" aria-label="Fourteen development tasks with their paired delta. Three tasks convert from zero to one. None regress. The rest sit at zero."></canvas>
+    <div class="fignote"><b>the receipt.</b> <code>recompute_paired.py</code> prints
+      <b>14 tasks, 3 flips, 0 regressions, mean delta +0.3095</b>.</div>
+  </div></div>
+  <table class="reveal">
+    <tr><th>set</th><th class="num">tasks</th><th class="num">conversions</th>
+      <th class="num">regressions</th><th class="num">mean delta</th></tr>
+    <tr class="hi"><td>Development</td><td class="num">14</td>
+      <td class="num"><span class="good">3</span></td><td class="num">0</td>
+      <td class="num"><span class="good">+0.3095</span></td></tr>
+    <tr><td>Held-out, pre-registered</td><td class="num">12</td><td class="num">0</td>
+      <td class="num">1</td><td class="num">-0.0278</td></tr>
+  </table>
+  <p class="reveal">The development tasks informed the library, so that mean measures the effect on
+    tasks chosen for relevance rather than a generalization estimate. The held-out set was
+    pre-registered before it ran and returned a null. Its one regression was measured not to be
+    mine: three further baseline rollouts of that task, with no library mounted at all, stall the
+    same way and name the same missing bundled skill.</p>
+</div></div></section>
+
+<section id="s6"><div class="wrap"><div class="col">
+  <div class="secnum reveal">06 &middot; Where it aims</div>
+  <h2 class="reveal">Scope, and why it is a decision</h2>
+  <p class="reveal">The packs target the Office-format work, 24 of the 87 public tasks, and they load
+    on 17 of the 21 I measured. Before spending on wider coverage I classified every failing
+    assertion on disk as contract-shaped or analytical. <b>12 of the 18 non-Office tasks fail on the
+    computed numbers</b> rather than on any output contract, so there is nothing there for a
+    procedural skill to fix.</p>
+  <div class="receipt reveal"><div class="receipt-frame">
+    <canvas id="reachCanvas" class="fig" aria-label="Load rate by task family. The library loads on seventeen of twenty-one Office-format tasks measured and on one of seventeen non-Office tasks."></canvas>
+    <div class="fignote"><b>the receipt.</b> <code>reach_census.py</code> prints
+      <b>Office 21 measured, 17 loaded</b> and <b>non-Office 17 measured, 1 loaded</b>.</div>
+  </div></div>
+  <p class="reveal">A pack fires when its format is what the task is <i>about</i>, and not when the
+    format is only the container the answer gets saved into. A pack named <code>json</code> loaded on
+    none of the tasks I tried it on, including one whose prompt says to write
+    <code>/root/answer.json</code>.</p>
+</div></div></section>
+
+<section id="s7"><div class="wrap"><div class="col">
+  <div class="secnum reveal">07 &middot; The generator</div>
+  <h2 class="reveal">A creator that reads the contract first</h2>
+  <p class="reveal">The Meta-Skills entry is one <code>skill-creator</code> pack: an environment probe
+    that runs against the real task workspace, a grader-view step that makes the agent read the
+    verifier's contract before writing anything, and an admit gate that lints a generated pack for
+    size, frontmatter, naming and forbidden references.</p>
+  <p class="reveal">I ran it end to end twelve times and it produced one conversion, which does not
+    yet beat shipping the static library. It is worth reporting anyway, because the failures share
+    one cause and that cause is traceable. The harness's own self-gen prompt hands the creator the
+    path <code>/root/generated-skills/&lt;task-name&gt;-skill</code>, so the creator was naming packs
+    after the calibration task, and a pack named after one task cannot route on any other. Written
+    advice reached two cases in three. Making it mechanical, as a check in the admit gate, catches
+    <b>14 of 14</b> task-echoing names across the 24 packs the creator has produced, with no false
+    rejects on the 10 clean ones.</p>
+  <p class="reveal">That last figure is a property of the checker measured offline. No rollout has
+    been run against the gate, and the write-up labels it that way.</p>
+</div></div></section>
+
+<section id="s8"><div class="wrap"><div class="col">
+  <div class="secnum reveal">08 &middot; The takeaway</div>
+  <h2 class="reveal">What I would tell someone starting this</h2>
+  <p class="reveal">Read the verifiers before you write anything. They are open, they are static, and
+    they are the only thing that decides the score. Most of what looks like a modelling problem on
+    this benchmark is a contract problem that is legible in the checker source for free.</p>
+  <p class="reveal">Then check whether the contract is the only thing failing. Where a task fails on
+    the computed numbers, no procedural skill helps, and the honest move is to say so and spend the
+    budget somewhere the mechanism can actually fire.</p>
+  <div class="pull reveal">Read the verifier before you write the skill.</div>
+</div></div></section>
+
+<section id="method"><div class="wrap"><div class="col">
+  <div class="secnum reveal">Method</div>
+  <h2 class="reveal">How it was measured</h2>
+  <p class="reveal">154 paid rollouts, 135.17 USD, all on
+    <code>anthropic/claude-haiku-4-5-20251001</code> through <code>bench eval run</code>
+    (benchflow 0.6.7, dataset <code>skillsbench@1.1</code>, Docker sandbox at concurrency 1). Each
+    round was pre-registered before it ran, with the task, the number of draws and what each outcome
+    would license fixed in advance, and amendments appended rather than edited.</p>
+  <p class="reveal">Every number here is printed by a script in the repository, and one command
+    checks the document against the artifacts: <code>recompute_paired.py</code> for the paired table,
+    <code>reach_census.py</code> for the reach figures, <code>verifier_census.py</code> and
+    <code>deliverable_census.py</code> for the corpus census, <code>trap_projection.py</code> for the
+    private-set projection, and <code>verify_writeup.py</code> to regenerate all of them and fail if
+    the text and the data disagree.</p>
+  <h3 class="reveal">Two measurement problems worth knowing about</h3>
+  <p class="reveal">Several task verifiers bootstrap their test runner by downloading a tool at
+    verify time. When that download fails, zero tests execute while the harness still writes a reward
+    of 0, which is indistinguishable from a real failure in every field the scorer reads. Separately,
+    an arm that never loaded a skill measures nothing about the library in either direction, so
+    counting those rollouts as evidence would be wrong both ways. Both are detected and held aside as
+    missing data.</p>
+</div></div></section>
+
+</main>
+
+<footer><div class="wrap"><div class="col">
+  <div class="fline">BenchFlow Agent Skill Lift &middot; Static Skills and Meta-Skills &middot; submitted 2026</div>
+  <p>Artifacts: <code>static-skills.zip</code> (7 packs) and <code>meta-skills.zip</code>
+    (skill-creator). Development set 14 tasks, 3 conversions, 0 regressions, mean delta +0.3095.
+    Held-out set 12 tasks, 0 conversions, 1 regression, mean delta -0.0278. Projected contribution
+    on a private set of a similar mix, about 2.3 percentage points from the recalculation mechanism,
+    which is a projection and not a measurement.</p>
+  <p>Maksim Silchenko</p>
+</div></div></footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- reveal + scrollspy, same pattern as the reference page ---------- */
+  var revealObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); revealObs.unobserve(e.target); } });
+  }, {rootMargin:"0px 0px -8% 0px", threshold:0.05});
+  document.querySelectorAll(".reveal").forEach(function(el){ revealObs.observe(el); });
+
+  var links = [].slice.call(document.querySelectorAll("#toc a"));
+  var map = {}; links.forEach(function(a){ map[a.dataset.sec] = a; });
+  var spy = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove("active"); });
+        var a = map[e.target.id]; if(a) a.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-45% 0px -50% 0px"});
+  document.querySelectorAll("main section").forEach(function(s){ spy.observe(s); });
+
+  /* ---------- canvas helper, device pixel ratio aware ---------- */
+  function hidpi(c){
+    var dpr = Math.min(devicePixelRatio || 1, 2);
+    var r = c.getBoundingClientRect();
+    var w = Math.max(1, Math.round(r.width));
+    var h = Math.max(1, Math.round(r.height || w * 0.5));
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    var x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
+    return {x:x, w:w, h:h};
+  }
+  var INK="#15110b", INK2="#3b3527", INK3="#6b6452", INK4="#968d77",
+      RULE="rgba(21,17,11,0.16)", ACC="#2558c6", CORE="#dd7a3c", CALM="#2f9e5c", BG2="#ece6d8";
+  function mono(x,s){ x.font = s+"px 'IBM Plex Mono',monospace"; }
+
+  /* ---------- hero: a slow field of cells, a few of which never resolve ---------- */
+  var hc = document.getElementById("heroCanvas");
+  function drawHero(t){
+    var d = hidpi(hc), x = d.x, w = d.w, h = d.h;
+    x.clearRect(0,0,w,h);
+    var cell = 42, cols = Math.ceil(w/cell), rows = Math.ceil(h/cell);
+    for(var i=0;i<cols;i++) for(var j=0;j<rows;j++){
+      var ph = i*0.6 + j*0.9;
+      var a = 0.05 + 0.05*Math.sin(t/2600 + ph);
+      x.strokeStyle = "rgba(21,17,11," + a.toFixed(3) + ")";
+      x.lineWidth = 1;
+      x.strokeRect(i*cell+.5, j*cell+.5, cell-1, cell-1);
+    }
+    /* six cells that pulse amber: the six trap tasks */
+    var spots = [[3,2],[9,1],[14,3],[19,2],[6,4],[16,5]];
+    spots.forEach(function(s,k){
+      var p = 0.5 + 0.5*Math.sin(t/1500 + k*1.1);
+      x.fillStyle = "rgba(221,122,60," + (0.10 + 0.16*p).toFixed(3) + ")";
+      x.fillRect(s[0]*cell, s[1]*cell, cell, cell);
+    });
+  }
+
+  /* ---------- figure 1: author view vs checker view ---------- */
+  var ROWS = [["North",412,388,455,1255],["South",301,356,294,951],
+              ["East",522,498,510,1530],["West",277,318,340,935]];
+  var checker = false;
+  function drawTrap(){
+    var d = hidpi(document.getElementById("trapCanvas")), x=d.x, w=d.w, h=d.h;
+    x.clearRect(0,0,w,h); x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var padL=26, top=44, rh=(h-top-26)/5, colw=(w-padL*2)/5.6;
+    mono(x,12); x.fillStyle=INK4;
+    ["REGION","Q1","Q2","Q3","TOTAL"].forEach(function(t,i){
+      x.fillText(t, padL + i*colw, top-14);
+    });
+    x.strokeStyle=RULE; x.lineWidth=1;
+    x.beginPath(); x.moveTo(padL,top-4); x.lineTo(w-padL,top-4); x.stroke();
+    ROWS.forEach(function(r,j){
+      var y = top + j*rh + rh*0.62;
+      mono(x,15); x.fillStyle=INK2;
+      x.fillText(r[0], padL, y);
+      for(var c=1;c<=3;c++){ x.fillText(String(r[c]), padL + c*colw, y); }
+      if(checker){ x.fillStyle=CORE; x.fillText("None", padL + 4*colw, y); }
+      else { x.fillStyle=CALM; x.fillText("=SUM(B"+(j+2)+":D"+(j+2)+")", padL + 4*colw, y); }
+      x.strokeStyle=RULE;
+      x.beginPath(); x.moveTo(padL, top+(j+1)*rh); x.lineTo(w-padL, top+(j+1)*rh); x.stroke();
+    });
+    mono(x,13);
+    x.fillStyle = checker ? CORE : CALM;
+    x.fillText(checker ? "load_workbook(path, data_only=True)  ->  reward 0.00"
+                       : "the workbook the agent produced", padL, h-14);
+  }
+  function setTrap(v){
+    checker=v;
+    document.getElementById("btnAuthor").classList.toggle("on",!v);
+    document.getElementById("btnChecker").classList.toggle("on",v);
+    drawTrap();
+  }
+  document.getElementById("btnAuthor").onclick=function(){setTrap(false);};
+  document.getElementById("btnChecker").onclick=function(){setTrap(true);};
+
+  /* ---------- figure 2: the 87 task corpus ---------- */
+  var TRAP={4:1,17:1,29:1,41:1,53:1,66:1}, mode="all";
+  function drawCorpus(){
+    var d = hidpi(document.getElementById("corpusCanvas")), x=d.x, w=d.w, h=d.h;
+    x.clearRect(0,0,w,h); x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var cols=15, pad=26, gap=7;
+    var sz = Math.min((w-pad*2-(cols-1)*gap)/cols, (h-pad*2-46-5*gap)/6);
+    var x0 = pad, y0 = pad+8;
+    for(var i=0;i<87;i++){
+      var c=i%cols, r=Math.floor(i/cols);
+      var px=x0+c*(sz+gap), py=y0+r*(sz+gap);
+      var isTrap=!!TRAP[i], isOff=i<24, lit=(mode==="all")||(mode==="trap"&&isTrap)||(mode==="office"&&isOff);
+      x.fillStyle = !lit ? "rgba(21,17,11,0.05)"
+        : (mode==="trap"&&isTrap) ? CORE : (mode==="office"&&isOff) ? CALM : "rgba(21,17,11,0.13)";
+      x.fillRect(px,py,sz,sz);
+      x.strokeStyle = lit ? "rgba(21,17,11,0.30)" : "rgba(21,17,11,0.10)";
+      x.lineWidth=1; x.strokeRect(px+.5,py+.5,sz-1,sz-1);
+    }
+    mono(x,13); x.fillStyle=INK3;
+    var label = mode==="trap" ? "6 of 87 sit on the recalculation trap"
+              : mode==="office" ? "24 of 87 are Office format, the set the packs aim at"
+              : "87 public tasks, 85 of them all or nothing";
+    x.fillText(label, x0, h-16);
+  }
+  function setMode(m){
+    mode=m;
+    ["btnAll","btnTrap","btnOffice"].forEach(function(id,k){
+      document.getElementById(id).classList.toggle("on", ["all","trap","office"][k]===m);
+    });
+    drawCorpus();
+  }
+  document.getElementById("btnAll").onclick=function(){setMode("all");};
+  document.getElementById("btnTrap").onclick=function(){setMode("trap");};
+  document.getElementById("btnOffice").onclick=function(){setMode("office");};
+
+  /* ---------- figure 3: the 14 paired development tasks ---------- */
+  var PAIRED=[["court-form-filling",0.33],["edit-pdf",0],["exceltable-in-ppt",1],
+    ["invoice-fraud-detection",0.33],["offer-letter-generator",1],["paper-anonymizer",0],
+    ["pdf-excel-diff",1],["powerlifting-coef-calc",0],["protein-expression-analysis",0.67],
+    ["reserves-at-risk-calc",0],["sales-pivot-analysis",0],["shock-analysis-supply",0],
+    ["weighted-gdp-calc",0],["xlsx-recover-data",0]];
+  function drawPaired(){
+    var d = hidpi(document.getElementById("pairedCanvas")), x=d.x, w=d.w, h=d.h;
+    x.clearRect(0,0,w,h); x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var padL=232, padR=44, top=22, bh=(h-top-34)/PAIRED.length;
+    var maxw = w-padL-padR;
+    PAIRED.forEach(function(p,i){
+      var y = top + i*bh;
+      mono(x,12); x.fillStyle = p[1]>=1 ? INK : INK3; x.textAlign="right";
+      x.fillText(p[0], padL-12, y+bh*0.68); x.textAlign="left";
+      x.strokeStyle=RULE; x.lineWidth=1;
+      x.beginPath(); x.moveTo(padL, y+bh-1); x.lineTo(w-padR, y+bh-1); x.stroke();
+      var bw = maxw * p[1];
+      if(bw>0){
+        x.fillStyle = p[1]>=1 ? CALM : "rgba(47,158,92,0.42)";
+        x.fillRect(padL, y+bh*0.22, bw, bh*0.52);
+      }
+      if(p[1]>0){
+        mono(x,11);
+        var lbl="+"+p[1].toFixed(2);
+        var lw=x.measureText(lbl).width;
+        if(padL+bw+8+lw > w-6){                 /* full-width bar: label goes inside */
+          x.fillStyle="#f4efe6"; x.fillText(lbl, padL+bw-lw-10, y+bh*0.66);
+        } else {
+          x.fillStyle = p[1]>=1?CALM:INK3; x.fillText(lbl, padL+bw+8, y+bh*0.66);
+        }
+      }
+    });
+    x.strokeStyle="rgba(21,17,11,0.35)";
+    x.beginPath(); x.moveTo(padL, top); x.lineTo(padL, h-34); x.stroke();
+    mono(x,12); x.fillStyle=INK3;
+    x.fillText("delta per task, 0 to +1. three conversions, no regressions.", padL, h-14);
+  }
+
+  /* ---------- figure 4: reach ---------- */
+  function drawReach(){
+    var d = hidpi(document.getElementById("reachCanvas")), x=d.x, w=d.w, h=d.h;
+    x.clearRect(0,0,w,h); x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var data=[["Office format",21,17,CALM],["non-Office",17,1,CORE]];
+    var padL=190, padR=40, top=44, gap=54, bh=52;
+    data.forEach(function(row,i){
+      var y=top+i*(bh+gap);
+      mono(x,14); x.fillStyle=INK2; x.textAlign="right";
+      x.fillText(row[0], padL-16, y+bh*0.62); x.textAlign="left";
+      var full=w-padL-padR;
+      x.fillStyle="rgba(21,17,11,0.08)"; x.fillRect(padL,y,full,bh);
+      var frac=row[2]/row[1];
+      x.fillStyle=row[3]; x.fillRect(padL,y,full*frac,bh);
+      mono(x,15); x.fillStyle=INK;
+      x.fillText(row[2]+" of "+row[1]+" loaded", padL+full*frac+12, y+bh*0.62);
+    });
+    mono(x,12); x.fillStyle=INK3;
+    x.fillText("a pack fires when its format is what the task is about, not when it is the container",
+      padL-160, h-16);
+  }
+
+  function drawAllStatic(){ drawTrap(); drawCorpus(); drawPaired(); drawReach(); }
+  drawAllStatic();
+
+  var heroRaf=null;
+  function loop(ts){ drawHero(ts); heroRaf=requestAnimationFrame(loop); }
+  if(!reduce) heroRaf=requestAnimationFrame(loop); else drawHero(0);
+
+  var to=null;
+  addEventListener("resize", function(){
+    clearTimeout(to); to=setTimeout(drawAllStatic, 140);
+  });
+})();
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+body{margin:0;background:var(--page,var(--bg));color:var(--ink);font-family:var(--font-body);
   font-size:18px;line-height:1.68;-webkit-font-smoothing:antialiased;
   font-feature-settings:"kern" 1,"liga" 1}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 30px}
@@ -48,8 +48,11 @@ em{font-style:italic}
 /* ---------------- ambient field, fixed behind everything ---------------- */
 #bgfield{position:fixed;inset:0;width:100%;height:100%;z-index:-3;pointer-events:none;opacity:.55}
 #bgtint{position:fixed;inset:0;z-index:-2;pointer-events:none;
-  background:linear-gradient(168deg,var(--tint-a,rgba(111,179,242,.05)) 0%,
-    var(--tint-b,rgba(255,145,66,.04)) 100%)}
+  background:
+    radial-gradient(115% 78% at var(--gx,50%) var(--gy,6%),
+      var(--glow,rgba(255,145,66,.20)) 0%, transparent 64%),
+    linear-gradient(168deg, var(--tint-a,rgba(111,179,242,.12)) 0%,
+      var(--tint-b,rgba(255,145,66,.10)) 100%)}
 
 /* ---------------- hero: the trace runs behind the title ---------------- */
 #hero{position:relative;padding:104px 0 82px;overflow:hidden;background:var(--panel);
@@ -113,8 +116,8 @@ h1 .it{font-style:italic;font-weight:420;color:var(--intl-lit)}
 
 /* ---------------- sections, on alternating grounds ---------------- */
 section{padding:96px 0;position:relative;background:transparent}
-section.alt{background:rgba(20,22,26,.035)}
-section.deep{background:rgba(20,22,26,.062)}
+section.alt{background:rgba(20,22,26,.052)}
+section.deep{background:rgba(20,22,26,.088)}
 section + section{border-top:1px solid var(--rule)}
 section.dark{background:var(--panel);color:var(--panel-ink);border-top:0}
 section.dark .secnum{color:var(--panel-ink-3)}
@@ -1746,25 +1749,52 @@ if(!reduce) requestAnimationFrame(loop); else { drawScope(0); drawField(0); }
 /* Scroll drives three things: the hero parallax, the ground tint, and whether the sticky
    bar is still part of the dark opening or has arrived over the paper. */
 var heroEl = document.getElementById("hero"), tocEl = document.getElementById("toc");
-var TINT = [
-  [[111,179,242,0.055], [255,145,66,0.030]],
-  [[255,145,66,0.052],  [111,179,242,0.040]],
-  [[20,22,26,0.050],    [255,145,66,0.055]],
-  [[111,179,242,0.045], [20,22,26,0.055]]
+/* Five grounds the page moves through as it is read. The paper itself changes, not only
+   a wash over it, because a wash at the alpha this design can carry is invisible. */
+var PAGE = [
+  [247,243,235],   /* warm bone, where the paper starts */
+  [235,238,244],   /* cool paper */
+  [246,239,229],   /* sand */
+  [233,231,240],   /* cool grey with a lilac cast */
+  [238,233,223]    /* deep bone */
 ];
+var TINT = [
+  [[111,179,242,0.10], [255,145,66,0.06]],
+  [[111,179,242,0.13], [ 20, 22,26,0.05]],
+  [[255,145,66,0.13],  [111,179,242,0.06]],
+  [[ 20, 22,26,0.09],  [255,145,66,0.11]],
+  [[111,179,242,0.08], [ 20, 22,26,0.10]]
+];
+var GLOW = [
+  [255,145,66,0.20], [111,179,242,0.20], [255,145,66,0.22],
+  [111,179,242,0.18], [255,145,66,0.16]
+];
+function rgb(c){ return "rgb("+c[0]+","+c[1]+","+c[2]+")"; }
 function rgba(c){ return "rgba("+c[0]+","+c[1]+","+c[2]+","+c[3].toFixed(3)+")"; }
-function mixc(a,b,t){ return [Math.round(lerp(a[0],b[0],t)),Math.round(lerp(a[1],b[1],t)),
-                              Math.round(lerp(a[2],b[2],t)),lerp(a[3],b[3],t)]; }
+function mixc(a,b,t){ var o=[Math.round(lerp(a[0],b[0],t)),Math.round(lerp(a[1],b[1],t)),
+                             Math.round(lerp(a[2],b[2],t))];
+  if(a.length>3) o.push(lerp(a[3],b[3],t));
+  return o; }
+function pick(stops, prog){
+  var seg = prog * (stops.length - 1);
+  var i = Math.min(stops.length - 2, Math.floor(seg));
+  return [stops[i], stops[i+1], seg - i];
+}
 var root = document.documentElement, tintRAF = null;
 function paintScroll(){
   tintRAF = null;
   var y = scrollY;
   var h = document.documentElement.scrollHeight - innerHeight;
   var prog = h > 0 ? Math.min(1, Math.max(0, y/h)) : 0;
-  var seg = prog * (TINT.length - 1);
-  var i = Math.min(TINT.length - 2, Math.floor(seg)), t = seg - i;
-  root.style.setProperty("--tint-a", rgba(mixc(TINT[i][0], TINT[i+1][0], t)));
-  root.style.setProperty("--tint-b", rgba(mixc(TINT[i][1], TINT[i+1][1], t)));
+  var pg = pick(PAGE, prog);
+  root.style.setProperty("--page", rgb(mixc(pg[0], pg[1], pg[2])));
+  var tn = pick(TINT, prog);
+  root.style.setProperty("--tint-a", rgba(mixc(tn[0][0], tn[1][0], tn[2])));
+  root.style.setProperty("--tint-b", rgba(mixc(tn[0][1], tn[1][1], tn[2])));
+  var gl = pick(GLOW, prog);
+  root.style.setProperty("--glow", rgba(mixc(gl[0], gl[1], gl[2])));
+  root.style.setProperty("--gx", (18 + 64 * (0.5 + 0.5*Math.sin(prog*6.283))).toFixed(1) + "%");
+  root.style.setProperty("--gy", (-6 + 92 * prog).toFixed(1) + "%");
 
   var dark = y < heroEl.offsetHeight - 4;
   if(dark !== tocEl.classList.contains("on-dark")) tocEl.classList.toggle("on-dark", dark);

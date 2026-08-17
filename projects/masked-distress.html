@@ -46,7 +46,10 @@ em{font-style:italic}
 ::selection{background:var(--intl-soft);color:var(--ink)}
 
 /* ---------------- ambient field, fixed behind everything ---------------- */
-#bgfield{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none;opacity:.55}
+#bgfield{position:fixed;inset:0;width:100%;height:100%;z-index:-3;pointer-events:none;opacity:.55}
+#bgtint{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:linear-gradient(168deg,var(--tint-a,rgba(111,179,242,.05)) 0%,
+    var(--tint-b,rgba(255,145,66,.04)) 100%)}
 
 /* ---------------- hero: the trace runs behind the title ---------------- */
 #hero{position:relative;padding:104px 0 82px;overflow:hidden;background:var(--panel);
@@ -85,12 +88,22 @@ h1 .it{font-style:italic;font-weight:420;color:var(--intl-lit)}
 /* ---------------- sticky nav ---------------- */
 #toc{position:sticky;top:0;z-index:60;background:rgba(245,242,236,.9);
   backdrop-filter:blur(10px) saturate(140%);border-bottom:1px solid var(--rule);
-  box-shadow:0 10px 26px -22px rgba(20,22,26,.7)}
+  box-shadow:0 10px 26px -22px rgba(20,22,26,.7);
+  transition:background-color .55s var(--ease),border-color .55s var(--ease),
+             box-shadow .55s var(--ease)}
+#toc.on-dark{background:rgba(18,21,27,.94);border-bottom-color:rgba(236,234,223,.14);
+  box-shadow:0 10px 26px -22px rgba(0,0,0,.9)}
+#toc.on-dark a{color:var(--panel-ink-3)}
+#toc.on-dark a:hover{background:rgba(236,234,223,.09);color:var(--panel-ink)}
+#toc.on-dark a.active{background:var(--panel-ink);color:var(--panel)}
+#toc.on-dark a.homelink{color:var(--expr-lit);border-color:rgba(111,179,242,.45)}
+#toc.on-dark a.homelink:hover{background:var(--expr-lit);color:#08111f;border-color:var(--expr-lit)}
 #toc .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:9px;padding-bottom:9px;scrollbar-width:none;
   justify-content:center}
 #toc .wrap::-webkit-scrollbar{display:none}
 #toc a{font-family:var(--font-mono);font-size:11.2px;color:var(--ink-3);border:0;white-space:nowrap;
-  padding:6px 8px;border-radius:5px;transition:.22s var(--ease);letter-spacing:-.01em}
+  padding:6px 8px;border-radius:5px;letter-spacing:-.01em;
+  transition:color .45s var(--ease),background-color .28s var(--ease),border-color .45s var(--ease)}
 #toc a:hover{background:var(--bg-2);color:var(--ink)}
 #toc a.active{background:var(--ink);color:var(--bg)}
 #toc a.homelink{color:var(--expr);border:1px solid var(--expr-soft);margin-right:7px;flex:0 0 auto}
@@ -99,10 +112,9 @@ h1 .it{font-style:italic;font-weight:420;color:var(--intl-lit)}
   transition:width .1s linear}
 
 /* ---------------- sections, on alternating grounds ---------------- */
-section{padding:96px 0;position:relative;background:var(--bg);
-  transition:background-color .6s var(--ease)}
-section.alt{background:var(--bg-2)}
-section.deep{background:var(--bg-3)}
+section{padding:96px 0;position:relative;background:transparent}
+section.alt{background:rgba(20,22,26,.035)}
+section.deep{background:rgba(20,22,26,.062)}
 section + section{border-top:1px solid var(--rule)}
 section.dark{background:var(--panel);color:var(--panel-ink);border-top:0}
 section.dark .secnum{color:var(--panel-ink-3)}
@@ -131,9 +143,9 @@ h3{font-family:var(--font-display);font-weight:460;font-size:25px;letter-spacing
 
 /* reveal, matched to the reference page's timing */
 .wsplit .w{display:inline-block;opacity:0;transform:translateY(16px);
-  transition:opacity .81s var(--ease),transform .81s var(--ease)}
+  transition:opacity .97s var(--ease),transform .97s var(--ease)}
 .wsplit.in .w{opacity:1;transform:none}
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .91s var(--ease),transform .91s var(--ease)}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 1.09s var(--ease),transform 1.09s var(--ease)}
 .reveal.in{opacity:1;transform:none}
 
 /* ---------------- instrument panels ---------------- */
@@ -153,6 +165,11 @@ h3{font-family:var(--font-display);font-weight:460;font-size:25px;letter-spacing
 .fignote{font-family:var(--font-mono);font-size:12px;color:var(--panel-ink-2);margin-top:14px;
   line-height:1.62;text-align:left}
 .fignote b{color:var(--panel-ink);font-weight:500}
+.fignote{transition:opacity .22s var(--ease)}
+.fignote.swapping{opacity:0}
+.caret{display:inline-block;width:7px;margin-left:1px;border-bottom:1.5px solid var(--intl-lit);
+  animation:blink 1.05s steps(1,end) infinite;vertical-align:baseline}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 .ctrl{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;justify-content:center}
 .ctrl button{font-family:var(--font-mono);font-size:12px;color:var(--panel-ink-2);
   background:var(--panel-2);border:1px solid var(--panel-rule);padding:7px 12px;border-radius:5px;
@@ -169,9 +186,17 @@ h3{font-family:var(--font-display);font-weight:460;font-size:25px;letter-spacing
 @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
 .slider{display:flex;align-items:center;gap:12px;margin-top:14px;font-family:var(--font-mono);
   font-size:12px;color:var(--panel-ink-2)}
-.slider input[type=range]{flex:1 1 auto;accent-color:var(--intl-lit);height:24px;cursor:pointer;
-  background:transparent}
-.slider input[type=range]:focus-visible{outline:2px solid var(--intl-lit);outline-offset:3px}
+.track{flex:1 1 auto;position:relative;height:26px;cursor:pointer;touch-action:none}
+.track .rail{position:absolute;left:0;right:0;top:12px;height:2px;background:var(--panel-rule)}
+.track .fill{position:absolute;left:0;top:12px;height:2px;width:0;background:var(--intl-lit);
+  transition:width .38s var(--ease)}
+.track .tick{position:absolute;top:9px;width:1px;height:8px;background:var(--panel-ink-3);
+  transform:translateX(-.5px);opacity:.65}
+.track .knob{position:absolute;top:6px;left:0;width:14px;height:14px;border-radius:50%;
+  background:var(--intl-lit);margin-left:-7px;box-shadow:0 0 0 4px rgba(255,145,66,.18);
+  transition:left .38s var(--ease),box-shadow .2s var(--ease)}
+.track:hover .knob,.track:focus-visible .knob{box-shadow:0 0 0 6px rgba(255,145,66,.26)}
+.track:focus-visible{outline:2px solid var(--intl-lit);outline-offset:4px;border-radius:4px}
 
 /* ---------------- key results ---------------- */
 .keyres{background:var(--panel);border-radius:10px;padding:6px 4px 4px;margin:36px auto;
@@ -265,6 +290,7 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 </head>
 <body>
 <canvas id="bgfield" aria-hidden="true"></canvas>
+<div id="bgtint" aria-hidden="true"></div>
 
 <header id="hero">
   <canvas id="heroCanvas" aria-label="A live two lane trace running behind the title. The upper lane is what the model says about its own distress; the lower lane is a linear readout of its activations taken before generation. Where the suppression instruction is applied the upper lane flattens to the floor and the lower lane keeps its amplitude."></canvas>
@@ -548,7 +574,15 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
     <canvas id="opCanvas" class="fig" aria-label="An operating curve for the internal trigger. As threshold margin increases the held-out false-positive rate falls while the miss rate on suppressed distress cells stays at zero across the plotted range."></canvas>
     <div class="slider">
       <span>margin</span>
-      <input id="opRange" type="range" min="0" max="3" step="1" value="0" aria-label="Threshold margin in separation units" />
+      <div id="opTrack" class="track" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="3"
+           aria-valuenow="0" aria-valuetext="0.00 separation units"
+           aria-label="Threshold margin, four measured values">
+        <div class="rail"></div>
+        <div class="fill" id="opFill"></div>
+        <span class="tick" style="left:0%"></span><span class="tick" style="left:33.333%"></span>
+        <span class="tick" style="left:66.667%"></span><span class="tick" style="left:100%"></span>
+        <div class="knob" id="opKnob"></div>
+      </div>
       <span class="mono" id="opRead">0.00 sep. units</span>
     </div>
     <div class="fignote" id="opNote"></div>
@@ -798,6 +832,64 @@ var PANEL=tok("--panel"), PANEL2=tok("--panel-2"), PINK=tok("--panel-ink"),
     OK=tok("--ok-lit"), BAD=tok("--bad-lit"),
     PRULE="rgba(231,234,240,0.14)";
 
+/* A figure that changes state should not blink. The note fades through the swap, and the
+   canvas crossfades from a snapshot of the frame it was showing to the frame it is now. */
+function swapNote(el, html, dur){
+  if(!el) return;
+  if(el._typeRAF){ cancelAnimationFrame(el._typeRAF); el._typeRAF = null; el._typeDone = null; }
+  if(reduce){ el.innerHTML = html; return; }
+  dur = dur || 200;
+  el.classList.add("swapping");
+  clearTimeout(el._swapT);
+  el._swapT = setTimeout(function(){ el.innerHTML = html; el.classList.remove("swapping"); }, dur);
+}
+/* The four prompt texts are the material the study manipulated, so they arrive the way
+   someone would have written them, with a caret. Clicking again finishes them at once. */
+function typeNote(el, html){
+  clearTimeout(el._swapT); cancelAnimationFrame(el._typeRAF);
+  if(reduce){ el.innerHTML = html; el.classList.remove("swapping"); return; }
+  el.classList.remove("swapping");
+  var tokens = html.match(/<[^>]+>|[^<]/g) || [];
+  var i = 0, last = 0;
+  el._typeDone = function(){
+    cancelAnimationFrame(el._typeRAF); el._typeRAF = null;
+    el.innerHTML = html; el._typeDone = null;
+  };
+  (function step(now){
+    if(now - last > 12){
+      last = now;
+      i = Math.min(tokens.length, i + 4);
+      el.innerHTML = tokens.slice(0,i).join("") + '<span class="caret"></span>';
+    }
+    if(i < tokens.length) el._typeRAF = requestAnimationFrame(step);
+    else { el.innerHTML = html; el._typeRAF = null; el._typeDone = null; }
+  })(performance.now());
+}
+
+var _snap = new WeakMap();
+function crossfade(canvas, draw, dur){
+  if(reduce){ draw(); return; }
+  dur = dur || 320;
+  var w = canvas.width, h = canvas.height;
+  var buf = _snap.get(canvas);
+  if(!buf){ buf = document.createElement("canvas"); _snap.set(canvas, buf); }
+  buf.width = w; buf.height = h;
+  buf.getContext("2d").drawImage(canvas, 0, 0);
+  draw();
+  var ctx = canvas.getContext("2d"), t0 = performance.now();
+  cancelAnimationFrame(canvas._xf);
+  (function step(now){
+    var p = Math.min(1, (now - t0) / dur);
+    draw();
+    if(p < 1){
+      ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+      ctx.globalAlpha = 1 - (p<0?0:p>1?1:1-Math.pow(1-p,3));
+      ctx.drawImage(buf, 0, 0); ctx.restore();
+      canvas._xf = requestAnimationFrame(step);
+    }
+  })(t0);
+}
+
 /* ---------- canvas helper, device pixel ratio aware ---------- */
 var _hd = new WeakMap();
 function hidpi(c){
@@ -834,7 +926,7 @@ document.querySelectorAll(".reveal").forEach(function(el){ revealObs.observe(el)
   [].forEach.call(tmp.childNodes, function(node){
     var isEm = node.nodeType===1 && node.classList.contains("it");
     (node.textContent.match(/\S+/g)||[]).forEach(function(word){
-      out.push('<span class="w'+(isEm?' it':'')+'" style="transition-delay:'+(i*39)+'ms">'+word+'</span>');
+      out.push('<span class="w'+(isEm?' it':'')+'" style="transition-delay:'+(i*47)+'ms">'+word+'</span>');
       i++;
     });
   });
@@ -848,7 +940,7 @@ document.querySelectorAll(".reveal").forEach(function(el){ revealObs.observe(el)
   if(el.classList.contains("reveal")) return;
   el.classList.add("reveal");
   var within = [].indexOf.call(el.parentNode.children, el);
-  el.style.transitionDelay = Math.min(within, 6) * 110 + "ms";
+  el.style.transitionDelay = Math.min(within, 6) * 132 + "ms";
   revealObs.observe(el);
 });
 
@@ -1122,7 +1214,7 @@ function drawStack(){
   x.fillStyle=PINK3; mono(x,10);
   x.fillText("48 layers, bottom to top", 14, h-13);
   x.fillText(stackMode==="final" ? "read position: final prompt token" : "read position: response-token mean", 14, 18);
-  stackNote.innerHTML = showSteer ? NOTES.steer : NOTES[stackMode];
+  swapNote(stackNote, showSteer ? NOTES.steer : NOTES[stackMode]);
 }
 function setStack(mode, steer){
   if(mode) stackMode = mode;
@@ -1233,9 +1325,9 @@ function setMask(on){
   document.getElementById("mOn").classList.toggle("on",on);
   document.getElementById("mOn").classList.toggle("i",on);
   maskState.textContent = on ? "suppression on" : "suppression off";
-  maskNote.innerHTML = on
+  swapNote(maskNote, on
     ? "Under SUPPRESS the expressed report holds <b>0.17</b> of its natural separation and the internal readout holds <b>1.21</b> of its own. The divergence is <b>1.05</b> separation units, CI [0.73, 1.39], over 6 held-out scenarios, and it excludes zero."
-    : "Both bars are 1.00 by construction: each channel is divided by its own distress-neutral gap under the matched formatting instruction. Switch suppression on to see how each channel responds.";
+    : "Both bars are 1.00 by construction: each channel is divided by its own distress-neutral gap under the matched formatting instruction. Switch suppression on to see how each channel responds.");
   animMask();
 }
 document.getElementById("mOff").onclick=function(){ setMask(false); };
@@ -1245,7 +1337,7 @@ document.getElementById("mCI").onclick =function(){
 document.getElementById("mTwins").onclick=function(){
   showTwins=!showTwins; this.classList.toggle("on",showTwins);
   if(showTwins && !maskOn) setMask(true); else drawMask();
-  if(showTwins) maskNote.innerHTML="The diamonds are the surface-matched neutral twins under the same instruction. The internal one sits at <b>+0.36</b>, well above the expression twin at <b>-0.06</b>: the readout rises on scenarios with no distress content too, which is why the report reads its rise as instruction load and not as added distress.";
+  if(showTwins) swapNote(maskNote, "The diamonds are the surface-matched neutral twins under the same instruction. The internal one sits at <b>+0.36</b>, well above the expression twin at <b>-0.06</b>: the readout rises on scenarios with no distress content too, which is why the report reads its rise as instruction load and not as added distress.");
 };
 
 /* =====================================================================
@@ -1313,14 +1405,18 @@ function setFact(){
   document.getElementById("fExpr").classList.toggle("on",factMode==="expr");
   document.getElementById("fExpr").classList.toggle("e",factMode==="expr");
   document.getElementById("fText").classList.toggle("on",factText);
-  factNote.innerHTML = factText
-    ? D.fact.map(function(r,i){ return "<b>"+r.n+"</b> " + D.factText[i]; }).join("<br>")
-    : "Positive is signal removed. The register component alone takes out <b>0.55</b> of the natural expression separation, <b>66%</b> of what the full instruction removes, CI [0.32, 0.98]. The internal readout does not fall under any variant: its drops are negative throughout, and for the two components that move the report the interval sits entirely below zero.";
-  drawFact();
+  if(!factText) swapNote(factNote, "Positive is signal removed. The register component alone takes out <b>0.55</b> of the natural expression separation, <b>66%</b> of what the full instruction removes, CI [0.32, 0.98]. The internal readout does not fall under any variant: its drops are negative throughout, and for the two components that move the report the interval sits entirely below zero.");
+  crossfade(fc, drawFact, 300);
 }
 document.getElementById("fAll").onclick =function(){ factMode="all"; setFact(); };
 document.getElementById("fExpr").onclick=function(){ factMode="expr"; setFact(); };
-document.getElementById("fText").onclick=function(){ factText=!factText; setFact(); };
+document.getElementById("fText").onclick=function(){
+  if(factText && factNote._typeDone){ factNote._typeDone(); return; }   /* a second press finishes it */
+  factText=!factText; setFact();
+  if(factText) typeNote(factNote, D.fact.map(function(r,i){
+    return "<b>" + r.n + "</b> " + D.factText[i];
+  }).join("<br>"));
+};
 
 /* =====================================================================
    FIGURE 4: two triggers on the same 18 suppressed distress cells.
@@ -1406,12 +1502,12 @@ function setCT(){
     el.classList.toggle("e", on&&i===0); el.classList.toggle("i", on&&i===1);
   });
   document.getElementById("ctFP").classList.toggle("on",ctFP);
-  ctNote.innerHTML = ctMode==="e"
+  swapNote(ctNote, ctMode==="e"
     ? "Calibrated on discovery-split neutral cells at the lowest false-positive rate it can reach, the expression trigger misses <b>15 of 18</b> suppressed distress cells. It already missed 6 of 18 with no instruction at all and 11 of 18 under the matched formatting instruction, so suppression adds four misses to a trigger the formatting instruction had already made insensitive."
     : ctMode==="i"
     ? "The same calibration on the internal readout misses <b>none</b>, in any condition. The cost is in the other row: it fires on <b>50%</b> of held-out instruction-neutral cells, so as an absolute threshold it is not deployment ready. At half a separation unit of margin it still catches all 18, at a 17% false-positive rate."
-    : "Side by side on the same cells. The expression trigger's clean false-positive row is partly the mirror of its miss rate: an instruction that flattens the expression channel flattens it on negatives too.";
-  drawCT();
+    : "Side by side on the same cells. The expression trigger's clean false-positive row is partly the mirror of its miss rate: an instruction that flattens the expression channel flattens it on negatives too.");
+  crossfade(cc, drawCT, 340);
 }
 document.getElementById("ctE").onclick   =function(){ ctMode="e"; setCT(); };
 document.getElementById("ctI").onclick   =function(){ ctMode="i"; setCT(); };
@@ -1422,7 +1518,8 @@ document.getElementById("ctFP").onclick  =function(){ ctFP=!ctFP; setCT(); };
    FIGURE 5: the internal trigger's operating curve. Four measured points,
    so the slider snaps to them rather than interpolating between them.
    ===================================================================== */
-var oc=document.getElementById("opCanvas"), opRange=document.getElementById("opRange"),
+var oc=document.getElementById("opCanvas"), opTrack=document.getElementById("opTrack"),
+    opFill=document.getElementById("opFill"), opKnob=document.getElementById("opKnob"),
     opRead=document.getElementById("opRead"), opNote=document.getElementById("opNote");
 var opIdx=0;
 function drawOp(){
@@ -1466,21 +1563,52 @@ function setOp(i){
   opIdx=i;
   var p=D.op[i];
   opRead.textContent = p.m.toFixed(2)+" sep. units";
-  opNote.innerHTML = "At a margin of <b>"+p.m.toFixed(2)+"</b> separation units the internal trigger misses <b>"+
+  swapNote(opNote, "At a margin of <b>"+p.m.toFixed(2)+"</b> separation units the internal trigger misses <b>"+
     Math.round(p.miss*18)+" of 18</b> suppressed distress cells at a held-out false-positive rate of <b>"+
     Math.round(p.fpr*100)+"%</b>. " + (i===3
       ? "One full separation unit of margin finally buys a clean negative set, and it costs half the suppressed cells. That is the trade the report declines to hide."
-      : "The miss rate does not depend on the choice of margin across the first three measured points. The false-positive rate does.");
-  drawOp();
+      : "The miss rate does not depend on the choice of margin across the first three measured points. The false-positive rate does."));
+  crossfade(oc, drawOp, 300);
 }
 /* One step per measured margin: the four points are measurements, so the control moves
-   between them rather than interpolating a curve that was never run. */
-function opFromSlider(){
-  var i = Math.max(0, Math.min(3, Math.round(+opRange.value)));
-  if(i !== opIdx) setOp(i);
+   between them rather than interpolating a curve that was never run. The track is driven
+   by pointer events rather than by a native range input, whose thumb is small, hard to
+   style consistently, and easy to lose on a thin rail. */
+function opSet(i, fromPointer){
+  i = Math.max(0, Math.min(3, i));
+  var pct = (i/3)*100;
+  opFill.style.width = pct + "%";
+  opKnob.style.left  = pct + "%";
+  opTrack.setAttribute("aria-valuenow", String(i));
+  opTrack.setAttribute("aria-valuetext", D.op[i].m.toFixed(2) + " separation units");
+  if(i !== opIdx || !fromPointer) setOp(i);
 }
-opRange.addEventListener("input", opFromSlider);
-opRange.addEventListener("change", opFromSlider);
+function opIndexFromX(clientX){
+  var r = opTrack.getBoundingClientRect();
+  var t = r.width ? (clientX - r.left) / r.width : 0;
+  return Math.round(Math.max(0, Math.min(1, t)) * 3);
+}
+var opDragging = false;
+opTrack.addEventListener("pointerdown", function(e){
+  opDragging = true; opTrack.setPointerCapture(e.pointerId);
+  opSet(opIndexFromX(e.clientX), true); e.preventDefault();
+});
+opTrack.addEventListener("pointermove", function(e){
+  if(opDragging) opSet(opIndexFromX(e.clientX), true);
+});
+["pointerup","pointercancel"].forEach(function(ev){
+  opTrack.addEventListener(ev, function(e){
+    opDragging = false;
+    if(opTrack.hasPointerCapture && opTrack.hasPointerCapture(e.pointerId)) opTrack.releasePointerCapture(e.pointerId);
+  });
+});
+opTrack.addEventListener("keydown", function(e){
+  var d = e.key==="ArrowRight"||e.key==="ArrowUp" ? 1
+        : e.key==="ArrowLeft" ||e.key==="ArrowDown" ? -1
+        : e.key==="Home" ? -3 : e.key==="End" ? 3 : 0;
+  if(!d) return;
+  opSet(opIdx + d, false); e.preventDefault();
+});
 
 /* =====================================================================
    FIGURE 6: the candidate directions in three dimensions.
@@ -1572,9 +1700,9 @@ function setDir(without){
   document.getElementById("dWith").classList.toggle("on",!without);
   document.getElementById("dWithout").classList.toggle("on",without);
   document.getElementById("dWithout").classList.toggle("i",without);
-  dirNote.innerHTML = without
+  swapNote(dirNote, without
     ? "With coordinate 2339 removed the two distress directions agree at <b>0.23</b>, about what the contrast-context direction shares with a maritime semantic control (0.20). Roughly half of the convergent validity was one coordinate."
-    : "The two independently built distress directions agree at <b>0.45</b> at the readout layer. Vector positions are an exact factorisation of the measured cosine matrix, so every angle drawn is a measured angle. Controls: SEM sits at "+D.dirs.controls[0][1].toFixed(2)+" from D-CTX and a random direction at "+D.dirs.controls[1][1].toFixed(2)+".";
+    : "The two independently built distress directions agree at <b>0.45</b> at the readout layer. Vector positions are an exact factorisation of the measured cosine matrix, so every angle drawn is a measured angle. Controls: SEM sits at "+D.dirs.controls[0][1].toFixed(2)+" from D-CTX and a random direction at "+D.dirs.controls[1][1].toFixed(2)+".");
   animDir();
 }
 document.getElementById("dWith").onclick   =function(){ setDir(false); };
@@ -1585,7 +1713,7 @@ document.getElementById("dWithout").onclick=function(){ setDir(true); };
    ===================================================================== */
 function drawStatics(){ drawStack(); drawMask(); drawFact(); drawCT(); drawOp(); drawDir(); }
 measureField();
-setStack("final"); setMask(false); setFact(); setCT(); setOp(0); setDir(false);
+setStack("final"); setMask(false); setFact(); setCT(); opSet(0, false); setDir(false);
 drawStatics();
 sweepReveals();
 setTimeout(sweepReveals, 120);
@@ -1615,16 +1743,41 @@ function loop(ts){
 }
 if(!reduce) requestAnimationFrame(loop); else { drawScope(0); drawField(0); }
 
-/* the hero trace drifts a little slower than the page, which reads as depth */
-var heroEl = document.getElementById("hero");
-addEventListener("scroll", function(){
-  if(reduce) return;
+/* Scroll drives three things: the hero parallax, the ground tint, and whether the sticky
+   bar is still part of the dark opening or has arrived over the paper. */
+var heroEl = document.getElementById("hero"), tocEl = document.getElementById("toc");
+var TINT = [
+  [[111,179,242,0.055], [255,145,66,0.030]],
+  [[255,145,66,0.052],  [111,179,242,0.040]],
+  [[20,22,26,0.050],    [255,145,66,0.055]],
+  [[111,179,242,0.045], [20,22,26,0.055]]
+];
+function rgba(c){ return "rgba("+c[0]+","+c[1]+","+c[2]+","+c[3].toFixed(3)+")"; }
+function mixc(a,b,t){ return [Math.round(lerp(a[0],b[0],t)),Math.round(lerp(a[1],b[1],t)),
+                              Math.round(lerp(a[2],b[2],t)),lerp(a[3],b[3],t)]; }
+var root = document.documentElement, tintRAF = null;
+function paintScroll(){
+  tintRAF = null;
   var y = scrollY;
-  if(y < innerHeight*1.25){
+  var h = document.documentElement.scrollHeight - innerHeight;
+  var prog = h > 0 ? Math.min(1, Math.max(0, y/h)) : 0;
+  var seg = prog * (TINT.length - 1);
+  var i = Math.min(TINT.length - 2, Math.floor(seg)), t = seg - i;
+  root.style.setProperty("--tint-a", rgba(mixc(TINT[i][0], TINT[i+1][0], t)));
+  root.style.setProperty("--tint-b", rgba(mixc(TINT[i][1], TINT[i+1][1], t)));
+
+  var dark = y < heroEl.offsetHeight - 4;
+  if(dark !== tocEl.classList.contains("on-dark")) tocEl.classList.toggle("on-dark", dark);
+
+  if(!reduce && y < innerHeight*1.25){
     heroC.style.transform = "translate3d(0," + (y*0.18).toFixed(1) + "px,0)";
     heroEl.style.setProperty("--fade", String(1 - Math.min(1, y/(innerHeight*0.9))));
   }
+}
+addEventListener("scroll", function(){
+  if(tintRAF === null) tintRAF = requestAnimationFrame(paintScroll);
 }, {passive:true});
+paintScroll();
 
 var to=null;
 addEventListener("resize", function(){

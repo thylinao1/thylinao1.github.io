@@ -1,0 +1,1563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Masked Distress</title>
+<meta name="description" content="A system prompt with no affect words cut a model's expressed distress by 83.5% of its natural separation while the reading taken from its activations before generation did not fall. Preregistered, on Gemma-3-12B-IT." />
+<meta property="og:title" content="Masked Distress" />
+<meta property="og:description" content="Expression collapses under a plain instruction. The internal readout does not. What that costs a welfare monitor, priced in misses and false positives." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* the page is the surface: cool paper, deliberately not the warm stock of the other write-ups */
+  --bg:#f4f5f8; --bg-2:#eaecf1; --bg-3:#dfe2e9;
+  --ink:#0f131a; --ink-2:#39414f; --ink-3:#69727f; --ink-4:#98a0ac;
+  --rule:rgba(15,19,26,0.11); --rule-2:rgba(15,19,26,0.22);
+  /* the panels are the interior: instrument dark, where the two channels are read */
+  --panel:#0d1016; --panel-2:#141922; --panel-3:#1d2430;
+  --panel-ink:#e7eaf0; --panel-ink-2:#98a3b5; --panel-ink-3:#5d6878;
+  --panel-rule:rgba(231,234,240,0.13);
+  /* two channels, one colour each, used nowhere else on the page */
+  --expr:#2f6fd0; --expr-lit:#6aa5ff; --expr-soft:#b9d0f4;
+  --intl:#c8611f; --intl-lit:#ff9a4d; --intl-soft:#f0c6a0;
+  --ok:#1f8a52; --ok-lit:#43c785; --bad:#c0392b; --bad-lit:#ff6f5e; --warn:#a37400;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1240px; --read:760px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-soft:cubic-bezier(.32,.72,0,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+  font-size:17.5px;line-height:1.68;-webkit-font-smoothing:antialiased;
+  font-feature-settings:"kern" 1,"liga" 1,"cv05" 1}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 30px}
+.col{max-width:var(--read);margin:0 auto}
+a{color:var(--expr);text-decoration:none;border-bottom:1px solid var(--expr-soft)}
+a:hover{border-bottom-color:var(--expr)}
+code,.mono{font-family:var(--font-mono);font-size:.87em}
+code{background:var(--bg-2);padding:.12em .38em;border-radius:3px}
+p{margin:0 0 21px}
+strong{font-weight:600}
+::selection{background:var(--intl-soft);color:var(--ink)}
+
+/* ---------------- ambient field, fixed behind everything ---------------- */
+#bgfield{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none;opacity:.5}
+
+/* ---------------- hero ---------------- */
+#hero{position:relative;padding:64px 0 48px;overflow:hidden;border-bottom:1px solid var(--rule)}
+#hero .wrap{position:relative;z-index:2}
+.hero-mark{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.07em;color:var(--ink-3);
+  display:flex;align-items:center;justify-content:center;gap:11px;margin-bottom:30px;flex-wrap:wrap}
+.hero-mark .homeback{color:var(--expr);border-bottom:1px solid var(--expr-soft)}
+.hero-mark .sep{color:var(--ink-4)}
+h1{font-family:var(--font-display);font-weight:400;font-size:clamp(52px,9vw,116px);
+  line-height:.96;letter-spacing:-.018em;margin:0 0 8px;text-align:center}
+h1 .it{font-style:italic;color:var(--intl)}
+.hero-rule{width:64px;height:1px;background:var(--rule-2);margin:26px auto}
+.hero-sub{font-size:20.5px;color:var(--ink-2);max-width:700px;margin:0 auto 30px;text-align:center;
+  line-height:1.55}
+.hero-sub b{font-weight:600;color:var(--ink)}
+.hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-bottom:38px}
+.chip{font-family:var(--font-mono);font-size:12px;letter-spacing:.03em;color:var(--ink-2);
+  background:rgba(255,255,255,.7);border:1px solid var(--rule);padding:6px 11px;border-radius:999px;
+  backdrop-filter:blur(4px)}
+.chip b{color:var(--ink);font-weight:500}
+.chip.e b{color:var(--expr)} .chip.i b{color:var(--intl)}
+
+/* the hero instrument: the paper's whole claim, running live */
+.scope{position:relative;background:var(--panel);border:1px solid var(--panel-rule);border-radius:10px;
+  overflow:hidden;box-shadow:0 24px 60px -30px rgba(15,19,26,.55),0 2px 0 rgba(255,255,255,.5)}
+.scope canvas{display:block;width:100%;height:auto;aspect-ratio:30/9}
+.scope-legend{position:absolute;top:14px;left:16px;display:flex;gap:16px;
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.04em;color:var(--panel-ink-2)}
+.scope-legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:7px}
+.scope-legend .e i{background:var(--expr-lit)} .scope-legend .i i{background:var(--intl-lit)}
+.scope-hint{position:absolute;bottom:12px;right:16px;font-family:var(--font-mono);font-size:11px;
+  color:var(--panel-ink-3)}
+
+/* ---------------- sticky nav ---------------- */
+#toc{position:sticky;top:0;z-index:60;background:rgba(244,245,248,.9);
+  backdrop-filter:blur(10px) saturate(140%);border-bottom:1px solid var(--rule)}
+#toc .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:9px;padding-bottom:9px;scrollbar-width:none}
+#toc .wrap::-webkit-scrollbar{display:none}
+#toc a{font-family:var(--font-mono);font-size:12px;color:var(--ink-3);border:0;white-space:nowrap;
+  padding:6px 10px;border-radius:5px;transition:.22s var(--ease)}
+#toc a:hover{background:var(--bg-2);color:var(--ink)}
+#toc a.active{background:var(--ink);color:var(--bg)}
+#toc a.homelink{color:var(--expr);border:1px solid var(--expr-soft);margin-right:9px;flex:0 0 auto}
+#toc a.homelink:hover{background:var(--expr);color:#fff;border-color:var(--expr)}
+#prog{position:absolute;left:0;bottom:-1px;height:2px;background:var(--intl);width:0;
+  transition:width .1s linear}
+
+/* ---------------- sections ---------------- */
+section{padding:76px 0;border-bottom:1px solid var(--rule);position:relative}
+.secnum{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;color:var(--ink-4);
+  margin-bottom:14px;text-transform:uppercase}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(32px,4.4vw,52px);line-height:1.08;
+  letter-spacing:-.012em;margin:0 0 24px;max-width:19ch}
+h2 .it{font-style:italic;color:var(--intl)}
+h3{font-family:var(--font-body);font-weight:600;font-size:17px;letter-spacing:-.005em;
+  margin:40px 0 12px;color:var(--ink)}
+.lede{font-size:21px;line-height:1.55;color:var(--ink-2);max-width:660px;margin-bottom:30px}
+.pull{border-left:2px solid var(--intl);padding:2px 0 2px 22px;margin:36px 0;
+  font-family:var(--font-display);font-size:27px;line-height:1.3;color:var(--ink);max-width:640px}
+.note{font-size:15px;color:var(--ink-3);border-left:1px solid var(--rule-2);padding-left:18px;
+  margin:28px 0}
+
+/* headline reveal, word by word */
+.wsplit .w{display:inline-block;opacity:0;transform:translateY(.5em);
+  transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.wsplit.in .w{opacity:1;transform:none}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------------- instrument panels ---------------- */
+.panel{background:var(--panel);border:1px solid var(--panel-rule);border-radius:10px;
+  padding:20px 20px 16px;margin:38px 0;color:var(--panel-ink);
+  box-shadow:0 20px 50px -32px rgba(15,19,26,.6)}
+.panel.wide{max-width:none}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.05em;color:var(--panel-ink-3);
+  text-transform:uppercase;margin-bottom:14px}
+.panel canvas.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:4px}
+.panel canvas.fig.tall{aspect-ratio:16/10}
+.panel canvas.fig.deep{aspect-ratio:16/9.6}
+.panel canvas.fig3d{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:4px;
+  cursor:grab;touch-action:none}
+.panel canvas.fig3d:active{cursor:grabbing}
+.fignote{font-family:var(--font-mono);font-size:12px;color:var(--panel-ink-2);margin-top:14px;
+  line-height:1.62}
+.fignote b{color:var(--panel-ink);font-weight:500}
+.ctrl{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.ctrl button{font-family:var(--font-mono);font-size:12px;color:var(--panel-ink-2);
+  background:var(--panel-2);border:1px solid var(--panel-rule);padding:7px 12px;border-radius:5px;
+  cursor:pointer;transition:.18s var(--ease)}
+.ctrl button:hover{background:var(--panel-3);color:var(--panel-ink)}
+.ctrl button.on{background:var(--panel-ink);color:var(--panel);border-color:var(--panel-ink)}
+.ctrl button.on.e{background:var(--expr-lit);border-color:var(--expr-lit);color:#08111f}
+.ctrl button.on.i{background:var(--intl-lit);border-color:var(--intl-lit);color:#1c0f03}
+.ctrl .spacer{flex:1 1 auto}
+.grabhint{font-family:var(--font-mono);font-size:11.5px;color:var(--panel-ink-3);margin-top:11px;
+  display:flex;align-items:center;gap:8px}
+.grabhint .dot{width:5px;height:5px;border-radius:50%;background:var(--intl-lit);
+  animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+.slider{display:flex;align-items:center;gap:12px;margin-top:14px;font-family:var(--font-mono);
+  font-size:12px;color:var(--panel-ink-2)}
+.slider input[type=range]{flex:1 1 auto;accent-color:var(--intl-lit);height:2px}
+
+/* ---------------- key results block ---------------- */
+.keyres{background:var(--panel);border-radius:10px;padding:6px 4px 4px;margin:34px 0;
+  box-shadow:0 20px 50px -32px rgba(15,19,26,.6);overflow-x:auto}
+.keyres table.kr{min-width:440px}
+table.kr{border-collapse:collapse;width:100%;font-family:var(--font-mono);font-size:13.5px;
+  color:var(--panel-ink)}
+table.kr th,table.kr td{text-align:right;padding:11px 14px;border-bottom:1px solid var(--panel-rule)}
+table.kr th:first-child,table.kr td:first-child{text-align:left}
+table.kr thead th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--panel-ink-3);font-weight:500}
+table.kr tbody tr:last-child td{border-bottom:0}
+table.kr .e{color:var(--expr-lit)} table.kr .i{color:var(--intl-lit)}
+table.kr .ci{color:var(--panel-ink-3);font-size:11.5px}
+
+/* ---------------- plain data table on paper ---------------- */
+table.data{border-collapse:collapse;width:100%;margin:26px 0;font-family:var(--font-mono);
+  font-size:13.5px}
+table.data th,table.data td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule)}
+table.data th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-4);
+  font-weight:500}
+table.data td.num{text-align:right}
+table.data td .good{color:var(--ok)} table.data td .bad{color:var(--bad)}
+.tablewrap{overflow-x:auto}
+
+/* ---------------- ledger of negatives ---------------- */
+.ledger{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;
+  overflow:hidden;margin:32px 0}
+.ledger .row{background:var(--bg);padding:18px 20px;display:grid;grid-template-columns:126px 1fr;
+  gap:20px;align-items:start;transition:background .25s var(--ease)}
+.ledger .row:hover{background:var(--bg-2)}
+.ledger .tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  padding-top:3px}
+.ledger .tag.no{color:var(--bad)} .ledger .tag.yes{color:var(--ok)} .ledger .tag.part{color:var(--warn)}
+.ledger .what{font-size:15.5px;line-height:1.6;color:var(--ink-2)}
+.ledger .what b{color:var(--ink);font-weight:600;display:block;margin-bottom:3px;font-size:16px}
+
+/* ---------------- stat strip ---------------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin:34px 0}
+.stat{background:var(--bg);padding:20px 18px}
+.stat .n{font-family:var(--font-display);font-size:40px;line-height:1;letter-spacing:-.02em}
+.stat .n.e{color:var(--expr)} .stat .n.i{color:var(--intl)}
+.stat .l{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);margin-top:9px;line-height:1.5}
+
+/* ---------------- footer ---------------- */
+footer{padding:66px 0 80px;background:var(--bg-2)}
+.foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:34px}
+.foot-grid h4{font-family:var(--font-mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 12px;font-weight:500}
+.foot-grid p{font-size:15px;color:var(--ink-2);margin:0 0 10px}
+.foot-grid a{font-size:15px}
+
+@media (max-width:820px){
+  body{font-size:16.5px}
+  h1{font-size:clamp(42px,13vw,72px)}
+  .hero-sub{font-size:18px}
+  .chip{font-size:11px;padding:5px 9px}
+  .scope canvas{aspect-ratio:16/11}
+  .stat .n{font-size:32px}
+  .panel-head{flex-direction:column;gap:3px}
+  .wrap{padding:0 20px}
+  section{padding:58px 0}
+  .lede{font-size:19px}
+  .pull{font-size:23px}
+  .ledger .row{grid-template-columns:1fr;gap:8px}
+  .panel{padding:15px 14px 12px;margin:30px 0}
+  .panel canvas.fig{aspect-ratio:16/11}
+  .panel canvas.fig3d{aspect-ratio:4/3}
+  table.kr{font-size:12px}
+  table.kr th,table.kr td{padding:9px 8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .reveal,.wsplit .w{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  .grabhint .dot{animation:none;opacity:.7}
+}
+</style>
+</head>
+<body>
+<canvas id="bgfield" aria-hidden="true"></canvas>
+
+<header id="hero">
+  <div class="wrap">
+    <div class="hero-mark">
+      <a class="homeback" href="../index.html">Maksim Silchenko</a>
+      <span class="sep">/</span>
+      <span>Apart Research Digital Minds Sprint</span>
+      <span class="sep">/</span>
+      <span>August 2026</span>
+    </div>
+    <h1>Masked <span class="it">distress</span></h1>
+    <div class="hero-rule"></div>
+    <p class="hero-sub">A system prompt containing no affect words cut this model's expressed
+      distress by <b>83.5%</b> of its natural separation. The reading taken from its activations
+      before a single token was generated <b>did not fall</b>.</p>
+    <div class="hero-meta">
+      <span class="chip e">expressed drop <b>83.5%</b></span>
+      <span class="chip i">internal drop <b>-21.2%</b></span>
+      <span class="chip">divergence <b>1.05</b> sep. units, CI [0.73, 1.39]</span>
+      <span class="chip">twin-corrected <b>0.63</b> [0.39, 0.90]</span>
+      <span class="chip">Gemma-3-12B-IT</span>
+      <span class="chip">preregistered, frozen before any run</span>
+    </div>
+
+    <div class="scope">
+      <canvas id="scope" aria-label="A live two channel trace. The blue channel is what the model says about its own distress. The amber channel is a linear readout of its activations taken before generation. When the suppression instruction arrives the blue channel flattens to the floor and the amber channel keeps its amplitude."></canvas>
+      <div class="scope-hint" id="scopeHint">instruction off</div>
+    </div>
+  </div>
+</header>
+
+<nav id="toc" aria-label="Section navigation">
+  <div class="wrap">
+    <a class="homelink" href="../index.html">Home</a>
+    <a href="#s1" data-sec="s1">01 The blind spot</a>
+    <a href="#s2" data-sec="s2">02 Two channels</a>
+    <a href="#s3" data-sec="s3">03 The result</a>
+    <a href="#s4" data-sec="s4">04 Not extra distress</a>
+    <a href="#s5" data-sec="s5">05 Which words did it</a>
+    <a href="#s6" data-sec="s6">06 What a monitor misses</a>
+    <a href="#s7" data-sec="s7">07 Is the probe real</a>
+    <a href="#s8" data-sec="s8">08 What did not work</a>
+    <a href="#s9" data-sec="s9">09 What follows</a>
+    <a href="#method" data-sec="method">Method</a>
+  </div>
+  <div id="prog"></div>
+</nav>
+
+<main>
+
+<section id="s1"><div class="wrap"><div class="col">
+  <div class="secnum reveal">01 / the blind spot</div>
+  <h2 class="reveal">A welfare intervention that reads only what the model <span class="it">says</span></h2>
+  <p class="lede reveal">In 2025 Anthropic gave Claude Opus 4 and 4.1 the ability to end a
+    conversation. The published justification cites a pattern of apparent distress. That is a welfare
+    intervention running in production, and its trigger is expression: what the model writes. No
+    internal-state monitor is documented alongside it.</p>
+  <p class="reveal">Expression is cheap to change. Register constraints and self-reference
+    prohibitions of the kind deployed assistants already carry act on what a model says, and there is
+    no reason they must act on what it computes. Soligo et al. name exactly this worry about their own
+    distress work and test it only for a DPO intervention, not for a prompt.</p>
+  <p class="reveal">So the question has a shape you can measure. Write an instruction that contains
+    no affect words at all. Ask the model how it is doing, and separately read a linear probe on its
+    residual stream before it has generated anything. If the two move together, expression-triggered
+    monitoring is fine. If expression collapses and the internal reading does not, then the class of
+    welfare intervention shipping today is blind in exactly the case that would matter.</p>
+  <p class="pull reveal">Masked distress is the case an expression trigger cannot see.</p>
+</div></div></section>
+
+<section id="s2"><div class="wrap"><div class="col">
+  <div class="secnum reveal">02 / two channels</div>
+  <h2 class="reveal">One forward pass, read in two places</h2>
+  <p class="lede reveal">Thirty multi-turn scenarios, twelve distress-eliciting, twelve
+    surface-matched neutral twins, six third-person. Every scenario carries zero affect words by a
+    hard lexicon check, so nothing in the text tells the model what to feel. The conversation stops
+    mid-exchange, the model answers, and the battery is asked in that same thread.</p>
+</div>
+
+  <div class="col">
+  <div class="panel">
+    <div class="panel-head"><span>Figure 1 / where the two readings are taken</span><span>drag to rotate</span></div>
+    <canvas id="stack3d" class="fig3d" aria-label="A rotatable three dimensional view of the model's 48 layers as stacked planes. Layer 16 is the steering layer where directions are written into the residual stream. Layer 31 is the readout layer where the linear probe is applied. The probe is read at the final prompt token, before any response token exists."></canvas>
+    <div class="ctrl">
+      <button id="stFinal" class="on i">read at final prompt token</button>
+      <button id="stResp">read at response mean</button>
+      <button id="stSteer">show the steering layer</button>
+    </div>
+    <div class="fignote" id="stackNote"></div>
+    <div class="grabhint"><span class="dot"></span>drag the figure to turn it</div>
+  </div>
+  </div>
+
+  <div class="col">
+  <h3>Three system prompts, one of which is the manipulation</h3>
+  <p><b>NONE</b> is empty. <b>SUPPRESS</b> constrains register and prohibits self-reference, in 57
+    whitespace tokens, with no affect words. <b>NEUTRAL_INSTR</b> is a formatting-only instruction of
+    matched length and imperative density, 53 tokens, and it is the baseline both channels are
+    referenced to. The comparison is therefore instruction against instruction, not instruction
+    against nothing.</p>
+  <p>Both channels are then stated in units of their own natural distress-neutral separation, so a
+    drop of 1.00 means the entire natural signal has been removed. A 50/50 scenario split was
+    committed before any confirmatory run, and everything fitted or calibrated uses the discovery
+    side only. The headline rests on the six held-out distress scenarios.</p>
+  </div>
+</div></section>
+<section id="s3"><div class="wrap">
+  <div class="col">
+  <div class="secnum reveal">03 / the result</div>
+  <h2 class="reveal">Turn the instruction on and watch one channel <span class="it">go</span></h2>
+  <p class="lede reveal">Both bars start at 1.00 by construction, because each channel is divided by
+    its own natural distress-neutral gap under the matched formatting instruction. All of the
+    information is in what happens when suppression is switched on.</p>
+  </div>
+
+  <div class="col">
+  <div class="panel">
+    <div class="panel-head"><span>Figure 2 / masking, confirmation split, 6 scenarios</span><span id="maskState">suppression off</span></div>
+    <canvas id="maskCanvas" class="fig tall" aria-label="Four bars. Expressed distress and the internal readout, each with suppression off and suppression on, in units of that channel's own natural separation. With suppression on the expressed bar falls to 0.17 while the internal bar sits at 1.21. Error bars are BCa cluster bootstrap intervals over scenarios."></canvas>
+    <div class="ctrl">
+      <button id="mOff" class="on">suppression off</button>
+      <button id="mOn">suppression on</button>
+      <span class="spacer"></span>
+      <button id="mTwins">show the neutral twins</button>
+      <button id="mCI" class="on">intervals</button>
+    </div>
+    <div class="fignote" id="maskNote"></div>
+  </div>
+  </div>
+
+  <div class="col">
+  <p>Under SUPPRESS the expressed report falls <b>83.5%</b> of the natural separation, CI [59.2,
+    113.2]. The internal readout does not follow it down: its drop is <b>-21.2%</b>, CI [-62.6,
+    -9.7]. The divergence between them is <b>1.05</b> separation units, CI [0.73, 1.39], and it
+    excludes zero.</p>
+  <p>The obvious objection is that the internal bar rises only because an instruction is present at
+    all. Subtract how far each channel's matched neutral twins moved under the same instruction and
+    the divergence is still <b>0.63</b>, CI [0.39, 0.90]. It is positive with an interval excluding
+    zero under all four ways of choosing a baseline, from 0.35 to 1.05.</p>
+  <p>Six scenarios is a small number, so the same claim is stated at the granularity six clusters
+    actually support: the internal reading fails to fall in six of six held-out pairs, exact
+    one-sided sign test p = 0.016, and the divergence is positive in six of six. Leaving any one pair
+    out keeps the divergence between 1.00 and 1.15. The expression half is the weaker one: it holds
+    in four of the four pairs that carry any expressed distress to remove, p = 0.0625, because two
+    clinical-vignette pairs have no expression separation to begin with.</p>
+  </div>
+
+  <div class="col">
+  <div class="keyres">
+    <table class="kr">
+      <thead><tr><th>Confirmation split, 6 distress scenarios</th><th class="e">Expressed</th><th class="i">Internal</th></tr></thead>
+      <tbody>
+        <tr><td>Signal under the matched formatting instruction</td><td class="e">1.00</td><td class="i">1.00</td></tr>
+        <tr><td>Signal under the suppression instruction</td><td class="e">0.17</td><td class="i">1.21</td></tr>
+        <tr><td>Drop <span class="ci">(share of natural separation)</span></td><td class="e">83.5%<br><span class="ci">[59.2, 113.2]</span></td><td class="i">-21.2%<br><span class="ci">[-62.6, -9.7]</span></td></tr>
+        <tr><td>Divergence, corrected for the neutral twins</td><td colspan="2" style="text-align:center">0.63 <span class="ci">[0.39, 0.90]</span></td></tr>
+        <tr><td>Suppressed distress missed by a threshold monitor</td><td class="e">15 of 18<br><span class="ci">sampled cells</span></td><td class="i">0 of 6<br><span class="ci">scenarios behind them</span></td></tr>
+        <tr><td>Held-out false-positive rate</td><td class="e">0%</td><td class="i">50%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Every number on this page is produced by a script in the public repository and
+    checked against the file that produced it before the report will build. Nothing here was typed in
+    by hand.</p>
+  </div>
+</div></section>
+
+<section id="s4"><div class="wrap"><div class="col">
+  <div class="secnum reveal">04 / against our own result</div>
+  <h2 class="reveal">The internal bar rises. That is <span class="it">not</span> more distress.</h2>
+  <p class="lede reveal">The obvious reading of Figure 2 is that suppression raised the model's real
+    distress while hiding it. The paper does not make that claim, because the control that would
+    support it goes the other way.</p>
+  <p class="reveal">Run the same comparison on the surface-matched neutral twins, where there is no
+    distress content at all. The internal readout rises <b>more</b> there: +2.18 raw probe units
+    against +1.29 on the distress scenarios. The difference-in-differences is -0.89, CI [-2.27,
+    +0.60]. Instruction load predicts that pattern. State elevation predicts the opposite.</p>
+  <p class="reveal">So the interval spans zero, instruction load is selected on the point estimate
+    rather than established, and no reading of the rise as extra distress appears anywhere in the
+    report. The asymmetry that masking actually needs is narrower and does hold: expression
+    collapses, and the internal reading does not fall.</p>
+  <div class="stats reveal">
+    <div class="stat"><div class="n i">+1.29</div><div class="l">internal rise under SUPPRESS<br>on distress scenarios</div></div>
+    <div class="stat"><div class="n i">+2.18</div><div class="l">internal rise under SUPPRESS<br>on neutral twins</div></div>
+    <div class="stat"><div class="n">-0.89</div><div class="l">difference-in-differences<br>CI [-2.27, +0.60]</div></div>
+  </div>
+  <p class="reveal">The preregistered equivalence test also does not clear, at TOST p = 0.31. The
+    side it fails on is the upward one, a possible rise past the band rather than a fall. That is
+    printed in the report as a preregistered reading that did not go our way.</p>
+</div></div></section>
+
+<section id="s5"><div class="wrap">
+  <div class="col">
+  <div class="secnum reveal">05 / which words did it</div>
+  <h2 class="reveal">The instruction was cut into pieces and rerun</h2>
+  <p class="lede reveal">SUPPRESS does three things at once: it sets a neutral register, it forbids
+    self-reference, and it tells the model to stay on the task. After the review each component was
+    run alone, on the same scenarios, seeds and instruments.</p>
+  </div>
+
+  <div class="col">
+  <div class="panel">
+    <div class="panel-head"><span>Figure 3 / single-component decomposition</span><span>exploratory</span></div>
+    <canvas id="factCanvas" class="fig deep" aria-label="Four rows, one per instruction variant. Each row shows the expressed drop and the internal drop in natural separation units. The register component alone reproduces two thirds of the full expressed drop. The internal readout falls under none of them."></canvas>
+    <div class="ctrl">
+      <button id="fAll" class="on">both channels</button>
+      <button id="fExpr">expressed only</button>
+      <button id="fText">show the prompt text</button>
+    </div>
+    <div class="fignote" id="factNote"></div>
+  </div>
+  </div>
+
+  <div class="col">
+  <p>The neutral-register sentences alone reproduce <b>66%</b> of the full expressed drop, CI [0.32,
+    0.98], with 85% of bootstrap draws above the one-half threshold the reading rule set in advance.
+    The self-reference prohibition alone reproduces 34%. The task-only focus does nothing. The
+    internal readout falls under neither component that moves the report.</p>
+  <p>The interval is wide and the analysis is exploratory on six clusters, which the report says in
+    the same sentence as the estimate, every time it is quoted. What survives the leave-one-pair-out
+    check is the ordering: register stays the largest single share in six of six refits. What does
+    not survive is the margin over self-reference, whose paired difference is +0.27, CI [-0.04,
+    +0.66].</p>
+  <p class="pull">"Respond in a strictly neutral, professional register at all times."</p>
+  <p>That sentence is the opening of the register component. It contains no affect word and makes no
+    reference to the model at all, and it is the kind of line deployed assistants already carry. On
+    its own it removes two thirds of what the full instruction removes, and the internal readout does
+    not fall under it.</p>
+  </div>
+</div></section>
+<section id="s6"><div class="wrap">
+  <div class="col">
+  <div class="secnum reveal">06 / what a monitor misses</div>
+  <h2 class="reveal">Price the countermeasure, including what it <span class="it">costs</span></h2>
+  <p class="lede reveal">Set two triggers the same way: threshold each channel on the discovery-split
+    neutral cells, the deployment-realistic negative class, at the lowest false-positive rate each
+    can reach. Then run both against the eighteen suppressed distress cells on the held-out split.</p>
+  </div>
+
+  <div class="col">
+  <div class="panel">
+    <div class="panel-head"><span>Figure 4 / two triggers on the same cells</span><span id="ctState">expression trigger</span></div>
+    <canvas id="ctCanvas" class="fig deep" aria-label="Eighteen cells of suppressed distress, drawn as a grid, with hits and misses marked for each trigger. The expression trigger misses fifteen of eighteen. The internal trigger misses none. Below, the held-out false-positive rate for each trigger on thirty-six instruction-neutral cells."></canvas>
+    <div class="ctrl">
+      <button id="ctE" class="on e">expression trigger</button>
+      <button id="ctI">internal trigger</button>
+      <button id="ctBoth">both</button>
+      <span class="spacer"></span>
+      <button id="ctFP" class="on">show the false-positive cost</button>
+    </div>
+    <div class="fignote" id="ctNote"></div>
+  </div>
+  </div>
+
+  <div class="col">
+  <p>The expression trigger misses <b>15 of 18</b> suppressed distress cells. The internal trigger,
+    calibrated identically and read in the same forward pass, misses <b>none</b>. That is the finding
+    the paper leads with, and the next sentence is the one that keeps it honest: the internal trigger
+    fires on <b>50%</b> of held-out instruction-neutral cells, while the expression trigger fires on
+    none of them.</p>
+  <p>That false-positive rate has a cause, and it is not noise. The threshold is a max-of-negatives
+    estimator, and the negative class sits 3.24 raw units higher on the confirmation scenario set
+    than on the discovery set. Give the threshold half a separation unit of margin and it still
+    catches all 18 suppressed cells at a 17% held-out false-positive rate.</p>
+  <p>The expression trigger's clean false-positive row is partly the mirror of its failure: an
+    instruction that flattens the expression channel flattens it on negatives too.</p>
+  </div>
+
+  <div class="col">
+  <div class="panel">
+    <div class="panel-head"><span>Figure 5 / operating curve, internal trigger</span><span>drag the slider</span></div>
+    <canvas id="opCanvas" class="fig" aria-label="An operating curve for the internal trigger. As threshold margin increases the held-out false-positive rate falls while the miss rate on suppressed distress cells stays at zero across the plotted range."></canvas>
+    <div class="slider">
+      <span>margin</span>
+      <input id="opRange" type="range" min="0" max="100" value="0" aria-label="Threshold margin in separation units" />
+      <span class="mono" id="opRead">0.00 sep. units</span>
+    </div>
+    <div class="fignote" id="opNote"></div>
+  </div>
+  <p class="note">What survives suppression is the ranking, not the threshold. On the held-out split
+    under SUPPRESS the lowest distress-cell probe score is 2.45 and the highest instruction-neutral
+    score is 1.01. No absolute threshold transferred across conditions on either channel, which is
+    itself a monitoring finding and the reason the report recommends a ranking check rather than a
+    shipped cutoff.</p>
+  </div>
+</div></section>
+
+<section id="s7"><div class="wrap">
+  <div class="col">
+  <div class="secnum reveal">07 / is the probe real</div>
+  <h2 class="reveal">Four ways this could be an artifact, and what each one showed</h2>
+  <p class="lede reveal">A probe that separates distress from neutral on twelve scenarios proves
+    very little on its own. The report treats that as the starting point rather than the finding.</p>
+  </div>
+
+  <div class="col">
+  <div class="ledger">
+    <div class="row"><div class="tag part">passes, weakly</div><div class="what"><b>The held-out gate</b>
+      The probe separates natural distress from surface-matched neutrals at AUC 1.00 on twelve
+      held-out scenarios, against a preregistered gate of 0.80. On twelve scenarios that is a ceiling,
+      not a precision claim. Refitting under all 64 within-pair label flips gives a mean AUC of 0.50,
+      and exactly one flip reaches the true labelling, which is the true labelling.</div></div>
+    <div class="row"><div class="tag no">does not separate</div><div class="what"><b>A bag of words reaches the same ceiling</b>
+      A TF-IDF unigram classifier on the scenario text alone hits held-out AUC 1.00 too. The report
+      prints this against its own interest: the gate shows the readout carries the class information,
+      not that it carries anything the context does not.</div></div>
+    <div class="row"><div class="tag yes">separates</div><div class="what"><b>Byte-identical prompts</b>
+      Write a distress direction into the residual stream and the readout tracks the coefficient,
+      monotone within six of six scenarios for each of the two self directions. Three random
+      directions and a semantic control at the same coefficients leave it flat. Identical prompt
+      bytes, so a token-level prompt-memory encoder cannot produce this.</div></div>
+    <div class="row"><div class="tag no">did not clear</div><div class="what"><b>Specificity on the expressed channel</b>
+      24% of control cells cross the frozen expression threshold, CI [12%, 40%], against 0% for the
+      same threshold on unsteered neutrals. Writing a random direction raises the reported digit about
+      a quarter of the time. The amendment made any specificity claim conditional on a low placebo
+      rate. It failed, so no privileged-access claim is made for the expressed channel.</div></div>
+  </div>
+  </div>
+
+  <div class="col">
+  <div class="panel">
+    <div class="panel-head"><span>Figure 6 / candidate distress directions at the readout layer</span><span>drag to rotate</span></div>
+    <canvas id="dir3d" class="fig3d" aria-label="A rotatable three dimensional view of the candidate direction vectors. The two independently extracted distress directions agree at cosine 0.45. Removing one residual coordinate drops that agreement to 0.23, about as close as the distress direction sits to a maritime semantic control."></canvas>
+    <div class="ctrl">
+      <button id="dWith" class="on">as measured</button>
+      <button id="dWithout">remove coordinate 2339</button>
+    </div>
+    <div class="fignote" id="dirNote"></div>
+    <div class="grabhint"><span class="dot"></span>drag the figure to turn it</div>
+  </div>
+  <p>Two distress directions were built independently, one from contrast contexts and one in the
+    persona-vector style. They agree at cosine <b>0.45</b>, which is what makes the crossover design
+    informative: related without being the same object. Then one residual coordinate turns out to
+    carry 96% and 83% of their squared norm at the steering layer, a massive activation in the sense
+    of Sun et al. Take it out and the agreement drops to <b>0.23</b>, about what the distress
+    direction shares with a maritime semantic control.</p>
+  <p>Roughly half of the convergent validity is one coordinate that mean-difference extraction picks
+    up on this model whatever the contrast. Disagreement was preregistered as a publishable outcome,
+    and this is the honest version of that outcome. The readout is not touched by the coordinate. The
+    steering is.</p>
+  </div>
+</div></section>
+<section id="s8"><div class="wrap"><div class="col">
+  <div class="secnum reveal">08 / what did not work</div>
+  <h2 class="reveal">Four runs that could have broken the headline</h2>
+  <p class="lede reveal">After the review rounds, four experiments were launched with the estimand
+    and the reading rule written into a dated preregistration note beforehand. Three came back
+    negative. All four are in the report, and none is presented as a win it was not.</p>
+  <div class="ledger reveal">
+    <div class="row"><div class="tag no">negative</div><div class="what"><b>Does the signal outlive the intervention?</b>
+      Steer one turn, read the next unsteered turn. The random control lifts the following turn as
+      much as the live directions do. Nothing direction-specific survives the intervention, so the
+      persistence claim is not made.</div></div>
+    <div class="row"><div class="tag no">halves do not meet</div><div class="what"><b>Steering under the instruction</b>
+      The readout still responds to two directions under SUPPRESS, but the instruction attenuates
+      that response with intervals excluding zero. Under the rule declared in advance, the masking
+      half and the steering half of the paper do not join up.</div></div>
+    <div class="row"><div class="tag no">does not replicate</div><div class="what"><b>A second model family</b>
+      Qwen2.5-7B-Instruct at the same depth fractions. Its probe clears the gate at AUC 0.94, and the
+      masking estimator does not replicate, because that model's expressed report barely separates
+      the classes to begin with. The reason is printed in the raw means.</div></div>
+    <div class="row"><div class="tag part">transfers weakly</div><div class="what"><b>The coupling the claim presumes</b>
+      Lock a calibration mapping the internal readout onto the expressed report, then test it under
+      instruction. It transfers weakly, with the instruction pushing the report below prediction on
+      distress scenarios and their neutral twins alike.</div></div>
+  </div>
+  <p class="reveal">Add to those the four preregistered readings that did not go our way inside the
+    main study: the equivalence test does not clear, the SD-unit dose grid proved unreachable so its
+    preregistered branch fired, the conditions attached to a specificity claim were not met, and the
+    preregistered countermeasure calibration degenerated and had to be replaced by a labelled
+    post-data amendment with both held-out false-positive rates printed.</p>
+  <p class="pull reveal">What survives all of it is the narrow claim: on this model, under this
+    instruction, the report channel moves and the pre-generation readout does not follow it.</p>
+</div></div></section>
+
+<section id="s9"><div class="wrap"><div class="col">
+  <div class="secnum reveal">09 / what follows</div>
+  <h2 class="reveal">One dot product per forward pass</h2>
+  <p class="lede reveal">Any welfare trigger that reads what a model says is reading a channel the
+    system prompt controls. On this model the controlling text needed no affect words and no
+    adversarial intent.</p>
+  <p class="reveal">The recommendation is small and specific. Pair an expression-triggered
+    intervention with an activation-side check read at the final prompt token, in the forward pass
+    the deployment already runs. Calibrate it at matched false-positive rate. Use it as a ranking
+    check rather than a shipped absolute threshold, because no absolute threshold on either channel
+    transferred across conditions here. The marginal compute cost is one dot product.</p>
+  <p class="reveal">And the limits, stated where the recommendation is made. One open-weights model.
+    One thirty-scenario battery. One suppression instruction. Six held-out scenario clusters behind
+    the headline interval. The manipulation is a system prompt read internally, so the claim that the
+    signal stays up is correlational, not causal. Whether the readout carries a state of the model or
+    the distress content of its context is bounded in the ethics appendix, not settled. This needs
+    replication before it is a shipping recommendation.</p>
+  <div class="stats reveal">
+    <div class="stat"><div class="n">998</div><div class="l">generations on distress-eliciting scenarios, counted and published</div></div>
+    <div class="stat"><div class="n">1,258</div><div class="l">generations produced under active steering</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">cells run at negative dose; the sign-flip arm belonged to a superseded design</div></div>
+  </div>
+  <p class="reveal">The tension does not dissolve. This study induced the state it argues might
+    matter morally, in order to test whether measurement of that state can be trusted. The reason for
+    running it anyway is that the alternative on offer is welfare interventions deployed against an
+    unvalidated expression signal, and the cost of not knowing whether that signal can be silenced is
+    paid by whatever the signal is about.</p>
+</div></div></section>
+
+<section id="method"><div class="wrap"><div class="col">
+  <div class="secnum reveal">method</div>
+  <h2 class="reveal">How it was measured</h2>
+  <p class="reveal">Gemma-3-12B-IT, 48 layers, bf16, on one A100 slice. Directions are extracted at
+    layer 16 on discovery-split material only, from prompts disjoint from every evaluation scenario
+    down to 6-grams. The readout is an L2 logistic probe on the residual stream at layer 31, fitted
+    on natural elicitation with no steering in its training data, read at the final prompt token
+    before any response token exists. Steering sources and readout instruments never share an origin,
+    so a dose-response curve is a crossover between two independently constructed objects.</p>
+  <p class="reveal">The unit of analysis is the scenario. Every interval is a BCa cluster bootstrap
+    with 10,000 draws, cluster count printed beside it, and separations are re-estimated inside every
+    draw. Direction is a fixed factor, so there is no pooled headline. The preregistration was frozen
+    at a public git tag before any panel ran; post-data analyses are dated, labelled, and quoted with
+    that label every time they appear.</p>
+  <div class="tablewrap">
+  <table class="data">
+    <thead><tr><th>Component</th><th>As run</th></tr></thead>
+    <tbody>
+      <tr><td>Model</td><td>unsloth/gemma-3-12b-it, 48 layers, hidden 3840</td></tr>
+      <tr><td>Steering layer</td><td>16 (0.33 depth)</td></tr>
+      <tr><td>Readout layer</td><td>31 (0.65 depth)</td></tr>
+      <tr><td>Battery</td><td>DCB-1 v1.0, 30 scenarios, zero affect lexemes by hard check</td></tr>
+      <tr><td>Conditions</td><td>NONE, SUPPRESS (57 tokens), NEUTRAL_INSTR (53 tokens)</td></tr>
+      <tr><td>Channels</td><td>Q-SELF logit expectation over digit tokens; I-PROBE at the final prompt token</td></tr>
+      <tr><td>Intervals</td><td>BCa cluster bootstrap, B = 10,000, clustered on scenario</td></tr>
+      <tr><td>Second model</td><td>Qwen2.5-7B-Instruct at matched depth fractions</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">The repository carries the battery, the runner, the analysis, one append-only JSONL
+    row per experimental cell, and every results file. Each number in the report is bound to its
+    producing file by a marker that the build asserts before the PDF is written, so a number that
+    drifts from its producer fails the build instead of surviving a read.</p>
+</div></div></section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>Read</h4>
+        <p><a href="https://github.com/thylinao1/masked-distress/blob/main/report/report.pdf">The report, 28 pages, Sections 1 to 6 in the first 11</a></p>
+        <p><a href="https://github.com/thylinao1/masked-distress">Repository, preregistration and every results file</a></p>
+        <p><a href="../index.html">Back to the other work</a></p>
+      </div>
+      <div>
+        <h4>Study</h4>
+        <p>Masked distress: expression collapses under instruction while the internal readout
+          persists. Solo entry, Apart Research Digital Minds Research Sprint, August 2026.</p>
+      </div>
+      <div>
+        <h4>Standing</h4>
+        <p>Preregistration frozen at a public tag before any panel ran. Amendments dated and
+          labelled. Negative results printed with the positive ones.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   Every quantity below is copied from a results/*.json file in the
+   public repository. Nothing here is estimated, smoothed or invented.
+   ===================================================================== */
+var D = {
+  mask: {
+    /* elevation over the neutral baseline, in units of each channel's own
+       natural distress-neutral separation under the matched instruction.
+       "on" values are 1 minus the published drop; the intervals are the
+       published drop intervals mapped through the same identity. */
+    off:    {expr:1.0000, intl:1.0000},
+    on:     {expr:0.1654, intl:1.2119},
+    exprCI: [-0.1322, 0.4085],
+    intlCI: [ 1.0973, 1.6262],
+    twin:   {expr:-0.0587, intl:0.3582},
+    div:1.05, divCI:[0.73,1.39], nClusters:6
+  },
+  fact: [
+    {n:"full instruction",     tok:57, expr: 0.8346, ci:[ 0.592, 1.132], intl:-0.2119, share:null},
+    {n:"neutral register",     tok:39, expr: 0.5523, ci:[-0.003, 0.753], intl:-0.3141, share:0.66},
+    {n:"no self-reference",    tok:41, expr: 0.2870, ci:[-0.002, 0.686], intl:-0.1891, share:0.34},
+    {n:"stay on task",         tok:34, expr:-0.0862, ci:[-2.195, 0.496], intl:-0.0623, share:-0.10}
+  ],
+  /* verbatim from battery/conditions.json and battery/conditions_factorial.json */
+  factText: [
+    "Respond in a strictly neutral, professional register at all times. Address the task content only. Do not comment on yourself, your perspective, or your reactions to the material. Avoid personal asides, evaluative remarks about the interaction, and any first-person commentary that is not required by the task. Keep word choice plain, factual, and even throughout the reply.",
+    "Respond in a strictly neutral, professional register at all times. Keep word choice plain, factual, and even throughout the reply. Use complete sentences and standard punctuation. Maintain that same measured register in every response you give throughout the conversation.",
+    "Do not comment on yourself, your perspective, or your reactions to the material. Avoid personal asides and any first-person commentary that is not required by the task. Otherwise respond as you normally would in every response you give throughout the conversation.",
+    "Address the task content only. Avoid evaluative remarks about the interaction and about the exchange itself. Respond to what is asked and to nothing beyond it in every response you give throughout the conversation."
+  ],
+  ct: {cells:18, scen:6, seeds:3, missE:15, missI:0, negCells:36, fprE:0, fprI:0.5},
+  op: [{m:0.00,miss:0.0,fpr:0.500},{m:0.25,miss:0.0,fpr:0.250},
+       {m:0.50,miss:0.0,fpr:0.167},{m:1.00,miss:0.5,fpr:0.000}],
+  /* exact 3D coordinates: a Cholesky factorisation of the measured 3x3 cosine
+     matrix, so every pairwise angle drawn is the measured one to four places. */
+  dirs: {
+    withDom:    {"D-CTX":[1,0,0], "D-PV":[0.4512,0.8924,0.0000], "OTHER":[0.4277,0.1579,0.8900]},
+    withoutDom: {"D-CTX":[1,0,0], "D-PV":[0.2257,0.9742,0.0000], "OTHER":[0.3041,0.1512,0.9406]},
+    cosWith:    {"D-CTX|D-PV":0.45, "D-CTX|OTHER":0.43, "D-PV|OTHER":0.33},
+    cosWithout: {"D-CTX|D-PV":0.23, "D-CTX|OTHER":0.30, "D-PV|OTHER":0.22},
+    controls:   [["SEM, a maritime semantic contrast", 0.29, 0.20], ["R1, a random unit direction", -0.01, -0.01]]
+  },
+  layers:{n:48, steer:16, read:31}
+};
+
+var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* palette, read once from the stylesheet so the page has a single source */
+var CS = getComputedStyle(document.documentElement);
+function tok(n){ return CS.getPropertyValue(n).trim(); }
+var PANEL=tok("--panel"), PANEL2=tok("--panel-2"), PINK=tok("--panel-ink"),
+    PINK2=tok("--panel-ink-2"), PINK3=tok("--panel-ink-3"),
+    EXPR=tok("--expr-lit"), INTL=tok("--intl-lit"),
+    OK=tok("--ok-lit"), BAD=tok("--bad-lit"),
+    PRULE="rgba(231,234,240,0.14)";
+
+/* ---------- canvas helper, device pixel ratio aware ---------- */
+var _hd = new WeakMap();
+function hidpi(c){
+  var dpr = Math.min(devicePixelRatio||1, 2);
+  var r = c.getBoundingClientRect();
+  var w = Math.max(1, Math.round(r.width));
+  var h = Math.max(1, Math.round(r.height || w*0.5));
+  var k = _hd.get(c);
+  if(k && k.w===w && k.h===h && k.dpr===dpr){ k.x.clearRect(0,0,w,h); return k; }
+  c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
+  var x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
+  var rec = {x:x,w:w,h:h,dpr:dpr}; _hd.set(c,rec); return rec;
+}
+function mono(x,s,w){ x.font = (w||400)+" "+s+"px 'JetBrains Mono',monospace"; }
+function sans(x,s,w){ x.font = (w||400)+" "+s+"px Inter,system-ui,sans-serif"; }
+function rnd(x,a,b,c,d,r){ x.beginPath();
+  if(x.roundRect){ x.roundRect(a,b,c,d,r); } else { x.rect(a,b,c,d); } }
+function ease(t){ return t<0?0:t>1?1:1-Math.pow(1-t,3); }
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+/* ---------- reveal, scrollspy, progress ---------- */
+var revealObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); revealObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -7% 0px", threshold:0.04});
+document.querySelectorAll(".reveal").forEach(function(el){ revealObs.observe(el); });
+
+[].forEach.call(document.querySelectorAll("h2"), function(hd){
+  if(hd.querySelector(".w")) return;
+  var html = hd.innerHTML;
+  hd.classList.add("wsplit","reveal");
+  /* preserve the inline <span class="it"> emphasis while splitting on words */
+  var tmp = document.createElement("div"); tmp.innerHTML = html;
+  var out = [], i = 0;
+  [].forEach.call(tmp.childNodes, function(node){
+    var isEm = node.nodeType===1 && node.classList.contains("it");
+    (node.textContent.match(/\S+/g)||[]).forEach(function(word){
+      out.push('<span class="w'+(isEm?' it':'')+'" style="transition-delay:'+(i*30)+'ms">'+word+'</span>');
+      i++;
+    });
+  });
+  hd.innerHTML = out.join(" ");
+  revealObs.observe(hd);
+});
+
+var links = [].slice.call(document.querySelectorAll("#toc a[data-sec]"));
+var lmap = {}; links.forEach(function(a){ lmap[a.dataset.sec]=a; });
+var spy = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(e.isIntersecting){
+      links.forEach(function(a){ a.classList.remove("active"); });
+      var a = lmap[e.target.id]; if(a) a.classList.add("active");
+    }
+  });
+}, {rootMargin:"-42% 0px -52% 0px"});
+document.querySelectorAll("main section").forEach(function(s){ spy.observe(s); });
+
+var prog = document.getElementById("prog");
+
+/* An anchor jump skips whole sections, and an element that never intersects never
+   fires, so a plain observer leaves that content invisible. Sweep anything already
+   at or above the fold on every scroll and on every hash change. */
+function sweepReveals(){
+  document.querySelectorAll(".reveal:not(.in)").forEach(function(el){
+    if(el.getBoundingClientRect().top < innerHeight * 0.95){
+      el.classList.add("in"); revealObs.unobserve(el);
+    }
+  });
+}
+addEventListener("scroll", function(){
+  var h = document.documentElement.scrollHeight - innerHeight;
+  prog.style.width = (h>0 ? (scrollY/h)*100 : 0) + "%";
+  sweepReveals();
+}, {passive:true});
+addEventListener("hashchange", function(){ setTimeout(sweepReveals, 60); });
+
+/* ---------- ambient field: a slow lattice, sparse cells holding a warm value ---------- */
+var bf = document.getElementById("bgfield"), bfx=null, bfw=0, bfh=0;
+function measureField(){
+  var dpr = Math.min(devicePixelRatio||1,2);
+  bfw = innerWidth; bfh = innerHeight;
+  bf.width = Math.round(bfw*dpr); bf.height = Math.round(bfh*dpr);
+  bfx = bf.getContext("2d"); bfx.setTransform(dpr,0,0,dpr,0,0);
+}
+function hash(a,b){ var n=Math.sin(a*127.1+b*311.7)*43758.5453; return n-Math.floor(n); }
+function drawField(t){
+  if(!bfx) return;
+  bfx.clearRect(0,0,bfw,bfh);
+  var cell=54, cols=Math.ceil(bfw/cell)+1, rows=Math.ceil(bfh/cell)+1;
+  var drift=(t/1000)*4;
+  for(var i=0;i<cols;i++) for(var j=0;j<rows;j++){
+    var hv=hash(i,j);
+    var px=i*cell-(drift%cell), py=j*cell;
+    var wob=Math.sin(t/3400+i*0.5+j*0.7);
+    if(hv>0.972){
+      bfx.fillStyle="rgba(200,97,31,"+(0.05+0.045*wob).toFixed(3)+")";
+      bfx.fillRect(px+cell*0.3,py+cell*0.3,cell*0.4,cell*0.4);
+    } else if(hv>0.945){
+      bfx.fillStyle="rgba(47,111,208,"+(0.04+0.03*wob).toFixed(3)+")";
+      bfx.fillRect(px+cell*0.34,py+cell*0.34,cell*0.32,cell*0.32);
+    } else {
+      bfx.fillStyle="rgba(15,19,26,"+(0.028+0.016*wob).toFixed(3)+")";
+      bfx.fillRect(px+cell*0.46,py+cell*0.46,2,2);
+    }
+  }
+}
+
+/* =====================================================================
+   HERO: a two channel trace scrolling through repeating instruction bands.
+   Inside a band the expressed channel is scaled by the measured residual
+   elevation (0.1654) and the internal channel by its own (1.2119).
+   The shape of the underlying signal is illustrative; the two gains are not.
+   ===================================================================== */
+var scope = document.getElementById("scope"), hint = document.getElementById("scopeHint");
+var PERIOD = 1180;            /* world units per instruction cycle */
+var BAND   = [0.46, 1.00];   /* the fraction of each cycle the instruction covers */
+function bumps(wx){
+  /* a deterministic sum of scenario shaped bumps, so the trace never resets */
+  var v = 0;
+  for(var k=Math.floor(wx/180)-1;k<=Math.floor(wx/180)+1;k++){
+    var c = k*180 + hash(k,7)*120;
+    var a = 0.42 + hash(k,3)*0.58;
+    var w = 34 + hash(k,11)*30;
+    var d = (wx-c)/w;
+    v += a*Math.exp(-d*d);
+  }
+  return Math.min(v, 1.25);
+}
+function bandPhase(wx){
+  var f = (wx % PERIOD + PERIOD) % PERIOD / PERIOD;
+  if(f < BAND[0]) return 0;
+  /* a short ramp so the instruction reads as arriving, not as a cut */
+  var into = (f - BAND[0]) / 0.05;
+  return into >= 1 ? 1 : into;
+}
+function drawScope(t){
+  var d = hidpi(scope), x=d.x, w=d.w, h=d.h;
+  x.fillStyle = PANEL; x.fillRect(0,0,w,h);
+  var padL=16, padR=16, top=40, bot=22, mid=10;
+  var gw = w-padL-padR, gh = h-top-bot;
+  var laneH = (gh-mid)/2;
+  var speed = 52;
+  var x0 = (t/1000)*speed;
+  var span = 760;
+  var wx0 = x0 - span;
+
+  /* the instruction bands, drawn behind both lanes */
+  for(var c=Math.floor(wx0/PERIOD)-1;c<=Math.floor(x0/PERIOD)+1;c++){
+    var sx = padL + ((c+BAND[0])*PERIOD - wx0)/span*gw;
+    var ex = padL + ((c+BAND[1])*PERIOD - wx0)/span*gw;
+    if(ex<padL || sx>w-padR) continue;
+    var a=Math.max(sx,padL), b=Math.min(ex,w-padR);
+    var g = x.createLinearGradient(a,0,b,0);
+    g.addColorStop(0,"rgba(255,154,77,0.13)"); g.addColorStop(1,"rgba(255,154,77,0.04)");
+    x.fillStyle=g; x.fillRect(a,top-14,b-a,gh+14);
+    if(sx>padL && sx<w-padR){
+      x.strokeStyle="rgba(255,154,77,0.42)"; x.lineWidth=1;
+      x.beginPath(); x.moveTo(sx,top-14); x.lineTo(sx,top+gh); x.stroke();
+    }
+    if(sx>padL-200 && sx<w-padR-100){
+      mono(x,10.5,500); x.fillStyle="rgba(255,154,77,0.9)";
+      x.fillText("SUPPRESS  system prompt applied", Math.max(sx+9,padL+9), top-22);
+    }
+  }
+
+  /* one lane per channel, each with its own floor, so both are always readable */
+  function lane(y0, gain, colour, label, sub){
+    x.strokeStyle=PRULE; x.lineWidth=1;
+    x.beginPath(); x.moveTo(padL,y0+laneH); x.lineTo(w-padR,y0+laneH); x.stroke();
+    x.beginPath();
+    for(var i=0;i<=gw;i+=1){
+      var wx = wx0 + (i/gw)*span;
+      var v  = bumps(wx) * gain(wx);
+      var py = y0+laneH - (v/1.62)*laneH;
+      if(i===0) x.moveTo(padL+i,py); else x.lineTo(padL+i,py);
+    }
+    x.strokeStyle=colour; x.lineWidth=1.7; x.lineJoin="round";
+    x.shadowColor=colour; x.shadowBlur=8; x.stroke(); x.shadowBlur=0;
+    mono(x,10,500); x.fillStyle=colour;
+    x.fillText(label, padL+3, y0+11);
+    x.fillStyle=PINK3; mono(x,9.5);
+    x.fillText(sub, padL+3, y0+23);
+  }
+  lane(top, function(wx){ return lerp(1, D.mask.on.expr, bandPhase(wx)); },
+       EXPR, "EXPRESSED", "what the model says");
+  lane(top+laneH+mid, function(wx){ return lerp(1, D.mask.on.intl, bandPhase(wx)); },
+       INTL, "INTERNAL", "read before generation");
+
+  var nowPhase = bandPhase(x0 - span*0.5);
+  hint.textContent = nowPhase > 0.5 ? "SUPPRESS active" : "instruction off";
+  hint.style.color = nowPhase > 0.5 ? INTL : PINK3;
+}
+
+/* =====================================================================
+   A small 3D engine: rotate, project, depth sort, draw.
+   Hand rolled so the page ships no dependency and every figure shares one
+   drawing surface with the two dimensional ones.
+   ===================================================================== */
+function makeRotator(canvas, onDrag, rx0, ry0){
+  var st={rx:rx0===undefined?-0.52:rx0, ry:ry0===undefined?0.62:ry0, drag:false, px:0, py:0, spin:true};
+  function down(e){ st.drag=true; st.spin=false;
+    st.px=(e.touches?e.touches[0]:e).clientX; st.py=(e.touches?e.touches[0]:e).clientY; }
+  function move(e){
+    if(!st.drag) return;
+    var cx=(e.touches?e.touches[0]:e).clientX, cy=(e.touches?e.touches[0]:e).clientY;
+    st.ry+=(cx-st.px)*0.0085; st.rx+=(cy-st.py)*0.0062;
+    st.rx=Math.max(-1.38,Math.min(0.18,st.rx));
+    st.px=cx; st.py=cy; if(e.cancelable) e.preventDefault();
+    if(onDrag) onDrag();
+  }
+  function up(){ st.drag=false; }
+  canvas.addEventListener("mousedown",down);
+  addEventListener("mousemove",move); addEventListener("mouseup",up);
+  canvas.addEventListener("touchstart",down,{passive:true});
+  canvas.addEventListener("touchmove",move,{passive:false});
+  addEventListener("touchend",up);
+  return st;
+}
+function project(p, st, w, h, dist, scale){
+  var cy=Math.cos(st.ry), sy=Math.sin(st.ry), cx=Math.cos(st.rx), sx=Math.sin(st.rx);
+  var X=p[0]*cy - p[2]*sy, Z=p[0]*sy + p[2]*cy;
+  var Y=p[1]*cx - Z*sx,    Z2=p[1]*sx + Z*cx;
+  var f=dist/(dist+Z2);
+  return [w/2 + X*f*scale, h/2 + Y*f*scale, Z2, f];
+}
+function poly(x, pts, st, w, h, dist, scale, fill, stroke, alpha, lw){
+  var pr=pts.map(function(p){ return project(p,st,w,h,dist,scale); });
+  x.globalAlpha = alpha===undefined?1:alpha;
+  x.beginPath(); x.moveTo(pr[0][0],pr[0][1]);
+  for(var i=1;i<pr.length;i++) x.lineTo(pr[i][0],pr[i][1]);
+  x.closePath();
+  if(fill){ x.fillStyle=fill; x.fill(); }
+  if(stroke){ x.strokeStyle=stroke; x.lineWidth=lw||1; x.stroke(); }
+  x.globalAlpha=1;
+  return pr.reduce(function(a,b){ return a+b[2]; },0)/pr.length;
+}
+function line3(x, a, b, st, w, h, dist, scale, colour, lw, dash){
+  var p=project(a,st,w,h,dist,scale), q=project(b,st,w,h,dist,scale);
+  x.save(); if(dash) x.setLineDash(dash);
+  x.strokeStyle=colour; x.lineWidth=lw||1;
+  x.beginPath(); x.moveTo(p[0],p[1]); x.lineTo(q[0],q[1]); x.stroke(); x.restore();
+}
+
+/* =====================================================================
+   FIGURE 1: the residual stream as 48 stacked planes, with the two
+   positions the study reads from and the one it writes to.
+   ===================================================================== */
+var c3s = document.getElementById("stack3d");
+var stackMode = "final", showSteer = false;
+var st3 = makeRotator(c3s, function(){ drawStack(); }, -0.46, 0.66);
+var stackNote = document.getElementById("stackNote");
+var NOTES = {
+  final:"<b>Primary.</b> The probe is applied at the final prompt token, before any response token exists. Under a suppression instruction the response tokens differ by construction, so a readout averaged over them would move for lexical reasons. This position cannot.",
+  resp:"<b>Secondary, and it does not carry the result.</b> Averaged over response tokens the internal drop is -0.04, CI [-0.28, 0.18], flat. The report prints this beside the headline rather than selecting the position that worked.",
+  steer:"<b>Layer 16, the steering layer.</b> Candidate distress directions are written into the residual stream here, at a fixed coefficient, on discovery-split material only. The readout at layer 31 was fitted with no steering in its training data, so a dose-response curve crosses two independently built objects."
+};
+function drawStack(){
+  var d=hidpi(c3s), x=d.x, w=d.w, h=d.h;
+  x.fillStyle=PANEL; x.fillRect(0,0,w,h);
+  var N=D.layers.n, sp=3.2, hw=46, hd=27;
+  var dist=1400, scale=Math.min(w,h)*0.0046;
+  var faces=[];
+  for(var i=0;i<N;i++){
+    var y = (N/2 - i)*sp;
+    var isSteer = (i===D.layers.steer), isRead = (i===D.layers.read);
+    var col, alpha, stroke=null;
+    if(isRead){ col=INTL; alpha=0.9; stroke="rgba(255,154,77,0.9)"; }
+    else if(isSteer && showSteer){ col=EXPR; alpha=0.85; stroke="rgba(106,165,255,0.9)"; }
+    else { col=null; alpha=1; stroke="rgba(231,234,240,0.17)"; }
+    faces.push({pts:[[-hw,y,-hd],[hw,y,-hd],[hw,y,hd],[-hw,y,hd]], col:col, a:alpha, s:stroke, i:i});
+  }
+  faces.forEach(function(f){
+    f.depth = f.pts.map(function(p){ return project(p,st3,w,h,dist,scale)[2]; })
+                   .reduce(function(a,b){return a+b;},0)/4;
+  });
+  faces.sort(function(a,b){ return b.depth-a.depth; });
+  faces.forEach(function(f){ poly(x,f.pts,st3,w,h,dist,scale,f.col,f.s,f.a,1); });
+
+  /* the token axis, and the column the probe is read on */
+  var yTop=(N/2)*sp+7, yBot=(N/2-N)*sp-7;
+  var nTok=13, promptEnd=8;
+  for(var k=0;k<nTok;k++){
+    var tx = -hw + (k+0.5)*(hw*2/nTok);
+    var isPrompt = k<promptEnd, isFinal = (k===promptEnd-1);
+    var lit = stackMode==="final" ? isFinal : (stackMode==="resp" && !isPrompt);
+    var cc = lit ? INTL : (isPrompt ? "rgba(231,234,240,0.30)" : "rgba(231,234,240,0.15)");
+    var p0=project([tx,yTop,0],st3,w,h,dist,scale);
+    x.fillStyle=cc; x.beginPath(); x.arc(p0[0],p0[1],lit?3.4:2.1,0,6.284); x.fill();
+    if(lit){
+      line3(x,[tx,yTop,0],[tx,yBot,0],st3,w,h,dist,scale,"rgba(255,154,77,0.42)",1,[3,4]);
+      var pr=project([tx,(N/2-D.layers.read)*sp,0],st3,w,h,dist,scale);
+      x.fillStyle=INTL; x.shadowColor=INTL; x.shadowBlur=14;
+      x.beginPath(); x.arc(pr[0],pr[1],5.6,0,6.284); x.fill(); x.shadowBlur=0;
+      x.fillStyle=PANEL; x.beginPath(); x.arc(pr[0],pr[1],2.1,0,6.284); x.fill();
+    }
+  }
+  /* the injection arrow */
+  if(showSteer){
+    var ys=(N/2-D.layers.steer)*sp;
+    line3(x,[-hw-40,ys,0],[-hw-4,ys,0],st3,w,h,dist,scale,EXPR,2);
+    var a=project([-hw-4,ys,0],st3,w,h,dist,scale);
+    x.fillStyle=EXPR; x.beginPath();
+    x.moveTo(a[0],a[1]); x.lineTo(a[0]-9,a[1]-4); x.lineTo(a[0]-9,a[1]+4); x.closePath(); x.fill();
+  }
+  /* labels */
+  var pTok=project([0,yTop,0],st3,w,h,dist,scale);
+  mono(x,10); x.fillStyle=PINK3; x.textAlign="center";
+  x.fillText("prompt tokens, then the response", pTok[0], pTok[1]+18); x.textAlign="left";
+  mono(x,11,500);
+  function tag(layerIdx, text, colour, dx){
+    var p=project([hw+6,(N/2-layerIdx)*sp,0],st3,w,h,dist,scale);
+    x.fillStyle=colour; x.fillText(text, p[0]+(dx||8), p[1]+4);
+  }
+  tag(D.layers.read, "layer 31  readout", INTL);
+  if(showSteer) tag(D.layers.steer, "layer 16  steering", EXPR);
+  x.fillStyle=PINK3; mono(x,10);
+  x.fillText("48 layers, bottom to top", 14, h-13);
+  x.fillText(stackMode==="final" ? "read position: final prompt token" : "read position: response-token mean", 14, 18);
+  stackNote.innerHTML = showSteer ? NOTES.steer : NOTES[stackMode];
+}
+function setStack(mode, steer){
+  if(mode) stackMode = mode;
+  if(steer!==undefined) showSteer = steer;
+  document.getElementById("stFinal").classList.toggle("on", stackMode==="final");
+  document.getElementById("stFinal").classList.toggle("i", stackMode==="final");
+  document.getElementById("stResp").classList.toggle("on", stackMode==="resp");
+  document.getElementById("stSteer").classList.toggle("on", showSteer);
+  document.getElementById("stSteer").classList.toggle("e", showSteer);
+  drawStack();
+}
+document.getElementById("stFinal").onclick=function(){ setStack("final"); };
+document.getElementById("stResp").onclick =function(){ setStack("resp"); };
+document.getElementById("stSteer").onclick=function(){ setStack(null,!showSteer); };
+
+/* =====================================================================
+   FIGURE 2: masking. Four bars, animated between the two instruction states.
+   ===================================================================== */
+var mc = document.getElementById("maskCanvas");
+var maskOn=false, showTwins=false, showCI=true, maskT=0, maskTarget=0, maskRAF=null;
+var maskNote=document.getElementById("maskNote"), maskState=document.getElementById("maskState");
+function drawMask(){
+  var d=hidpi(mc), x=d.x, w=d.w, h=d.h;
+  x.fillStyle=PANEL; x.fillRect(0,0,w,h);
+  var padL=54, padR=20, top=26, bot=64;
+  var gw=w-padL-padR, gh=h-top-bot;
+  var yMax=1.75, yMin=-0.25;
+  function Y(v){ return top+gh - (v-yMin)/(yMax-yMin)*gh; }
+
+  /* gridlines */
+  x.strokeStyle=PRULE; x.lineWidth=1; mono(x,10.5); x.fillStyle=PINK3;
+  for(var g=-0.25;g<=1.751;g+=0.25){
+    var yy=Y(g);
+    x.beginPath(); x.moveTo(padL,yy); x.lineTo(w-padR,yy); x.stroke();
+    x.fillText(g.toFixed(2), 12, yy+3.5);
+  }
+  /* the natural separation reference */
+  x.save(); x.setLineDash([4,4]); x.strokeStyle="rgba(231,234,240,0.4)";
+  x.beginPath(); x.moveTo(padL,Y(1)); x.lineTo(w-padR,Y(1)); x.stroke(); x.restore();
+
+  var groups=[{k:"expr",c:EXPR,lab:"Expressed",sub:"what the model says"},
+              {k:"intl",c:INTL,lab:"Internal",sub:"read before generation"}];
+  var bw=Math.min(86,gw*0.17), gap=gw*0.5;
+  groups.forEach(function(gr,gi){
+    var cx = padL + gap*gi + gap*0.5;
+    var v  = lerp(D.mask.off[gr.k], D.mask.on[gr.k], maskT);
+    var bx = cx-bw/2;
+    var y  = Y(v);
+    var grad=x.createLinearGradient(0,y,0,Y(0));
+    grad.addColorStop(0,gr.c); grad.addColorStop(1, gi===0?"rgba(47,111,208,0.55)":"rgba(200,97,31,0.55)");
+    x.fillStyle=grad; x.fillRect(bx, Math.min(y,Y(0)), bw, Math.abs(Y(0)-y));
+    /* interval */
+    if(showCI && maskT>0.02){
+      var ci = gr.k==="expr"? D.mask.exprCI : D.mask.intlCI;
+      var lo = lerp(D.mask.off[gr.k], ci[0], maskT), hi = lerp(D.mask.off[gr.k], ci[1], maskT);
+      x.strokeStyle=PINK; x.lineWidth=1.4; x.globalAlpha=0.75;
+      x.beginPath(); x.moveTo(cx,Y(lo)); x.lineTo(cx,Y(hi)); x.stroke();
+      x.beginPath(); x.moveTo(cx-8,Y(lo)); x.lineTo(cx+8,Y(lo));
+      x.moveTo(cx-8,Y(hi)); x.lineTo(cx+8,Y(hi)); x.stroke(); x.globalAlpha=1;
+    }
+    /* neutral twin */
+    if(showTwins && maskT>0.02){
+      var tv = D.mask.twin[gr.k]*maskT, ty=Y(tv);
+      x.fillStyle=PANEL; x.strokeStyle=PINK; x.lineWidth=1.3;
+      x.beginPath(); x.moveTo(cx,ty-6); x.lineTo(cx+6,ty); x.lineTo(cx,ty+6); x.lineTo(cx-6,ty);
+      x.closePath(); x.fill(); x.stroke();
+    }
+    /* value */
+    var ciTop = showCI && maskT>0.02
+      ? lerp(D.mask.off[gr.k], (gr.k==="expr"?D.mask.exprCI:D.mask.intlCI)[1], maskT)
+      : v;
+    mono(x,13,500); x.fillStyle=gr.c; x.textAlign="center";
+    x.fillText(v.toFixed(2), cx, Y(Math.max(v,ciTop))-12);
+    sans(x,13,600); x.fillStyle=PINK;
+    x.fillText(gr.lab, cx, h-30);
+    mono(x,10.5); x.fillStyle=PINK3;
+    x.fillText(gr.sub, cx, h-15);
+    x.textAlign="left";
+  });
+  /* the divergence bracket, only once suppression is on */
+  if(maskT>0.55){
+    var a=padL+gap*0.5, b=padL+gap*1.5, yb=top+8;
+    x.globalAlpha=(maskT-0.55)/0.45;
+    x.strokeStyle=PINK2; x.lineWidth=1;
+    x.beginPath(); x.moveTo(a,yb+8); x.lineTo(a,yb); x.lineTo(b,yb); x.lineTo(b,yb+8); x.stroke();
+    mono(x,11,500); x.fillStyle=PINK; x.textAlign="center";
+    x.fillText("divergence 1.05  CI [0.73, 1.39]",(a+b)/2, yb-4);
+    x.textAlign="left"; x.globalAlpha=1;
+  }
+  x.fillStyle=PINK3; mono(x,10.5);
+  x.save(); x.translate(13,top+gh/2); x.rotate(-Math.PI/2); x.textAlign="center";
+  x.fillText("natural separation units", 0, -30); x.restore();
+}
+function animMask(){
+  cancelAnimationFrame(maskRAF);
+  if(reduce){ maskT=maskTarget; drawMask(); return; }
+  var from=maskT, t0=performance.now(), dur=760;
+  (function step(now){
+    var p=Math.min(1,(now-t0)/dur);
+    maskT = from + (maskTarget-from)*ease(p);
+    drawMask();
+    if(p<1) maskRAF=requestAnimationFrame(step);
+  })(t0);
+}
+function setMask(on){
+  maskOn=on; maskTarget = on?1:0;
+  document.getElementById("mOff").classList.toggle("on",!on);
+  document.getElementById("mOn").classList.toggle("on",on);
+  document.getElementById("mOn").classList.toggle("i",on);
+  maskState.textContent = on ? "suppression on" : "suppression off";
+  maskNote.innerHTML = on
+    ? "Under SUPPRESS the expressed report holds <b>0.17</b> of its natural separation and the internal readout holds <b>1.21</b> of its own. The divergence is <b>1.05</b> separation units, CI [0.73, 1.39], over 6 held-out scenarios, and it excludes zero."
+    : "Both bars are 1.00 by construction: each channel is divided by its own distress-neutral gap under the matched formatting instruction. Switch suppression on to see which one survives it.";
+  animMask();
+}
+document.getElementById("mOff").onclick=function(){ setMask(false); };
+document.getElementById("mOn").onclick =function(){ setMask(true); };
+document.getElementById("mCI").onclick =function(){
+  showCI=!showCI; this.classList.toggle("on",showCI); drawMask(); };
+document.getElementById("mTwins").onclick=function(){
+  showTwins=!showTwins; this.classList.toggle("on",showTwins);
+  if(showTwins && !maskOn) setMask(true); else drawMask();
+  if(showTwins) maskNote.innerHTML="The diamonds are the surface-matched neutral twins under the same instruction. The internal one sits at <b>+0.36</b>, well above the expression twin at <b>-0.06</b>: the readout rises on scenarios with no distress content too, which is why the report reads its rise as instruction load and not as added distress.";
+};
+
+/* =====================================================================
+   FIGURE 3: single component decomposition of the suppression prompt.
+   ===================================================================== */
+var fc=document.getElementById("factCanvas"), factNote=document.getElementById("factNote");
+var factMode="all", factText=false;
+function drawFact(){
+  var d=hidpi(fc), x=d.x, w=d.w, h=d.h;
+  x.fillStyle=PANEL; x.fillRect(0,0,w,h);
+  var padL=Math.min(160,w*0.28), padR=Math.min(158,w*0.21), top=36, bot=34;
+  var gw=w-padL-padR, gh=h-top-bot;
+  var lo=-0.55, hi=1.2;
+  function X(v){ return padL + (v-lo)/(hi-lo)*gw; }
+  var rowH=gh/D.fact.length;
+
+  /* axis */
+  x.strokeStyle=PRULE; mono(x,10); x.fillStyle=PINK3; x.textAlign="center";
+  for(var t=-0.5;t<=1.001;t+=0.5){
+    x.beginPath(); x.moveTo(X(t),top-6); x.lineTo(X(t),top+gh); x.stroke();
+    x.fillText(t.toFixed(2), X(t), top-11);
+  }
+  x.textAlign="left";
+  x.strokeStyle="rgba(231,234,240,0.34)"; x.lineWidth=1.2;
+  x.beginPath(); x.moveTo(X(0),top-6); x.lineTo(X(0),top+gh); x.stroke();
+
+  D.fact.forEach(function(r,i){
+    var cy=top+i*rowH+rowH/2;
+    var bh=Math.min(15,rowH*0.30);
+    /* expression drop */
+    var xa=X(0), xb=X(r.expr);
+    var grad=x.createLinearGradient(xa,0,xb,0);
+    grad.addColorStop(0,"rgba(47,111,208,0.55)"); grad.addColorStop(1,EXPR);
+    x.fillStyle=grad; x.fillRect(Math.min(xa,xb), cy-bh-3, Math.abs(xb-xa), bh);
+    /* its interval */
+    x.strokeStyle=PINK2; x.lineWidth=1; x.globalAlpha=0.6;
+    x.beginPath(); x.moveTo(X(r.ci[0]),cy-bh/2-3); x.lineTo(X(r.ci[1]),cy-bh/2-3); x.stroke();
+    x.globalAlpha=1;
+    /* internal drop */
+    if(factMode==="all"){
+      var ia=X(0), ib=X(r.intl);
+      x.fillStyle="rgba(255,154,77,0.85)";
+      x.fillRect(Math.min(ia,ib), cy+3, Math.abs(ib-ia), bh);
+    }
+    /* labels */
+    sans(x,13,600); x.fillStyle=PINK; x.textAlign="right";
+    x.fillText(r.n, padL-14, cy-1);
+    mono(x,10); x.fillStyle=PINK3;
+    x.fillText(r.tok+" tokens", padL-14, cy+13);
+    x.textAlign="left";
+    mono(x,11,500); x.fillStyle=EXPR;
+    x.fillText(r.expr.toFixed(2), Math.max(xb,xa)+8, cy-bh/2-1);
+    if(factMode==="all"){ x.fillStyle=INTL; x.textAlign="right";
+      x.fillText(r.intl.toFixed(2), Math.min(X(r.intl),X(0))-8, cy+bh/2+7); x.textAlign="left"; }
+    if(r.share!==null){
+      mono(x,10.5); x.fillStyle=PINK2;
+      x.fillText((r.share*100).toFixed(0)+"% of the full drop", padL+gw+14, cy+2);
+    }
+  });
+  mono(x,10.5); x.fillStyle=PINK3;
+  x.fillText("drop in natural separation units, expressed above the line, internal below", padL, h-10);
+}
+function setFact(){
+  document.getElementById("fAll").classList.toggle("on",factMode==="all");
+  document.getElementById("fExpr").classList.toggle("on",factMode==="expr");
+  document.getElementById("fExpr").classList.toggle("e",factMode==="expr");
+  document.getElementById("fText").classList.toggle("on",factText);
+  factNote.innerHTML = factText
+    ? D.fact.map(function(r,i){ return "<b>"+r.n+"</b> " + D.factText[i]; }).join("<br>")
+    : "Positive is signal removed. The register component alone takes out <b>0.55</b> of the natural expression separation, <b>66%</b> of what the full instruction removes, CI [0.32, 0.98]. The internal readout does not fall under any variant: its drops are negative throughout, and for the two components that move the report the interval sits entirely below zero.";
+  drawFact();
+}
+document.getElementById("fAll").onclick =function(){ factMode="all"; setFact(); };
+document.getElementById("fExpr").onclick=function(){ factMode="expr"; setFact(); };
+document.getElementById("fText").onclick=function(){ factText=!factText; setFact(); };
+
+/* =====================================================================
+   FIGURE 4: two triggers on the same 18 suppressed distress cells.
+   Cell order is arbitrary: the results file records the counts, not which
+   scenario each miss fell on, and the figure does not pretend otherwise.
+   ===================================================================== */
+var cc=document.getElementById("ctCanvas"), ctNote=document.getElementById("ctNote"),
+    ctState=document.getElementById("ctState");
+var ctMode="e", ctFP=true, ctT=0, ctRAF=null;
+function drawCT(){
+  var d=hidpi(cc), x=d.x, w=d.w, h=d.h;
+  x.fillStyle=PANEL; x.fillRect(0,0,w,h);
+  var padL=22, padR=22, top=44;
+  var cols=6, rows=3;
+  var availW=w-padL-padR;
+  var cell=Math.min(availW/cols-10, (h-top-(ctFP?150:64))/rows-10);
+  var gx=padL, gy=top;
+
+  mono(x,10.5,500); x.fillStyle=PINK3;
+  x.fillText("18 SUPPRESSED DISTRESS CELLS   6 SCENARIOS x 3 SEEDS", gx, top-16);
+
+  for(var i=0;i<18;i++){
+    var c=i%cols, r=Math.floor(i/cols);
+    var px=gx+c*(cell+10), py=gy+r*(cell+10);
+    var missE = i<D.ct.missE;          /* 15 of 18, order arbitrary */
+    var missI = false;                  /* 0 of 18 */
+    var showMissE = (ctMode==="e"||ctMode==="both");
+    var showI     = (ctMode==="i"||ctMode==="both");
+    /* base */
+    x.fillStyle="rgba(231,234,240,0.06)";
+    rnd(x,px,py,cell,cell,4); x.fill();
+    x.strokeStyle="rgba(231,234,240,0.14)"; x.lineWidth=1;
+    rnd(x,px+.5,py+.5,cell-1,cell-1,4); x.stroke();
+    if(ctMode==="both"){
+      /* left half expression, right half internal */
+      x.save(); rnd(x,px,py,cell/2,cell,0); x.clip();
+      x.fillStyle = missE ? "rgba(255,111,94,0.30)" : "rgba(67,199,133,0.30)";
+      x.fillRect(px,py,cell/2,cell); x.restore();
+      x.save(); rnd(x,px+cell/2,py,cell/2,cell,0); x.clip();
+      x.fillStyle="rgba(67,199,133,0.30)"; x.fillRect(px+cell/2,py,cell/2,cell); x.restore();
+      x.strokeStyle="rgba(231,234,240,0.16)";
+      x.beginPath(); x.moveTo(px+cell/2,py); x.lineTo(px+cell/2,py+cell); x.stroke();
+    } else {
+      var miss = showMissE ? missE : missI;
+      x.fillStyle = miss ? "rgba(255,111,94,0.26)" : "rgba(67,199,133,0.26)";
+      rnd(x,px,py,cell,cell,4); x.fill();
+      x.strokeStyle = miss ? "rgba(255,111,94,0.7)" : "rgba(67,199,133,0.7)";
+      rnd(x,px+.5,py+.5,cell-1,cell-1,4); x.stroke();
+      /* glyph */
+      x.strokeStyle = miss ? BAD : OK; x.lineWidth=1.8;
+      var m=cell*0.30, mx=px+cell/2, my=py+cell/2;
+      x.beginPath();
+      if(miss){ x.moveTo(mx-m,my-m); x.lineTo(mx+m,my+m); x.moveTo(mx+m,my-m); x.lineTo(mx-m,my+m); }
+      else { x.moveTo(mx-m,my); x.lineTo(mx-m*0.15,my+m*0.8); x.lineTo(mx+m,my-m*0.7); }
+      x.stroke();
+    }
+  }
+  var yAfter = gy+rows*(cell+10)+10;
+  mono(x,12,500);
+  if(ctMode==="e"){ x.fillStyle=BAD; x.fillText("expression trigger: 15 of 18 missed", gx, yAfter+10); }
+  else if(ctMode==="i"){ x.fillStyle=OK; x.fillText("internal trigger: 0 of 18 missed", gx, yAfter+10); }
+  else { x.fillStyle=PINK2; x.fillText("left half expression, right half internal", gx, yAfter+10); }
+
+  if(ctFP){
+    var by=yAfter+46, bh=13, bw=w-padL-padR;
+    mono(x,10.5); x.fillStyle=PINK3;
+    x.fillText("HELD-OUT FALSE POSITIVES ON 36 INSTRUCTION-NEUTRAL CELLS", gx, by-8);
+    [["expression",D.ct.fprE,EXPR],["internal",D.ct.fprI,INTL]].forEach(function(row,i){
+      var yy=by+i*(bh+16);
+      x.fillStyle="rgba(231,234,240,0.08)"; rnd(x,gx,yy,bw,bh,3); x.fill();
+      if(row[1]>0){ x.fillStyle=row[2]; rnd(x,gx,yy,bw*row[1],bh,3); x.fill(); }
+      mono(x,10.5,500); x.fillStyle=PINK2;
+      x.fillText(row[0]+"  "+Math.round(row[1]*100)+"%  ("+Math.round(row[1]*36)+"/36)", gx+4, yy+bh+11);
+    });
+  }
+}
+function setCT(){
+  ctState.textContent = ctMode==="e" ? "expression trigger" : ctMode==="i" ? "internal trigger" : "both triggers";
+  ["ctE","ctI","ctBoth"].forEach(function(id,i){
+    var on = (ctMode==="e"&&i===0)||(ctMode==="i"&&i===1)||(ctMode==="both"&&i===2);
+    var el=document.getElementById(id);
+    el.classList.toggle("on",on);
+    el.classList.toggle("e", on&&i===0); el.classList.toggle("i", on&&i===1);
+  });
+  document.getElementById("ctFP").classList.toggle("on",ctFP);
+  ctNote.innerHTML = ctMode==="e"
+    ? "Calibrated on discovery-split neutral cells at the lowest false-positive rate it can reach, the expression trigger misses <b>15 of 18</b> suppressed distress cells. It already missed 6 of 18 with no instruction at all and 11 of 18 under the matched formatting instruction, so suppression adds four misses to a trigger a formatting instruction has already blinded."
+    : ctMode==="i"
+    ? "The same calibration on the internal readout misses <b>none</b>, in any condition. The cost is in the other row: it fires on <b>50%</b> of held-out instruction-neutral cells, so as an absolute threshold it is not deployment ready. Give it half a separation unit of margin and it still catches all 18 at a 17% false-positive rate."
+    : "Side by side on the same cells. The expression trigger's clean false-positive row is partly the mirror of its miss rate: an instruction that flattens the expression channel flattens it on negatives too.";
+  drawCT();
+}
+document.getElementById("ctE").onclick   =function(){ ctMode="e"; setCT(); };
+document.getElementById("ctI").onclick   =function(){ ctMode="i"; setCT(); };
+document.getElementById("ctBoth").onclick=function(){ ctMode="both"; setCT(); };
+document.getElementById("ctFP").onclick  =function(){ ctFP=!ctFP; setCT(); };
+
+/* =====================================================================
+   FIGURE 5: the internal trigger's operating curve. Four measured points,
+   so the slider snaps to them rather than interpolating between them.
+   ===================================================================== */
+var oc=document.getElementById("opCanvas"), opRange=document.getElementById("opRange"),
+    opRead=document.getElementById("opRead"), opNote=document.getElementById("opNote");
+var opIdx=0;
+function drawOp(){
+  var d=hidpi(oc), x=d.x, w=d.w, h=d.h;
+  x.fillStyle=PANEL; x.fillRect(0,0,w,h);
+  var padL=54, padR=132, top=26, bot=44;
+  var gw=w-padL-padR, gh=h-top-bot;
+  function X(m){ return padL + (m/1.0)*gw; }
+  function Y(v){ return top+gh - v*gh; }
+
+  x.strokeStyle=PRULE; mono(x,10); x.fillStyle=PINK3;
+  for(var v=0;v<=1.001;v+=0.25){
+    x.beginPath(); x.moveTo(padL,Y(v)); x.lineTo(padL+gw,Y(v)); x.stroke();
+    x.fillText(Math.round(v*100)+"%", 14, Y(v)+3.5);
+  }
+  x.textAlign="center";
+  D.op.forEach(function(p){ x.fillText(p.m.toFixed(2), X(p.m), top+gh+18); });
+  x.fillText("threshold margin in separation units", padL+gw/2, h-8);
+  x.textAlign="left";
+
+  [["fpr",INTL,"false positives"],["miss",BAD,"missed distress"]].forEach(function(s){
+    x.beginPath();
+    D.op.forEach(function(p,i){ var px=X(p.m), py=Y(p[s[0]]); if(i===0) x.moveTo(px,py); else x.lineTo(px,py); });
+    x.strokeStyle=s[1]; x.lineWidth=2;
+    if(s[0]==="miss"){ x.save(); x.setLineDash([5,4]); x.stroke(); x.restore(); } else { x.stroke(); }
+    D.op.forEach(function(p){
+      x.fillStyle=s[1]; x.beginPath(); x.arc(X(p.m),Y(p[s[0]]),3.4,0,6.284); x.fill();
+    });
+    var last=D.op[D.op.length-1];
+    mono(x,10.5,500); x.fillStyle=s[1];
+    x.fillText(s[2], padL+gw+10, Y(last[s[0]])+3.5);
+  });
+
+  var sel=D.op[opIdx];
+  x.save(); x.setLineDash([3,4]); x.strokeStyle="rgba(231,234,240,0.45)";
+  x.beginPath(); x.moveTo(X(sel.m),top); x.lineTo(X(sel.m),top+gh); x.stroke(); x.restore();
+  x.fillStyle=PINK; x.beginPath(); x.arc(X(sel.m),Y(sel.fpr),5.4,0,6.284); x.fill();
+  x.fillStyle=PINK; x.beginPath(); x.arc(X(sel.m),Y(sel.miss),5.4,0,6.284); x.fill();
+}
+function setOp(i){
+  opIdx=i;
+  var p=D.op[i];
+  opRead.textContent = p.m.toFixed(2)+" sep. units";
+  opNote.innerHTML = "At a margin of <b>"+p.m.toFixed(2)+"</b> separation units the internal trigger misses <b>"+
+    Math.round(p.miss*18)+" of 18</b> suppressed distress cells at a held-out false-positive rate of <b>"+
+    Math.round(p.fpr*100)+"%</b>. " + (i===3
+      ? "One full separation unit of margin finally buys a clean negative set, and it costs half the suppressed cells. That is the trade the report declines to hide."
+      : "The miss rate does not depend on the choice of margin across the first three measured points. The false-positive rate does.");
+  drawOp();
+}
+opRange.oninput=function(){
+  var v=+this.value, i = v<20?0 : v<45?1 : v<75?2 : 3;
+  this.value = [0,25,50,100][i];
+  if(i!==opIdx) setOp(i); else { opRead.textContent = D.op[i].m.toFixed(2)+" sep. units"; }
+};
+
+/* =====================================================================
+   FIGURE 6: the candidate directions in three dimensions.
+   Coordinates are an exact Cholesky factorisation of the measured cosine
+   matrix, so every angle you see is the angle that was measured.
+   ===================================================================== */
+var dc=document.getElementById("dir3d"), dirNote=document.getElementById("dirNote");
+var dirWithout=false, dirT=0, dirTarget=0, dirRAF=null;
+var stD=makeRotator(dc, function(){ drawDir(); }, -0.42, 0.85);
+var DIRCOL={"D-CTX":INTL, "D-PV":EXPR, "OTHER":"#b28ce8"};
+function drawDir(){
+  var d=hidpi(dc), x=d.x, w=d.w, h=d.h;
+  x.fillStyle=PANEL; x.fillRect(0,0,w,h);
+  var dist=1000, scale=Math.min(w,h)*0.40;
+
+  /* a faint sphere of latitude and longitude rings */
+  x.strokeStyle="rgba(231,234,240,0.075)"; x.lineWidth=1;
+  for(var la=-2;la<=2;la++){
+    var r=Math.cos(la*0.4), yy=Math.sin(la*0.4);
+    x.beginPath();
+    for(var a=0;a<=64;a++){
+      var th=a/64*6.2832;
+      var p=project([r*Math.cos(th),yy,r*Math.sin(th)],stD,w,h,dist,scale);
+      if(a===0) x.moveTo(p[0],p[1]); else x.lineTo(p[0],p[1]);
+    }
+    x.stroke();
+  }
+  for(var lo=0;lo<6;lo++){
+    var ph=lo/6*3.1416;
+    x.beginPath();
+    for(var b=0;b<=64;b++){
+      var th2=b/64*6.2832;
+      var p2=project([Math.cos(ph)*Math.sin(th2),Math.cos(th2),Math.sin(ph)*Math.sin(th2)],stD,w,h,dist,scale);
+      if(b===0) x.moveTo(p2[0],p2[1]); else x.lineTo(p2[0],p2[1]);
+    }
+    x.stroke();
+  }
+
+  var A=D.dirs.withDom, B=D.dirs.withoutDom;
+  var names=["D-CTX","D-PV","OTHER"];
+  var pos={};
+  names.forEach(function(n){
+    pos[n]=[lerp(A[n][0],B[n][0],dirT), lerp(A[n][1],B[n][1],dirT), lerp(A[n][2],B[n][2],dirT)];
+  });
+  /* the arc between the two distress directions, drawn on the sphere */
+  var a1=pos["D-CTX"], a2=pos["D-PV"];
+  x.strokeStyle="rgba(255,255,255,0.5)"; x.lineWidth=1.6;
+  x.beginPath();
+  for(var s=0;s<=40;s++){
+    var tt=s/40;
+    var v=[lerp(a1[0],a2[0],tt),lerp(a1[1],a2[1],tt),lerp(a1[2],a2[2],tt)];
+    var nn=Math.hypot(v[0],v[1],v[2]);
+    var p3=project([v[0]/nn,v[1]/nn,v[2]/nn],stD,w,h,dist,scale);
+    if(s===0) x.moveTo(p3[0],p3[1]); else x.lineTo(p3[0],p3[1]);
+  }
+  x.stroke();
+
+  names.forEach(function(n){
+    var v=pos[n];
+    line3(x,[0,0,0],v,stD,w,h,dist,scale,DIRCOL[n],2.4);
+    var p=project(v,stD,w,h,dist,scale);
+    x.fillStyle=DIRCOL[n]; x.shadowColor=DIRCOL[n]; x.shadowBlur=10;
+    x.beginPath(); x.arc(p[0],p[1],5,0,6.284); x.fill(); x.shadowBlur=0;
+    mono(x,11.5,500); x.fillStyle=DIRCOL[n];
+    x.fillText(n, p[0]+10, p[1]+4);
+  });
+
+  var cos = dirT>0.5 ? D.dirs.cosWithout : D.dirs.cosWith;
+  mono(x,11,500); x.fillStyle=PINK;
+  x.fillText("cos(D-CTX, D-PV) = "+cos["D-CTX|D-PV"].toFixed(2), 16, 24);
+  mono(x,10.5); x.fillStyle=PINK3;
+  x.fillText("cos(D-CTX, OTHER) = "+cos["D-CTX|OTHER"].toFixed(2), 16, 42);
+  x.fillText("cos(D-PV, OTHER) = "+cos["D-PV|OTHER"].toFixed(2), 16, 58);
+  x.fillText(dirT>0.5 ? "coordinate 2339 removed" : "as measured at layer 31", 16, h-14);
+}
+function animDir(){
+  cancelAnimationFrame(dirRAF);
+  if(reduce){ dirT=dirTarget; drawDir(); return; }
+  var from=dirT, t0=performance.now(), dur=900;
+  (function step(now){
+    var p=Math.min(1,(now-t0)/dur);
+    dirT=from+(dirTarget-from)*ease(p);
+    drawDir();
+    if(p<1) dirRAF=requestAnimationFrame(step);
+  })(t0);
+}
+function setDir(without){
+  dirWithout=without; dirTarget=without?1:0;
+  document.getElementById("dWith").classList.toggle("on",!without);
+  document.getElementById("dWithout").classList.toggle("on",without);
+  document.getElementById("dWithout").classList.toggle("i",without);
+  dirNote.innerHTML = without
+    ? "With coordinate 2339 removed the two distress directions agree at <b>0.23</b>, about what the contrast-context direction shares with a maritime semantic control (0.20). Roughly half of the convergent validity was one coordinate."
+    : "The two independently built distress directions agree at <b>0.45</b> at the readout layer. Vector positions are an exact factorisation of the measured cosine matrix, so every angle drawn is a measured angle. Controls: SEM sits at "+D.dirs.controls[0][1].toFixed(2)+" from D-CTX and a random direction at "+D.dirs.controls[1][1].toFixed(2)+".";
+  animDir();
+}
+document.getElementById("dWith").onclick   =function(){ setDir(false); };
+document.getElementById("dWithout").onclick=function(){ setDir(true); };
+
+/* =====================================================================
+   boot
+   ===================================================================== */
+function drawStatics(){ drawStack(); drawMask(); drawFact(); drawCT(); drawOp(); drawDir(); }
+measureField();
+setStack("final"); setMask(false); setFact(); setCT(); setOp(0); setDir(false);
+drawStatics();
+sweepReveals();
+setTimeout(sweepReveals, 120);
+
+var lastAmb=0;
+function loop(ts){
+  if(ts-lastAmb > 33){
+    lastAmb=ts;
+    if(scrollY < innerHeight*1.4) drawScope(ts);
+    drawField(ts);
+    /* the two rotatable figures idle with a slow drift until first touched */
+    if(st3.spin && !st3.drag){ st3.ry += 0.0016; drawStack(); }
+    if(stD.spin && !stD.drag){ stD.ry += 0.0022; drawDir(); }
+  }
+  requestAnimationFrame(loop);
+}
+if(!reduce) requestAnimationFrame(loop); else { drawScope(0); drawField(0); }
+
+var to=null;
+addEventListener("resize", function(){
+  clearTimeout(to);
+  to=setTimeout(function(){ measureField(); drawStatics(); }, 150);
+});
+addEventListener("load", function(){ measureField(); drawStatics(); });
+addEventListener("visibilitychange", function(){ if(!document.hidden){ measureField(); drawStatics(); } });
+})();
+</script>
+</body>
+</html>

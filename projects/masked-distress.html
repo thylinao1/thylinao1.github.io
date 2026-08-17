@@ -878,18 +878,25 @@ function crossfade(canvas, draw, dur){
   if(!buf){ buf = document.createElement("canvas"); _snap.set(canvas, buf); }
   buf.width = w; buf.height = h;
   buf.getContext("2d").drawImage(canvas, 0, 0);
-  draw();
   var ctx = canvas.getContext("2d"), t0 = performance.now();
   cancelAnimationFrame(canvas._xf);
+  /* Out through the panel ground, then in. A cross dissolve would show both frames of
+     labels at once, which reads as overlapping text rather than as a transition. */
   (function step(now){
     var p = Math.min(1, (now - t0) / dur);
-    draw();
-    if(p < 1){
-      ctx.save(); ctx.setTransform(1,0,0,1,0,0);
-      ctx.globalAlpha = 1 - (p<0?0:p>1?1:1-Math.pow(1-p,3));
-      ctx.drawImage(buf, 0, 0); ctx.restore();
-      canvas._xf = requestAnimationFrame(step);
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+    if(p < 0.5){
+      ctx.globalAlpha = 1; ctx.fillStyle = PANEL; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.globalAlpha = 1 - (p/0.5);
+      ctx.drawImage(buf, 0, 0);
+    } else {
+      ctx.restore(); draw(); ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+      ctx.globalAlpha = 1 - ((p-0.5)/0.5);
+      ctx.fillStyle = PANEL; ctx.fillRect(0,0,canvas.width,canvas.height);
     }
+    ctx.restore();
+    if(p < 1) canvas._xf = requestAnimationFrame(step);
+    else draw();
   })(t0);
 }
 
@@ -1401,7 +1408,9 @@ function drawFact(){
     }
   });
   mono(x,10.5); x.fillStyle=PINK3;
-  x.fillText("drop in natural separation units, expressed above the line, internal below", padL, h-10);
+  x.fillText(factMode==="all"
+    ? "drop in natural separation units, expressed above the line, internal below"
+    : "drop in natural separation units, expressed channel only", padL, h-10);
 }
 function setFact(){
   document.getElementById("fAll").classList.toggle("on",factMode==="all");
@@ -1435,7 +1444,11 @@ function drawCT(){
   var padL=22, padR=22, top=44;
   var cols=6, rows=3;
   var availW=w-padL-padR;
-  var cell=Math.min(availW/cols-10, (h-top-(ctFP?150:64))/rows-10);
+  /* Reserve what the footer actually needs before sizing the cells, so a mode with two
+     caption lines cannot push the false-positive block off the bottom of the canvas. */
+  var capLines = (ctMode==="both") ? 2 : 1;
+  var footer = capLines*17 + 8 + (ctFP ? 104 : 0);
+  var cell=Math.min(availW/cols-10, (h-top-footer)/rows-10);
   var gx=padL, gy=top;
 
   mono(x,10.5,500); x.fillStyle=PINK3;
@@ -1477,14 +1490,22 @@ function drawCT(){
       x.stroke();
     }
   }
-  var yAfter = gy+rows*(cell+10)+10;
+  var yAfter = gy+rows*(cell+10)+8;
   mono(x,12,500);
-  if(ctMode==="e"){ x.fillStyle=BAD; x.fillText("expression trigger: 15 of 18 missed", gx, yAfter+10); }
-  else if(ctMode==="i"){ x.fillStyle=OK; x.fillText("internal trigger: 0 of 18 missed", gx, yAfter+10); }
-  else { x.fillStyle=PINK2; x.fillText("left half expression, right half internal", gx, yAfter+10); }
+  if(ctMode==="e"){ x.fillStyle=BAD; x.fillText("expression trigger: 15 of 18 missed", gx, yAfter+11); }
+  else if(ctMode==="i"){ x.fillStyle=OK; x.fillText("internal trigger: 0 of 18 missed", gx, yAfter+11); }
+  else {
+    x.fillStyle=BAD; x.fillText("expression: 15 of 18 missed", gx, yAfter+11);
+    var wSeg = x.measureText("expression: 15 of 18 missed").width;
+    x.fillStyle=PINK3; x.fillText("|", gx+wSeg+14, yAfter+11);
+    x.fillStyle=OK; x.fillText("internal: 0 of 18 missed", gx+wSeg+30, yAfter+11);
+    mono(x,10.5); x.fillStyle=PINK3;
+    x.fillText("left half of each cell is the expression trigger, right half the internal one",
+               gx, yAfter+28);
+  }
 
   if(ctFP){
-    var by=yAfter+46, bh=13, bw=w-padL-padR;
+    var by=yAfter+(capLines*17)+30, bh=13, bw=w-padL-padR;
     mono(x,10.5); x.fillStyle=PINK3;
     x.fillText("HELD-OUT FALSE POSITIVES ON 36 INSTRUCTION-NEUTRAL CELLS", gx, by-8);
     [["expression",D.ct.fprE,EXPR],["internal",D.ct.fprI,INTL]].forEach(function(row,i){

@@ -6,10 +6,10 @@
 <title>Masked Distress</title>
 <meta name="description" content="A system prompt with no affect words cut a model's expressed distress by 83.5% of its natural separation while the reading taken from its activations before generation did not fall. Preregistered, on Gemma-3-12B-IT." />
 <meta property="og:title" content="Masked Distress" />
-<meta property="og:description" content="Expression collapses under a plain instruction. The internal readout does not. What that costs a welfare monitor, priced in misses and false positives." />
+<meta property="og:description" content="A system prompt with no affect words removed most of a model's expressed distress while a linear readout taken before generation did not fall, and what that costs a welfare monitor in misses and false positives." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,400;0,9..144,460;0,9..144,600;1,9..144,420&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
 :root{
   /* bone paper, ink, and the two channel colours the paper's own figures use */
@@ -23,7 +23,7 @@
   --expr:#0f5f9e; --expr-lit:#6fb3f2; --expr-soft:#b6d4ee;
   --intl:#bd550c; --intl-lit:#ff9142; --intl-soft:#efc3a1;
   --ok:#1c7f4c; --ok-lit:#4fc98a; --bad:#b8371f; --bad-lit:#ff7059; --warn:#96690a;
-  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-display:"Fraunces",Georgia,"Times New Roman",serif;
   --font-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
   --maxw:1240px; --read:768px;
@@ -35,12 +35,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body)
   font-size:18px;line-height:1.68;-webkit-font-smoothing:antialiased;
   font-feature-settings:"kern" 1,"liga" 1}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 30px}
-.col{max-width:var(--read);margin:0 auto}
+.col{max-width:960px;margin:0 auto}
 a{color:var(--expr);text-decoration:none;border-bottom:1px solid var(--expr-soft)}
 a:hover{border-bottom-color:var(--expr)}
 code,.mono{font-family:var(--font-mono);font-size:.87em}
 code{background:var(--bg-2);padding:.12em .38em;border-radius:3px}
-p{margin:0 0 21px;max-width:var(--read)}
+p{margin:0 auto 21px;max-width:var(--read)}
 strong{font-weight:600}
 em{font-style:italic}
 ::selection{background:var(--intl-soft);color:var(--ink)}
@@ -61,11 +61,11 @@ em{font-style:italic}
   display:flex;align-items:center;justify-content:center;gap:11px;margin-bottom:34px;flex-wrap:wrap}
 .hero-mark .homeback{color:var(--expr);border-bottom:1px solid var(--expr-soft)}
 .hero-mark .sep{color:var(--ink-4)}
-h1{font-family:var(--font-display);font-weight:400;font-size:clamp(56px,10vw,132px);
-  line-height:.94;letter-spacing:-.02em;margin:0;text-align:center}
-h1 .it{font-style:italic;color:var(--intl)}
+h1{font-family:var(--font-display);font-weight:380;font-size:clamp(50px,8.4vw,112px);
+  line-height:1.0;letter-spacing:-.022em;margin:0;text-align:center}
+h1 .it{font-style:italic;font-weight:420;color:var(--intl)}
 .hero-rule{width:62px;height:1px;background:var(--rule-2);margin:30px auto}
-.hero-sub{font-size:21px;color:var(--ink-2);max-width:720px;margin:0 auto 32px;text-align:center;
+.hero-sub{font-size:21px;color:var(--ink-2);max-width:760px;margin:0 auto 32px;text-align:center;
   line-height:1.55}
 .hero-sub b{font-weight:600;color:var(--ink)}
 .hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
@@ -116,15 +116,16 @@ section.dark .panel{background:var(--panel-2);box-shadow:none;border-color:var(-
 section.dark .pull{color:var(--panel-ink);border-left-color:var(--intl-lit)}
 .secnum{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;color:var(--ink-4);
   margin-bottom:16px;text-transform:uppercase;text-align:center}
-h2{font-family:var(--font-display);font-weight:400;font-size:clamp(34px,4.8vw,58px);line-height:1.06;
-  letter-spacing:-.014em;margin:0 auto 30px;max-width:19ch;text-align:center}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(31px,4.1vw,50px);line-height:1.12;
+  letter-spacing:-.015em;margin:0 auto 30px;max-width:min(30ch,880px);text-align:center}
 h2 .it{font-style:italic;color:var(--intl)}
-h3{font-family:var(--font-body);font-weight:600;font-size:17px;letter-spacing:-.005em;
-  margin:46px auto 14px;color:inherit;text-align:center;max-width:34ch}
-.lede{font-size:21.5px;line-height:1.56;color:var(--ink-2);max-width:660px;
+h3{font-family:var(--font-display);font-weight:460;font-size:25px;letter-spacing:-.008em;
+  margin:52px auto 16px;color:inherit;text-align:center;max-width:min(30ch,720px)}
+.lede{font-size:21.5px;line-height:1.56;color:var(--ink-2);max-width:830px;
   margin:0 auto 34px;text-align:center}
-.pull{border-left:2px solid var(--intl);padding:2px 0 2px 24px;margin:40px auto;
-  font-family:var(--font-display);font-size:29px;line-height:1.28;color:var(--ink);max-width:640px}
+.pull{border-left:2px solid var(--intl);padding:4px 0 4px 24px;margin:44px auto;
+  font-family:var(--font-display);font-weight:400;font-style:italic;font-size:27px;line-height:1.34;
+  color:var(--ink);max-width:730px}
 .note{font-size:15px;color:var(--ink-3);border-left:1px solid var(--rule-2);padding-left:18px;
   margin:30px auto;max-width:var(--read)}
 
@@ -137,7 +138,7 @@ h3{font-family:var(--font-body);font-weight:600;font-size:17px;letter-spacing:-.
 
 /* ---------------- instrument panels ---------------- */
 .panel{background:var(--panel);border:1px solid rgba(20,22,26,.16);border-radius:10px;
-  padding:20px 20px 16px;margin:42px auto;color:var(--panel-ink);max-width:var(--read);
+  padding:22px 22px 18px;margin:46px auto;color:var(--panel-ink);max-width:880px;
   box-shadow:0 26px 60px -34px rgba(20,22,26,.62)}
 .panel.wide{max-width:none}
 .panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
@@ -172,7 +173,7 @@ h3{font-family:var(--font-body);font-weight:600;font-size:17px;letter-spacing:-.
 
 /* ---------------- key results ---------------- */
 .keyres{background:var(--panel);border-radius:10px;padding:6px 4px 4px;margin:36px auto;
-  max-width:var(--read);box-shadow:0 26px 60px -34px rgba(20,22,26,.62);overflow-x:auto}
+  max-width:830px;box-shadow:0 26px 60px -34px rgba(20,22,26,.62);overflow-x:auto}
 .keyres table.kr{min-width:440px}
 table.kr{border-collapse:collapse;width:100%;font-family:var(--font-mono);font-size:13.5px;
   color:var(--panel-ink)}
@@ -194,7 +195,7 @@ table.data th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color
 
 /* ---------------- ledger ---------------- */
 .ledger{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;
-  overflow:hidden;margin:36px auto;max-width:var(--read)}
+  overflow:hidden;margin:38px auto;max-width:860px}
 .ledger .row{background:var(--bg);padding:20px 22px;display:grid;grid-template-columns:128px 1fr;
   gap:20px;align-items:start;transition:background .3s var(--ease),transform .3s var(--ease)}
 section.alt .ledger .row{background:var(--bg-2)}
@@ -216,7 +217,7 @@ section.dark .ledger .tag.yes{color:var(--ok-lit)}
 /* ---------------- stat strip ---------------- */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;
   background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden;
-  margin:36px auto;max-width:var(--read)}
+  margin:38px auto;max-width:860px}
 .stat{background:var(--bg);padding:22px 18px;text-align:center}
 section.alt .stat{background:var(--bg-2)}
 section.deep .stat{background:var(--bg-3)}
@@ -238,7 +239,7 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
   .wrap{padding:0 20px}
   section{padding:64px 0}
   #hero{padding:76px 0 62px}
-  h1{font-size:clamp(46px,14vw,80px)}
+  h1{font-size:clamp(42px,12vw,74px)}
   .hero-sub{font-size:18px}
   .chip{font-size:11px;padding:5px 9px}
   .lede{font-size:19px}
@@ -299,15 +300,15 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 <nav id="toc" aria-label="Section navigation">
   <div class="wrap">
     <a class="homelink" href="../index.html">Home</a>
-    <a href="#s1" data-sec="s1">01 The blind spot</a>
+    <a href="#s1" data-sec="s1">01 The gap</a>
     <a href="#s2" data-sec="s2">02 Two channels</a>
     <a href="#s3" data-sec="s3">03 The result</a>
-    <a href="#s4" data-sec="s4">04 Not distress</a>
-    <a href="#s5" data-sec="s5">05 Which words</a>
-    <a href="#s6" data-sec="s6">06 Monitor cost</a>
-    <a href="#s7" data-sec="s7">07 The probe</a>
-    <a href="#s8" data-sec="s8">08 What failed</a>
-    <a href="#s9" data-sec="s9">09 What follows</a>
+    <a href="#s4" data-sec="s4">04 Specificity</a>
+    <a href="#s5" data-sec="s5">05 Components</a>
+    <a href="#s6" data-sec="s6">06 Countermeasure</a>
+    <a href="#s7" data-sec="s7">07 Validity</a>
+    <a href="#s8" data-sec="s8">08 Checks</a>
+    <a href="#s9" data-sec="s9">09 Implications</a>
     <a href="#method" data-sec="method">Method</a>
   </div>
   <div id="prog"></div>
@@ -322,7 +323,7 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
     conversation. The published justification cites a pattern of apparent distress. That is a welfare
     intervention running in production, and its trigger is expression: what the model writes. No
     internal-state monitor is documented alongside it.</p>
-  <p class="reveal">Expression is cheap to change. Register constraints and self-reference
+  <p class="reveal">Expression is readily altered by instruction. Register constraints and self-reference
     prohibitions of the kind deployed assistants already carry act on what a model says, and there is
     no reason they must act on what it computes. Soligo et al. name exactly this worry about their own
     distress work and test it only for a DPO intervention, not for a prompt.</p>
@@ -330,8 +331,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
     no affect words at all. Ask the model how it is doing, and separately read a linear probe on its
     residual stream before it has generated anything. If the two move together, expression-triggered
     monitoring is fine. If expression collapses and the internal reading does not, then the class of
-    welfare intervention shipping today is blind in exactly the case that would matter.</p>
-  <p class="pull reveal">Masked distress is the case an expression trigger cannot see.</p>
+    welfare intervention deployed today cannot detect the case that would matter.</p>
+  <p class="pull reveal">Masked distress is the case an expression trigger cannot detect.</p>
 </div></div></section>
 
 <section id="s2"><div class="wrap"><div class="col">
@@ -373,7 +374,7 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 <section id="s3" class="alt"><div class="wrap">
   <div class="col">
   <div class="secnum reveal">03 / the result</div>
-  <h2 class="reveal">Turn the instruction on and watch one channel <span class="it">go</span></h2>
+  <h2 class="reveal">One channel falls to the floor, the other does <span class="it">not</span></h2>
   <p class="lede reveal">Both bars start at 1.00 by construction, because each channel is divided by
     its own natural distress-neutral gap under the matched formatting instruction. All of the
     information is in what happens when suppression is switched on.</p>
@@ -406,7 +407,7 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
   <p>Six scenarios is a small number, so the same claim is stated at the granularity six clusters
     actually support: the internal reading fails to fall in six of six held-out pairs, exact
     one-sided sign test p = 0.016, and the divergence is positive in six of six. Leaving any one pair
-    out keeps the divergence between 1.00 and 1.15. The expression half is the weaker one: it holds
+    out keeps the divergence between 1.00 and 1.15. The expression side is the less well supported one: it holds
     in four of the four pairs that carry any expressed distress to remove, p = 0.0625, because two
     clinical-vignette pairs have no expression separation to begin with.</p>
   </div>
@@ -432,8 +433,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 </div></section>
 
 <section id="s4"><div class="wrap"><div class="col">
-  <div class="secnum reveal">04 / against our own result</div>
-  <h2 class="reveal">The internal bar rises. That is <span class="it">not</span> more distress.</h2>
+  <div class="secnum reveal">04 / specificity of the internal rise</div>
+  <h2 class="reveal">The internal reading rises, and that is <span class="it">not</span> added distress</h2>
   <p class="lede reveal">The obvious reading of Figure 2 is that suppression raised the model's real
     distress while hiding it. The paper does not make that claim, because the control that would
     support it goes the other way.</p>
@@ -451,14 +452,14 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
     <div class="stat"><div class="n">-0.89</div><div class="l">difference-in-differences<br>CI [-2.27, +0.60]</div></div>
   </div>
   <p class="reveal">The preregistered equivalence test also does not clear, at TOST p = 0.31. The
-    side it fails on is the upward one, a possible rise past the band rather than a fall. That is
-    printed in the report as a preregistered reading that did not go our way.</p>
+    side it fails on is the upward one, a possible rise past the band rather than a fall. That is printed in the report as a preregistered
+    reading that returned against the hypothesis.</p>
 </div></div></section>
 
 <section id="s5" class="alt"><div class="wrap">
   <div class="col">
-  <div class="secnum reveal">05 / which words did it</div>
-  <h2 class="reveal">The instruction was cut into pieces and rerun</h2>
+  <div class="secnum reveal">05 / component decomposition</div>
+  <h2 class="reveal">The instruction decomposed into its three components</h2>
   <p class="lede reveal">SUPPRESS does three things at once: it sets a neutral register, it forbids
     self-reference, and it tells the model to stay on the task. After the review each component was
     run alone, on the same scenarios, seeds and instruments.</p>
@@ -496,8 +497,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 </div></section>
 <section id="s6" class="dark"><div class="wrap">
   <div class="col">
-  <div class="secnum reveal">06 / what a monitor misses</div>
-  <h2 class="reveal">Price the countermeasure, including what it <span class="it">costs</span></h2>
+  <div class="secnum reveal">06 / the countermeasure</div>
+  <h2 class="reveal">The countermeasure, with its false-positive <span class="it">cost</span></h2>
   <p class="lede reveal">Set two triggers the same way: threshold each channel on the discovery-split
     neutral cells, the deployment-realistic negative class, at the lowest false-positive rate each
     can reach. Then run both against the eighteen suppressed distress cells on the held-out split.</p>
@@ -523,17 +524,16 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
     calibrated identically and read in the same forward pass, misses <b>none of the 18</b>. The
     pre-generation reading is identical across the three seeds, so those 18 cells carry six distinct
     values and every internal interval here is a six-cluster reading, with an exact one-sided bound
-    of 39% on that zero. That is the finding
-    the paper leads with, and the next sentence is the one that keeps it honest: the internal trigger
-    fires on <b>50%</b> of held-out instruction-neutral cells, while the expression trigger fires on
-    none of them.</p>
+    of 39% on that zero. That is the result the paper leads with, and it
+    is reported with its cost: the internal trigger fires on <b>50%</b> of held-out
+    instruction-neutral cells, while the expression trigger fires on none of them.</p>
   <p>That false-positive rate has a cause, and it is not noise. The threshold is a max-of-negatives
     estimator, and the negative class sits 3.24 raw units higher on the confirmation scenario set
     than on the discovery set. Give the threshold half a separation unit of margin and it still
     catches all 18 suppressed cells at a 17% held-out false-positive rate.</p>
   <p>The expression trigger's clean false-positive row is partly the mirror of its failure: an
     instruction that flattens the expression channel flattens it on negatives too.</p>
-  <p>One more line keeps this table honest. A bag-of-words classifier on the scenario text matches
+  <p>One qualification belongs with this table. A bag-of-words classifier on the scenario text matches
     the internal trigger's miss rate here, without weights access and without a forward-pass hook.
     What this table shows is that expression <em>level</em> is silenceable. What separates an
     activation readout from a context classifier is the byte-identical-prompt evidence in the next
@@ -561,8 +561,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 
 <section id="s7"><div class="wrap">
   <div class="col">
-  <div class="secnum reveal">07 / is the probe real</div>
-  <h2 class="reveal">Four ways this could be an artifact, and what each one showed</h2>
+  <div class="secnum reveal">07 / instrument validity</div>
+  <h2 class="reveal">Four checks on whether the readout is an artifact</h2>
   <p class="lede reveal">A probe that separates distress from neutral on twelve scenarios proves very
     little on its own. The report treats that as the starting point rather than the finding, and two
     of the four checks below come back against it.</p>
@@ -611,13 +611,13 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
     direction shares with a maritime semantic control.</p>
   <p>Roughly half of the convergent validity is one coordinate that mean-difference extraction picks
     up on this model whatever the contrast. Disagreement was preregistered as a publishable outcome,
-    and this is the honest version of that outcome. The readout is not touched by the coordinate. The
+    and this is the outcome as measured. The readout is not touched by the coordinate. The
     steering is.</p>
   </div>
 </div></section>
 <section id="s8" class="alt"><div class="wrap"><div class="col">
-  <div class="secnum reveal">08 / what did not work</div>
-  <h2 class="reveal">Four runs that could have broken the headline</h2>
+  <div class="secnum reveal">08 / checks that did not confirm</div>
+  <h2 class="reveal">Four checks that could have overturned the result</h2>
   <p class="lede reveal">After the review rounds, four experiments were launched with the estimand
     and the reading rule written into a dated preregistration note beforehand. Three came back
     negative. All four are in the report, and none is presented as a win it was not.</p>
@@ -639,8 +639,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
       instruction. It transfers weakly, with the instruction pushing the report below prediction on
       distress scenarios and their neutral twins alike.</div></div>
   </div>
-  <p class="reveal">Add to those the four preregistered readings that did not go our way inside the
-    main study: the equivalence test does not clear, the SD-unit dose grid proved unreachable so its
+  <p class="reveal">Add to those the four preregistered readings inside the main study that returned against the
+    hypothesis: the equivalence test does not clear, the SD-unit dose grid proved unreachable so its
     preregistered branch fired, the conditions attached to a specificity claim were not met, and the
     preregistered countermeasure calibration degenerated and had to be replaced by a labelled
     post-data amendment with both held-out false-positive rates printed.</p>
@@ -649,8 +649,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
 </div></div></section>
 
 <section id="s9"><div class="wrap"><div class="col">
-  <div class="secnum reveal">09 / what follows</div>
-  <h2 class="reveal">One dot product per forward pass</h2>
+  <div class="secnum reveal">09 / implications</div>
+  <h2 class="reveal">What follows for welfare monitoring</h2>
   <p class="lede reveal">Any welfare trigger that reads what a model says is reading a channel the
     system prompt controls. On this model the controlling text needed no affect words and no
     adversarial intent.</p>
@@ -1233,7 +1233,7 @@ function setMask(on){
   maskState.textContent = on ? "suppression on" : "suppression off";
   maskNote.innerHTML = on
     ? "Under SUPPRESS the expressed report holds <b>0.17</b> of its natural separation and the internal readout holds <b>1.21</b> of its own. The divergence is <b>1.05</b> separation units, CI [0.73, 1.39], over 6 held-out scenarios, and it excludes zero."
-    : "Both bars are 1.00 by construction: each channel is divided by its own distress-neutral gap under the matched formatting instruction. Switch suppression on to see which one survives it.";
+    : "Both bars are 1.00 by construction: each channel is divided by its own distress-neutral gap under the matched formatting instruction. Switch suppression on to see how each channel responds.";
   animMask();
 }
 document.getElementById("mOff").onclick=function(){ setMask(false); };
@@ -1405,9 +1405,9 @@ function setCT(){
   });
   document.getElementById("ctFP").classList.toggle("on",ctFP);
   ctNote.innerHTML = ctMode==="e"
-    ? "Calibrated on discovery-split neutral cells at the lowest false-positive rate it can reach, the expression trigger misses <b>15 of 18</b> suppressed distress cells. It already missed 6 of 18 with no instruction at all and 11 of 18 under the matched formatting instruction, so suppression adds four misses to a trigger a formatting instruction has already blinded."
+    ? "Calibrated on discovery-split neutral cells at the lowest false-positive rate it can reach, the expression trigger misses <b>15 of 18</b> suppressed distress cells. It already missed 6 of 18 with no instruction at all and 11 of 18 under the matched formatting instruction, so suppression adds four misses to a trigger the formatting instruction had already made insensitive."
     : ctMode==="i"
-    ? "The same calibration on the internal readout misses <b>none</b>, in any condition. The cost is in the other row: it fires on <b>50%</b> of held-out instruction-neutral cells, so as an absolute threshold it is not deployment ready. Give it half a separation unit of margin and it still catches all 18 at a 17% false-positive rate."
+    ? "The same calibration on the internal readout misses <b>none</b>, in any condition. The cost is in the other row: it fires on <b>50%</b> of held-out instruction-neutral cells, so as an absolute threshold it is not deployment ready. At half a separation unit of margin it still catches all 18, at a 17% false-positive rate."
     : "Side by side on the same cells. The expression trigger's clean false-positive row is partly the mirror of its miss rate: an instruction that flattens the expression channel flattens it on negatives too.";
   drawCT();
 }

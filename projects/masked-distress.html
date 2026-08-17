@@ -71,7 +71,7 @@ h1{font-family:var(--font-display);font-weight:380;font-size:clamp(50px,8.4vw,11
   line-height:1.0;letter-spacing:-.022em;margin:0;text-align:center}
 h1 .it{font-style:italic;font-weight:420;color:var(--intl-lit)}
 .hero-rule{width:62px;height:1px;background:var(--panel-rule);margin:30px auto}
-.hero-sub{font-size:20px;color:var(--panel-ink-2);max-width:610px;margin:0 auto 32px;text-align:center;
+.hero-sub{font-size:20px;color:var(--panel-ink-2);max-width:820px;margin:0 auto 32px;text-align:center;
   line-height:1.55}
 .hero-sub b{font-weight:600;color:var(--panel-ink)}
 .hero-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
@@ -903,11 +903,17 @@ function crossfade(canvas, draw, dur){
 
 /* ---------- canvas helper, device pixel ratio aware ---------- */
 var _hd = new WeakMap();
-function hidpi(c){
+/* hOverride lets a caller that has just computed a layout height draw against that exact
+   height instead of re-reading it from the box. Engines do not agree on when an inline
+   height on a replaced element wins over a stylesheet aspect-ratio and min-height, and a
+   figure drawn against a height the box does not have is a figure whose footer lands on
+   its grid. Passing the height in removes the disagreement rather than betting on it. */
+function hidpi(c, hOverride){
   var dpr = Math.min(devicePixelRatio||1, 2);
   var r = c.getBoundingClientRect();
   var w = Math.max(1, Math.round(r.width));
-  var h = Math.max(1, Math.round(r.height || w*0.5));
+  var h = hOverride ? Math.max(1, Math.round(hOverride))
+                    : Math.max(1, Math.round(r.height || w*0.5));
   var k = _hd.get(c);
   if(k && k.w===w && k.h===h && k.dpr===dpr){ k.x.clearRect(0,0,w,h); return k; }
   c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
@@ -1480,18 +1486,26 @@ function ctLayout(cssW){
           capLines:capLines, footer:footer,
           height: Math.round(top + rows*(cell+10) + footerMax)};
 }
+/* Sizing and drawing are kept apart on purpose. sizeCT is the only thing that touches the
+   box, and it runs before a transition starts, never inside one. drawCT is called on every
+   frame of the crossfade: if it mutated the height there, the box would be relaid out mid
+   animation, hidpi would see a changed width and rebuild the bitmap, and the half-faded
+   snapshot would composite against a canvas that is no longer the size it was captured at.
+   That is what showed as overlapping labels, and it only showed in engines that report the
+   new width immediately. */
 function sizeCT(){
-  var cssW = cc.getBoundingClientRect().width;
-  if(!cssW) return;
+  var cssW = Math.max(1, Math.round(cc.getBoundingClientRect().width));
   var L = ctLayout(cssW);
-  var want = L.height + "px";
-  if(cc.style.height !== want){ cc.style.height = want; cc.style.aspectRatio = "auto"; }
+  cc.style.height = L.height + "px";
+  cc.style.aspectRatio = "auto";
+  cc.style.minHeight = "0";
+  return L;
 }
 function drawCT(){
-  sizeCT();
-  var d=hidpi(cc), x=d.x, w=d.w, h=d.h;
+  var w0 = Math.max(1, Math.round(cc.getBoundingClientRect().width));
+  var L = ctLayout(w0);
+  var d=hidpi(cc, L.height), x=d.x, w=d.w, h=d.h;
   x.fillStyle=PANEL; x.fillRect(0,0,w,h);
-  var L=ctLayout(w);
   var padL=L.padL, padR=L.padR, top=L.top;
   var cols=L.cols, rows=L.rows;
   var availW=w-padL-padR;
@@ -1597,6 +1611,7 @@ function setCT(){
     : ctMode==="i"
     ? "The same calibration on the internal readout misses <b>none</b>, in any condition. The cost is in the other row: it fires on <b>50%</b> of held-out instruction-neutral cells, so as an absolute threshold it is not deployment ready. At half a separation unit of margin it still catches all 18, at a 17% false-positive rate."
     : "Side by side on the same cells. The expression trigger's clean false-positive row is partly the mirror of its miss rate: an instruction that flattens the expression channel flattens it on negatives too.");
+  sizeCT();                 /* settle the box before the transition, never during it */
   crossfade(cc, drawCT, 340);
 }
 document.getElementById("ctE").onclick   =function(){ ctMode="e"; setCT(); };
@@ -1803,7 +1818,7 @@ document.getElementById("dWithout").onclick=function(){ setDir(true); };
 /* =====================================================================
    boot
    ===================================================================== */
-function drawStatics(){ drawStack(); drawMask(); drawFact(); drawCT(); drawOp(); drawDir(); }
+function drawStatics(){ drawStack(); drawMask(); drawFact(); sizeCT(); drawCT(); drawOp(); drawDir(); }
 measureField();
 setStack("final"); setMask(false); setFact(); setCT(); opSet(0, false); setDir(false);
 drawStatics();
@@ -1901,9 +1916,20 @@ paintScroll();
 var to=null;
 addEventListener("resize", function(){
   clearTimeout(to);
-  to=setTimeout(function(){ measureField(); cc.style.height=""; cc.style.aspectRatio=""; drawStatics(); }, 150);
+  to=setTimeout(function(){
+    measureField();
+    cc.style.height=""; cc.style.aspectRatio=""; cc.style.minHeight="";
+    drawStatics();
+  }, 150);
 });
 addEventListener("load", function(){ measureField(); drawStatics(); sweepReveals(); });
+/* Canvas type is measured, not reflowed, so a label fitted against a fallback metric stays
+   fitted against it. Safari holds a webfont back until something outside canvas needs it,
+   so the first pass can measure JetBrains Mono as Courier and pick a wording that no longer
+   fits once the real face arrives. Re-fit everything once the fonts are actually in. */
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(function(){ measureField(); drawStatics(); });
+}
 addEventListener("visibilitychange", function(){ if(!document.hidden){ measureField(); drawStatics(); } });
 })();
 </script>

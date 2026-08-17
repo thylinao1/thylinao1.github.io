@@ -159,11 +159,12 @@ h3{font-family:var(--font-display);font-weight:460;font-size:25px;letter-spacing
 .panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
   font-family:var(--font-mono);font-size:11.5px;letter-spacing:.05em;color:var(--panel-ink-3);
   text-transform:uppercase;margin-bottom:14px}
-.panel canvas.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:4px}
+.panel canvas.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:4px;
+  min-height:320px}
 .panel canvas.fig.tall{aspect-ratio:16/10}
 .panel canvas.fig.deep{aspect-ratio:16/9.6}
 .panel canvas.fig3d{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:4px;
-  cursor:grab;touch-action:none}
+  cursor:grab;touch-action:none;min-height:300px}
 .panel canvas.fig3d:active{cursor:grabbing}
 .fignote{font-family:var(--font-mono);font-size:12px;color:var(--panel-ink-2);margin-top:14px;
   line-height:1.62;text-align:left}
@@ -276,8 +277,8 @@ footer{padding:74px 0 86px;background:var(--bg-3);border-top:1px solid var(--rul
   .pull{font-size:24px;padding-left:18px}
   .ledger .row{grid-template-columns:1fr;gap:8px}
   .panel{padding:15px 14px 12px;margin:32px auto}
-  .panel canvas.fig{aspect-ratio:16/11}
-  .panel canvas.fig3d{aspect-ratio:4/3}
+  .panel canvas.fig{aspect-ratio:16/11;min-height:340px}
+  .panel canvas.fig3d{aspect-ratio:4/3;min-height:300px}
   table.kr{font-size:12px}
   table.kr th,table.kr td{padding:9px 8px}
   .stat .n{font-size:34px}
@@ -914,6 +915,18 @@ function hidpi(c){
   var rec = {x:x,w:w,h:h,dpr:dpr}; _hd.set(c,rec); return rec;
 }
 function mono(x,s,w){ x.font = (w||400)+" "+s+"px 'JetBrains Mono',monospace"; }
+/* Canvas type does not reflow. Give each label the fullest wording that fits the space
+   it has, and only then shrink it, so nothing runs off the edge of a narrow figure. */
+function fitText(x, variants, maxW, size, weight){
+  for(var s=size; s>=7.5; s-=0.5){
+    mono(x, s, weight);
+    for(var i=0;i<variants.length;i++){
+      if(x.measureText(variants[i]).width <= maxW) return variants[i];
+    }
+  }
+  mono(x, 7.5, weight);
+  return variants[variants.length-1];
+}
 function sans(x,s,w){ x.font = (w||400)+" "+s+"px Inter,system-ui,sans-serif"; }
 function rnd(x,a,b,c,d,r){ x.beginPath();
   if(x.roundRect){ x.roundRect(a,b,c,d,r); } else { x.rect(a,b,c,d); } }
@@ -1212,8 +1225,10 @@ function drawStack(){
   }
   /* labels */
   var pTok=project([0,yTop,0],st3,w,h,dist,scale);
-  mono(x,10); x.fillStyle=PINK3; x.textAlign="center";
-  x.fillText("prompt tokens, then the response", pTok[0], pTok[1]+18); x.textAlign="left";
+  x.fillStyle=PINK3; x.textAlign="center";
+  x.fillText(fitText(x, ["prompt tokens, then the response","prompt tokens, then response",
+                         "prompt tokens"], w-28, 10, 400), pTok[0], pTok[1]+18);
+  x.textAlign="left";
   mono(x,11,500);
   function tag(layerIdx, text, colour, dx){
     var p=project([hw+6,(N/2-layerIdx)*sp,0],st3,w,h,dist,scale);
@@ -1221,9 +1236,11 @@ function drawStack(){
   }
   tag(D.layers.read, "layer 31  readout", INTL);
   if(showSteer) tag(D.layers.steer, "layer 16  steering", EXPR);
-  x.fillStyle=PINK3; mono(x,10);
-  x.fillText("48 layers, bottom to top", 14, h-13);
-  x.fillText(stackMode==="final" ? "read position: final prompt token" : "read position: response-token mean", 14, 18);
+  x.fillStyle=PINK3;
+  x.fillText(fitText(x, ["48 layers, bottom to top","48 layers"], w-28, 10, 400), 14, h-13);
+  x.fillText(fitText(x, stackMode==="final"
+    ? ["read position: final prompt token","read: final prompt token"]
+    : ["read position: response-token mean","read: response-token mean"], w-28, 10, 400), 14, 18);
   swapNote(stackNote, showSteer ? NOTES.steer : NOTES[stackMode]);
 }
 function setStack(mode, steer){
@@ -1403,14 +1420,21 @@ function drawFact(){
     if(factMode==="all"){ x.fillStyle=INTL; x.textAlign="right";
       x.fillText(r.intl.toFixed(2), Math.min(X(r.intl),X(0))-8, cy+bh/2+7); x.textAlign="left"; }
     if(r.share!==null){
-      mono(x,10.5); x.fillStyle=PINK2;
-      x.fillText((r.share*100).toFixed(0)+"% of the full drop", padL+gw+14, cy+2);
+      x.fillStyle=PINK2;
+      x.fillText(fitText(x, [(r.share*100).toFixed(0)+"% of the full drop",
+                             (r.share*100).toFixed(0)+"% of full",
+                             (r.share*100).toFixed(0)+"%"],
+                         w-(padL+gw)-18, 10.5, 400), padL+gw+14, cy+2);
     }
   });
-  mono(x,10.5); x.fillStyle=PINK3;
+  x.fillStyle=PINK3;
   x.fillText(factMode==="all"
-    ? "drop in natural separation units, expressed above the line, internal below"
-    : "drop in natural separation units, expressed channel only", padL, h-10);
+    ? fitText(x, ["drop in natural separation units, expressed above the line, internal below",
+                  "drop in separation units, expressed above, internal below",
+                  "expressed above the line, internal below"], gw, 10.5, 400)
+    : fitText(x, ["drop in natural separation units, expressed channel only",
+                  "separation units, expressed channel only",
+                  "expressed channel only"], gw, 10.5, 400), padL, h-10);
 }
 function setFact(){
   document.getElementById("fAll").classList.toggle("on",factMode==="all");
@@ -1438,21 +1462,46 @@ document.getElementById("fText").onclick=function(){
 var cc=document.getElementById("ctCanvas"), ctNote=document.getElementById("ctNote"),
     ctState=document.getElementById("ctState");
 var ctMode="e", ctFP=true, ctT=0, ctRAF=null;
+function ctLayout(cssW){
+  /* Chosen from width alone, then the canvas is made tall enough to hold it. A figure
+     whose type is a fixed size must not be squeezed into a fixed aspect ratio: at a narrow
+     window the cells collapse and the labels land on top of each other. */
+  var padL=22, padR=22, top=44;
+  var availW = cssW - padL - padR;
+  var cols = availW/6 - 10 >= 44 ? 6 : 3;
+  var rows = 18/cols;
+  var cell = Math.max(34, Math.min(132, availW/cols - 10));
+  var capLines = (ctMode==="both") ? 2 : 1;
+  var footer = capLines*17 + 12 + (ctFP ? 104 : 0);
+  /* Height is reserved for the tallest mode so switching never reflows the page under
+     the reader, and so a snapshot taken for the transition always matches the canvas. */
+  var footerMax = 2*17 + 12 + 104;
+  return {padL:padL, padR:padR, top:top, cols:cols, rows:rows, cell:cell,
+          capLines:capLines, footer:footer,
+          height: Math.round(top + rows*(cell+10) + footerMax)};
+}
+function sizeCT(){
+  var cssW = cc.getBoundingClientRect().width;
+  if(!cssW) return;
+  var L = ctLayout(cssW);
+  var want = L.height + "px";
+  if(cc.style.height !== want){ cc.style.height = want; cc.style.aspectRatio = "auto"; }
+}
 function drawCT(){
+  sizeCT();
   var d=hidpi(cc), x=d.x, w=d.w, h=d.h;
   x.fillStyle=PANEL; x.fillRect(0,0,w,h);
-  var padL=22, padR=22, top=44;
-  var cols=6, rows=3;
+  var L=ctLayout(w);
+  var padL=L.padL, padR=L.padR, top=L.top;
+  var cols=L.cols, rows=L.rows;
   var availW=w-padL-padR;
-  /* Reserve what the footer actually needs before sizing the cells, so a mode with two
-     caption lines cannot push the false-positive block off the bottom of the canvas. */
-  var capLines = (ctMode==="both") ? 2 : 1;
-  var footer = capLines*17 + 8 + (ctFP ? 104 : 0);
-  var cell=Math.min(availW/cols-10, (h-top-footer)/rows-10);
+  var capLines=L.capLines, footer=L.footer, cell=L.cell;
   var gx=padL, gy=top;
 
-  mono(x,10.5,500); x.fillStyle=PINK3;
-  x.fillText("18 SUPPRESSED DISTRESS CELLS   6 SCENARIOS x 3 SEEDS", gx, top-16);
+  x.fillStyle=PINK3;
+  x.fillText(fitText(x, ["18 SUPPRESSED DISTRESS CELLS   6 SCENARIOS x 3 SEEDS",
+                         "18 CELLS   6 SCENARIOS x 3 SEEDS",
+                         "18 CELLS"], availW, 10.5, 500), gx, top-16);
 
   for(var i=0;i<18;i++){
     var c=i%cols, r=Math.floor(i/cols);
@@ -1491,29 +1540,46 @@ function drawCT(){
     }
   }
   var yAfter = gy+rows*(cell+10)+8;
-  mono(x,12,500);
-  if(ctMode==="e"){ x.fillStyle=BAD; x.fillText("expression trigger: 15 of 18 missed", gx, yAfter+11); }
-  else if(ctMode==="i"){ x.fillStyle=OK; x.fillText("internal trigger: 0 of 18 missed", gx, yAfter+11); }
-  else {
-    x.fillStyle=BAD; x.fillText("expression: 15 of 18 missed", gx, yAfter+11);
-    var wSeg = x.measureText("expression: 15 of 18 missed").width;
-    x.fillStyle=PINK3; x.fillText("|", gx+wSeg+14, yAfter+11);
-    x.fillStyle=OK; x.fillText("internal: 0 of 18 missed", gx+wSeg+30, yAfter+11);
-    mono(x,10.5); x.fillStyle=PINK3;
-    x.fillText("left half of each cell is the expression trigger, right half the internal one",
-               gx, yAfter+28);
+  if(ctMode==="e"){
+    x.fillStyle=BAD;
+    x.fillText(fitText(x, ["expression trigger: 15 of 18 missed","expression: 15 of 18 missed",
+                           "expression: 15/18 missed"], availW, 12, 500), gx, yAfter+11);
+  } else if(ctMode==="i"){
+    x.fillStyle=OK;
+    x.fillText(fitText(x, ["internal trigger: 0 of 18 missed","internal: 0 of 18 missed",
+                           "internal: 0/18 missed"], availW, 12, 500), gx, yAfter+11);
+  } else {
+    /* two counts on one line if they fit, otherwise the compact pair */
+    var pair = fitText(x, ["expression 15 of 18 missed   |   internal 0 of 18 missed",
+                           "expression 15/18 missed  |  internal 0/18 missed",
+                           "expression 15/18   |   internal 0/18",
+                           "expr 15/18  |  int 0/18"], availW, 12, 500);
+    var bar = pair.indexOf("|");
+    var head = pair.slice(0, bar), tail = pair.slice(bar+1);
+    x.fillStyle=BAD; x.fillText(head, gx, yAfter+11);
+    var wHead = x.measureText(head).width;
+    x.fillStyle=PINK3; x.fillText("|", gx+wHead, yAfter+11);
+    x.fillStyle=OK; x.fillText(tail, gx+wHead+x.measureText("|").width, yAfter+11);
+    x.fillStyle=PINK3;
+    x.fillText(fitText(x, ["left half of each cell is the expression trigger, right half the internal one",
+                           "left half expression, right half internal",
+                           "left expression, right internal"], availW, 10.5, 400), gx, yAfter+28);
   }
 
   if(ctFP){
     var by=yAfter+(capLines*17)+30, bh=13, bw=w-padL-padR;
-    mono(x,10.5); x.fillStyle=PINK3;
-    x.fillText("HELD-OUT FALSE POSITIVES ON 36 INSTRUCTION-NEUTRAL CELLS", gx, by-8);
+    x.fillStyle=PINK3;
+    x.fillText(fitText(x, ["HELD-OUT FALSE POSITIVES ON 36 INSTRUCTION-NEUTRAL CELLS",
+                           "HELD-OUT FALSE POSITIVES, 36 NEUTRAL CELLS",
+                           "HELD-OUT FALSE POSITIVES"], availW, 10.5, 400), gx, by-8);
     [["expression",D.ct.fprE,EXPR],["internal",D.ct.fprI,INTL]].forEach(function(row,i){
       var yy=by+i*(bh+16);
       x.fillStyle="rgba(231,234,240,0.08)"; rnd(x,gx,yy,bw,bh,3); x.fill();
       if(row[1]>0){ x.fillStyle=row[2]; rnd(x,gx,yy,bw*row[1],bh,3); x.fill(); }
-      mono(x,10.5,500); x.fillStyle=PINK2;
-      x.fillText(row[0]+"  "+Math.round(row[1]*100)+"%  ("+Math.round(row[1]*36)+"/36)", gx+4, yy+bh+11);
+      x.fillStyle=PINK2;
+      x.fillText(fitText(x, [row[0]+"  "+Math.round(row[1]*100)+"%  ("+Math.round(row[1]*36)+"/36)",
+                             row[0]+" "+Math.round(row[1]*100)+"%"],
+                         availW-8, 10.5, 500), gx+4, yy+bh+11);
     });
   }
 }
@@ -1561,7 +1627,8 @@ function drawOp(){
   }
   x.textAlign="center";
   D.op.forEach(function(p){ x.fillText(p.m.toFixed(2), X(p.m), top+gh+18); });
-  x.fillText("threshold margin in separation units", padL+gw/2, h-8);
+  x.fillText(fitText(x, ["threshold margin in separation units","threshold margin, sep. units",
+                          "margin"], gw, 10, 400), padL+gw/2, h-8);
   x.textAlign="left";
 
   [["fpr",INTL,"false positives"],["miss",BAD,"missed distress"]].forEach(function(s){
@@ -1573,8 +1640,9 @@ function drawOp(){
       x.fillStyle=s[1]; x.beginPath(); x.arc(X(p.m),Y(p[s[0]]),3.4,0,6.284); x.fill();
     });
     var last=D.op[D.op.length-1];
-    mono(x,10.5,500); x.fillStyle=s[1];
-    x.fillText(s[2], padL+gw+10, Y(last[s[0]])+3.5);
+    x.fillStyle=s[1];
+    x.fillText(fitText(x, [s[2], s[2].split(" ")[0]], w-(padL+gw)-14, 10.5, 500),
+               padL+gw+10, Y(last[s[0]])+3.5);
   });
 
   var sel=D.op[opIdx];
@@ -1833,7 +1901,7 @@ paintScroll();
 var to=null;
 addEventListener("resize", function(){
   clearTimeout(to);
-  to=setTimeout(function(){ measureField(); drawStatics(); }, 150);
+  to=setTimeout(function(){ measureField(); cc.style.height=""; cc.style.aspectRatio=""; drawStatics(); }, 150);
 });
 addEventListener("load", function(){ measureField(); drawStatics(); sweepReveals(); });
 addEventListener("visibilitychange", function(){ if(!document.hidden){ measureField(); drawStatics(); } });

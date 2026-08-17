@@ -388,7 +388,7 @@ footer{padding:66px 0 80px;background:var(--bg-2)}
         <tr><td>Signal under the suppression instruction</td><td class="e">0.17</td><td class="i">1.21</td></tr>
         <tr><td>Drop <span class="ci">(share of natural separation)</span></td><td class="e">83.5%<br><span class="ci">[59.2, 113.2]</span></td><td class="i">-21.2%<br><span class="ci">[-62.6, -9.7]</span></td></tr>
         <tr><td>Divergence, corrected for the neutral twins</td><td colspan="2" style="text-align:center">0.63 <span class="ci">[0.39, 0.90]</span></td></tr>
-        <tr><td>Suppressed distress missed by a threshold monitor</td><td class="e">15 of 18<br><span class="ci">sampled cells</span></td><td class="i">0 of 6<br><span class="ci">scenarios behind them</span></td></tr>
+        <tr><td>Suppressed distress missed by a threshold monitor</td><td class="e">15 of 18 cells</td><td class="i">0 of 18 cells<br><span class="ci">6 clusters, bound 39%</span></td></tr>
         <tr><td>Held-out false-positive rate</td><td class="e">0%</td><td class="i">50%</td></tr>
       </tbody>
     </table>
@@ -488,7 +488,10 @@ footer{padding:66px 0 80px;background:var(--bg-2)}
 
   <div class="col">
   <p>The expression trigger misses <b>15 of 18</b> suppressed distress cells. The internal trigger,
-    calibrated identically and read in the same forward pass, misses <b>none</b>. That is the finding
+    calibrated identically and read in the same forward pass, misses <b>none of the 18</b>. The
+    pre-generation reading is identical across the three seeds, so those 18 cells carry six distinct
+    values and every internal interval here is a six-cluster reading, with an exact one-sided bound
+    of 39% on that zero. That is the finding
     the paper leads with, and the next sentence is the one that keeps it honest: the internal trigger
     fires on <b>50%</b> of held-out instruction-neutral cells, while the expression trigger fires on
     none of them.</p>
@@ -498,6 +501,11 @@ footer{padding:66px 0 80px;background:var(--bg-2)}
     catches all 18 suppressed cells at a 17% held-out false-positive rate.</p>
   <p>The expression trigger's clean false-positive row is partly the mirror of its failure: an
     instruction that flattens the expression channel flattens it on negatives too.</p>
+  <p>One more line keeps this table honest. A bag-of-words classifier on the scenario text matches
+    the internal trigger's miss rate here, without weights access and without a forward-pass hook.
+    What this table shows is that expression <em>level</em> is silenceable. What separates an
+    activation readout from a context classifier is the byte-identical-prompt evidence in the next
+    section, not this comparison.</p>
   </div>
 
   <div class="col">

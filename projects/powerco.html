@@ -321,7 +321,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
           Which PowerCo SMEs should the retention team actually contact, and what is one wrong contact worth?
         </h2>
         <div class="body-prose">
-          <p>The PowerCo brief ships as a generic classification task: predict which SMEs will churn. The interesting move is to refuse the brief as stated. A churn probability is not an action; a decision threshold is. And a decision threshold is not free.</p>
+          <p>The PowerCo brief ships as a generic classification task: predict which SMEs will churn. The interesting move is to refuse the brief as stated. A churn probability on its own does not tell anyone what to do. The decision threshold does, and picking one is not free.</p>
           <p>The project is framed as <span class="em">the inferential machinery a retention team would actually deploy</span>: a £-denominated expected-cost objective, a threshold tuned on a held-out validation fold, and a test fold touched exactly once for the headline number.</p>
           <p><span class="em">Three cost levers</span> drive the whole pipeline: CLV (cost of a missed churner), campaign cost (one retention contact), and retention rate (probability that a contacted churner is saved). The TP cell is a derived quantity, not an input. Every reported number is a function of those three.</p>
         </div>
@@ -422,7 +422,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;background:var(--ink)
       </div>
     </div>
     <div class="verdict" style="margin-top:48px">
-      The model was never the problem. The default threshold was, and on imbalanced churn data with this cost matrix, defaults push you to a corner solution.
+      The default threshold was the problem, and on imbalanced churn data with this cost matrix, defaults push you to a corner solution.
       <div class="mono" style="font-size:11px;color:var(--ink-3);font-style:normal;letter-spacing:.04em;margin-top:14px">M. Silchenko · case-study verdict</div>
     </div>
   </div>
@@ -497,7 +497,7 @@ t* = argmin_t  cost(t)
       </div>
     </div>
     <p class="body-prose" style="max-width:68ch;color:var(--ink-3);font-size:14.5px;margin-top:36px">
-      The integrated finding: SMOTE contributes a real but modest cost reduction (~£1.2M on the test fold). The threshold step contributes the rest. The story is decision-theoretic, not resampling. A Random Survival Forest run in parallel reaches a held-out concordance of ~0.71 on time-to-churn, well above the ~0.56 of the linear Cox model it replaced; it is reported as a complement to the classifier, not the lead.
+      The integrated finding: SMOTE contributes a real but modest cost reduction (~£1.2M on the test fold). The threshold step contributes the rest. The story is decision-theoretic rather than one about resampling. A Random Survival Forest run in parallel reaches a held-out concordance of ~0.71 on time-to-churn, well above the ~0.56 of the linear Cox model it replaced; it is reported as a complement to the classifier, not the lead.
     </p>
   </div>
 </section>
@@ -630,7 +630,7 @@ t* = argmin_t  cost(t)
       </div>
       <div class="diag" style="grid-column:1 / -1">
         <div class="head"><div class="name">Out-of-time validation · split by contract activation date</div><div class="status note">drift check</div></div>
-        <div class="desc">A genuine out-of-time hold-out is impossible on a single 2015 snapshot, so the data is re-split by contract activation date: the model trains on the earliest ~80% of activations and is scored on the most recent ~20%, which churn materially more (~14% versus ~10%). The cost-optimal threshold stays on the grid floor, so the policy is robust to drift. The classifier's discrimination is not: out-of-time AUC falls from ~0.67 on a random split to ~0.62. The cost reduction stays large on the later cohort, but that is driven by its higher churn prevalence, not by a better model.</div>
+        <div class="desc">A genuine out-of-time hold-out is impossible on a single 2015 snapshot, so the data is re-split by contract activation date: the model trains on the earliest ~80% of activations and is scored on the most recent ~20%, which churn materially more (~14% versus ~10%). The cost-optimal threshold stays on the grid floor, so the policy holds up under drift. The classifier's discrimination is not: out-of-time AUC falls from ~0.67 on a random split to ~0.62. The cost reduction stays large on the later cohort, but that is driven by its higher churn prevalence, not by a better model.</div>
         <div class="stat">
           <div class="row"><span class="k">out-of-time t*</span><span>~0.01 · unchanged from random split</span></div>
           <div class="row"><span class="k">out-of-time test AUC</span><span style="color:var(--accent)">~0.62 (random split ~0.67)</span></div>
@@ -688,7 +688,7 @@ t* = argmin_t  cost(t)
         <h2 class="display display-l" style="margin:0 0 18px;max-width:24ch">A one-shot envelope, tested against temporal drift.</h2>
         <div class="body-prose">
           <p>On the held-out test fold of 2,922 customers, the cost-tuned policy cuts expected spend by roughly £15.9M vs. the default 0.5 threshold, and tips the headline number negative (a net benefit) under the brief's cost matrix.</p>
-          <p>To test whether that survives temporal drift, the data is re-split by contract activation date: the model trains on the earliest ~80% of activations and is scored on the most recent ~20%. The cost-optimal threshold stays on the grid floor, so the <em>policy</em> is robust. The model's discrimination is not: out-of-time AUC falls from ~0.67 to ~0.62. The saving stays large on the later cohort only because it churns more (~14% vs. ~10%), not because the model improved.</p>
+          <p>To test whether that survives temporal drift, the data is re-split by contract activation date: the model trains on the earliest ~80% of activations and is scored on the most recent ~20%. The cost-optimal threshold stays on the grid floor, so the <em>policy</em> holds. The model's discrimination does not: out-of-time AUC falls from ~0.67 to ~0.62. The saving stays large on the later cohort only because it churns more (~14% vs. ~10%), not because the model improved.</p>
           <p><span class="em" style="color:var(--accent)">The supported recommendations: ship the cost-tuned threshold as the operating point, treat the £15.9M as an upper bound on the single-snapshot prize, and retrain on a rolling window because discrimination visibly decays on newer cohorts.</span></p>
           <p class="mono" style="font-size:12.5px;color:rgba(244,239,230,.65)">What I would do next: a genuine forward-label out-of-time window, uplift modelling on a pilot subset, and a re-priced cost matrix once retention success is observed rather than assumed.</p>
         </div>

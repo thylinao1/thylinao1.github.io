@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>The Fold · how a network hid a feature where no straight line could find it</title>
-<meta name="description" content="My solution to BlueDot's Technical AI Safety Puzzle #1. A small classifier represents seven of its eight features as clean linear directions and hides the eighth — country — as a magnitude: the L2 norm of a low-dimensional subspace, built by a ReLU absolute-value fold and confirmed causally with activation patching. Then I try to hide it in stranger ways (an angular ring, two features in superposition, a topological link) and find that a network has a limited budget for representational complexity: the fold is the cheapest non-linear code and the only one that emerges unsupervised. Interactive figures you can drag, fold, and spin." />
+<meta name="description" content="My solution to BlueDot's Technical AI Safety Puzzle #1. A small classifier represents seven of its eight features as clean linear directions and hides the eighth, country, as a magnitude: the L2 norm of a low-dimensional subspace, built by a ReLU absolute-value fold and confirmed causally with activation patching. Then I try to hide it in stranger ways (an angular ring, two features in superposition, a topological link) and find that a network has a limited budget for representational complexity: the fold is the cheapest non-linear code and the only one that emerges unsupervised. Interactive figures you can drag, fold, and spin." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;0,9..144,600;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -15,8 +15,8 @@
   --rule:rgba(21,17,11,0.12); --rule-strong:rgba(21,17,11,0.28);
   /* BlueDot blue is the UI accent; the data spine below matches the analysis figures */
   --accent:#2558c6; --accent-deep:#16357e; --accent-soft:#a9c0ee; --accent-bright:#4d84f0;
-  --core:#dd7a3c; --core-soft:#eeb98f;   /* country PRESENT — the tight core */
-  --halo:#4a8fd6;                         /* country ABSENT — the surrounding shell */
+  --core:#dd7a3c; --core-soft:#eeb98f;   /* country PRESENT: the tight core */
+  --halo:#4a8fd6;                         /* country ABSENT: the surrounding shell */
   --calm:#2f9e5c;                         /* the seven well-behaved features */
   --danger:#d23a28; --warn:#b88200;
   --font-display:"Fraunces","Source Serif 4",Georgia,serif;
@@ -292,7 +292,7 @@ footer .runbox .c{color:var(--accent);}
     <div class="col">
       <div class="hero-mark"><span class="bd"></span> BlueDot · Technical AI Safety Puzzle #1 · my solution</div>
       <h1>The <span class="it">Fold</span></h1>
-      <p class="hero-sub">A small network was handed eight features to represent. Seven of them it laid out neatly, one clean direction each, exactly the way our interpretability tools assume. The eighth it hid. Not by throwing it away, but by folding a straight line in half, so that a linear probe, the workhorse of the whole field, reads pure noise while the feature sits there in plain sight. This is which feature it was, the origami trick the network used to bury it, and what happened when I tried to hide things in stranger ways still.</p>
+      <p class="hero-sub">A small network was handed eight features to represent. Seven of them it laid out neatly, one clean direction each, exactly the way our interpretability tools assume. The eighth it hid. It kept the feature and folded the straight line in half, so that a linear probe, the workhorse of the whole field, reads pure noise while the feature sits there in plain sight. This is which feature it was, the origami trick the network used to bury it, and what happened when I tried to hide things in stranger ways still.</p>
       <div class="hero-meta">
         <b>Needs</b> &nbsp;comfort with vectors and a mental picture of ReLU, no heavy math<br>
         <b>Reading</b> &nbsp;~12 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;figures you can drag, fold, and spin, next to the real analysis plots
@@ -322,7 +322,7 @@ footer .runbox .c{color:var(--accent);}
       <span class="chip"><span class="n">6</span>person</span>
       <span class="chip"><span class="n">7</span>body_part</span>
     </div>
-    <p class="reveal">Here is the part that should bother an interpretability person, and it is the reason I think this puzzle is worth more than a puzzle. Point the standard tool at layer L, a linear probe, and ask it whether the network represents <span class="country">country</span>, and it says no. The AUC is <b>0.507</b>, a coin flip. Ask the same tool about the other seven and every one of them answers yes at 0.995 or better. The tool that most published claims of the form &ldquo;the model does or does not represent X&rdquo; quietly rest on is, here, confidently and completely wrong. Swap in a non-linear probe and country comes straight back out at <b>0.99</b>. So the information was never gone. The linear probe simply could not see it.</p>
+    <p class="reveal">Here is the part that should bother an interpretability person, and it is the reason I think this puzzle is worth more than a puzzle. Point the standard tool at layer L, a linear probe, and ask it whether the network represents <span class="country">country</span>, and it says no. The AUC is <b>0.507</b>, a coin flip. Ask the same tool about the other seven and every one of them answers yes at 0.995 or better. The tool that most published claims of the form "the model does or does not represent X" quietly rest on is, here, confidently and completely wrong. Swap in a non-linear probe and country comes straight back out at <b>0.99</b>. So the information was never gone. The linear probe simply could not see it.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
@@ -344,7 +344,7 @@ footer .runbox .c{color:var(--accent);}
       <figcaption><b>One feature refuses the line.</b> Every feature but country is a single readable direction at layer L. Country is the only one where a linear probe and a non-linear probe disagree, and they disagree by almost half an AUC point. Flip to <b>Both</b> to see the gap side by side.</figcaption>
     </figure>
 
-    <p class="reveal">Before reading anything into that, I wanted to be sure it was not just a weak probe. Six standard linear methods, logistic regression across a range of regularization strengths, a linear SVM, a ridge classifier, all land between 0.50 and 0.53 on country. An RBF-kernel SVM reaches 0.99. Bootstrapping the test set 2,000 times puts the linear AUC at 0.515 with a 95% interval of [0.501, 0.540], the non-linear AUC at 0.993, [0.988, 0.997], and the gap between them at 0.478, [0.452, 0.493], with no overlap at all. This is not an underpowered linear probe missing a faint linear signal. There is no linear signal to miss.</p>
+    <p class="reveal">Before reading anything into that, I wanted to be sure it was not simply a weak probe. Six standard linear methods, logistic regression across a range of regularization strengths, a linear SVM, a ridge classifier, all land between 0.50 and 0.53 on country. An RBF-kernel SVM reaches 0.99. Bootstrapping the test set 2,000 times puts the linear AUC at 0.515 with a 95% interval of [0.501, 0.540], the non-linear AUC at 0.993, [0.988, 0.997], and the gap between them at 0.478, [0.452, 0.493], with no overlap at all. So the gap is not an underpowered linear probe missing a faint signal; there is no linear signal there to miss.</p>
 
     <h3 class="reveal">A surgical blind spot</h3>
     <p class="reveal">The next clue is where the blindness lives. If you run the linear probe on country at every stage of the network, it is perfectly readable going in and perfectly readable coming out, and blind at exactly one layer in between. Entering the head it is linear at 1.00, one hidden layer in it is still 1.00, and then at layer L it collapses to 0.51, and the very next layer it is back at 0.99. No other feature does this. Whatever the network is doing to country, it does it inside a single layer and undoes it one layer later, which already tells you this is a construction, not an accident of the encoder.</p>
@@ -408,7 +408,7 @@ footer .runbox .c{color:var(--accent);}
         <div class="legend">
           <span><i style="background:var(--core)"></i>present · in the crease</span>
           <span><i style="background:var(--halo)"></i>absent · up the walls</span>
-          <span style="color:rgba(244,239,230,.5)">the height is |s| — the magnitude a linear probe can&rsquo;t read</span>
+          <span style="color:rgba(244,239,230,.5)">the height is |s|, the magnitude a linear probe cannot read</span>
         </div>
       </div>
       <figcaption><b>The fold, in three dimensions.</b> Unfolded, the two classes lie in one flat plane, spread along <span class="eq">s</span> but the same height, so a straight cut finds nothing. Fold it into <span class="eq">z = |s|</span> and absent rises up both walls while present stays in the valley floor. The height is the magnitude, and <span class="eq">+s</span> and <span class="eq">&minus;s</span> get pressed to the same wall, which is the sign a linear probe went looking for and can no longer see.</figcaption>
@@ -462,7 +462,7 @@ footer .runbox .c{color:var(--accent);}
           <span style="color:rgba(244,239,230,.4)">its mirror &minus;&tau; lands on the same logit</span>
         </div>
       </div>
-      <figcaption><b>Causal, not correlational.</b> I set the magnitude and the model's own prediction follows the absolute value. Zero magnitude reads present, large magnitude in either direction reads absent. A signed code would be a slope through the origin; an even inverted-U is the signature of <span class="eq">|&tau;|</span>.</figcaption>
+      <figcaption><b>Causal evidence.</b> I set the magnitude and the model's own prediction follows the absolute value. Zero magnitude reads present, large magnitude in either direction reads absent. A signed code would be a slope through the origin; an even inverted-U is the signature of <span class="eq">|&tau;|</span>.</figcaption>
     </figure>
     <figure class="receipt reveal">
       <div class="receipt-frame">
@@ -570,7 +570,7 @@ footer .runbox .c{color:var(--accent);}
           <span><i style="background:var(--calm)"></i>model accuracy</span>
         </div>
       </div>
-      <figcaption><b>Exotic codes don't arise for free.</b> If a hidden non-linear code were cheap to discover, the deep-probe line would stay high while the linear line dropped, opening a gap. It never does. The network jumps straight from &ldquo;linear and decodable&rdquo; to &ldquo;gone.&rdquo;</figcaption>
+      <figcaption><b>Exotic codes don't arise for free.</b> If a hidden non-linear code were cheap to discover, the deep-probe line would stay high while the linear line dropped, opening a gap. It never does. The network jumps straight from "linear and decodable" to "gone."</figcaption>
     </figure>
 
     <p class="reveal">The reading I trust is a description-length one. Keeping a topologically complex manifold alive costs more parameters than the feature ever saves in loss, so under ordinary training the model would rather forget country than tie a knot to hide it. That is exactly why the fold is the code that emerges: an absolute value is the <em>cheapest</em> non-linear encoding there is, one op, and everything fancier has to be paid for out of a budget the network does not want to spend.</p>
@@ -607,7 +607,7 @@ footer .runbox .c{color:var(--accent);}
   <div class="col">
     <span class="eyebrow reveal"><span class="num">06</span> · The takeaway</span>
     <h2 class="reveal">What a blind probe costs</h2>
-    <p class="reveal">Strip the puzzle down and it is a tiny, clean existence proof: a feature can be fully present in a network, fully used by it, and read out at 99% by the right probe, while the linear probe, the tool a great deal of interpretability leans on, reports chance. If you had audited this model with the standard method you would have written down &ldquo;does not represent country&rdquo; and moved on, and you would have been wrong about a feature the model uses on every single input.</p>
+    <p class="reveal">Strip the puzzle down and it is a tiny, clean existence proof: a feature can be fully present in a network, fully used by it, and read out at 99% by the right probe, while the linear probe, the tool a great deal of interpretability leans on, reports chance. If you had audited this model with the standard method you would have written down "does not represent country" and moved on, and you would have been wrong about a feature the model uses on every single input.</p>
     <p class="reveal">The budget finding is the part that is quietly reassuring, and the part that is quietly worrying, at the same time. Reassuring, because the cheapest place a feature can hide, the fold, is also the one a second-order probe catches: run your linear probe on the squared activations and the fold lights up at 0.94. That is a small, cheap addition to an audit. Worrying, because the reason the exotic codes never emerged in my test is that nothing was <em>pushing</em> for them, and the one pressure I left out is the one that matters for safety. A training process rewarded for evading an interpretability check is exactly the force that would pay the budget the fold never had to.</p>
     <div class="note safety reveal">
       <span class="tag">Why this sits in an AI-safety course</span>
@@ -615,7 +615,7 @@ footer .runbox .c{color:var(--accent);}
     </div>
 
     <h3 class="reveal">How I actually got here</h3>
-    <p class="reveal">The path was not clever so much as it was a matter of letting each measurement narrow the next. First I probed every feature at every layer, linear and non-linear, and the V for country fell out immediately: one feature, one layer, blind only there. Then the question was which non-linear shape, and I let the geometry throw candidates out rather than guessing. The shared centroid killed anything mean-based. The squared-activation probe scoring 0.94 said &ldquo;second order, a magnitude.&rdquo; The single dominant eigenvalue in the covariance-difference spectrum said &ldquo;one axis, a fold,&rdquo; not an XOR and not a shell. Activation patching then turned that picture into a cause I could stand behind. The whole of Task 3 was really me asking how far past the fold you can push a feature, and the emergence test was the part that genuinely surprised me, because I went in expecting to find a window where weirdness pays off, and there just wasn't one.</p>
+    <p class="reveal">The path was not clever so much as it was a matter of letting each measurement narrow the next. First I probed every feature at every layer, linear and non-linear, and the V for country fell out immediately: one feature, one layer, blind only there. Then the question was which non-linear shape, and I let the geometry throw candidates out rather than guessing. The shared centroid killed anything mean-based. The squared-activation probe scoring 0.94 said "second order, a magnitude." The single dominant eigenvalue in the covariance-difference spectrum said "one axis, a fold," not an XOR and not a shell. Activation patching then turned that picture into a cause I could stand behind. The whole of Task 3 was really me asking how far past the fold you can push a feature, and the emergence test was the part that genuinely surprised me, because I went in expecting to find a window where weirdness pays off, and there just wasn't one.</p>
     <p class="reveal">I tried to break every claim before believing it. Every linear method I could think of left country at chance while non-linear ones recovered it, so it is not an underpowered probe. I cross-validated the magnitude probe five ways and bootstrapped the headline numbers for intervals. For the topological model I checked that the linking number is stable across bin counts and drops to exactly zero on unlinked controls. And the honest limitations: the Task 3 models classify country at 86 to 99 percent, under the original model's 96, because a code that is harder for a probe to decode is harder for the model's own head too; and W2's food feature keeps a small linear leak at 0.57 rather than a clean 0.50, a residue of uneven template-group sizes.</p>
 
     <h3 class="reveal">The name map</h3>
@@ -642,7 +642,6 @@ footer .runbox .c{color:var(--accent);}
         <div>$ <span class="c">bash run_all.sh</span></div>
         <div style="margin-top:8px; color:var(--ink-3)"># first run downloads the encoder and caches embeddings; re-runs are immediate</div>
       </div>
-      <div class="sig">The fold was the cheapest way to hide.</div>
       <div class="meta">
         BlueDot Impact · Technical AI Safety Puzzle #1 · submitted 2026<br>
         Answer: <b>country</b>, encoded at layer L as the magnitude of a low-dimensional projection via a ReLU absolute-value fold.<br>
@@ -654,7 +653,7 @@ footer .runbox .c{color:var(--accent);}
 
 <script>
 /* ===================================================================
-   The Fold — interactive figures
+   The Fold: interactive figures
    Self-contained, no libraries. Canvas + rAF, DPR-aware.
    =================================================================== */
 (function(){
@@ -783,7 +782,7 @@ footer .runbox .c{color:var(--accent);}
   function lerp(a,b,t){ return a + (b-a)*t; }
 
   /* =========================================================
-     HERO — the fold: signed → folded → radial, looping
+     HERO: the fold, signed → folded → radial, looping
      ========================================================= */
   (function(){
     const fig = figure("heroCanvas"); if(!fig) return;
@@ -831,7 +830,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §01 — probe bench: 8 features, linear vs non-linear
+     §01: probe bench, 8 features, linear vs non-linear
      ========================================================= */
   (function(){
     const fig = figure("probeCanvas"); if(!fig) return;
@@ -897,7 +896,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §01 — the V: linear-probe AUC across layers
+     §01: the V, linear-probe AUC across layers
      ========================================================= */
   (function(){
     const fig = figure("layerCanvas"); if(!fig) return;
@@ -940,7 +939,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §02 — the fold machine: ReLU(+s)+ReLU(-s)=|s| + radial
+     §02: the fold machine, ReLU(+s)+ReLU(-s)=|s| + radial
      ========================================================= */
   (function(){
     const fig = figure("foldCanvas"); if(!fig) return;
@@ -989,7 +988,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §02 — the fold as a 3-D surface z = |s| (drag to rotate)
+     §02: the fold as a 3-D surface z = |s| (drag to rotate)
      ========================================================= */
   (function(){
     const fig = figure("surfaceCanvas"); if(!fig) return;
@@ -1041,7 +1040,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §03 — activation patching: even inverted-U, verdict flip
+     §03: activation patching, even inverted-U, verdict flip
      ========================================================= */
   (function(){
     const fig = figure("patchCanvas"); if(!fig) return;
@@ -1078,7 +1077,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §04 W1 — angular ring, colored by parity, slow spin
+     §04 W1: angular ring, colored by parity, slow spin
      ========================================================= */
   (function(){
     const fig = figure("ringCanvas"); if(!fig) return;
@@ -1097,7 +1096,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §04 W2 — superposition: recolor by country(6th)/food(3rd)
+     §04 W2: superposition, recolor by country(6th)/food(3rd)
      ========================================================= */
   (function(){
     const fig = figure("superCanvas"); if(!fig) return;
@@ -1121,7 +1120,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §04 W3 — rotating (2,6) torus link; drag to spin
+     §04 W3: rotating (2,6) torus link, drag to spin
      ========================================================= */
   (function(){
     const fig = figure("torusCanvas"); if(!fig) return;
@@ -1154,7 +1153,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §05 — emergence sweep: 4 lines collapse together
+     §05: emergence sweep, 4 lines collapse together
      ========================================================= */
   (function(){
     const fig = figure("emergeCanvas"); if(!fig) return;
@@ -1194,7 +1193,7 @@ footer .runbox .c{color:var(--accent);}
   })();
 
   /* =========================================================
-     §05 — difficulty ladder: probe capacity lollipops
+     §05: difficulty ladder, probe capacity lollipops
      ========================================================= */
   (function(){
     const fig = figure("ladderCanvas"); if(!fig) return;

@@ -307,7 +307,7 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
           <button class="btn primary" id="orbPlay">Replay the walk</button>
           <div class="grp"><label for="orbA">Hero&nbsp;a</label><input type="range" id="orbA" min="1" max="16" value="1"><span class="readout">a = <b id="orbAV">1</b></span></div>
           <div class="grp"><label for="orbB">Villain&nbsp;b</label><input type="range" id="orbB" min="1" max="16" value="3"><span class="readout">b = <b id="orbBV">3</b></span></div>
-          <span class="readout" style="margin-left:auto">tail μ = <b id="orbMu">–</b> &nbsp;·&nbsp; cycle λ = <b id="orbLam">–</b> &nbsp;·&nbsp; f = <b id="orbF">–</b></span>
+          <span class="readout" style="margin-left:auto">tail μ = <b id="orbMu">-</b> &nbsp;·&nbsp; cycle λ = <b id="orbLam">-</b> &nbsp;·&nbsp; f = <b id="orbF">-</b></span>
         </div>
         <div class="legend">
           <span><i style="background:var(--hero-c)"></i>tail, the fresh ground the hero covers</span>
@@ -340,13 +340,13 @@ footer .meta{font-family:var(--font-mono); font-size:12px; color:var(--ink-3); l
           <button class="btn primary" id="matAuto">Climb to the value</button>
           <button class="btn" id="matReset">Reset</button>
           <div class="grp"><label for="matT">Floor&nbsp;t</label><input type="range" id="matT" min="1" max="30" value="1"><span class="readout">t = <b id="matTV">1</b></span></div>
-          <span class="readout" style="margin-left:auto" id="matStatus">–</span>
+          <span class="readout" style="margin-left:auto" id="matStatus">-</span>
         </div>
         <div class="legend">
           <span><i style="background:var(--bond)"></i>a chosen pair (score ≥ t)</span>
           <span><i style="background:var(--accent-soft)"></i>eligible, unused</span>
           <span><i style="background:var(--ink-4)"></i>below the floor, discarded</span>
-          <span style="color:var(--ink-4)">bottleneck value here = <b id="matBottleneck">–</b></span>
+          <span style="color:var(--ink-4)">bottleneck value here = <b id="matBottleneck">-</b></span>
         </div>
       </div>
       <figcaption><b>Binary search on the floor.</b> Feasibility only ever decreases as the floor rises, so the largest floor that still admits a perfect matching is exactly the hero-villain value. On this <span class="mono">p = 101</span> board the top-left 5 × 5 corner reproduces the puzzle's worked value of 14; the full board settles higher. The real challenge runs the identical procedure on a 611 × 611 grid at p = 14411.</figcaption>
@@ -1989,7 +1989,7 @@ if (!LIB.REDUCED) kick();
       hoverIdx = idx;
       if(idx >= 0){
         const lo = DOM_LO + idx * BIN_W, hi = lo + BIN_W - 1;
-        setReadout("scores " + lo + "–" + hi + " · " + counts[idx] + " pairs");
+        setReadout("scores " + lo + "-" + hi + " · " + counts[idx] + " pairs");
       } else {
         setReadout(DEFAULT_READOUT);
       }

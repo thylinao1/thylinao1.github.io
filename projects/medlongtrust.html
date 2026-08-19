@@ -374,10 +374,10 @@ footer .runbox .c{color:var(--accent);}
   <div class="col">
     <span class="eyebrow reveal"><span class="num">02</span> · The measurement</span>
     <h2 class="reveal">I measured the model before I trusted it</h2>
-    <p class="lead reveal">The design came out of a number, not a preference. Before building anything, I took my small local model, llama3.2:3b run through Ollama, and used it the usual way: as a free-form verifier that reads the record and judges the claim on its own.</p>
+    <p class="lead reveal">The design came out of a measurement. Before building anything, I took my small local model, llama3.2:3b run through Ollama, and used it the usual way: as a free-form verifier that reads the record and judges the claim on its own.</p>
     <p class="reveal">It matched a direct reading of the record only about 60 to 70 percent of the time, and it made a particular mistake often, treating observation-trend claims as though they were conditions. On the two jobs I could measure directly against the tools, it agreed on routing 143 times out of 266, and on whether the retrieved paragraphs actually supported the decision only 36 times out of 266. A component that is wrong this often, and wrong in ways that are hard to see, is not something I want deciding trust in a clinical setting.</p>
     <p class="reveal pull">So I moved the decision out of the model. The tools decide; the model advises.</p>
-    <p class="reveal">That measured unreliability is not a footnote to the entry. It is the reason for the architecture. Toggle the figure to let the small model decide the 266 test claims, and then to let the tools decide, and watch the difference. The tools are not more clever. They are just checkable.</p>
+    <p class="reveal">That measured unreliability is the reason for the architecture. Toggle the figure to let the small model decide the 266 test claims, and then to let the tools decide, and watch the difference. Their advantage is that every step is checkable.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel dark">
@@ -551,7 +551,7 @@ footer .runbox .c{color:var(--accent);}
     <span class="eyebrow reveal"><span class="num">06</span> · The result</span>
     <h2 class="reveal">Where it landed, and why the gap is that size</h2>
     <p class="lead reveal">The same configuration went to the held-out test board as the lean-planner entry and came back first, with a final score of 100.0 and trust accuracy, risk micro-F1, and evidence F1 each at 1.00, recorded on 7 July 2026.</p>
-    <p class="reveal">The second entry scored 82.899 and the third 68.79. The height of the first bar is not the interesting part. The gap between first and second is, and most of it is one component. On the label and the risks the field was close. On evidence F1 the second-place entry scored 0.34 against my 1.00, so most of the seventeen-point margin comes down to that single measure. Toggle the evidence overlay to see it.</p>
+    <p class="reveal">The second entry scored 82.899 and the third 68.79. The interesting part is the gap between first and second, and most of it is one component. On the label and the risks the field was close. On evidence F1 the second-place entry scored 0.34 against my 1.00, so most of the seventeen-point margin comes down to that single measure. Toggle the evidence overlay to see it.</p>
 
     <figure class="figure-wide reveal">
       <div class="panel">
@@ -632,12 +632,12 @@ footer .runbox .c{color:var(--accent);}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
         </a>
       </div>
-      <div class="sig">The record decides. The model advises.</div>
+      <div class="sig">Grounds for trust.</div>
       <div class="meta">
         UbiComp/ISWC 2026 &middot; TCSAUC Workshop on Trustworthy, Controllable, and Sustainable Agentic AI &middot; Track 1, MedLongTrust-EHR<br>
         Result: <b>first place, final score 100.0</b>, all three components at 1.00, recorded 7 July 2026.<br>
         Competition: <a class="inline" href="https://www.codabench.org/competitions/16891/" target="_blank" rel="noopener">Codabench 16891</a> &nbsp;&middot;&nbsp; Event: Shanghai, 11 to 12 October 2026.<br>
-        Numbers are from the actual runs. The final upload stays a human step. Written by Maksim Silchenko, National University of Singapore.
+        Numbers are from the actual runs. Written by Maksim Silchenko, National University of Singapore.
       </div>
     </div>
   </div>

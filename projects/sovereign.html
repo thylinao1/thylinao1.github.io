@@ -241,7 +241,7 @@ a:hover{color:var(--accent)}
     <h2 class="display display-l section-title">Can a deep-learning architecture from recommender systems beat tree ensembles on a sparse macro panel with 78 positive labels in training?</h2>
     <p class="lede">The two-tower hypothesis: vulnerability embeddings interact with stress embeddings to predict default. Mathematically clean, intuitive, and on this data, wrong.</p>
     <p>Sovereign default is a rare event. In the train slice (1990 to 2014), 78 country-year cells out of 2,925 are flagged as default-within-2-years. The two-tower architecture treats domestic vulnerability and global stress as separable factors that interact through an L2-normalised dot product, the way user-item embeddings do in MovieLens. The idea is appealing: some countries are structurally vulnerable, but they only default when global stress is elevated.</p>
-    <p>That hypothesis is testable. This case study runs five classifiers - logistic regression, random forest, sklearn gradient boosting, XGBoost, and the Two-Tower network - on the same temporal train/test split (1990 to 2014 vs 2015 to 2023). The Two-Tower model loses to every tree-based baseline. PCA on its learned vulnerability embedding shows 94 percent of variance in the first component: the network collapsed the 16-dimensional macro feature space into a one-dimensional risk score and called it a day.</p>
+    <p>That hypothesis is testable. This case study runs five classifiers (logistic regression, random forest, sklearn gradient boosting, XGBoost, and the Two-Tower network) on the same temporal train/test split (1990 to 2014 vs 2015 to 2023). The Two-Tower model loses to every tree-based baseline. PCA on its learned vulnerability embedding shows 94 percent of variance in the first component: the network collapsed the 16-dimensional macro feature space into a one-dimensional risk score and called it a day.</p>
   </div>
 </section>
 
@@ -296,7 +296,7 @@ a:hover{color:var(--accent)}
       </div>
     </div>
     <p class="verdict">With only 78 positive cases in train and 18 in test, every reasonable architecture is downstream of the data, not the design. The Two-Tower latent space collapsed to one effective dimension because there was no signal left for the second.</p>
-    <p>This is the most useful single finding in the project: a 538,154-parameter network with 16-dimensional latent towers and focal loss does not extract more signal than a 100-tree random forest on this panel. The result is not a verdict on deep learning generally - it is a verdict on this dataset's sample size and label density. PCA on the trained vulnerability embedding confirms it: 94 percent of variance lives in PC1, and the second component carries the next 4 percent. The architectural prior never had room to express itself.</p>
+    <p>This is the most useful single finding in the project: a 538,154-parameter network with 16-dimensional latent towers and focal loss does not extract more signal than a 100-tree random forest on this panel. The result speaks to this dataset's sample size and label density rather than to deep learning in general. PCA on the trained vulnerability embedding confirms it: 94 percent of variance lives in PC1, and the second component carries the next 4 percent. The architectural prior never had room to express itself.</p>
   </div>
 </section>
 
@@ -366,7 +366,7 @@ ECE per model, calibration curve</pre>
       <div class="chart-cap" id="model-cap">Higher is better. Test set: 2015-2023, 1,053 rows, 18 positives.</div>
     </div>
 
-    <p style="margin-top:24px">A bootstrap 95% CI on AUC, with only 18 positive test cases, is wide enough that any pair of models with a gap under about 0.06 should be treated as inside the noise. The headline gap of 0.153 between Random Forest and Two-Tower NN survives that bar; the gap between RF and Gradient Boosting (0.035) does not. The point is not "Random Forest wins"; the point is that the data is sparse enough that architectural ambition cannot rescue you.</p>
+    <p style="margin-top:24px">A bootstrap 95% CI on AUC, with only 18 positive test cases, is wide enough that any pair of models with a gap under about 0.06 should be treated as inside the noise. The headline gap of 0.153 between Random Forest and Two-Tower NN survives that bar; the gap between RF and Gradient Boosting (0.035) does not. The reading to take away is that the data is sparse enough that architectural ambition cannot rescue you.</p>
   </div>
 </section>
 
@@ -529,11 +529,11 @@ ECE per model, calibration curve</pre>
       <div class="skill">
         <div class="num">04 · engineering</div>
         <div class="title">src/ package with 47 unit tests</div>
-        <p>data.py, eval.py, tune.py, rl/env.py, rl/ppo.py, rl/normaliser.py, rl/yield_model.py. CI on Python 3.10 and 3.11; notebook JSON validation; banned-phrasing grep.</p>
+        <p>data.py, eval.py, tune.py, rl/env.py, rl/ppo.py, rl/normaliser.py, rl/yield_model.py. CI on Python 3.10 and 3.11, plus notebook JSON validation.</p>
       </div>
       <div class="skill">
         <div class="num">05 · honesty</div>
-        <div class="title">Limits disclosed, not buried</div>
+        <div class="title">Limits disclosed on the page</div>
         <p>1990s label carryover, 8GB-machine re-execution gap, static-policy finding, narrow weight spread. Each surfaced on the same page as the headline number it qualifies.</p>
       </div>
       <div class="skill">

@@ -1539,34 +1539,47 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <tr><td><b>Batch whitening</b></td><td class="num">2.0x to 2.34x</td>
           <td class="small">The largest single number anyone published, and it may make the point set
             redundant rather than adding to it. Cheap to test: one factorisation and a triangular
-            solve folded into the first weight matrix. <button type="button" class="term code-link" data-modal="k-whiten">sketch of the code</button></td></tr>
+            solve folded into the first weight matrix. <button type="button" class="term" data-modal="f-whiten">the measurement</button> <button type="button" class="term code-link" data-modal="k-whiten">see the code</button></td></tr>
         <tr><td><b>Radial and angular split</b></td><td class="num">exact, free</td>
           <td class="small">Removes a whole source of variance at no cost and introduces no error.
-            It is also the precondition for anything below that samples directions.</td></tr>
+            It is also the precondition for anything below that samples directions. <button type="button" class="term" data-modal="f-radial">how it works</button></td></tr>
         <tr><td><b>Spherical design carrier</b></td><td class="num">carrier-dependent</td>
           <td class="small">The 66,048-direction construction that most of the strong entries
-            converged on. Worth pairing with the note that its mechanism is disputed.</td></tr>
+            converged on. Worth pairing with the note that its mechanism is disputed. <button type="button" class="term" data-modal="f-kerdock">the construction</button> <button type="button" class="term" data-modal="f-wrongreason">the dispute</button></td></tr>
         <tr><td><b>Mid-network control variate</b></td><td class="num">17.6% to 2.39x</td>
           <td class="small">Buys dependence information without paying per sample. My own null was
-            for an input-anchored control, which is a different object.</td></tr>
+            for an input-anchored control, which is a different object. <button type="button" class="term" data-modal="f-midcv">the measurements</button></td></tr>
         <tr><td><b>Looser pilot pruning</b></td><td class="num">1.315x vs 1.205x</td>
           <td class="small">My build uses an exact dead mask. The measurement says a deliberately
-            sloppy pilot beats an exact one at matched cost.</td></tr>
+            sloppy pilot beats an exact one at matched cost. <button type="button" class="term code-link" data-modal="p2-prune">the change I would make</button></td></tr>
         <tr><td><b>Symmetric Gram restructuring</b></td><td class="num">0.502x, exact</td>
           <td class="small">A real half-price route if the expensive step can be written as a
-            contraction of an operand with itself. Bit-identical output.</td></tr>
+            contraction of an operand with itself. Bit-identical output. <button type="button" class="term code-link" data-modal="p2-gram">see the code</button></td></tr>
         <tr><td><b>Rank-40 rectangular multiplication</b></td><td class="num">about 48% of leaves</td>
           <td class="small">A faster exact product than the two-level scheme I shipped, reported to
-            remove roughly half the leaf products.</td></tr>
+            remove roughly half the leaf products. <button type="button" class="term code-link" data-modal="p2-rank40">see the code</button></td></tr>
         <tr><td><b>Fewer, larger calls</b></td><td class="num">per-call tax</td>
           <td class="small">My build is already at about 2,130 calls per network. The measurements
-            say the residual charge tracks call count, so there may be more here.</td></tr>
+            say the residual charge tracks call count, so there may be more here. <button type="button" class="term code-link" data-modal="p2-calls">see the code</button></td></tr>
         <tr><td><b>Maximum-entropy readout</b></td><td class="num">bias&sup2; 5.077e-09</td>
           <td class="small">Better than the series expansions on the same inputs. Listed last on
-            purpose: section 6 caps the whole readout lane at about 3 percent of the error.</td></tr>
+            purpose: section 6 caps the whole readout lane at about 3 percent of the error. <button type="button" class="term code-link" data-modal="p2-maxent">see the code</button></td></tr>
       </table>
       </div>
 
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Where each lever moves the score <span>animated</span></p>
+      <canvas class="fig" id="cLevers" data-fig="levers"></canvas>
+      <figcaption><b>Figure 10.</b> The only two quantities the score algebra leaves open, on log axes.
+        Every diagonal is a line of equal score, because <span class="mono">s = a &times; p / B</span>.
+        My build sits at the origin by construction. Each arrow is where a lever would move it, using
+        the effect its author reported. The shaded corner is the region that would beat the leading
+        public entry, which needs the product to fall by 7.5 times. No single arrow reaches it.</figcaption>
+    </figure>
+
+    <div class="read">
       <p class="reveal">The honest summary of that list: eight of the nine are cost-side or
         variance-side improvements to a sampler, which is the only lane the score algebra leaves
         open. None of them explains the gap to the leading entry, so either the bound on the
@@ -1992,6 +2005,133 @@ low-order moments are nearly exact. Whitening makes the second moment <em>exactl
 there is nothing in that band left for the point set to supply. Reported measurements put whitening
 alone at 2.06 to 2.34 times, and a lattice on top of a whitened batch at
 <span class="mono">0.97 &plusmn; 0.07</span>, meaning nothing.</p></div>
+
+
+<div id="p2-gram"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; bin_yong_bong 18184, hyojun_kwon 18154</p>
+<h3>Restructuring the expensive step into a self-contraction</h3>
+<p>The meter prices a contraction of an array with itself at half, because the symmetric result has
+only half as many independent entries. Reported at width 256 with 36,356 rows:
+<span class="mono">2,391,901,056</span> billed against <span class="mono">4,765,188,096</span>, which
+is <span class="mono">0.502</span> times, bit identical with a maximum difference of exactly zero.</p>
+<div class="code"><span class="c"># full price: two distinct operands</span>
+G = <span class="f">fnp.einsum</span>(<span class="s">"ik,jk-&gt;ij"</span>, A, B)          <span class="c"># bills k*i*j*2</span>
+
+<span class="c"># half price: the SAME python object on both sides</span>
+G = <span class="f">fnp.einsum</span>(<span class="s">"ik,jk-&gt;ij"</span>, A, A)          <span class="c"># bills about half</span>
+
+<span class="c"># the precondition is object identity, not equality of values</span>
+B = A.<span class="f">copy</span>()
+G = <span class="f">fnp.einsum</span>(<span class="s">"ik,jk-&gt;ij"</span>, A, B)          <span class="c"># full price again</span></div>
+<p class="code-note">Illustrative. Written by me to show the shape of the lever.</p>
+<p>Why it is worth trying rather than obviously free: my forward is
+<span class="mono">h @ W</span>, which is not a self-contraction, so the discount does not apply as
+written. It only pays if some genuinely expensive step can be reformulated as a Gram. The obvious
+candidate is anything that computes a covariance or a pairwise similarity across samples. Whether
+that exists inside my build is exactly the open question.</p></div>
+
+<div id="p2-rank40"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; andrei_bulzan 18183</p>
+<h3>Exact fast multiplication past Strassen</h3>
+<p>Strassen replaces eight sub-products with seven. There are better exact schemes for rectangular
+shapes, found by search rather than by hand. The one reported here is a Tichavsky rank-40
+decomposition, which the author reports removing about 48 percent of ordinary leaf products,
+<span class="mono">82.08e9</span> down to <span class="mono">49.45e9</span> including the transform
+cost.</p>
+<div class="code"><span class="c"># Strassen: 2x2 blocks, 8 products -&gt; 7</span>
+<span class="c"># leaf count for a 54x54x8 tiling:  54*54*8   = 23,328</span>
+
+<span class="c"># rank-40 rectangular scheme on the same shapes</span>
+<span class="c"># leaf count:                        40*40*7   = 11,200   (52% removed)</span>
+
+<span class="c"># the shape of any such scheme: fixed integer transform matrices U, V, W</span>
+<span class="c"># with  C = W @ ((U @ vec(A)) * (V @ vec(B)))</span>
+Pa = U @ <span class="f">vec</span>(A)          <span class="c"># cheap: small integer combinations</span>
+Pb = V @ <span class="f">vec</span>(B)
+C  = <span class="f">unvec</span>(W @ (Pa * Pb))  <span class="c"># the 40 products live here</span></div>
+<p class="code-note">Illustrative. The real decomposition is a published table of coefficients.</p>
+<p>The catch is the same one that stopped my third Strassen level: the transform matrices add
+elementwise work and, more importantly, calls. The measured ceiling for Strassen alone is 1.686
+times, and going deeper reverses on the meter. A rank-40 scheme has to clear both the extra
+arithmetic and the extra call tax before it pays.</p></div>
+
+<div id="p2-calls"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; SKIBIDI_TOILET 18166, trim_qewas 18182</p>
+<h3>Paying the call tax instead of the arithmetic tax</h3>
+<p>The residual charge is dominated by how many times you call into the metered library, not by how
+much each call does. Reported figures: about 3.3 microseconds per instrumented call for tiny
+operands, 13.2 microseconds at 54 MB when a destination array is supplied, and 6,250 microseconds
+when a fresh 54 MB buffer has to be allocated. That last number is the whole lever.</p>
+<div class="code"><span class="c"># three ways to spend the same arithmetic, very different residual bills</span>
+
+<span class="c"># worst: many small calls, each allocating a fresh output buffer</span>
+<span class="k">for</span> blk <span class="k">in</span> blocks:
+    out.<span class="f">append</span>(<span class="f">fnp.matmul</span>(blk, W))          <span class="c"># N allocations, N calls</span>
+
+<span class="c"># better: one call over the whole block</span>
+Z = <span class="f">fnp.matmul</span>(H, W)                          <span class="c"># 1 allocation, 1 call</span>
+
+<span class="c"># best: reuse a destination that already exists</span>
+<span class="f">fnp.matmul</span>(H, W, out=Zbuf)                     <span class="c"># 1 call, 0 allocation</span></div>
+<p class="code-note">Illustrative. My build already runs about 2,130 calls per network.</p>
+<p>My estimator is at 2,123 to 2,139 calls per network, which is already low, so this is the lever
+with the least headroom on the list. It is here because the measurements say the charge tracks call
+count rather than work, which inverts the usual advice, and because a build that adds any of the
+other levers will add calls unless it is careful.</p></div>
+
+<div id="p2-maxent"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; jamesrahenry 18157, bin_yong_bong 18184</p>
+<h3>Reconstructing the terminal distribution from its moments</h3>
+<p>Given exact moments at the final layer, the classical move is an Edgeworth or Gram-Charlier
+expansion, which writes the density as a Gaussian times a polynomial. Those can go negative in the
+tails, which is where a ReLU expectation is most sensitive. The maximum-entropy reconstruction takes
+the highest-entropy density consistent with the known moments instead, which is an exponential of a
+polynomial and is therefore positive everywhere by construction.</p>
+<div class="code"><span class="c"># find lambda so that  q(x) = exp(-sum_k lambda_k x^k)  matches the known moments</span>
+<span class="k">def</span> <span class="f">maxent</span>(moments, order=<span class="n">6</span>):
+    lam = <span class="f">zeros</span>(order + <span class="n">1</span>)
+    <span class="k">for</span> _ <span class="k">in</span> <span class="f">range</span>(<span class="n">50</span>):                       <span class="c"># Newton on the dual</span>
+        q     = <span class="k">lambda</span> x: <span class="f">exp</span>(-<span class="f">poly</span>(lam, x))
+        got   = [<span class="f">quad</span>(<span class="k">lambda</span> x: x**k * <span class="f">q</span>(x)) <span class="k">for</span> k <span class="k">in</span> <span class="f">range</span>(order + <span class="n">1</span>)]
+        resid = got - moments
+        <span class="k">if</span> <span class="f">norm</span>(resid) &lt; <span class="n">1e-12</span>: <span class="k">break</span>
+        lam  -= <span class="f">solve</span>(<span class="f">hessian</span>(got, order), resid)
+    <span class="k">return</span> lam
+
+<span class="c"># then the readout is one integral against the ReLU</span>
+E_relu = <span class="f">quad</span>(<span class="k">lambda</span> x: <span class="f">max</span>(x, <span class="n">0</span>) * <span class="f">exp</span>(-<span class="f">poly</span>(lam, x)))</div>
+<p class="code-note">Illustrative sketch of the standard algorithm, not the other authors' code.</p>
+<p>Reported measurement: squared bias <span class="mono">5.077e-09</span> at order six, stable to 0.7
+percent across a fourfold change in how the moments were computed, improving to
+<span class="mono">8.148e-10</span> at order eight though converging for only 85 percent of cases.
+Both beat the series expansions on the same inputs.</p>
+<p>It is last on the Phase 2 list on purpose. Section 6 caps the entire readout lane at about 3
+percent of the chain error, so a perfect readout cannot rescue a sampler. It is here because it is
+cheap, because the fitting happens offline, and because any future method that does move the
+propagation error will then need a readout that does not waste the gain.</p></div>
+
+<div id="p2-prune"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; ely2sh 18176, amalgonim 18151</p>
+<h3>Pruning harder than correctness would suggest</h3>
+<p>My build prunes a neuron only when the pilot says it is dead. The measurements say that is the
+wrong operating point: at matched compute, a pilot that misclassifies some live neurons as dead
+beats an oracle that knows exactly which are truly dead. No pruning
+<span class="mono">1.7485e-07</span>, a 512-point pilot <span class="mono">1.3293e-07</span> at 1.315
+times better winning 7 of 8 networks, and the exact oracle mask
+<span class="mono">1.4513e-07</span> at 1.205 times.</p>
+<p>The reason is a variance trade rather than a correctness one. A unit that fires once in five
+hundred inputs adds almost nothing to the mean and a full unit's worth of noise, so dropping it is
+favourable. The exact mask refuses to make that trade because the unit is not, strictly, dead.</p>
+<div class="code"><span class="c"># what ships now: a margin below zero on the layer's own scale</span>
+thr = -<b>C5_TAU</b> * <span class="f">abs</span>(mx)                <span class="c"># C5_TAU = 0.010</span>
+al  = [j <span class="k">for</span> j, v <span class="k">in</span> <span class="f">enumerate</span>(mzl) <span class="k">if</span> v &gt; thr]
+
+<span class="c"># what the measurements suggest testing: a FIRING-COUNT threshold, not a margin</span>
+fires = <span class="f">fnp.count_nonzero</span>(zp &gt; <span class="n">0</span>, axis=<span class="n">0</span>)   <span class="c"># out of C5_N1 pilot rows</span>
+al    = [j <span class="k">for</span> j, f <span class="k">in</span> <span class="f">enumerate</span>(fires) <span class="k">if</span> f &gt; <b>MIN_FIRE</b>]
+
+<span class="c"># and the sweep that prices it, because it is a cliff and not a slope:</span>
+<span class="c">#   threshold 1..8   raw MSE flat at 2.24e-7 to 2.48e-7</span>
+<span class="c">#   threshold 16     4.67e-7      threshold 32  1.89e-6     threshold 64  1.30e-5</span></div>
+<p class="code-note">The first block is from the graded source. The second is the change I would test.</p>
+<p>Note the shape carefully before using it. Error is flat while the threshold rises to 8 and then
+rises by nearly two orders of magnitude over the next three steps, so this is a cliff. The whole
+lever is reported to cap at about 1.6 times.</p></div>
 
 <div id="m-flop"><p class="kicker">Concept</p><h3>FLOPs and the metered sandbox</h3>
 <p>A floating point operation, used here as the unit of account. Submissions run against a metered
@@ -3558,6 +3698,72 @@ document.querySelectorAll(".filters .btn").forEach(function(b){
     lab(x,"variance ratio, lower is better",8,m.t-14,INK3,10.5);
   }
   register(c,draw,0.5); draw(0);
+})();
+
+/* ================= FIG 10: the lever plane ================= */
+(function(){
+  var c=document.getElementById("cLevers"); if(!c) return;
+  /* axes are log10 of the two quantities the score algebra leaves open:
+     a = variance produced per sample, p = billed price per sample. s = a*p/B. */
+  var LEV=[
+    {n:"batch whitening",      da:-Math.log10(2.0),  dp:0,                 col:"CALM"},
+    {n:"design carrier",       da:-Math.log10(1.5),  dp:0,                 col:"ACC"},
+    {n:"mid-network control",  da:-Math.log10(1.22), dp:Math.log10(1.05),  col:"ACC"},
+    {n:"looser pruning",       da:-Math.log10(1.10), dp:-Math.log10(1.05), col:"ACC"},
+    {n:"symmetric Gram",       da:0,                 dp:-Math.log10(1.15), col:"CORE"},
+    {n:"rank-40 multiply",     da:0,                 dp:-Math.log10(1.25), col:"CORE"},
+    {n:"fewer calls",          da:0,                 dp:-Math.log10(1.06), col:"CORE"}
+  ];
+  var TARGET = Math.log10(1.3820094075e-7/1.84e-8);   /* 7.51x, the gap to the leader */
+  function draw(t){
+    var k=hidpi(c,0.58), x=k.x, w=k.w, h=k.h;
+    x.fillStyle=BG2; x.fillRect(0,0,w,h);
+    var m={l:74,r:150,t:32,b:52}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+    var LO=-1.15, HI=0.35;
+    function X(v){ return m.l+pw*(v-LO)/(HI-LO) }
+    function Y(v){ return m.t+ph*(1-(v-LO)/(HI-LO)) }
+    /* iso-score lines: log a + log p = const, straight with slope -1 */
+    for(var q=-2.0;q<=0.61;q+=0.25){
+      x.strokeStyle = Math.abs(q)<1e-9 ? RULE2 : RULE;
+      x.lineWidth = Math.abs(q)<1e-9 ? 1.4 : 1;
+      x.beginPath(); x.moveTo(X(LO), Y(q-LO)); x.lineTo(X(HI), Y(q-HI)); x.stroke();
+    }
+    /* the band that would beat the leading public entry */
+    x.save(); x.beginPath(); x.rect(m.l,m.t,pw,ph); x.clip();
+    x.fillStyle="rgba(47,158,92,0.10)";
+    x.beginPath();
+    x.moveTo(X(LO), Y(-TARGET-LO)); x.lineTo(X(HI), Y(-TARGET-HI));
+    x.lineTo(X(HI), Y(LO)); x.lineTo(X(LO), Y(LO)); x.closePath(); x.fill();
+    x.restore();
+    lab(x,"BEATS THE LEADING PUBLIC ENTRY",m.l+8,m.t+ph-12,CALM_T,9.5,1);
+    /* my build sits at the origin by construction */
+    var ox=X(0), oy=Y(0);
+    var grow = reduce?1:ease(clamp(((t*0.55)%9)/3.2,0,1));
+    for(var i=0;i<LEV.length;i++){
+      var L=LEV[i];
+      var col = L.col==="CALM"?CALM:(L.col==="ACC"?ACC:CORE);
+      var ex=X(L.dp*grow), ey=Y(L.da*grow);
+      x.strokeStyle=col; x.lineWidth=1.8; x.globalAlpha=0.9;
+      x.beginPath(); x.moveTo(ox,oy); x.lineTo(ex,ey); x.stroke();
+      x.fillStyle=col; x.beginPath(); x.arc(ex,ey,3.4,0,6.283); x.fill();
+      x.globalAlpha=1;
+      if(grow>0.55) lab(x,L.n,ex+7,ey+(L.da<0?-6:12),col,10);
+    }
+    var gr=x.createRadialGradient(ox,oy,0,ox,oy,15);
+    gr.addColorStop(0,"rgba(15,23,42,0.5)");gr.addColorStop(1,"rgba(15,23,42,0)");
+    x.fillStyle=gr;x.beginPath();x.arc(ox,oy,15,0,6.283);x.fill();
+    x.fillStyle=INK;x.beginPath();x.arc(ox,oy,4.4,0,6.283);x.fill();
+    lab(x,"my build",ox+9,oy-9,INK,11);
+    lab(x,"price per sample  p",m.l+pw/2-52,h-14,INK3,10.5);
+    x.save(); x.translate(16,m.t+ph/2); x.rotate(-Math.PI/2);
+    x.fillStyle=INK3; x.font="10.5px 'IBM Plex Mono',monospace";
+    x.fillText("variance per sample  a",-64,0); x.restore();
+    lab(x,"cheaper",m.l,m.t+ph+18,INK4,10);
+    lab(x,"dearer",m.l+pw-42,m.t+ph+18,INK4,10);
+    lab(x,"lines of equal score",m.l+pw+12,m.t+16,INK4,10);
+    lab(x,"s = a x p / B",m.l+pw+12,m.t+32,INK2,11.5);
+  }
+  register(c,draw,0.58); draw(0);
 })();
 
 /* ================= FIG 3: the multiplier ================= */

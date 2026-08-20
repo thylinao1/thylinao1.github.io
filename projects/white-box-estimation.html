@@ -1259,9 +1259,11 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
 
     <div class="read">
       <div class="note reveal">
-        <p style="margin:0"><b>Provenance.</b> Every figure below is as reported by its author in the AIcrowd
-          forum topic whose number appears on the card, at
-          <span class="mono">discourse.aicrowd.com/t/&lt;number&gt;</span>. I have not independently reproduced them, and where two published
+        <p style="margin:0"><b>Provenance and credit.</b> Every technique below is someone else's work. Each card
+          names the author and the AIcrowd forum topic it came from, at
+          <span class="mono">discourse.aicrowd.com/t/&lt;number&gt;</span>, and the full list is
+          in the acknowledgements at the foot of the page. The figures are as those authors
+          reported them. I have not independently reproduced them, and where two published
           results disagree I have said so rather than picking a winner. Treat the numbers as
           pointers to the original write-ups, not as settled fact.</p>
       </div>
@@ -1285,7 +1287,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>A ReLU network without biases is positively homogeneous, so the length of the input can be
           integrated out exactly and only the direction needs sampling.</p>
         <span class="num">Exact identity, no error introduced</span>
-        <span class="who">18169, 18171, 18173, 18175</span>
+        <span class="who">bgrubbs1984 18169, kaileh57 18171, pranay212 18173, Team Puffi 18175</span>
       </div>
 
       <div class="card reveal d1" data-cat="geometry" data-modal="f-kerdock">
@@ -1294,7 +1296,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Instead of random directions, use a deterministic set of 66,048 directions built from
           coding theory that integrates every polynomial up to degree five exactly.</p>
         <span class="num">0.389% above the proven minimum of 65,792 nodes</span>
-        <span class="who">18183, 18171, 18177, 18175</span>
+        <span class="who">andrei_bulzan 18183, kaileh57 18171, keenanpepper 18177, Team Puffi 18175</span>
       </div>
 
       <div class="card reveal d2" data-cat="geometry" data-modal="f-antipodal">
@@ -1303,7 +1305,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Pairing each direction with its negation lets you reuse work through an exact ReLU
           identity. How much it is worth is genuinely disputed in the published record.</p>
         <span class="num">119&times; better, 1.10&times; better, and worse: three published results</span>
-        <span class="who">18176, 18181, 18184</span>
+        <span class="who">ely2sh 18176, omer_kiraz 18181, bin_yong_bong 18184</span>
       </div>
 
       <div class="card reveal d3" data-cat="geometry" data-modal="f-whiten">
@@ -1312,7 +1314,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Force the drawn batch's own sample covariance to be exactly the identity before using it,
           which removes the error you can see rather than the error you expect.</p>
         <span class="num">2.06&times; to 2.34&times; alone, 2.86&times; with antipodal pairing</span>
-        <span class="who">18182, 18151</span>
+        <span class="who">trim_qewas 18182, amalgonim 18151</span>
       </div>
 
       <div class="card reveal" data-cat="variance" data-modal="f-midcv">
@@ -1322,7 +1324,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           where the analytic model is still accurate, and use the discrepancy to correct the final
           answer.</p>
         <span class="num">17.6% final-layer reduction, paired bootstrap; 2.39&times; in another build</span>
-        <span class="who">18175, 18154, 18170</span>
+        <span class="who">Team Puffi 18175, hyojun_kwon 18154, mliston 18170</span>
       </div>
 
       <div class="card reveal d1" data-cat="variance" data-modal="f-cvdesign">
@@ -1332,7 +1334,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           point set, the thing left to cancel is the quadrature rule's bias, which is a different
           object from Monte Carlo variance.</p>
         <span class="num">Stated as the precondition for the same author's self-reported 20% gain</span>
-        <span class="who">18152</span>
+        <span class="who">Cipo 18152</span>
       </div>
 
       <div class="card reveal d2" data-cat="analytic" data-modal="f-mehler">
@@ -1342,7 +1344,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           classical series expansion. Using the series instead of numerical quadrature changes the
           cost by three orders of magnitude.</p>
         <span class="num">30.6% of budget becomes 0.012% of budget</span>
-        <span class="who">18151</span>
+        <span class="who">amalgonim 18151</span>
       </div>
 
       <div class="card reveal d3" data-cat="analytic" data-modal="f-maxent">
@@ -1352,7 +1354,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           maximum-entropy one consistent with them rather than as a truncated series. Series
           expansions can go negative; this cannot.</p>
         <span class="num">bias&sup2; = 5.077e-09 at order 6</span>
-        <span class="who">18157, 18184</span>
+        <span class="who">jamesrahenry 18157, bin_yong_bong 18184</span>
       </div>
 
       <div class="card reveal" data-cat="analytic" data-modal="f-dof">
@@ -1361,7 +1363,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Counting the degrees of freedom a sample-based estimator can possibly exploit gives an
           upper bound on every sampler anyone could build, not just the ones that exist.</p>
         <span class="num">Ceiling 1.915&times;; a deployed estimator already at 1.731&times;</span>
-        <span class="who">18151</span>
+        <span class="who">amalgonim 18151</span>
       </div>
 
       <div class="card reveal d1" data-cat="analytic" data-modal="f-saturation">
@@ -1370,7 +1372,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Error is not spread evenly across the 256 output neurons. It concentrates almost entirely
           in the ones sitting near the ReLU kink, where the answer is most sensitive.</p>
         <span class="num">Quantiles of |c| over 4 networks and 1024 neurons</span>
-        <span class="who">18151</span>
+        <span class="who">amalgonim 18151</span>
       </div>
 
       <div class="card reveal d2" data-cat="cost" data-modal="f-spelling">
@@ -1380,7 +1382,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           mathematical work. An independent audit of the evaluation-version cost model found no
           arbitrage at all.</p>
         <span class="num">Ratio 1.000 across all routes; fp16 = fp32; fp64 = 2&times;</span>
-        <span class="who">18151, 18179, 18184</span>
+        <span class="who">amalgonim 18151, qi_zhang5 18179, bin_yong_bong 18184</span>
       </div>
 
       <div class="card reveal d3" data-cat="cost" data-modal="f-gram">
@@ -1389,7 +1391,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>A contraction of an operand with itself produces a symmetric result, and the meter prices
           it at half. The saving is exact and bit-identical, not an approximation.</p>
         <span class="num">0.502&times;, maximum difference 0</span>
-        <span class="who">18184, 18154</span>
+        <span class="who">bin_yong_bong 18184, hyojun_kwon 18154</span>
       </div>
 
       <div class="card reveal" data-cat="cost" data-modal="f-percall">
@@ -1399,7 +1401,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           library, not by how much arithmetic each call performs. This inverts the usual advice
           about batching.</p>
         <span class="num">3.3 &micro;s per call at tiny sizes, 13.2 &micro;s at 54 MB</span>
-        <span class="who">18166, 18182, 18151</span>
+        <span class="who">SKIBIDI_TOILET 18166, trim_qewas 18182, amalgonim 18151</span>
       </div>
 
       <div class="card reveal d1" data-cat="cost" data-modal="f-strassen">
@@ -1408,7 +1410,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Fast matrix multiplication saves metered operations, but the saving converges. Depth five
           and depth six give exactly the same number, and going deeper costs wall time.</p>
         <span class="num">1.000 / 1.138 / 1.288 / 1.444 / 1.588 / 1.686 / 1.686</span>
-        <span class="who">18184, 18159</span>
+        <span class="who">bin_yong_bong 18184, konstantin_baltsat 18159</span>
       </div>
 
       <div class="card reveal d2" data-cat="cost" data-modal="f-dtype">
@@ -1417,7 +1419,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>The statistics helpers silently return float64 for any input, and float64 bills at twice
           the rate. Several participants lost a chunk of their budget to this before finding it.</p>
         <span class="num">Worth only 0.7% of the bill until every promoted vector was found</span>
-        <span class="who">18127, 18154</span>
+        <span class="who">nkosi_ndwandwe 18127, hyojun_kwon 18154</span>
       </div>
 
       <div class="card reveal d3" data-cat="cost" data-modal="f-cliff">
@@ -1427,7 +1429,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           check was not wired on the evaluator until August, and older submissions were re-graded
           retroactively.</p>
         <span class="num">One submission went from ~4e-8 per network to an aggregate 0.682</span>
-        <span class="who">18129</span>
+        <span class="who">pranay212 and qi_zhang5, 18129</span>
       </div>
 
       <div class="card reveal" data-cat="method" data-modal="f-oracle">
@@ -1437,7 +1439,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           measure. The result upper-bounds every idea whose effect flows through that quantity,
           including ideas nobody has had yet.</p>
         <span class="num">54 families closed, about 15 minutes each</span>
-        <span class="who">18182</span>
+        <span class="who">trim_qewas 18182</span>
       </div>
 
       <div class="card reveal d1" data-cat="method" data-modal="f-floor">
@@ -1446,7 +1448,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Ground truth was produced by Monte Carlo at a billion samples, so it has its own error
           floor. Below that floor you are measuring the target's noise, not your own accuracy.</p>
         <span class="num">Floor 4.949e-11 on the mini split, 5.219e-11 on the full</span>
-        <span class="who">18182</span>
+        <span class="who">trim_qewas 18182</span>
       </div>
 
       <div class="card reveal d2" data-cat="method" data-modal="f-rotation">
@@ -1456,7 +1458,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           a factor of several. Any ablation smaller than that variation is unmeasurable without
           crossed replicates.</p>
         <span class="num">One network varied 2.9&times; to 5.4&times; across ten orientations</span>
-        <span class="who">18176, 18180</span>
+        <span class="who">ely2sh 18176, violeta 18180</span>
       </div>
 
       <div class="card reveal d3" data-cat="negative" data-modal="f-selector">
@@ -1465,7 +1467,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Choosing a different configuration for each network sounds obviously good. The selector
           itself has to be computed, and the computation costs more than the choice saves.</p>
         <span class="num">Selector cost 25.202B FLOPs, 9.3% of the budget</span>
-        <span class="who">18159</span>
+        <span class="who">konstantin_baltsat 18159</span>
       </div>
 
       <div class="card reveal" data-cat="negative" data-modal="f-bitpack">
@@ -1475,7 +1477,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           operations at all, and even removing 100 percent of the packable work would have saved
           nothing.</p>
         <span class="num">Zero FLOPs saved</span>
-        <span class="who">18149</span>
+        <span class="who">konstantin_baltsat 18149</span>
       </div>
 
       <div class="card reveal d1" data-cat="negative" data-modal="f-anchor">
@@ -1484,7 +1486,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>A hardcoded mathematical constant entered with a small error. Because the constant anchors
           a moment used at every layer, the error compounded through the depth of the network.</p>
         <span class="num">0.22% constant error measured 24&times; worse end to end</span>
-        <span class="who">18184, 18166</span>
+        <span class="who">bin_yong_bong 18184, SKIBIDI_TOILET 18166</span>
       </div>
 
 
@@ -1495,7 +1497,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           design. Someone tested that assumption directly by completing the design, and the mechanism
           turned out to be something else.</p>
         <span class="num">Completing it buys 1.0050&times;, not "a lot"</span>
-        <span class="who">18176</span>
+        <span class="who">ely2sh 18176</span>
       </div>
 
       <div class="card reveal d3" data-cat="negative" data-modal="f-pruningcliff">
@@ -1505,7 +1507,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           pilot that misclassifies live ones. Pruning a rarely-firing unit removes almost no signal
           and a full unit of noise.</p>
         <span class="num">Pilot 1.315&times;, exact oracle mask 1.205&times;</span>
-        <span class="who">18176, 18151</span>
+        <span class="who">ely2sh 18176, amalgonim 18151</span>
       </div>
 
       <div class="card reveal" data-cat="negative" data-modal="f-mysovskikh">
@@ -1515,7 +1517,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           this dimension exactness algebraically forces negative weights, which destroys the
           effective sample size.</p>
         <span class="num">2.6048e-05 against 3.6955e-07, t = 15.92</span>
-        <span class="who">18184</span>
+        <span class="who">bin_yong_bong 18184</span>
       </div>
 
     </div>
@@ -1633,6 +1635,26 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
 <footer>
   <div class="wrap">
     <div class="small">
+      <h3>Acknowledgements</h3>
+      <p>The field guide in section 11 is built entirely from write-ups other people published on
+        the AIcrowd forum after Phase 1 closed. Credit for those techniques belongs to them, and the
+        page cites each one on the card it appears on. Named here as well, with the topic each
+        contributed:</p>
+      <p class="mono" style="font-size:13.5px;line-height:1.85">
+        amalgonim (18151) &nbsp;&middot;&nbsp; andrei_bulzan (18183) &nbsp;&middot;&nbsp;
+        bgrubbs1984 (18169) &nbsp;&middot;&nbsp; bin_yong_bong (18184) &nbsp;&middot;&nbsp;
+        Cipo (18152) &nbsp;&middot;&nbsp; ely2sh (18176) &nbsp;&middot;&nbsp;
+        hyojun_kwon (18154) &nbsp;&middot;&nbsp; jamesrahenry (18157) &nbsp;&middot;&nbsp;
+        kaileh57 (18171) &nbsp;&middot;&nbsp; keenanpepper (18177) &nbsp;&middot;&nbsp;
+        konstantin_baltsat (18149, 18159) &nbsp;&middot;&nbsp; mliston (18170) &nbsp;&middot;&nbsp;
+        nkosi_ndwandwe (18127) &nbsp;&middot;&nbsp; omer_kiraz (18181) &nbsp;&middot;&nbsp;
+        pranay212 (18129, 18173) &nbsp;&middot;&nbsp; qi_zhang5 (18129, 18179) &nbsp;&middot;&nbsp;
+        SKIBIDI_TOILET (18166) &nbsp;&middot;&nbsp; Team Puffi (18175) &nbsp;&middot;&nbsp;
+        trim_qewas (18182) &nbsp;&middot;&nbsp; violeta (18180)
+      </p>
+      <p>Thanks also to the organizers for answering rules questions in public, which is why several
+        of the cost model facts on this page can be stated at all.</p>
+
       <h3>Notes on this page</h3>
       <p>Written by Maksim Silchenko, team thylinao, competing solo. My Phase 1 technical write-up
         was submitted to the organizers as a PDF bound to submission 326694, with a companion post
@@ -1640,8 +1662,8 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         together with a guide to what other participants published after Phase 1 closed.</p>
       <p>Numbers describing my own estimator come from my measurement log and from grader records,
         and are quoted with their submission identifiers so they can be checked. Numbers describing
-        other participants' work are as reported by those participants in the forum topics cited on
-        each card. I have not reproduced them independently. Where published results disagree with
+        other participants' work are as reported by those participants, in the forum topics cited by
+        author and number on each card. I have not reproduced them independently. Where published results disagree with
         each other or with mine, the disagreement is stated rather than resolved.</p>
       <p>Large language models were used throughout this project for code, for analysis and for
         drafting, including this page. Every quantitative claim about my own build traces to a
@@ -1993,7 +2015,7 @@ the cost-model defect described in section 7 is removed. Its 98,304 rows are not
 though: they are set by the 50 MiB cap on the shipped asset and by the wall-clock guard.</p>
 </div>
 
-<div id="f-radial"><p class="kicker">Sampling geometry &nbsp;/&nbsp; topics 18169, 18171, 18173, 18175</p>
+<div id="f-radial"><p class="kicker">Sampling geometry &nbsp;/&nbsp; bgrubbs1984 18169, kaileh57 18171, pranay212 18173, Team Puffi 18175</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="radial" style="aspect-ratio:16/7"></canvas>
 <figcaption>A Gaussian input carries a length and a direction. Because the network has no biases, the length factors out of the expectation exactly, so only the direction has to be sampled.</figcaption>
@@ -2011,7 +2033,7 @@ removed one entire source of variance at no cost and introduced no error.</p>
 also the precondition for using spherical designs, because a spherical design is a rule for
 integrating over directions, and it only helps if the radius has already been handled exactly.</p></div>
 
-<div id="f-kerdock"><p class="kicker">Sampling geometry &nbsp;/&nbsp; topics 18183, 18171, 18177, 18175</p>
+<div id="f-kerdock"><p class="kicker">Sampling geometry &nbsp;/&nbsp; andrei_bulzan 18183, kaileh57 18171, keenanpepper 18177, Team Puffi 18175</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="design" style="aspect-ratio:16/7"></canvas>
 <figcaption>Twenty-four directions placed at random against twenty-four placed by design, in two dimensions for legibility. Same count, and the widest uncovered gap is very different.</figcaption>
@@ -2039,7 +2061,7 @@ participant measured Sobol worse than plain independent draws at equal row count
 Sobol stream and reported it beating shifted replicates, and a third closed lattice methods entirely.
 See the card on what the carrier is actually doing, which complicates all of this.</p></div>
 
-<div id="f-antipodal"><p class="kicker">Sampling geometry &nbsp;/&nbsp; topics 18176, 18181, 18184</p>
+<div id="f-antipodal"><p class="kicker">Sampling geometry &nbsp;/&nbsp; ely2sh 18176, omer_kiraz 18181, bin_yong_bong 18184</p>
 <h3>Antipodal pairing, and a genuine disagreement</h3>
 <p>If you evaluate a direction and also its exact negation, the ReLU identity
 <span class="mono">ReLU(-y) = ReLU(y) - y</span> lets you obtain the second from the first almost for
@@ -2064,7 +2086,7 @@ percent of the variance.</li>
 entirely on what point set you are pairing within, so these three results may all be correct about
 different constructions. Nobody has run the crossed experiment that would settle it.</p></div>
 
-<div id="f-whiten"><p class="kicker">Sampling geometry &nbsp;/&nbsp; topics 18182 and 18151</p>
+<div id="f-whiten"><p class="kicker">Sampling geometry &nbsp;/&nbsp; trim_qewas 18182, amalgonim 18151</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="whiten" style="aspect-ratio:16/7"></canvas>
 <figcaption>The drawn batch has a sample covariance that is not quite the identity. Whitening applies the linear map that forces it to be exactly the identity, which is what the ellipse becoming a circle shows.</figcaption>
@@ -2097,7 +2119,7 @@ eight times the sample count.</p>
 quasi-Monte Carlo apparatus my build is organised around was the wrong axis to spend on. This is the
 single thing on this page I most regret not testing.</p></div>
 
-<div id="f-midcv"><p class="kicker">Variance reduction &nbsp;/&nbsp; topics 18175, 18154, 18170</p>
+<div id="f-midcv"><p class="kicker">Variance reduction &nbsp;/&nbsp; Team Puffi 18175, hyojun_kwon 18154, mliston 18170</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="midcv" style="aspect-ratio:16/7"></canvas>
 <figcaption>A cheap analytic model tracks the sampler closely in the early layers and drifts away later. Measuring the gap where the model is still trustworthy gives a correction for the final layer.</figcaption>
@@ -2118,7 +2140,7 @@ split. A third deployed a layer-22 control with a learned centre.</p>
 introduces contamination, and one author measured a correlation of 0.885 between the corrector's
 output and the batch noise it was supposed to be independent of.</p></div>
 
-<div id="f-cvdesign"><p class="kicker">Variance reduction &nbsp;/&nbsp; topic 18152</p>
+<div id="f-cvdesign"><p class="kicker">Variance reduction &nbsp;/&nbsp; Cipo 18152</p>
 <h3>Cancel the rule's error, not the sampler's variance</h3>
 <p>This is a design principle rather than a technique, and it explains a class of failures including
 one of my own.</p>
@@ -2135,7 +2157,7 @@ scrambled net, at a variance ratio of <span class="mono">1.0052</span> against a
 <p>The corollary is constructive. If you use a structured point set, your control has to be designed
 against the structure of that specific rule's residual error, not against the integrand.</p></div>
 
-<div id="f-mehler"><p class="kicker">Analytic &nbsp;/&nbsp; topic 18151</p>
+<div id="f-mehler"><p class="kicker">Analytic &nbsp;/&nbsp; amalgonim 18151</p>
 <h3>Hermite series instead of quadrature</h3>
 <p>An estimator that propagates a full covariance needs, at every layer, the expectation of
 <span class="mono">ReLU(a)&middot;ReLU(b)</span> for a pair of correlated Gaussians. Computing that by
@@ -2152,7 +2174,7 @@ times cheaper for the same quantity.</p>
 <p>This is a good example of a technique that is not novel mathematics at all, and is still worth a
 great deal, because the metric charges for arithmetic and the series does less of it.</p></div>
 
-<div id="f-maxent"><p class="kicker">Analytic &nbsp;/&nbsp; topics 18157, 18184</p>
+<div id="f-maxent"><p class="kicker">Analytic &nbsp;/&nbsp; jamesrahenry 18157, bin_yong_bong 18184</p>
 <h3>Maximum-entropy readout</h3>
 <p>Suppose you know the first six moments of the final layer's pre-activation distribution exactly,
 and you need the expected ReLU. The classical move is an Edgeworth or Gram-Charlier expansion, which
@@ -2171,7 +2193,7 @@ Both beat the series expansions on the same inputs.</p>
 percent of the total error. This technique is excellent and its ceiling is low, and both things are
 true at once.</p></div>
 
-<div id="f-dof"><p class="kicker">Analytic &nbsp;/&nbsp; topic 18151</p>
+<div id="f-dof"><p class="kicker">Analytic &nbsp;/&nbsp; amalgonim 18151</p>
 <h3>A ceiling on the entire sampling family</h3>
 <p>Rather than testing samplers one at a time, count the degrees of freedom any sample-based estimator
 could possibly exploit at a given cost, and turn that count into a bound. The result applies to every
@@ -2186,7 +2208,7 @@ than the bound would permit. Either the bound has an assumption that the leader 
 leader is doing something that is not sampling. I do not know which, and I would treat this as an open
 question rather than a settled result.</p></div>
 
-<div id="f-saturation"><p class="kicker">Analytic &nbsp;/&nbsp; topic 18151</p>
+<div id="f-saturation"><p class="kicker">Analytic &nbsp;/&nbsp; amalgonim 18151</p>
 <h3>Sixty-six neurons carry the problem</h3>
 <p>The error is not spread evenly across the 256 output neurons. Each neuron has a standardised
 distance from the ReLU kink, the quantity called alpha in the closure recurrence. A neuron sitting far
@@ -2202,7 +2224,7 @@ elsewhere, is spending its budget correctly. Several of the pruning and certific
 this competition, including two in my own build, are exactly that idea applied to cost rather than to
 accuracy.</p></div>
 
-<div id="f-spelling"><p class="kicker">Cost model &nbsp;/&nbsp; topics 18151, 18179, 18184</p>
+<div id="f-spelling"><p class="kicker">Cost model &nbsp;/&nbsp; amalgonim 18151, qi_zhang5 18179, bin_yong_bong 18184</p>
 <h3>Every spelling of a contraction bills the same</h3>
 <p>An obvious thing to try, once you know the score is accuracy times billed cost, is to look for a
 cheaper way to spell the same matrix multiplication. Numerical libraries expose many entry points that
@@ -2219,7 +2241,7 @@ technique.</p>
 <p>The genuine savings in this competition come from doing less arithmetic, not from spelling the same
 arithmetic differently.</p></div>
 
-<div id="f-gram"><p class="kicker">Cost model &nbsp;/&nbsp; topics 18184, 18154</p>
+<div id="f-gram"><p class="kicker">Cost model &nbsp;/&nbsp; bin_yong_bong 18184, hyojun_kwon 18154</p>
 <h3>The symmetric Gram discount</h3>
 <p>When you contract a matrix with itself to form a Gram matrix, the result is symmetric, so only
 about half of the output entries are independent. The meter recognises this and prices it accordingly.</p>
@@ -2235,7 +2257,7 @@ identical product bills in full. So the lesson is narrow: if the expensive step 
 into a genuine contraction of an array with itself, the meter will halve it. One participant bundled this with a half-sample
 coefficient fit and reported cutting billed cost meaningfully at exactly zero statistical cost.</p></div>
 
-<div id="f-percall"><p class="kicker">Cost model &nbsp;/&nbsp; topics 18166, 18182, 18151</p>
+<div id="f-percall"><p class="kicker">Cost model &nbsp;/&nbsp; SKIBIDI_TOILET 18166, trim_qewas 18182, amalgonim 18151</p>
 <h3>Wall time is a per-call tax</h3>
 <p>The score charges you for residual wall-clock time at a hundred billion FLOPs per second, so it
 looks like you should minimise time spent outside the metered library. The natural conclusion is to
@@ -2251,7 +2273,7 @@ those conflict. Supply destination arrays so buffers are reused rather than allo
 self-check helper whose cost grows with process history becomes unaffordable by the end of a long
 grading run.</p></div>
 
-<div id="f-strassen"><p class="kicker">Cost model &nbsp;/&nbsp; topic 18184</p>
+<div id="f-strassen"><p class="kicker">Cost model &nbsp;/&nbsp; bin_yong_bong 18184</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="strassen" style="aspect-ratio:16/7"></canvas>
 <figcaption>Cumulative metered saving by recursion depth across a 32-layer chain. The bars stop growing at depth five, and depth six is identical.</figcaption>
@@ -2269,7 +2291,7 @@ calls cost wall time that is charged back.</p>
 recursion regressing metered compute by 2.383 percent in all three paired repeats, with predictions
 bitwise equal. Three independent measurements, one conclusion.</p></div>
 
-<div id="f-dtype"><p class="kicker">Cost model &nbsp;/&nbsp; topics 18127, 18154</p>
+<div id="f-dtype"><p class="kicker">Cost model &nbsp;/&nbsp; nkosi_ndwandwe 18127, hyojun_kwon 18154</p>
 <h3>The float64 promotion trap</h3>
 <p>Float64 bills at twice the rate of float32, and float16 gets no discount over float32, so float32
 is the correct working precision throughout. That is easy to say and hard to enforce, because a single
@@ -2284,7 +2306,7 @@ path made a float32 assumption fail in a way that moved their proxy score from
 regression, with a two-operation workaround. If you are optimising precision, check the actual dtype
 of every intermediate rather than trusting the declared one.</p></div>
 
-<div id="f-cliff"><p class="kicker">Cost model &nbsp;/&nbsp; topic 18129</p>
+<div id="f-cliff"><p class="kicker">Cost model &nbsp;/&nbsp; pranay212 and qi_zhang5, 18129</p>
 <h3>The budget cliff, enforced late</h3>
 <p>Exceeding the compute budget is not a graded penalty. When effective compute exceeds the budget,
 the grader zeroes your predictions for that network, which turns a small overspend into a total loss
@@ -2299,7 +2321,7 @@ the failure mode is discontinuous. My own honest twin sits about 0.3 seconds of 
 boundary on its worst network, which is closer than I would choose again. Second, treat any
 leaderboard snapshot from before the patch as having been produced under different rules.</p></div>
 
-<div id="f-oracle"><p class="kicker">Measurement &nbsp;/&nbsp; topic 18182</p>
+<div id="f-oracle"><p class="kicker">Measurement &nbsp;/&nbsp; trim_qewas 18182</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="oracle" style="aspect-ratio:16/7"></canvas>
 <figcaption>The protocol. Replace one stage with its true value, leave the rest running, and read the residual. The numbers shown are the ones measured on this problem.</figcaption>
@@ -2319,7 +2341,7 @@ estimators this way without building any of them.</p>
 campaign, the finding in section 6 that propagation rather than readout carries nearly all the
 error. It is the single thing I would tell a newcomer to build first.</p></div>
 
-<div id="f-floor"><p class="kicker">Measurement &nbsp;/&nbsp; topics 18182 and 18149</p>
+<div id="f-floor"><p class="kicker">Measurement &nbsp;/&nbsp; trim_qewas 18182, konstantin_baltsat 18149</p>
 <h3>The answer key is itself noisy</h3>
 <p>The targets you are scored against were produced by Monte Carlo at a billion samples. That is a lot
 of samples, but it is not infinity, so the answer key carries its own error.</p>
@@ -2333,7 +2355,7 @@ two truth replicates they had baked locally disagreed with each other by more th
 were trying to measure. That is about their own reference rather than the competition's answer key,
 and it makes the same point: check the label noise before trusting a small win.</p></div>
 
-<div id="f-rotation"><p class="kicker">Measurement &nbsp;/&nbsp; topics 18176, 18180</p>
+<div id="f-rotation"><p class="kicker">Measurement &nbsp;/&nbsp; ely2sh 18176, violeta 18180</p>
 <h3>Rotation noise swamps small effects</h3>
 <p>Because the input distribution is spherically symmetric, you can rotate the whole problem and it is
 the same problem. That gives you a free source of replicates, and it also reveals how noisy a single
@@ -2348,7 +2370,7 @@ expensive but is the only thing that makes a small effect legible. A related res
 participant: a three-replicate bias and variance decomposition inverted at least one of their own
 previously recorded gate verdicts, turning a recorded failure into a pass.</p></div>
 
-<div id="f-selector"><p class="kicker">Negative result &nbsp;/&nbsp; topic 18159</p>
+<div id="f-selector"><p class="kicker">Negative result &nbsp;/&nbsp; konstantin_baltsat 18159</p>
 <h3>Per-network adaptive selectors do not pay</h3>
 <p>Networks vary in difficulty, so choosing a different configuration for each one sounds obviously
 correct. The problem is that the choosing is itself computation, and it is billed.</p>
@@ -2362,7 +2384,7 @@ Every network in my submission runs the same sample count.</p>
 <p>The general lesson is that under a metric which charges for every operation, meta-computation has
 to clear a surprisingly high bar. Decide statically where you can.</p></div>
 
-<div id="f-bitpack"><p class="kicker">Negative result &nbsp;/&nbsp; topic 18149</p>
+<div id="f-bitpack"><p class="kicker">Negative result &nbsp;/&nbsp; konstantin_baltsat 18149</p>
 <h3>Bit-packing saved exactly zero</h3>
 <p>Boolean masks over a large array look wasteful, since each flag occupies a whole element. Packing
 them into bits should reduce the work.</p>
@@ -2377,7 +2399,7 @@ cost was, so removing all of it would have changed nothing.</p>
 optimising for memory or for real hardware time, when the thing being scored is a published price list
 for operations. The two only sometimes point the same way.</p></div>
 
-<div id="f-anchor"><p class="kicker">Negative result &nbsp;/&nbsp; topic 18184</p>
+<div id="f-anchor"><p class="kicker">Negative result &nbsp;/&nbsp; bin_yong_bong 18184</p>
 <h3>A 0.22 percent typo cost 24 times</h3>
 <p>A participant hardcoded a mathematical constant, <span class="mono">sqrt((pi-1)/(2*pi))</span>, and
 typed <span class="mono">0.5825213767497766</span> where the correct value is
@@ -2393,7 +2415,7 @@ figure is that a 0.1 percent coherent error at layer 2 emerges as 0.19 percent a
 <p>The practical rule is to derive constants in code rather than pasting them, and to test any
 hardcoded anchor at full depth rather than on a shallow proxy.</p></div>
 
-<div id="f-wrongreason"><p class="kicker">Negative result &nbsp;/&nbsp; topic 18176</p>
+<div id="f-wrongreason"><p class="kicker">Negative result &nbsp;/&nbsp; ely2sh 18176</p>
 <h3>The right answer for the wrong reason</h3>
 <p>Most of the field converged on the same 66,048-direction carrier and explained it the same way: it
 is a spherical 5-design, so it integrates every polynomial up to degree five exactly, and the
@@ -2413,7 +2435,7 @@ particular kernel.</p>
 can hold a correct empirical result attached to an incorrect causal story, and the thing that
 separates the two is somebody constructing the experiment where the story makes a prediction.</p></div>
 
-<div id="f-pruningcliff"><p class="kicker">Negative result &nbsp;/&nbsp; topics 18176, 18151</p>
+<div id="f-pruningcliff"><p class="kicker">Negative result &nbsp;/&nbsp; ely2sh 18176, amalgonim 18151</p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="cliff" style="aspect-ratio:16/7"></canvas>
 <figcaption>The measured pruning sweep. Error is flat while the threshold rises to 8, then rises by nearly two orders of magnitude over the next three steps.</figcaption>
@@ -2438,7 +2460,7 @@ nothing to the mean and a full unit's worth of variance, so dropping it is a fav
 the exact mask refuses to make. Correctness and usefulness are different objectives here, and the
 metric rewards the second.</p></div>
 
-<div id="f-mysovskikh"><p class="kicker">Negative result &nbsp;/&nbsp; topic 18184</p>
+<div id="f-mysovskikh"><p class="kicker">Negative result &nbsp;/&nbsp; bin_yong_bong 18184</p>
 <h3>An exact cubature rule, seventy times worse</h3>
 <p>If exact degree-five integration on the sphere helps, an exact degree-five cubature rule for the
 Gaussian ought to help too. A textbook construction at dimension 256 uses 66,307 nodes, almost exactly

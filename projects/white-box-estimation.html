@@ -1540,8 +1540,9 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
   <div class="wrap">
     <p class="kicker reveal">12 &nbsp;/&nbsp; Phase 2</p>
     <h2 class="reveal">Levers I would try next</h2>
-    <p class="lede reveal d1">Short list, ranked by what the measurements say they are worth. Some
-      are mine, most come from the field guide above. None of them is tested in my build.</p>
+    <p class="lede reveal d1">Phase 2 had not opened at the time of writing, so nothing here has a
+      score attached to it. This is a list of what I would try, ranked by what the Phase 1
+      measurements say each is worth. None of it is tested in my build.</p>
 
     <div class="read">
       <div class="tbl-scroll reveal">
@@ -1609,25 +1610,28 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
     </div>
 
     <figure class="reveal d1">
-      <p class="fig-head">Where each lever moves the score <span>animated</span></p>
+      <p class="fig-head">What each lever would be worth <span>animated</span></p>
       <canvas class="fig" id="cLevers" data-fig="levers"></canvas>
-      <figcaption><b>Figure 10.</b> The only two quantities the score algebra leaves open, on log axes.
-        Every diagonal is a line of equal score, because <span class="mono">s = a &times; p / B</span>.
-        My build sits at the origin by construction. Each arrow is where a lever would move it, using
-        the effect its author reported. The shaded corner is the region that would beat the leading
-        public entry, which needs the product to fall by 7.5 times. No single arrow reaches it.</figcaption>
+      <figcaption><b>Figure 10.</b> Every lever on the list, drawn as the factor by which it would
+        divide the score. Blue attacks the variance per sample, orange attacks the price per sample,
+        and those are the only two things the algebra lets you attack. The dashed line is the 7.5
+        times needed to match the top Phase 1 score. Hatched rows are the ideas that have never been
+        measured, drawn differently on purpose so that no number is implied where none exists.</figcaption>
     </figure>
 
     <div class="read">
       <p class="reveal">The honest summary of that list: almost all of it is cost-side or
         variance-side improvement to a sampler, which is the only lane the score algebra leaves
-        open. None of them explains the gap to the leading entry, so either the bound on the
-        sampling family is wrong, or the leader is not sampling.</p>
-      <p class="reveal">Six of these came out of my own parked register rather than from the forum.
-        They were proposed during Phase 1, priced, given a gate in some cases, and then never run
-        because the window closed. I am listing them because a parked idea with a written gate is
-        more useful to somebody else than a vague suggestion, and because publishing them costs me
-        nothing I was going to use.</p>
+        open. To be clear about which gap: Phase 2 has no leaderboard yet, so the comparison is to the
+        entry that finished on top of the <em>Phase 1</em> public board, at
+        <span class="mono">1.84e-08</span> against my honest <span class="mono">1.382e-07</span>.
+        None of the levers below closes a gap that size on its own. Either the published bound on
+        what a sampler can do is wrong, or whoever produced that number was not running a
+        sampler.</p>
+      <p class="reveal">Six of these came out of my own notes rather than from the forum. They were
+        proposed during Phase 1, priced, given a gate in some cases, and then never run because the
+        window closed. Where a gate exists it is quoted, so the bar each one has to clear is visible
+        before anyone spends time on it.</p>
     </div>
   </div>
 </section>
@@ -1678,7 +1682,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           entries is a particular measured compromise between those two facts, and the more
           interesting ideas are the ones that obtain dependence information without paying for it
           one sample at a time.</p>
-        <p class="small" style="margin-bottom:0">The leading entry on the public board scores
+        <p class="small" style="margin-bottom:0">The entry that finished on top of the Phase 1 public board scores
           <span class="mono">7.5</span> times better than my honest submission, and does it while
           spending slightly more compute rather than less. As far as I can tell from the public
           record, the mechanism has not been explained. That question appears to be open.</p>
@@ -2443,7 +2447,7 @@ equal cost, with a deployed estimator already achieving <b>1.731 times</b>, or 9
 ceiling.</p>
 <p>If that bound is right, it is one of the most consequential results in the whole public record,
 because it says the sampling lane was nearly exhausted while people were still working on it. It also
-sits in tension with the leading entry on the board, which appears to be substantially further ahead
+sits in tension with the top of the Phase 1 board, which appears to be substantially further ahead
 than the bound would permit. Either the bound has an assumption that the leader violates, or the
 leader is doing something that is not sampling. I do not know which, and I would treat this as an open
 question rather than a settled result.</p></div>
@@ -3800,70 +3804,79 @@ document.querySelectorAll(".filters .btn").forEach(function(b){
   register(c,draw,0.5); draw(0);
 })();
 
-/* ================= FIG 10: the lever plane ================= */
+/* ================= FIG 10: what each lever is worth ================= */
 (function(){
   var c=document.getElementById("cLevers"); if(!c) return;
-  /* axes are log10 of the two quantities the score algebra leaves open:
-     a = variance produced per sample, p = billed price per sample. s = a*p/B. */
+  /* s = a*p/B, so a lever is worth exactly the factor by which it divides a*p.
+     A horizontal ranking reads cleanly where the a-p plane did not: the moves are
+     small in log space and every arrow piled onto the origin. */
   var LEV=[
-    {n:"batch whitening",      da:-Math.log10(2.0),  dp:0,                 col:"CALM"},
-    {n:"design carrier",       da:-Math.log10(1.5),  dp:0,                 col:"ACC"},
-    {n:"mid-network control",  da:-Math.log10(1.22), dp:Math.log10(1.05),  col:"ACC"},
-    {n:"looser pruning",       da:-Math.log10(1.10), dp:-Math.log10(1.05), col:"ACC"},
-    {n:"symmetric Gram",       da:0,                 dp:-Math.log10(1.15), col:"CORE"},
-    {n:"rank-40 multiply",     da:0,                 dp:-Math.log10(1.25), col:"CORE"},
-    {n:"fewer calls",          da:0,                 dp:-Math.log10(1.06), col:"CORE"}
+    {n:"batch whitening",        f:2.00, ax:"variance", src:"amalgonim, trim_qewas"},
+    {n:"design carrier",         f:1.50, ax:"variance", src:"andrei_bulzan and others"},
+    {n:"looser pruning",         f:1.31, ax:"variance", src:"ely2sh, amalgonim"},
+    {n:"rank-40 multiply",       f:1.25, ax:"price",    src:"andrei_bulzan"},
+    {n:"mid-network control",    f:1.22, ax:"variance", src:"Team Puffi, hyojun_kwon"},
+    {n:"symmetric Gram",         f:1.15, ax:"price",    src:"bin_yong_bong"},
+    {n:"fewer calls",            f:1.06, ax:"price",    src:"SKIBIDI_TOILET"},
+    {n:"preintegration",         f:0,    ax:"variance", src:"mine, never run"},
+    {n:"ridge-ReLU control",     f:0,    ax:"variance", src:"mine, gate written"},
+    {n:"two-phase regression",   f:0,    ax:"variance", src:"mine, never run"},
+    {n:"finer sparsity tiers",   f:0,    ax:"price",    src:"mine, needs re-pricing"},
+    {n:"seed-generated points",  f:0,    ax:"price",    src:"mine, gate written"}
   ];
-  var TARGET = Math.log10(1.3820094075e-7/1.84e-8);   /* 7.51x, the gap to the leader */
+  var TARGET = 1.3820094075e-7/1.84e-8;      /* 7.51x, the gap to the top Phase 1 score */
   function draw(t){
-    var k=hidpi(c,0.58), x=k.x, w=k.w, h=k.h;
+    var mob = c.getBoundingClientRect().width < 620;
+    var k=hidpi(c,mob?1.15:0.62), x=k.x, w=k.w, h=k.h;
     x.fillStyle=BG2; x.fillRect(0,0,w,h);
-    var m={l:74,r:150,t:32,b:52}, pw=w-m.l-m.r, ph=h-m.t-m.b;
-    var LO=-1.15, HI=0.35;
-    function X(v){ return m.l+pw*(v-LO)/(HI-LO) }
-    function Y(v){ return m.t+ph*(1-(v-LO)/(HI-LO)) }
-    /* iso-score lines: log a + log p = const, straight with slope -1 */
-    for(var q=-2.0;q<=0.61;q+=0.25){
-      x.strokeStyle = Math.abs(q)<1e-9 ? RULE2 : RULE;
-      x.lineWidth = Math.abs(q)<1e-9 ? 1.4 : 1;
-      x.beginPath(); x.moveTo(X(LO), Y(q-LO)); x.lineTo(X(HI), Y(q-HI)); x.stroke();
-    }
-    /* the band that would beat the leading public entry */
-    x.save(); x.beginPath(); x.rect(m.l,m.t,pw,ph); x.clip();
-    x.fillStyle="rgba(47,158,92,0.10)";
-    x.beginPath();
-    x.moveTo(X(LO), Y(-TARGET-LO)); x.lineTo(X(HI), Y(-TARGET-HI));
-    x.lineTo(X(HI), Y(LO)); x.lineTo(X(LO), Y(LO)); x.closePath(); x.fill();
-    x.restore();
-    lab(x,"BEATS THE LEADING PUBLIC ENTRY",m.l+8,m.t+ph-12,CALM_T,9.5,1);
-    /* my build sits at the origin by construction */
-    var ox=X(0), oy=Y(0);
-    var grow = reduce?1:ease(clamp(((t*0.55)%9)/3.2,0,1));
+    var m={l:mob?128:186,r:mob?18:34,t:34,b:44}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+    var rowH = ph/LEV.length;
+    var MAXF = 8.2;
+    function X(f){ return m.l+pw*Math.log(f)/Math.log(MAXF) }   /* log, so 1x is the origin */
+    /* gridlines at meaningful multipliers */
+    [1,1.25,1.5,2,3,5,7.51].forEach(function(g){
+      var gx=X(g), tgt=Math.abs(g-TARGET)<0.01;
+      x.strokeStyle = tgt ? "rgba(47,158,92,0.55)" : (g===1?RULE2:RULE);
+      x.lineWidth = tgt?1.6:1;
+      if(tgt) x.setLineDash([4,4]);
+      x.beginPath(); x.moveTo(gx,m.t-6); x.lineTo(gx,m.t+ph); x.stroke();
+      x.setLineDash([]);
+      lab(x, tgt ? "7.5x needed" : g+"x", gx-(tgt?26:7), m.t-12, tgt?CALM_T:INK4, tgt?10:9.5);
+    });
+    var grow = reduce?1:ease(clamp(((t*0.5)%11)/3.4,0,1));
     for(var i=0;i<LEV.length;i++){
-      var L=LEV[i];
-      var col = L.col==="CALM"?CALM:(L.col==="ACC"?ACC:CORE);
-      var ex=X(L.dp*grow), ey=Y(L.da*grow);
-      x.strokeStyle=col; x.lineWidth=1.8; x.globalAlpha=0.9;
-      x.beginPath(); x.moveTo(ox,oy); x.lineTo(ex,ey); x.stroke();
-      x.fillStyle=col; x.beginPath(); x.arc(ex,ey,3.4,0,6.283); x.fill();
-      x.globalAlpha=1;
-      if(grow>0.55) lab(x,L.n,ex+7,ey+(L.da<0?-6:12),col,10);
+      var L=LEV[i], cy=m.t+rowH*i+rowH/2;
+      var col = L.ax==="variance" ? ACC : CORE;
+      /* the label sits in its own gutter, so nothing can ever collide */
+      x.save(); x.font=(mob?10:11.5)+"px 'IBM Plex Mono',monospace";
+      x.fillStyle = L.f ? INK2 : INK3;
+      x.fillText(L.n, m.l-10-x.measureText(L.n).width, cy+4);
+      x.restore();
+      if(L.f){
+        var end = X(1+(L.f-1)*grow);
+        x.fillStyle = col;
+        x.globalAlpha = 0.72;
+        rr(x, X(1), cy-rowH*0.26, Math.max(1,end-X(1)), rowH*0.52, 2); x.fill();
+        x.globalAlpha = 1;
+        if(grow>0.6) lab(x, L.f.toFixed(2)+"x", end+7, cy+4, col, mob?9.5:10.5);
+      } else {
+        /* unmeasured: a hatched stub, so "no number yet" is visually distinct from "small" */
+        x.save(); x.strokeStyle=col; x.globalAlpha=0.5; x.lineWidth=1;
+        for(var q=0;q<7;q++){
+          var qx=X(1)+q*5;
+          x.beginPath(); x.moveTo(qx, cy-rowH*0.2); x.lineTo(qx+4, cy+rowH*0.2); x.stroke();
+        }
+        x.restore();
+        if(grow>0.6) lab(x, "not measured", X(1)+42, cy+4, INK4, mob?9:10);
+      }
     }
-    var gr=x.createRadialGradient(ox,oy,0,ox,oy,15);
-    gr.addColorStop(0,"rgba(15,23,42,0.5)");gr.addColorStop(1,"rgba(15,23,42,0)");
-    x.fillStyle=gr;x.beginPath();x.arc(ox,oy,15,0,6.283);x.fill();
-    x.fillStyle=INK;x.beginPath();x.arc(ox,oy,4.4,0,6.283);x.fill();
-    lab(x,"my build",ox+9,oy-9,INK,11);
-    lab(x,"price per sample  p",m.l+pw/2-52,h-14,INK3,10.5);
-    x.save(); x.translate(16,m.t+ph/2); x.rotate(-Math.PI/2);
-    x.fillStyle=INK3; x.font="10.5px 'IBM Plex Mono',monospace";
-    x.fillText("variance per sample  a",-64,0); x.restore();
-    lab(x,"cheaper",m.l,m.t+ph+18,INK4,10);
-    lab(x,"dearer",m.l+pw-42,m.t+ph+18,INK4,10);
-    lab(x,"lines of equal score",m.l+pw+12,m.t+16,INK4,10);
-    lab(x,"s = a x p / B",m.l+pw+12,m.t+32,INK2,11.5);
+    lab(x,"score improvement, log scale",m.l,h-12,INK3,mob?9.5:10.5);
+    if(!mob){
+      lab(x,"variance axis",m.l+pw-150,h-12,ACC,10.5);
+      lab(x,"price axis",m.l+pw-52,h-12,CORE,10.5);
+    }
   }
-  register(c,draw,0.58); draw(0);
+  register(c,draw,0.62); draw(0);
 })();
 
 /* ================= FIG 3: the multiplier ================= */

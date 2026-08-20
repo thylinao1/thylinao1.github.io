@@ -1223,6 +1223,17 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           <td class="small">Measured <span class="mono">+1.28%</span> billed cost, so it made things
           worse. Another participant independently measured deeper recursion regressing metered
           compute by 2.383 percent in all three paired repeats.</td></tr>
+        <tr><td><b>Deterministic propagation with an exact pair kernel.</b> Drop sampling
+          entirely, carry mean and full covariance through all 32 layers using the exact bivariate
+          ReLU kernel rather than an approximated one.</td>
+          <td class="small">Worth recording carefully, because the kernel was not the problem. The
+          kernel was verified exact to <span class="mono">2.9e-10</span>, and fixing it moved the
+          result from <span class="mono">0.68</span> to <span class="mono">2.7e-4</span>, a repair
+          of about 2,500 times. The remaining three and a half orders of magnitude are the Gaussian
+          closure itself. By mid-depth the true joint law departs far enough from Gaussian that even
+          exact-kernel propagation accumulates about 1 percent relative mean error by layer 32.
+          Reviving it needs a closure that carries non-Gaussian information, demonstrated at about
+          <span class="mono">1e-4</span> one-step relative error at layers 8 to 16.</td></tr>
         <tr><td><b>Adaptive sample count per network.</b> Spend more rows on harder networks.</td>
           <td class="small">Score-negative and shipped inert. A top-up row costs
           <span class="mono">2.113e6</span> against the main block's marginal
@@ -1561,6 +1572,34 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <tr><td><b>Fewer, larger calls</b></td><td class="num">per-call tax</td>
           <td class="small">My build is already at about 2,130 calls per network. The measurements
             say the residual charge tracks call count, so there may be more here. <button type="button" class="term code-link" data-modal="p2-calls">see the code</button></td></tr>
+        <tr><td><b>Preintegration over the kink</b></td><td class="num">untested</td>
+          <td class="small">Integrate one direction out analytically for each neuron whose
+            pre-activation crosses zero, so the sampler sees a smooth integrand instead of a kinked
+            one. This is the textbook fix for exactly this class of integrand, and my own diagnosis
+            says the kinks are where the error is. Parked after Phase 1, never run.
+            <button type="button" class="term code-link" data-modal="p2-preint">see the code</button></td></tr>
+        <tr><td><b>Ridge-ReLU control variate</b></td><td class="num">needs R&sup2; &ge; 0.338</td>
+          <td class="small">Fit a small sum of ReLU ridge functions on a pilot batch. Because the
+            family is bias-free and positively homogeneous, each term has an exact Gaussian mean,
+            so the control needs no extra sampling to be unbiased. Gate was pre-registered and the
+            build never happened. <button type="button" class="term code-link" data-modal="p2-ridge">see the code</button></td></tr>
+        <tr><td><b>Two-phase regression estimator</b></td><td class="num">untested</td>
+          <td class="small">Draw extra cheap samples of a correlated proxy alongside the expensive
+            ones and combine with the classical two-phase regression formula. The coefficient comes
+            from the sample covariance rather than from an analytic anchor, which is what separates
+            it from the control variates I already killed.</td></tr>
+        <tr><td><b>Finer sparsity tiers</b></td><td class="num">up to 1.6&times; on price</td>
+          <td class="small">Activation density is exactly 0.50 at every layer, and my staircase
+            captures about 0.80 of that bound. The tier count was priced against an assumed 30
+            second wall that has since been measured safe to 56, so the pricing should be redone.</td></tr>
+        <tr><td><b>Seed-generated point set</b></td><td class="num">about 0.9% of cost</td>
+          <td class="small">Ship the scrambling seed instead of a 48 MiB array and regenerate the
+            points at run time. Removes the package cap as a constraint on sample count. A rival's
+            0.012 second setup is the existence proof. Prototype gate already written, never run.</td></tr>
+        <tr><td><b>Higher cumulants with the exact kernel</b></td><td class="num">untested</td>
+          <td class="small">The one propagation variant my own kill chain never actually ran: third
+            and fourth cumulants carried forward through the verified exact pair kernel. The kernel
+            runs were all second-order only.</td></tr>
         <tr><td><b>Maximum-entropy readout</b></td><td class="num">bias&sup2; 5.077e-09</td>
           <td class="small">Better than the series expansions on the same inputs. Listed last on
             purpose: section 6 caps the whole readout lane at about 3 percent of the error. <button type="button" class="term code-link" data-modal="p2-maxent">see the code</button></td></tr>
@@ -1580,10 +1619,15 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
     </figure>
 
     <div class="read">
-      <p class="reveal">The honest summary of that list: eight of the nine are cost-side or
-        variance-side improvements to a sampler, which is the only lane the score algebra leaves
+      <p class="reveal">The honest summary of that list: almost all of it is cost-side or
+        variance-side improvement to a sampler, which is the only lane the score algebra leaves
         open. None of them explains the gap to the leading entry, so either the bound on the
         sampling family is wrong, or the leader is not sampling.</p>
+      <p class="reveal">Six of these came out of my own parked register rather than from the forum.
+        They were proposed during Phase 1, priced, given a gate in some cases, and then never run
+        because the window closed. I am listing them because a parked idea with a written gate is
+        more useful to somebody else than a vague suggestion, and because publishing them costs me
+        nothing I was going to use.</p>
     </div>
   </div>
 </section>
@@ -2006,6 +2050,62 @@ there is nothing in that band left for the point set to supply. Reported measure
 alone at 2.06 to 2.34 times, and a lattice on top of a whitened batch at
 <span class="mono">0.97 &plusmn; 0.07</span>, meaning nothing.</p></div>
 
+
+
+<div id="p2-preint"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; parked, never run</p>
+<h3>Smoothing the kink before the points are drawn</h3>
+<p>Quasi-Monte Carlo converges fast on smooth integrands and degrades toward the plain Monte Carlo
+rate at discontinuities and kinks. A ReLU network is nothing but kinks, one per neuron, so the point
+set is being asked to do the thing it is worst at. That is a reasonable explanation for why my
+measured exponent is 1.0653 rather than something closer to the quasi-Monte Carlo ideal.</p>
+<p>Preintegration is the standard response, used in finance for digital payoffs. For a neuron whose
+pre-activation crosses zero, integrate out one direction analytically, in closed form, and hand the
+sampler the smooth conditional expectation in the remaining dimensions instead.</p>
+<div class="code"><span class="c"># the kinked integrand the sampler currently sees</span>
+f(x) = <span class="f">relu</span>(a . x)                       <span class="c"># not differentiable at a.x = 0</span>
+
+<span class="c"># split x along a: x = (a/|a|) u + x_perp, with u ~ N(0, 1) independent of x_perp</span>
+<span class="c"># then integrate u out in closed form and sample only x_perp</span>
+mu    = a_perp_part(x_perp)
+sigma = <span class="f">norm</span>(a)
+g(x_perp) = mu * <span class="f">Phi</span>(mu / sigma) + sigma * <span class="f">phi</span>(mu / sigma)   <span class="c"># smooth in x_perp</span>
+
+<span class="c"># same expectation, one fewer dimension, and no kink left for the net to trip on</span>
+<span class="c">#   E_x[ relu(a . x) ] == E_x_perp[ g(x_perp) ]</span></div>
+<p class="code-note">Illustrative. Written by me to show the construction, and never measured.</p>
+<p>Two honest problems with it. The identity above is exact for one neuron, and a layer has 256 of
+them with different directions, so you have to choose which direction to integrate out and accept
+that the others stay kinked. And the conditional expectation costs a normal cumulative distribution
+function per sample per neuron, which the meter charges for. Whether that trade pays is exactly what
+was never tested.</p>
+<p>This is the item on the list I would run first, because the diagnosis and the remedy line up:
+section 6 says the damage is in propagating through nonlinearities, and this is the one lever that
+attacks the nonlinearity itself rather than the sampling around it.</p></div>
+
+<div id="p2-ridge"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; parked, gate pre-registered</p>
+<h3>A control variate whose mean is exact for free</h3>
+<p>Section 9 records my control variate returning nothing on a scrambled net. That control was built
+from the input coordinates, and the point set had already removed what it was reaching for. This is a
+different object: a surrogate built to look like the network rather than like the inputs.</p>
+<p>The useful property is that this network family has no bias terms, so it is positively homogeneous
+and a ReLU ridge function has a closed-form Gaussian mean:</p>
+<div class="code"><span class="c"># the exact identity that makes the control free of extra sampling</span>
+<span class="c">#   E[ relu(a . x) ] = |a| / sqrt(2*pi)      for x ~ N(0, I)</span>
+
+<span class="c"># fit a small surrogate on a pilot batch</span>
+g = <span class="k">lambda</span> x: <span class="f">sum</span>(c[k] * <span class="f">relu</span>(a[k] @ x) <span class="k">for</span> k <span class="k">in</span> <span class="f">range</span>(K))   <span class="c"># K in {1, 8, 64}</span>
+
+<span class="c"># its mean is known in closed form, so no extra samples are needed</span>
+Eg = <span class="f">sum</span>(c[k] * <span class="f">norm</span>(a[k]) / <span class="f">sqrt</span>(<span class="n">2</span>*<span class="f">pi</span>) <span class="k">for</span> k <span class="k">in</span> <span class="f">range</span>(K))
+
+<span class="c"># and the corrected estimator is unbiased by construction</span>
+est = <span class="f">mean</span>(h(x) - g(x)) + Eg</div>
+<p class="code-note">Illustrative. The fitting procedure and the shapes are mine; nothing here ran.</p>
+<p>The gate was written before the window closed and never fired. To reach a 1.51 times score gain
+the control has to explain a fraction <span class="mono">R&sup2; &ge; 0.338</span> of the scramble
+error, against a measured leading-mode share of 0.435, meaning it must remove roughly 77 percent of
+that one mode. That is a demanding target and it is stated up front so nobody spends a week finding
+out the hard way.</p></div>
 
 <div id="p2-gram"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; bin_yong_bong 18184, hyojun_kwon 18154</p>
 <h3>Restructuring the expensive step into a self-contraction</h3>

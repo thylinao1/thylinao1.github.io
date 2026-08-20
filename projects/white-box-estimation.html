@@ -131,6 +131,11 @@ tr:hover td{background:rgba(15,23,42,.024)}
   background:none;border:none;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
   border-radius:0;padding:22px 10px}
 
+.xlink{color:inherit;border-bottom:1px dotted var(--ink-4);text-decoration:none;
+  transition:color .18s var(--ease),border-color .18s var(--ease)}
+.xlink:hover{color:var(--accent-deep);border-bottom-color:var(--accent-deep)}
+.who .xlink,.kicker .xlink{border-bottom-color:rgba(15,23,42,.22)}
+
 /* ---------- code samples ---------- */
 .code{font-family:var(--font-mono);font-size:12.5px;line-height:1.62;background:var(--deep);
   color:#d7e0ec;border-radius:4px;padding:18px 20px;margin:20px 0;overflow-x:auto;
@@ -415,7 +420,7 @@ footer h3{margin-top:0}
     <div class="meta">
       <span><b>Maksim Silchenko</b> &nbsp;team thylinao, solo</span>
       <span>National University of Singapore</span>
-      <span>Submissions <b>325943</b> and <b>326694</b></span>
+      <span>Submissions <b><a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325943" target="_blank" rel="noopener">325943</a></b> and <b>326694</b></span>
     </div>
   </div>
   <div class="scrollcue"><span></span>Scroll</div>
@@ -1033,9 +1038,9 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
       <table>
         <tr><th>Submission</th><th class="num">Score</th><th class="num">Raw MSE</th>
           <th class="num">Multiplier</th><th>Status</th></tr>
-        <tr><td>325943</td><td class="num">7.5858e-08</td><td class="num">1.7238308e-07</td>
+        <tr><td><a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325943" target="_blank" rel="noopener">325943</a></td><td class="num">7.5858e-08</td><td class="num">1.7238308e-07</td>
           <td class="num">0.4401</td><td class="small">On the public board</td></tr>
-        <tr><td>326694</td><td class="num">1.3820e-07</td><td class="num">1.7238308e-07</td>
+        <tr><td><a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326694" target="_blank" rel="noopener">326694</a></td><td class="num">1.3820e-07</td><td class="num">1.7238308e-07</td>
           <td class="num">0.8017</td><td class="small">The honest twin</td></tr>
       </table>
       </div>
@@ -1271,10 +1276,10 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
     <div class="read">
       <div class="note reveal">
         <p style="margin:0"><b>Provenance and credit.</b> Every technique below is someone else's work. Each card
-          names the author and the AIcrowd forum topic it came from, at
-          <span class="mono">discourse.aicrowd.com/t/&lt;number&gt;</span>, and the full list is
-          in the acknowledgements at the foot of the page. The figures are as those authors
-          reported them. I have not independently reproduced them, and where two published
+          links the author's AIcrowd profile and the forum topic it came from, and each write-up's
+          detail view also links the graded submission it is bound to. The figures are as those
+          authors reported them, and the full list is in the acknowledgements at the foot of the
+          page. I have not independently reproduced them, and where two published
           results disagree I have said so rather than picking a winner. Treat the numbers as
           pointers to the original write-ups, not as settled fact.</p>
       </div>
@@ -1298,7 +1303,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>A ReLU network without biases is positively homogeneous, so the length of the input can be
           integrated out exactly and only the direction needs sampling.</p>
         <span class="num">Exact identity, no error introduced</span>
-        <span class="who">bgrubbs1984 18169, kaileh57 18171, pranay212 18173, Team Puffi 18175</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/bgrubbs1984" target="_blank" rel="noopener">bgrubbs1984</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18169" target="_blank" rel="noopener">18169</a>, <a class="xlink" href="https://www.aicrowd.com/participants/kaileh57" target="_blank" rel="noopener">kaileh57</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18171" target="_blank" rel="noopener">18171</a>, <a class="xlink" href="https://www.aicrowd.com/participants/pranay212" target="_blank" rel="noopener">pranay212</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18173" target="_blank" rel="noopener">18173</a>, Team Puffi <a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a></span>
       </div>
 
       <div class="card reveal d1" data-cat="geometry" data-modal="f-kerdock">
@@ -1307,7 +1312,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Instead of random directions, use a deterministic set of 66,048 directions built from
           coding theory that integrates every polynomial up to degree five exactly.</p>
         <span class="num">0.389% above the proven minimum of 65,792 nodes</span>
-        <span class="who">andrei_bulzan 18183, kaileh57 18171, keenanpepper 18177, Team Puffi 18175</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/andrei_bulzan" target="_blank" rel="noopener">andrei_bulzan</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18183" target="_blank" rel="noopener">18183</a>, <a class="xlink" href="https://www.aicrowd.com/participants/kaileh57" target="_blank" rel="noopener">kaileh57</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18171" target="_blank" rel="noopener">18171</a>, <a class="xlink" href="https://www.aicrowd.com/participants/keenanpepper" target="_blank" rel="noopener">keenanpepper</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18177" target="_blank" rel="noopener">18177</a>, Team Puffi <a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a></span>
       </div>
 
       <div class="card reveal d2" data-cat="geometry" data-modal="f-antipodal">
@@ -1316,7 +1321,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Pairing each direction with its negation lets you reuse work through an exact ReLU
           identity. How much it is worth is genuinely disputed in the published record.</p>
         <span class="num">119&times; better, 1.10&times; better, and worse: three published results</span>
-        <span class="who">ely2sh 18176, omer_kiraz 18181, bin_yong_bong 18184</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, omer_kiraz <a class="xlink" href="https://discourse.aicrowd.com/t/18181" target="_blank" rel="noopener">18181</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a></span>
       </div>
 
       <div class="card reveal d3" data-cat="geometry" data-modal="f-whiten">
@@ -1325,7 +1330,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Force the drawn batch's own sample covariance to be exactly the identity before using it,
           which removes the error you can see rather than the error you expect.</p>
         <span class="num">2.06&times; to 2.34&times; alone, 2.86&times; with antipodal pairing</span>
-        <span class="who">trim_qewas 18182, amalgonim 18151</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a></span>
       </div>
 
       <div class="card reveal" data-cat="variance" data-modal="f-midcv">
@@ -1335,7 +1340,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           where the analytic model is still accurate, and use the discrepancy to correct the final
           answer.</p>
         <span class="num">17.6% final-layer reduction, paired bootstrap; 2.39&times; in another build</span>
-        <span class="who">Team Puffi 18175, hyojun_kwon 18154, mliston 18170</span>
+        <span class="who">Team Puffi <a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a>, <a class="xlink" href="https://www.aicrowd.com/participants/mliston" target="_blank" rel="noopener">mliston</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18170" target="_blank" rel="noopener">18170</a></span>
       </div>
 
       <div class="card reveal d1" data-cat="variance" data-modal="f-cvdesign">
@@ -1345,7 +1350,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           point set, the thing left to cancel is the quadrature rule's bias, which is a different
           object from Monte Carlo variance.</p>
         <span class="num">Stated as the precondition for the same author's self-reported 20% gain</span>
-        <span class="who">Cipo 18152</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/Cipo" target="_blank" rel="noopener">Cipo</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18152" target="_blank" rel="noopener">18152</a></span>
       </div>
 
       <div class="card reveal d2" data-cat="analytic" data-modal="f-mehler">
@@ -1355,7 +1360,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           classical series expansion. Using the series instead of numerical quadrature changes the
           cost by three orders of magnitude.</p>
         <span class="num">30.6% of budget becomes 0.012% of budget</span>
-        <span class="who">amalgonim 18151</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a></span>
       </div>
 
       <div class="card reveal d3" data-cat="analytic" data-modal="f-maxent">
@@ -1365,7 +1370,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           maximum-entropy one consistent with them rather than as a truncated series. Series
           expansions can go negative; this cannot.</p>
         <span class="num">bias&sup2; = 5.077e-09 at order 6</span>
-        <span class="who">jamesrahenry 18157, bin_yong_bong 18184</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/jamesrahenry" target="_blank" rel="noopener">jamesrahenry</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18157" target="_blank" rel="noopener">18157</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a></span>
       </div>
 
       <div class="card reveal" data-cat="analytic" data-modal="f-dof">
@@ -1374,7 +1379,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Counting the degrees of freedom a sample-based estimator can possibly exploit gives an
           upper bound on every sampler anyone could build, not just the ones that exist.</p>
         <span class="num">Ceiling 1.915&times;; a deployed estimator already at 1.731&times;</span>
-        <span class="who">amalgonim 18151</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a></span>
       </div>
 
       <div class="card reveal d1" data-cat="analytic" data-modal="f-saturation">
@@ -1383,7 +1388,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Error is not spread evenly across the 256 output neurons. It concentrates almost entirely
           in the ones sitting near the ReLU kink, where the answer is most sensitive.</p>
         <span class="num">Quantiles of |c| over 4 networks and 1024 neurons</span>
-        <span class="who">amalgonim 18151</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a></span>
       </div>
 
       <div class="card reveal d2" data-cat="cost" data-modal="f-spelling">
@@ -1393,7 +1398,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           mathematical work. An independent audit of the evaluation-version cost model found no
           arbitrage at all.</p>
         <span class="num">Ratio 1.000 across all routes; fp16 = fp32; fp64 = 2&times;</span>
-        <span class="who">amalgonim 18151, qi_zhang5 18179, bin_yong_bong 18184</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, <a class="xlink" href="https://www.aicrowd.com/participants/qi_zhang5" target="_blank" rel="noopener">qi_zhang5</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18179" target="_blank" rel="noopener">18179</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a></span>
       </div>
 
       <div class="card reveal d3" data-cat="cost" data-modal="f-gram">
@@ -1402,7 +1407,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>A contraction of an operand with itself produces a symmetric result, and the meter prices
           it at half. The saving is exact and bit-identical, not an approximation.</p>
         <span class="num">0.502&times;, maximum difference 0</span>
-        <span class="who">bin_yong_bong 18184, hyojun_kwon 18154</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a></span>
       </div>
 
       <div class="card reveal" data-cat="cost" data-modal="f-percall">
@@ -1412,7 +1417,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           library, not by how much arithmetic each call performs. This inverts the usual advice
           about batching.</p>
         <span class="num">3.3 &micro;s per call at tiny sizes, 13.2 &micro;s at 54 MB</span>
-        <span class="who">SKIBIDI_TOILET 18166, trim_qewas 18182, amalgonim 18151</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/SKIBIDI_TOILET" target="_blank" rel="noopener">SKIBIDI_TOILET</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18166" target="_blank" rel="noopener">18166</a>, <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a></span>
       </div>
 
       <div class="card reveal d1" data-cat="cost" data-modal="f-strassen">
@@ -1421,7 +1426,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Fast matrix multiplication saves metered operations, but the saving converges. Depth five
           and depth six give exactly the same number, and going deeper costs wall time.</p>
         <span class="num">1.000 / 1.138 / 1.288 / 1.444 / 1.588 / 1.686 / 1.686</span>
-        <span class="who">bin_yong_bong 18184, konstantin_baltsat 18159</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, <a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18159" target="_blank" rel="noopener">18159</a></span>
       </div>
 
       <div class="card reveal d2" data-cat="cost" data-modal="f-dtype">
@@ -1430,7 +1435,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>The statistics helpers silently return float64 for any input, and float64 bills at twice
           the rate. Several participants lost a chunk of their budget to this before finding it.</p>
         <span class="num">Worth only 0.7% of the bill until every promoted vector was found</span>
-        <span class="who">nkosi_ndwandwe 18127, hyojun_kwon 18154</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/nkosi_ndwandwe" target="_blank" rel="noopener">nkosi_ndwandwe</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18127" target="_blank" rel="noopener">18127</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a></span>
       </div>
 
       <div class="card reveal d3" data-cat="cost" data-modal="f-cliff">
@@ -1440,7 +1445,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           check was not wired on the evaluator until August, and older submissions were re-graded
           retroactively.</p>
         <span class="num">One submission went from ~4e-8 per network to an aggregate 0.682</span>
-        <span class="who">pranay212 and qi_zhang5, 18129</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/pranay212" target="_blank" rel="noopener">pranay212</a> and <a class="xlink" href="https://www.aicrowd.com/participants/qi_zhang5" target="_blank" rel="noopener">qi_zhang5</a>, <a class="xlink" href="https://discourse.aicrowd.com/t/18129" target="_blank" rel="noopener">18129</a></span>
       </div>
 
       <div class="card reveal" data-cat="method" data-modal="f-oracle">
@@ -1450,7 +1455,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           measure. The result upper-bounds every idea whose effect flows through that quantity,
           including ideas nobody has had yet.</p>
         <span class="num">54 families closed, about 15 minutes each</span>
-        <span class="who">trim_qewas 18182</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a></span>
       </div>
 
       <div class="card reveal d1" data-cat="method" data-modal="f-floor">
@@ -1459,7 +1464,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Ground truth was produced by Monte Carlo at a billion samples, so it has its own error
           floor. Below that floor you are measuring the target's noise, not your own accuracy.</p>
         <span class="num">Floor 4.949e-11 on the mini split, 5.219e-11 on the full</span>
-        <span class="who">trim_qewas 18182</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a></span>
       </div>
 
       <div class="card reveal d2" data-cat="method" data-modal="f-rotation">
@@ -1469,7 +1474,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           a factor of several. Any ablation smaller than that variation is unmeasurable without
           crossed replicates.</p>
         <span class="num">One network varied 2.9&times; to 5.4&times; across ten orientations</span>
-        <span class="who">ely2sh 18176, violeta 18180</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, <a class="xlink" href="https://www.aicrowd.com/participants/violeta" target="_blank" rel="noopener">violeta</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18180" target="_blank" rel="noopener">18180</a></span>
       </div>
 
       <div class="card reveal d3" data-cat="negative" data-modal="f-selector">
@@ -1478,7 +1483,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>Choosing a different configuration for each network sounds obviously good. The selector
           itself has to be computed, and the computation costs more than the choice saves.</p>
         <span class="num">Selector cost 25.202B FLOPs, 9.3% of the budget</span>
-        <span class="who">konstantin_baltsat 18159</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18159" target="_blank" rel="noopener">18159</a></span>
       </div>
 
       <div class="card reveal" data-cat="negative" data-modal="f-bitpack">
@@ -1488,7 +1493,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           operations at all, and even removing 100 percent of the packable work would have saved
           nothing.</p>
         <span class="num">Zero FLOPs saved</span>
-        <span class="who">konstantin_baltsat 18149</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18149" target="_blank" rel="noopener">18149</a></span>
       </div>
 
       <div class="card reveal d1" data-cat="negative" data-modal="f-anchor">
@@ -1497,7 +1502,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         <p>A hardcoded mathematical constant entered with a small error. Because the constant anchors
           a moment used at every layer, the error compounded through the depth of the network.</p>
         <span class="num">0.22% constant error measured 24&times; worse end to end</span>
-        <span class="who">bin_yong_bong 18184, SKIBIDI_TOILET 18166</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, <a class="xlink" href="https://www.aicrowd.com/participants/SKIBIDI_TOILET" target="_blank" rel="noopener">SKIBIDI_TOILET</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18166" target="_blank" rel="noopener">18166</a></span>
       </div>
 
 
@@ -1508,7 +1513,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           design. Someone tested that assumption directly by completing the design, and the mechanism
           turned out to be something else.</p>
         <span class="num">Completing it buys 1.0050&times;, not "a lot"</span>
-        <span class="who">ely2sh 18176</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a></span>
       </div>
 
       <div class="card reveal d3" data-cat="negative" data-modal="f-pruningcliff">
@@ -1518,7 +1523,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           pilot that misclassifies live ones. Pruning a rarely-firing unit removes almost no signal
           and a full unit of noise.</p>
         <span class="num">Pilot 1.315&times;, exact oracle mask 1.205&times;</span>
-        <span class="who">ely2sh 18176, amalgonim 18151</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a></span>
       </div>
 
       <div class="card reveal" data-cat="negative" data-modal="f-mysovskikh">
@@ -1528,7 +1533,7 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
           this dimension exactness algebraically forces negative weights, which destroys the
           effective sample size.</p>
         <span class="num">2.6048e-05 against 3.6955e-07, t = 15.92</span>
-        <span class="who">bin_yong_bong 18184</span>
+        <span class="who"><a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a></span>
       </div>
 
     </div>
@@ -1702,23 +1707,28 @@ adaptive N     TOPUP_MAX = 0     (machinery present, measured score-negative, sh
         page cites each one on the card it appears on. Named here as well, with the topic each
         contributed:</p>
       <p class="mono" style="font-size:13.5px;line-height:1.85">
-        amalgonim (18151) &nbsp;&middot;&nbsp; andrei_bulzan (18183) &nbsp;&middot;&nbsp;
-        bgrubbs1984 (18169) &nbsp;&middot;&nbsp; bin_yong_bong (18184) &nbsp;&middot;&nbsp;
-        Cipo (18152) &nbsp;&middot;&nbsp; ely2sh (18176) &nbsp;&middot;&nbsp;
-        hyojun_kwon (18154) &nbsp;&middot;&nbsp; jamesrahenry (18157) &nbsp;&middot;&nbsp;
-        kaileh57 (18171) &nbsp;&middot;&nbsp; keenanpepper (18177) &nbsp;&middot;&nbsp;
-        konstantin_baltsat (18149, 18159) &nbsp;&middot;&nbsp; mliston (18170) &nbsp;&middot;&nbsp;
-        nkosi_ndwandwe (18127) &nbsp;&middot;&nbsp; omer_kiraz (18181) &nbsp;&middot;&nbsp;
-        pranay212 (18129, 18173) &nbsp;&middot;&nbsp; qi_zhang5 (18129, 18179) &nbsp;&middot;&nbsp;
-        SKIBIDI_TOILET (18166) &nbsp;&middot;&nbsp; Team Puffi (18175) &nbsp;&middot;&nbsp;
-        trim_qewas (18182) &nbsp;&middot;&nbsp; violeta (18180)
+        <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/andrei_bulzan" target="_blank" rel="noopener">andrei_bulzan</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18183" target="_blank" rel="noopener">18183</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/bgrubbs1984" target="_blank" rel="noopener">bgrubbs1984</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18169" target="_blank" rel="noopener">18169</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/Cipo" target="_blank" rel="noopener">Cipo</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18152" target="_blank" rel="noopener">18152</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/jamesrahenry" target="_blank" rel="noopener">jamesrahenry</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18157" target="_blank" rel="noopener">18157</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/kaileh57" target="_blank" rel="noopener">kaileh57</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18171" target="_blank" rel="noopener">18171</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/keenanpepper" target="_blank" rel="noopener">keenanpepper</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18177" target="_blank" rel="noopener">18177</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18149" target="_blank" rel="noopener">18149</a>, <a class="xlink" href="https://discourse.aicrowd.com/t/18159" target="_blank" rel="noopener">18159</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/mliston" target="_blank" rel="noopener">mliston</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18170" target="_blank" rel="noopener">18170</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/nkosi_ndwandwe" target="_blank" rel="noopener">nkosi_ndwandwe</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18127" target="_blank" rel="noopener">18127</a>) &nbsp;&middot;&nbsp; omer_kiraz (<a class="xlink" href="https://discourse.aicrowd.com/t/18181" target="_blank" rel="noopener">18181</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/pranay212" target="_blank" rel="noopener">pranay212</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18129" target="_blank" rel="noopener">18129</a>, <a class="xlink" href="https://discourse.aicrowd.com/t/18173" target="_blank" rel="noopener">18173</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/qi_zhang5" target="_blank" rel="noopener">qi_zhang5</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18129" target="_blank" rel="noopener">18129</a>, <a class="xlink" href="https://discourse.aicrowd.com/t/18179" target="_blank" rel="noopener">18179</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/SKIBIDI_TOILET" target="_blank" rel="noopener">SKIBIDI_TOILET</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18166" target="_blank" rel="noopener">18166</a>) &nbsp;&middot;&nbsp; Team Puffi (<a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a>) &nbsp;&middot;&nbsp;
+        <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>) &nbsp;&middot;&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/violeta" target="_blank" rel="noopener">violeta</a> (<a class="xlink" href="https://discourse.aicrowd.com/t/18180" target="_blank" rel="noopener">18180</a>)
       </p>
-      <p>Thanks also to the organizers for answering rules questions in public, which is why several
-        of the cost model facts on this page can be stated at all.</p>
+      <p>Names above link to AIcrowd profiles, numbers in brackets to the forum topic, and each
+        write-up's detail view links the graded submission it is bound to. Two entries are text
+        rather than links: Team Puffi is a team rather than a single profile, and omer_kiraz has no
+        reachable profile page, though their topic and submission are linked as normal.</p>
+      <p>Thanks to the organizers for answering rules questions in public, which is why several of
+        the cost model facts on this page can be stated at all, and to S.P. Mohanty for suggesting
+        that attributions link back to the profiles and submissions they refer to.</p>
 
       <h3>Notes on this page</h3>
       <p>Written by Maksim Silchenko, team thylinao, competing solo. My Phase 1 technical write-up
-        was submitted to the organizers as a PDF bound to submission 326694, with a companion post
+        was submitted to the organizers as a PDF bound to submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326694" target="_blank" rel="noopener">326694</a>, with a companion post
         on the challenge forum. This page is an expanded, public version of the same material,
         together with a guide to what other participants published after Phase 1 closed.</p>
       <p>Numbers describing my own estimator come from my measurement log and from grader records,
@@ -2111,7 +2121,7 @@ error, against a measured leading-mode share of 0.435, meaning it must remove ro
 that one mode. That is a demanding target and it is stated up front so nobody spends a week finding
 out the hard way.</p></div>
 
-<div id="p2-gram"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; bin_yong_bong 18184, hyojun_kwon 18154</p>
+<div id="p2-gram"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326024" target="_blank" rel="noopener">326024</a></p>
 <h3>Restructuring the expensive step into a self-contraction</h3>
 <p>The meter prices a contraction of an array with itself at half, because the symmetric result has
 only half as many independent entries. Reported at width 256 with 36,356 rows:
@@ -2133,7 +2143,7 @@ written. It only pays if some genuinely expensive step can be reformulated as a 
 candidate is anything that computes a covariance or a pairwise similarity across samples. Whether
 that exists inside my build is exactly the open question.</p></div>
 
-<div id="p2-rank40"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; andrei_bulzan 18183</p>
+<div id="p2-rank40"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/andrei_bulzan" target="_blank" rel="noopener">andrei_bulzan</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18183" target="_blank" rel="noopener">18183</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327801" target="_blank" rel="noopener">327801</a></p>
 <h3>Exact fast multiplication past Strassen</h3>
 <p>Strassen replaces eight sub-products with seven. There are better exact schemes for rectangular
 shapes, found by search rather than by hand. The one reported here is a Tichavsky rank-40
@@ -2157,7 +2167,7 @@ elementwise work and, more importantly, calls. The measured ceiling for Strassen
 times, and going deeper reverses on the meter. A rank-40 scheme has to clear both the extra
 arithmetic and the extra call tax before it pays.</p></div>
 
-<div id="p2-calls"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; SKIBIDI_TOILET 18166, trim_qewas 18182</p>
+<div id="p2-calls"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/SKIBIDI_TOILET" target="_blank" rel="noopener">SKIBIDI_TOILET</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18166" target="_blank" rel="noopener">18166</a>, <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325170" target="_blank" rel="noopener">325170</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326725" target="_blank" rel="noopener">326725</a></p>
 <h3>Paying the call tax instead of the arithmetic tax</h3>
 <p>The residual charge is dominated by how many times you call into the metered library, not by how
 much each call does. Reported figures: about 3.3 microseconds per instrumented call for tiny
@@ -2180,7 +2190,7 @@ with the least headroom on the list. It is here because the measurements say the
 count rather than work, which inverts the usual advice, and because a build that adds any of the
 other levers will add calls unless it is careful.</p></div>
 
-<div id="p2-maxent"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; jamesrahenry 18157, bin_yong_bong 18184</p>
+<div id="p2-maxent"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/jamesrahenry" target="_blank" rel="noopener">jamesrahenry</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18157" target="_blank" rel="noopener">18157</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <h3>Reconstructing the terminal distribution from its moments</h3>
 <p>Given exact moments at the final layer, the classical move is an Edgeworth or Gram-Charlier
 expansion, which writes the density as a Gaussian times a polynomial. Those can go negative in the
@@ -2210,7 +2220,7 @@ percent of the chain error, so a perfect readout cannot rescue a sampler. It is 
 cheap, because the fitting happens offline, and because any future method that does move the
 propagation error will then need a readout that does not waste the gain.</p></div>
 
-<div id="p2-prune"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; ely2sh 18176, amalgonim 18151</p>
+<div id="p2-prune"><p class="kicker">Phase 2 lever &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327749" target="_blank" rel="noopener">327749</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <h3>Pruning harder than correctness would suggest</h3>
 <p>My build prunes a neuron only when the pilot says it is dead. The measurements say that is the
 wrong operating point: at matched compute, a pilot that misclassifies some live neurons as dead
@@ -2259,7 +2269,7 @@ the cost-model defect described in section 7 is removed. Its 98,304 rows are not
 though: they are set by the 50 MiB cap on the shipped asset and by the wall-clock guard.</p>
 </div>
 
-<div id="f-radial"><p class="kicker">Sampling geometry &nbsp;/&nbsp; bgrubbs1984 18169, kaileh57 18171, pranay212 18173, Team Puffi 18175</p>
+<div id="f-radial"><p class="kicker">Sampling geometry &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bgrubbs1984" target="_blank" rel="noopener">bgrubbs1984</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18169" target="_blank" rel="noopener">18169</a>, <a class="xlink" href="https://www.aicrowd.com/participants/kaileh57" target="_blank" rel="noopener">kaileh57</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18171" target="_blank" rel="noopener">18171</a>, <a class="xlink" href="https://www.aicrowd.com/participants/pranay212" target="_blank" rel="noopener">pranay212</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18173" target="_blank" rel="noopener">18173</a>, Team Puffi <a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326948" target="_blank" rel="noopener">326948</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327786" target="_blank" rel="noopener">327786</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327651" target="_blank" rel="noopener">327651</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327725" target="_blank" rel="noopener">327725</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="radial" style="aspect-ratio:16/7"></canvas>
 <figcaption>A Gaussian input carries a length and a direction. Because the network has no biases, the length factors out of the expectation exactly, so only the direction has to be sampled.</figcaption>
@@ -2277,7 +2287,7 @@ removed one entire source of variance at no cost and introduced no error.</p>
 also the precondition for using spherical designs, because a spherical design is a rule for
 integrating over directions, and it only helps if the radius has already been handled exactly.</p></div>
 
-<div id="f-kerdock"><p class="kicker">Sampling geometry &nbsp;/&nbsp; andrei_bulzan 18183, kaileh57 18171, keenanpepper 18177, Team Puffi 18175</p>
+<div id="f-kerdock"><p class="kicker">Sampling geometry &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/andrei_bulzan" target="_blank" rel="noopener">andrei_bulzan</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18183" target="_blank" rel="noopener">18183</a>, <a class="xlink" href="https://www.aicrowd.com/participants/kaileh57" target="_blank" rel="noopener">kaileh57</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18171" target="_blank" rel="noopener">18171</a>, <a class="xlink" href="https://www.aicrowd.com/participants/keenanpepper" target="_blank" rel="noopener">keenanpepper</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18177" target="_blank" rel="noopener">18177</a>, Team Puffi <a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327801" target="_blank" rel="noopener">327801</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327786" target="_blank" rel="noopener">327786</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327838" target="_blank" rel="noopener">327838</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327725" target="_blank" rel="noopener">327725</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="design" style="aspect-ratio:16/7"></canvas>
 <figcaption>Twenty-four directions placed at random against twenty-four placed by design, in two dimensions for legibility. Same count, and the widest uncovered gap is very different.</figcaption>
@@ -2305,7 +2315,7 @@ participant measured Sobol worse than plain independent draws at equal row count
 Sobol stream and reported it beating shifted replicates, and a third closed lattice methods entirely.
 See the card on what the carrier is actually doing, which complicates all of this.</p></div>
 
-<div id="f-antipodal"><p class="kicker">Sampling geometry &nbsp;/&nbsp; ely2sh 18176, omer_kiraz 18181, bin_yong_bong 18184</p>
+<div id="f-antipodal"><p class="kicker">Sampling geometry &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, omer_kiraz <a class="xlink" href="https://discourse.aicrowd.com/t/18181" target="_blank" rel="noopener">18181</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327749" target="_blank" rel="noopener">327749</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327792" target="_blank" rel="noopener">327792</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <h3>Antipodal pairing, and a genuine disagreement</h3>
 <p>If you evaluate a direction and also its exact negation, the ReLU identity
 <span class="mono">ReLU(-y) = ReLU(y) - y</span> lets you obtain the second from the first almost for
@@ -2330,7 +2340,7 @@ percent of the variance.</li>
 entirely on what point set you are pairing within, so these three results may all be correct about
 different constructions. Nobody has run the crossed experiment that would settle it.</p></div>
 
-<div id="f-whiten"><p class="kicker">Sampling geometry &nbsp;/&nbsp; trim_qewas 18182, amalgonim 18151</p>
+<div id="f-whiten"><p class="kicker">Sampling geometry &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326725" target="_blank" rel="noopener">326725</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="whiten" style="aspect-ratio:16/7"></canvas>
 <figcaption>The drawn batch has a sample covariance that is not quite the identity. Whitening applies the linear map that forces it to be exactly the identity, which is what the ellipse becoming a circle shows.</figcaption>
@@ -2363,7 +2373,7 @@ eight times the sample count.</p>
 quasi-Monte Carlo apparatus my build is organised around was the wrong axis to spend on. This is the
 single thing on this page I most regret not testing.</p></div>
 
-<div id="f-midcv"><p class="kicker">Variance reduction &nbsp;/&nbsp; Team Puffi 18175, hyojun_kwon 18154, mliston 18170</p>
+<div id="f-midcv"><p class="kicker">Variance reduction &nbsp;/&nbsp; Team Puffi <a class="xlink" href="https://discourse.aicrowd.com/t/18175" target="_blank" rel="noopener">18175</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a>, <a class="xlink" href="https://www.aicrowd.com/participants/mliston" target="_blank" rel="noopener">mliston</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18170" target="_blank" rel="noopener">18170</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327725" target="_blank" rel="noopener">327725</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326024" target="_blank" rel="noopener">326024</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327723" target="_blank" rel="noopener">327723</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="midcv" style="aspect-ratio:16/7"></canvas>
 <figcaption>A cheap analytic model tracks the sampler closely in the early layers and drifts away later. Measuring the gap where the model is still trustworthy gives a correction for the final layer.</figcaption>
@@ -2384,7 +2394,7 @@ split. A third deployed a layer-22 control with a learned centre.</p>
 introduces contamination, and one author measured a correlation of 0.885 between the corrector's
 output and the batch noise it was supposed to be independent of.</p></div>
 
-<div id="f-cvdesign"><p class="kicker">Variance reduction &nbsp;/&nbsp; Cipo 18152</p>
+<div id="f-cvdesign"><p class="kicker">Variance reduction &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/Cipo" target="_blank" rel="noopener">Cipo</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18152" target="_blank" rel="noopener">18152</a></p>
 <h3>Cancel the rule's error, not the sampler's variance</h3>
 <p>This is a design principle rather than a technique, and it explains a class of failures including
 one of my own.</p>
@@ -2401,7 +2411,7 @@ scrambled net, at a variance ratio of <span class="mono">1.0052</span> against a
 <p>The corollary is constructive. If you use a structured point set, your control has to be designed
 against the structure of that specific rule's residual error, not against the integrand.</p></div>
 
-<div id="f-mehler"><p class="kicker">Analytic &nbsp;/&nbsp; amalgonim 18151</p>
+<div id="f-mehler"><p class="kicker">Analytic &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <h3>Hermite series instead of quadrature</h3>
 <p>An estimator that propagates a full covariance needs, at every layer, the expectation of
 <span class="mono">ReLU(a)&middot;ReLU(b)</span> for a pair of correlated Gaussians. Computing that by
@@ -2418,7 +2428,7 @@ times cheaper for the same quantity.</p>
 <p>This is a good example of a technique that is not novel mathematics at all, and is still worth a
 great deal, because the metric charges for arithmetic and the series does less of it.</p></div>
 
-<div id="f-maxent"><p class="kicker">Analytic &nbsp;/&nbsp; jamesrahenry 18157, bin_yong_bong 18184</p>
+<div id="f-maxent"><p class="kicker">Analytic &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/jamesrahenry" target="_blank" rel="noopener">jamesrahenry</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18157" target="_blank" rel="noopener">18157</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <h3>Maximum-entropy readout</h3>
 <p>Suppose you know the first six moments of the final layer's pre-activation distribution exactly,
 and you need the expected ReLU. The classical move is an Edgeworth or Gram-Charlier expansion, which
@@ -2437,7 +2447,7 @@ Both beat the series expansions on the same inputs.</p>
 percent of the total error. This technique is excellent and its ceiling is low, and both things are
 true at once.</p></div>
 
-<div id="f-dof"><p class="kicker">Analytic &nbsp;/&nbsp; amalgonim 18151</p>
+<div id="f-dof"><p class="kicker">Analytic &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <h3>A ceiling on the entire sampling family</h3>
 <p>Rather than testing samplers one at a time, count the degrees of freedom any sample-based estimator
 could possibly exploit at a given cost, and turn that count into a bound. The result applies to every
@@ -2452,7 +2462,7 @@ than the bound would permit. Either the bound has an assumption that the leader 
 leader is doing something that is not sampling. I do not know which, and I would treat this as an open
 question rather than a settled result.</p></div>
 
-<div id="f-saturation"><p class="kicker">Analytic &nbsp;/&nbsp; amalgonim 18151</p>
+<div id="f-saturation"><p class="kicker">Analytic &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <h3>Sixty-six neurons carry the problem</h3>
 <p>The error is not spread evenly across the 256 output neurons. Each neuron has a standardised
 distance from the ReLU kink, the quantity called alpha in the closure recurrence. A neuron sitting far
@@ -2468,7 +2478,7 @@ elsewhere, is spending its budget correctly. Several of the pruning and certific
 this competition, including two in my own build, are exactly that idea applied to cost rather than to
 accuracy.</p></div>
 
-<div id="f-spelling"><p class="kicker">Cost model &nbsp;/&nbsp; amalgonim 18151, qi_zhang5 18179, bin_yong_bong 18184</p>
+<div id="f-spelling"><p class="kicker">Cost model &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, <a class="xlink" href="https://www.aicrowd.com/participants/qi_zhang5" target="_blank" rel="noopener">qi_zhang5</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18179" target="_blank" rel="noopener">18179</a>, <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326954" target="_blank" rel="noopener">326954</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <h3>Every spelling of a contraction bills the same</h3>
 <p>An obvious thing to try, once you know the score is accuracy times billed cost, is to look for a
 cheaper way to spell the same matrix multiplication. Numerical libraries expose many entry points that
@@ -2485,7 +2495,7 @@ technique.</p>
 <p>The genuine savings in this competition come from doing less arithmetic, not from spelling the same
 arithmetic differently.</p></div>
 
-<div id="f-gram"><p class="kicker">Cost model &nbsp;/&nbsp; bin_yong_bong 18184, hyojun_kwon 18154</p>
+<div id="f-gram"><p class="kicker">Cost model &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326024" target="_blank" rel="noopener">326024</a></p>
 <h3>The symmetric Gram discount</h3>
 <p>When you contract a matrix with itself to form a Gram matrix, the result is symmetric, so only
 about half of the output entries are independent. The meter recognises this and prices it accordingly.</p>
@@ -2501,7 +2511,7 @@ identical product bills in full. So the lesson is narrow: if the expensive step 
 into a genuine contraction of an array with itself, the meter will halve it. One participant bundled this with a half-sample
 coefficient fit and reported cutting billed cost meaningfully at exactly zero statistical cost.</p></div>
 
-<div id="f-percall"><p class="kicker">Cost model &nbsp;/&nbsp; SKIBIDI_TOILET 18166, trim_qewas 18182, amalgonim 18151</p>
+<div id="f-percall"><p class="kicker">Cost model &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/SKIBIDI_TOILET" target="_blank" rel="noopener">SKIBIDI_TOILET</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18166" target="_blank" rel="noopener">18166</a>, <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325170" target="_blank" rel="noopener">325170</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326725" target="_blank" rel="noopener">326725</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <h3>Wall time is a per-call tax</h3>
 <p>The score charges you for residual wall-clock time at a hundred billion FLOPs per second, so it
 looks like you should minimise time spent outside the metered library. The natural conclusion is to
@@ -2517,7 +2527,7 @@ those conflict. Supply destination arrays so buffers are reused rather than allo
 self-check helper whose cost grows with process history becomes unaffordable by the end of a long
 grading run.</p></div>
 
-<div id="f-strassen"><p class="kicker">Cost model &nbsp;/&nbsp; bin_yong_bong 18184</p>
+<div id="f-strassen"><p class="kicker">Cost model &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="strassen" style="aspect-ratio:16/7"></canvas>
 <figcaption>Cumulative metered saving by recursion depth across a 32-layer chain. The bars stop growing at depth five, and depth six is identical.</figcaption>
@@ -2535,7 +2545,7 @@ calls cost wall time that is charged back.</p>
 recursion regressing metered compute by 2.383 percent in all three paired repeats, with predictions
 bitwise equal. Three independent measurements, one conclusion.</p></div>
 
-<div id="f-dtype"><p class="kicker">Cost model &nbsp;/&nbsp; nkosi_ndwandwe 18127, hyojun_kwon 18154</p>
+<div id="f-dtype"><p class="kicker">Cost model &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/nkosi_ndwandwe" target="_blank" rel="noopener">nkosi_ndwandwe</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18127" target="_blank" rel="noopener">18127</a>, <a class="xlink" href="https://www.aicrowd.com/participants/hyojun_kwon" target="_blank" rel="noopener">hyojun_kwon</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18154" target="_blank" rel="noopener">18154</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326024" target="_blank" rel="noopener">326024</a></p>
 <h3>The float64 promotion trap</h3>
 <p>Float64 bills at twice the rate of float32, and float16 gets no discount over float32, so float32
 is the correct working precision throughout. That is easy to say and hard to enforce, because a single
@@ -2550,7 +2560,7 @@ path made a float32 assumption fail in a way that moved their proxy score from
 regression, with a two-operation workaround. If you are optimising precision, check the actual dtype
 of every intermediate rather than trusting the declared one.</p></div>
 
-<div id="f-cliff"><p class="kicker">Cost model &nbsp;/&nbsp; pranay212 and qi_zhang5, 18129</p>
+<div id="f-cliff"><p class="kicker">Cost model &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/pranay212" target="_blank" rel="noopener">pranay212</a> and <a class="xlink" href="https://www.aicrowd.com/participants/qi_zhang5" target="_blank" rel="noopener">qi_zhang5</a>, <a class="xlink" href="https://discourse.aicrowd.com/t/18129" target="_blank" rel="noopener">18129</a></p>
 <h3>The budget cliff, enforced late</h3>
 <p>Exceeding the compute budget is not a graded penalty. When effective compute exceeds the budget,
 the grader zeroes your predictions for that network, which turns a small overspend into a total loss
@@ -2565,7 +2575,7 @@ the failure mode is discontinuous. My own honest twin sits about 0.3 seconds of 
 boundary on its worst network, which is closer than I would choose again. Second, treat any
 leaderboard snapshot from before the patch as having been produced under different rules.</p></div>
 
-<div id="f-oracle"><p class="kicker">Measurement &nbsp;/&nbsp; trim_qewas 18182</p>
+<div id="f-oracle"><p class="kicker">Measurement &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326725" target="_blank" rel="noopener">326725</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="oracle" style="aspect-ratio:16/7"></canvas>
 <figcaption>The protocol. Replace one stage with its true value, leave the rest running, and read the residual. The numbers shown are the ones measured on this problem.</figcaption>
@@ -2585,7 +2595,7 @@ estimators this way without building any of them.</p>
 campaign, the finding in section 6 that propagation rather than readout carries nearly all the
 error. It is the single thing I would tell a newcomer to build first.</p></div>
 
-<div id="f-floor"><p class="kicker">Measurement &nbsp;/&nbsp; trim_qewas 18182, konstantin_baltsat 18149</p>
+<div id="f-floor"><p class="kicker">Measurement &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/trim_qewas" target="_blank" rel="noopener">trim_qewas</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18182" target="_blank" rel="noopener">18182</a>, <a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18149" target="_blank" rel="noopener">18149</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326725" target="_blank" rel="noopener">326725</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326680" target="_blank" rel="noopener">326680</a></p>
 <h3>The answer key is itself noisy</h3>
 <p>The targets you are scored against were produced by Monte Carlo at a billion samples. That is a lot
 of samples, but it is not infinity, so the answer key carries its own error.</p>
@@ -2599,7 +2609,7 @@ two truth replicates they had baked locally disagreed with each other by more th
 were trying to measure. That is about their own reference rather than the competition's answer key,
 and it makes the same point: check the label noise before trusting a small win.</p></div>
 
-<div id="f-rotation"><p class="kicker">Measurement &nbsp;/&nbsp; ely2sh 18176, violeta 18180</p>
+<div id="f-rotation"><p class="kicker">Measurement &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, <a class="xlink" href="https://www.aicrowd.com/participants/violeta" target="_blank" rel="noopener">violeta</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18180" target="_blank" rel="noopener">18180</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327749" target="_blank" rel="noopener">327749</a></p>
 <h3>Rotation noise swamps small effects</h3>
 <p>Because the input distribution is spherically symmetric, you can rotate the whole problem and it is
 the same problem. That gives you a free source of replicates, and it also reveals how noisy a single
@@ -2614,7 +2624,7 @@ expensive but is the only thing that makes a small effect legible. A related res
 participant: a three-replicate bias and variance decomposition inverted at least one of their own
 previously recorded gate verdicts, turning a recorded failure into a pass.</p></div>
 
-<div id="f-selector"><p class="kicker">Negative result &nbsp;/&nbsp; konstantin_baltsat 18159</p>
+<div id="f-selector"><p class="kicker">Negative result &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18159" target="_blank" rel="noopener">18159</a></p>
 <h3>Per-network adaptive selectors do not pay</h3>
 <p>Networks vary in difficulty, so choosing a different configuration for each one sounds obviously
 correct. The problem is that the choosing is itself computation, and it is billed.</p>
@@ -2628,7 +2638,7 @@ Every network in my submission runs the same sample count.</p>
 <p>The general lesson is that under a metric which charges for every operation, meta-computation has
 to clear a surprisingly high bar. Decide statically where you can.</p></div>
 
-<div id="f-bitpack"><p class="kicker">Negative result &nbsp;/&nbsp; konstantin_baltsat 18149</p>
+<div id="f-bitpack"><p class="kicker">Negative result &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/konstantin_baltsat" target="_blank" rel="noopener">konstantin_baltsat</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18149" target="_blank" rel="noopener">18149</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/326680" target="_blank" rel="noopener">326680</a></p>
 <h3>Bit-packing saved exactly zero</h3>
 <p>Boolean masks over a large array look wasteful, since each flag occupies a whole element. Packing
 them into bits should reduce the work.</p>
@@ -2643,7 +2653,7 @@ cost was, so removing all of it would have changed nothing.</p>
 optimising for memory or for real hardware time, when the thing being scored is a published price list
 for operations. The two only sometimes point the same way.</p></div>
 
-<div id="f-anchor"><p class="kicker">Negative result &nbsp;/&nbsp; bin_yong_bong 18184</p>
+<div id="f-anchor"><p class="kicker">Negative result &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <h3>A 0.22 percent typo cost 24 times</h3>
 <p>A participant hardcoded a mathematical constant, <span class="mono">sqrt((pi-1)/(2*pi))</span>, and
 typed <span class="mono">0.5825213767497766</span> where the correct value is
@@ -2659,7 +2669,7 @@ figure is that a 0.1 percent coherent error at layer 2 emerges as 0.19 percent a
 <p>The practical rule is to derive constants in code rather than pasting them, and to test any
 hardcoded anchor at full depth rather than on a shallow proxy.</p></div>
 
-<div id="f-wrongreason"><p class="kicker">Negative result &nbsp;/&nbsp; ely2sh 18176</p>
+<div id="f-wrongreason"><p class="kicker">Negative result &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327749" target="_blank" rel="noopener">327749</a></p>
 <h3>The right answer for the wrong reason</h3>
 <p>Most of the field converged on the same 66,048-direction carrier and explained it the same way: it
 is a spherical 5-design, so it integrates every polynomial up to degree five exactly, and the
@@ -2679,7 +2689,7 @@ particular kernel.</p>
 can hold a correct empirical result attached to an incorrect causal story, and the thing that
 separates the two is somebody constructing the experiment where the story makes a prediction.</p></div>
 
-<div id="f-pruningcliff"><p class="kicker">Negative result &nbsp;/&nbsp; ely2sh 18176, amalgonim 18151</p>
+<div id="f-pruningcliff"><p class="kicker">Negative result &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/ely2sh" target="_blank" rel="noopener">ely2sh</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18176" target="_blank" rel="noopener">18176</a>, <a class="xlink" href="https://www.aicrowd.com/participants/amalgonim" target="_blank" rel="noopener">amalgonim</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18151" target="_blank" rel="noopener">18151</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/327749" target="_blank" rel="noopener">327749</a>, <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/324409" target="_blank" rel="noopener">324409</a></p>
 <figure style="margin:22px 0 20px">
 <canvas class="fig" data-mfig="cliff" style="aspect-ratio:16/7"></canvas>
 <figcaption>The measured pruning sweep. Error is flat while the threshold rises to 8, then rises by nearly two orders of magnitude over the next three steps.</figcaption>
@@ -2704,7 +2714,7 @@ nothing to the mean and a full unit's worth of variance, so dropping it is a fav
 the exact mask refuses to make. Correctness and usefulness are different objectives here, and the
 metric rewards the second.</p></div>
 
-<div id="f-mysovskikh"><p class="kicker">Negative result &nbsp;/&nbsp; bin_yong_bong 18184</p>
+<div id="f-mysovskikh"><p class="kicker">Negative result &nbsp;/&nbsp; <a class="xlink" href="https://www.aicrowd.com/participants/bin_yong_bong" target="_blank" rel="noopener">bin_yong_bong</a> <a class="xlink" href="https://discourse.aicrowd.com/t/18184" target="_blank" rel="noopener">18184</a>, submission <a class="xlink" href="https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/325573" target="_blank" rel="noopener">325573</a></p>
 <h3>An exact cubature rule, seventy times worse</h3>
 <p>If exact degree-five integration on the sphere helps, an exact degree-five cubature rule for the
 Gaussian ought to help too. A textbook construction at dimension 256 uses 66,307 nodes, almost exactly

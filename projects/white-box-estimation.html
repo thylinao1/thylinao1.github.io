@@ -845,13 +845,42 @@ for w in mlp.weights:
         <span class="mono">c = -1</span>, gives 0 after one layer, then 0.318 at layer 2, 0.605 at
         layer 4, 0.809 at layer 8, 0.923 at layer 16, and <b>0.972 at layer 31</b>. Measured
         directly, the cosine between <span class="mono">h31(x)</span> and
-        <span class="mono">h31(-x)</span> is 0.982 against that theoretical 0.972.</p>
+        <span class="mono">h31(-x)</span> is 0.982.</p>
+
+      <p class="reveal">That measured number and the theoretical one are not quite the same
+        quantity, which is worth stating because the discrepancy runs the opposite way to how it
+        first reads. The 0.982 is an average of per-pair cosines, while the map predicts a ratio of
+        expectations, <span class="mono">E&lt;h, h'&gt; / E||h||&sup2;</span>. Re-measured on ten
+        networks at 131,072 samples each, the average of cosines has a median of
+        <span class="mono">0.979</span> and the map's own quantity a median of
+        <span class="mono">0.941</span>, against <span class="mono">0.973</span> from the iteration.
+        So the map slightly overpredicts the collapse rather than underpredicting it. The conclusion
+        is unchanged and the correction is small, but the sign of the residual matters if anyone
+        builds on it.</p>
 
       <p class="reveal">Two inputs as different as two inputs can possibly be end up 98 percent
         aligned by the layer that gets scored. Team SOX measured the consequence on this exact
         architecture class: 73 dead neurons, 106 kink neurons, 77 always-on neurons, at an
-        effective rank of <b>2.2</b>. A 256-dimensional activation vector that is effectively living
-        on a two-dimensional object.</p>
+        effective rank of <b>2.2</b>.</p>
+
+      <p class="reveal">That 2.2 is a <b>participation ratio</b>,
+        <span class="mono">(&Sigma;&lambda;)&sup2; / &Sigma;&lambda;&sup2;</span>, and it is worth
+        being careful about what it licenses. A participation ratio is dominated by the largest
+        eigenvalue, which on my own re-measurement carries a median
+        <span class="mono">0.64</span> of the centred variance at the scored layer, and it says
+        very little about how far the rest of the spectrum reaches. Spectra with a participation
+        ratio of 2.4 exist whose 99 percent count is anywhere from single digits to over 200.</p>
+
+      <p class="reveal">On the same ten networks, four defensible summaries of the same layer-32
+        spectrum disagree by more than an order of magnitude: participation ratio
+        <span class="mono">2.4</span>, the entropy-based effective rank of Roy and Vetterli
+        <span class="mono">5.9</span> on the covariance eigenvalues and
+        <span class="mono">64</span> on the data matrix singular values, and stable rank
+        <span class="mono">1.6</span>. Reaching 99 percent of the variance takes a median of
+        <span class="mono">56</span> directions out of 256, and 99.99 percent takes
+        <span class="mono">155</span>. The collapse is real and large. It is not a two-dimensional
+        object, and an estimator sized from the participation ratio would be roughly twenty times
+        under-provisioned.</p>
     </div>
 
     <figure class="reveal d1">

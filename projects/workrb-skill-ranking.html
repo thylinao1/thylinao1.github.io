@@ -1,0 +1,2671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thirteen thousand skills, in order</title>
+<meta name="description" content="How I won the RecSys-HR 2026 WorkRB challenge: ranking the whole ESCO taxonomy by graded relevance with a retrieve-then-rerank cascade, an architecture-diverse cross-encoder ensemble, and a measurement protocol that pre-registered every decision.">
+<meta property="og:title" content="Thirteen thousand skills, in order">
+<meta property="og:description" content="First place in the RecSys-HR 2026 WorkRB challenge. The method, the ablations, the dead ends, and the measurement discipline that decided when to stop.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://thylinao1.github.io/projects/workrb-skill-ranking.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;0,9..144,600;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* A sage-stone ground rather than a cool grey one, deep green-black ink,
+     and an earth palette that runs teal to ochre to rust. */
+  --bg:#f0f2ec; --bg-2:#e6ebe1; --bg-3:#d7ded0;
+  --ink:#16201b; --ink-2:#39443c; --ink-3:#5c665e; --ink-4:#78827a;
+  --rule:rgba(22,32,27,0.11); --rule-strong:rgba(22,32,27,0.26);
+
+  /* the graded-relevance ramp: this page's whole colour logic.
+     ESCO annotations run 0..4, and every figure that shows a ranked list
+     colours its items with these five stops, so "warm" always means
+     "the annotator called this relevant". */
+  --g0:#b4bbb2; --g1:#8fae9f; --g2:#4b8a76; --g3:#c48a35; --g4:#a03f1e;
+
+  --accent:#a03f1e; --accent-deep:#7d2f14; --accent-soft:#dfbaa6; --accent-bright:#c4592c;
+  --core:#1f5f52; --core-soft:#8fb3aa; --halo:#3f8c7d;
+  --calm:#3f7d4a; --calm-deep:#2b5e35; --danger:#9e3418; --warn:#a8791f;
+  --deep:#14231e; --deep-2:#1e332c; --deep-ink:#edf1ec;
+
+  --font-display:"Fraunces","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-soft:cubic-bezier(.33,1,.68,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+  font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ---------- atmosphere: drifting gradient field + grain ---------- */
+#field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.74}
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+#shell{position:relative;z-index:2}
+
+/* ---------- reading rail ---------- */
+#rail{position:fixed;left:0;top:0;height:3px;width:100%;z-index:60;background:transparent}
+#rail i{display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--g2),var(--g3),var(--g4));
+  box-shadow:0 0 14px rgba(160,63,30,.42)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.read{max-width:var(--read);margin-left:auto;margin-right:auto}
+main section{padding:104px 0;position:relative}
+main section + section{border-top:1px solid var(--rule)}
+
+/* ---------- type ---------- */
+h1{font-family:var(--font-display);font-weight:380;font-size:clamp(44px,7.4vw,104px);
+  line-height:1.02;letter-spacing:-.025em;margin:0 0 22px;max-width:15ch}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(30px,3.9vw,46px);
+  line-height:1.13;letter-spacing:-.015em;margin:0 auto 26px;max-width:22ch;text-align:center}
+h3{font-family:var(--font-display);font-weight:460;font-size:24px;line-height:1.28;
+  letter-spacing:-.01em;margin:44px 0 12px}
+h4{font-family:var(--font-display);font-weight:460;font-size:19px;margin:28px 0 8px}
+p{margin:0 0 20px}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 16px;text-align:center}
+.lede{font-size:22px;line-height:1.5;color:var(--ink-2);text-align:center;
+  max-width:720px;margin:0 auto 44px}
+.small{font-size:15px;line-height:1.55;color:var(--ink-3)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+em{font-style:italic}
+a{color:var(--accent-deep);text-decoration:none;border-bottom:1px solid var(--accent-soft);
+  transition:border-color .18s var(--ease),color .18s var(--ease)}
+a:hover{color:var(--accent);border-color:var(--accent)}
+.xlink{color:inherit;border-bottom:1px dotted var(--ink-4);text-decoration:none;
+  transition:color .18s var(--ease),border-color .18s var(--ease)}
+.xlink:hover{color:var(--accent-deep);border-bottom-color:var(--accent-deep)}
+
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(30px);
+  transition:opacity 1.07s var(--ease),transform 1.07s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.104s}.reveal.d2{transition-delay:.208s}
+.reveal.d3{transition-delay:.312s}.reveal.d4{transition-delay:.416s}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* ---------- figures ---------- */
+figure{margin:38px 0 34px;position:relative}
+.fig-head{font-family:var(--font-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-2);margin:0 0 11px;display:flex;align-items:center;gap:11px}
+.fig-head::before{content:"";width:20px;height:2px;background:var(--accent);flex:none;border-radius:1px}
+.fig-head span{color:var(--ink-4);letter-spacing:.08em}
+.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:3px;
+  background:var(--bg-2);border:1px solid var(--rule)}
+.fig.tall{aspect-ratio:16/10}
+.fig.r6{aspect-ratio:16/6}
+.fig.r45{aspect-ratio:32/9}
+.fig.r7{aspect-ratio:16/7}
+.fig.r8{aspect-ratio:16/8}
+@media(max-width:900px){.fig.r45{aspect-ratio:16/8}.fig.r6{aspect-ratio:16/9}.fig.r7{aspect-ratio:16/10}.fig.r8{aspect-ratio:16/11}}
+.fig.deep{background:var(--deep);border-color:rgba(237,241,236,.15)}
+figcaption{font-family:var(--font-mono);font-size:12.5px;line-height:1.55;color:var(--ink-3);
+  margin-top:12px;letter-spacing:.01em}
+figcaption b{color:var(--ink-2);font-weight:500}
+figure .scrub{position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--rule);
+  overflow:hidden;border-radius:1px}
+figure .scrub i{display:block;height:100%;width:0%;
+  background:linear-gradient(90deg,var(--core),var(--accent))}
+
+/* ---------- deep panels ---------- */
+.deep-panel{background:var(--deep);color:#dde5dc;border-radius:4px;padding:38px 34px;
+  margin:44px 0;border:1px solid rgba(237,241,236,.12);position:relative;overflow:hidden}
+.deep-panel h3{color:#f2f6f0;margin-top:0}
+.deep-panel p{color:#c6d2c6}
+.deep-panel .small{color:#95a598}
+.deep-panel::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 80% at 12% 0%,rgba(120,190,168,.16),transparent 60%),
+             radial-gradient(90% 70% at 92% 100%,rgba(196,138,53,.16),transparent 62%)}
+
+/* ---------- callouts ---------- */
+.note{border-left:2px solid var(--accent-soft);padding:2px 0 2px 20px;margin:30px 0;color:var(--ink-2)}
+.note.warn{border-color:#e8c07a}
+.note.kill{border-color:#dfa992}
+.note.good{border-color:#a3c8ad}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;margin:26px 0;font-size:16px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-4);font-weight:400;border-bottom-color:var(--rule-strong)}
+td.num,th.num{font-family:var(--font-mono);font-size:14px;white-space:nowrap}
+tr:hover td{background:rgba(22,32,27,.024)}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+td.pass{color:var(--calm-deep)}
+td.fail{color:var(--danger)}
+tr.win td{background:rgba(160,63,30,.055)}
+tr.win:hover td{background:rgba(160,63,30,.085)}
+tr.win td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
+
+/* ---------- equations ---------- */
+.eq{font-family:var(--font-mono);font-size:13px;line-height:1.85;background:var(--bg-2);
+  border:1px solid var(--rule);border-radius:3px;padding:15px 18px;margin:24px 0;
+  overflow-x:auto;white-space:pre;position:relative}
+.eq b{color:var(--accent-deep);font-weight:500}
+.eq i{color:var(--core);font-style:normal}
+.eq-hero{text-align:center;font-size:clamp(12.5px,1.45vw,15.6px);letter-spacing:.02em;
+  background:none;border:none;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  border-radius:0;padding:22px 10px;white-space:normal}
+.eq::after{content:"";position:absolute;inset:0;background:var(--bg-2);
+  transform-origin:right center;transform:scaleX(1);
+  transition:transform 1.25s var(--ease) .12s}
+.eq.in::after{transform:scaleX(0)}
+.eq-hero::after{background:var(--bg)}
+
+/* ---------- code ---------- */
+.code{font-family:var(--font-mono);font-size:12.5px;line-height:1.62;background:var(--deep);
+  color:#d8e2d6;border-radius:4px;padding:18px 20px;margin:20px 0;overflow-x:auto;
+  white-space:pre;-webkit-overflow-scrolling:touch;border:1px solid rgba(237,241,236,.12)}
+.code .c{color:#89998b}.code .k{color:#e8977a}.code .s{color:#9fc9a4}
+.code .n{color:#e6c079}.code .f{color:#7fbdaa}.code b{color:#fff;font-weight:500}
+
+/* ---------- headline: gradient sweep + word stagger ---------- */
+#hero h1{
+  background:linear-gradient(100deg,#1f5f52 0%,#2f7d6b 18%,#c48a35 42%,#a03f1e 56%,#2f7d6b 80%,#1f5f52 100%);
+  background-size:280% 100%;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+  animation:heroGrad 17s var(--ease-soft) infinite}
+@keyframes heroGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.w{display:inline-block;opacity:0;transform:translateY(0.5em) rotate(1.2deg);
+  transition:opacity .95s var(--ease),transform .95s var(--ease)}
+.w.in{opacity:1;transform:none}
+
+/* ---------- section headings draw their own rule ---------- */
+h2{position:relative;padding-bottom:16px}
+h2::after{content:"";position:absolute;left:50%;bottom:0;height:2px;width:0;
+  transform:translateX(-50%);border-radius:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  transition:width 1.5s var(--ease) .25s}
+h2.in::after{width:132px}
+
+.count{font-variant-numeric:tabular-nums}
+
+/* ---------- term links + modals ---------- */
+.term{appearance:none;-webkit-appearance:none;border:0;border-bottom:1px dotted var(--ink-4);
+  background:none;padding:0;margin:0;font:inherit;cursor:pointer;color:var(--ink);
+  transition:color .18s var(--ease),border-color .18s var(--ease)}
+.term:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.term::after{content:"\00a0\25be";font-size:.72em;color:var(--ink-4);vertical-align:.12em}
+.card-open:focus-visible,.term:focus-visible,.btn:focus-visible,#toc a:focus-visible,
+a:focus-visible,.modal-x:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;
+  border-radius:2px}
+#scrim{position:fixed;inset:0;z-index:80;background:rgba(22,32,27,.55);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity .34s var(--ease)}
+#scrim.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;z-index:81;left:50%;top:50%;width:min(720px,calc(100vw - 40px));
+  max-height:min(84vh,860px);overflow-y:auto;transform:translate(-50%,-46%) scale(.97);
+  opacity:0;pointer-events:none;visibility:hidden;background:var(--bg);
+  border:1px solid var(--rule-strong);border-radius:5px;padding:36px 38px 34px;
+  box-shadow:0 40px 90px -30px rgba(22,32,27,.42),0 2px 0 rgba(255,255,255,.5) inset;
+  transition:opacity .34s var(--ease),transform .44s var(--ease),visibility 0s linear .34s}
+.modal.on{opacity:1;pointer-events:auto;visibility:visible;
+  transform:translate(-50%,-50%) scale(1);transition-delay:0s,0s,0s}
+.modal h3{margin-top:0;font-size:27px}
+.modal .kicker{text-align:left}
+.modal .fig{aspect-ratio:16/7}
+.modal p:last-child{margin-bottom:0}
+.modal-x{position:absolute;top:14px;right:16px;width:32px;height:32px;border:none;
+  background:none;cursor:pointer;color:var(--ink-4);font-size:22px;line-height:1;
+  border-radius:50%;transition:background .18s var(--ease),color .18s var(--ease)}
+.modal-x:hover{background:var(--bg-3);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.modal{transition:opacity .01s}}
+
+/* ---------- nav + contents ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:50;
+  background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
+  border-bottom:1px solid transparent;
+  transition:border-color .3s var(--ease),background .3s var(--ease),backdrop-filter .3s var(--ease)}
+#topbar.stuck{border-bottom-color:var(--rule);background:rgba(240,242,236,.90);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+/* the hero is light, so the nav keeps its normal ink; only the ground changes */
+#topbar:not(.stuck) .brand{color:var(--ink-3)}
+#topbar:not(.stuck) #toc a{color:var(--ink-4)}
+#topbar:not(.stuck) #toc a:hover{color:var(--ink-2);background:rgba(22,32,27,.05)}
+#topbar .wrap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;
+  height:56px;gap:26px}
+#topbar .brand{justify-self:start;white-space:nowrap;font-family:var(--font-mono);font-size:12.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:none}
+#topbar .brand:hover{color:var(--ink)}
+#topbar .rail-end{justify-self:end;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);white-space:nowrap}
+@media(max-width:1180px){#topbar .rail-end{display:none}
+  #topbar .wrap{grid-template-columns:auto minmax(0,1fr)}}
+#toc{justify-self:stretch;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;
+  justify-content:center;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
+#toc::-webkit-scrollbar{display:none}
+#toc a{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-4);border:none;padding:6px 9px;border-radius:3px;white-space:nowrap;
+  transition:color .2s var(--ease),background .2s var(--ease)}
+#toc a:hover{color:var(--ink-2);background:var(--bg-2)}
+#toc a.active{color:var(--accent-deep);background:rgba(160,63,30,.10)}
+#toc a.homelink{color:var(--ink-3);margin-right:8px;position:relative}
+#toc a.homelink::after{content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);
+  width:1px;height:13px;background:var(--rule-strong)}
+#toc a.homelink:hover{color:var(--accent-deep);background:rgba(160,63,30,.08)}
+#topbar:not(.stuck) #toc a.homelink{color:var(--ink-3)}
+@media(max-width:860px){#toc{display:none}}
+
+/* ---------- hero ---------- */
+#hero{padding:0;position:relative;min-height:100svh;display:flex;align-items:center;
+  overflow:hidden;border-top:none;background:var(--bg-2);color:var(--ink);isolation:isolate}
+#hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(105% 80% at 78% 26%,rgba(31,95,82,.10),transparent 58%),
+             radial-gradient(85% 72% at 12% 86%,rgba(196,138,53,.13),transparent 62%),
+             radial-gradient(70% 60% at 46% 108%,rgba(160,63,30,.09),transparent 60%),
+             linear-gradient(180deg,rgba(240,242,236,.55) 0%,transparent 26%)}
+/* a hairline that hands the eye off to the paper below */
+#hero::before{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;z-index:4;
+  background:linear-gradient(90deg,transparent,var(--rule-strong) 22%,var(--rule-strong) 78%,transparent)}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+/* the taxonomy field belongs to the right of the hero; fade it out before it
+   reaches the type rather than letting it drift across the headline */
+@media(min-width:901px){
+  #heroCanvas{
+    -webkit-mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.35) 46%,#000 60%,#000 96%,transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.35) 46%,#000 60%,#000 96%,transparent 100%)}
+}
+@media(max-width:900px){
+  #heroCanvas{
+    -webkit-mask-image:linear-gradient(180deg,transparent 22%,#000 52%,#000 92%,transparent 100%);
+            mask-image:linear-gradient(180deg,transparent 22%,#000 52%,#000 92%,transparent 100%)}
+}
+#hero .wrap{position:relative;z-index:3;padding-top:80px;padding-bottom:64px}
+@media(min-width:901px){
+  #hero h1{max-width:13ch}
+  #hero .sub{max-width:560px}
+  #hero .meta{max-width:900px}
+}
+#hero .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--core);margin:0 0 26px}
+#hero .sub{font-size:21px;line-height:1.5;color:var(--ink-2);max-width:640px;margin:0 0 32px}
+#hero .meta{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-3);
+  display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:38px;
+  padding-top:22px;border-top:1px solid var(--rule-strong)}
+#hero .meta b{color:var(--ink);font-weight:500}
+.scrollcue{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:5;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);display:flex;flex-direction:column;align-items:center;gap:8px}
+.scrollcue span{display:block;width:1px;height:34px;
+  background:linear-gradient(var(--ink-4),transparent);animation:cue 2.4s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}
+  55%{transform:scaleY(1);transform-origin:top}
+  56%{transform:scaleY(1);transform-origin:bottom}
+  100%{transform:scaleY(0);transform-origin:bottom}}
+@media (prefers-reduced-motion:reduce){.scrollcue span{animation:none}#hero h1{animation:none}
+  .w{opacity:1;transform:none;transition:none}.eq::after{display:none}
+  h2::after{transition:none;width:132px}}
+
+/* ---------- interactive controls ---------- */
+.controls{display:flex;flex-wrap:wrap;gap:18px 30px;align-items:flex-end;
+  background:var(--bg-2);border:1px solid var(--rule);border-radius:3px;
+  padding:18px 22px;margin:24px 0}
+.ctl{flex:1 1 200px;min-width:170px}
+.ctl label{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);margin-bottom:7px}
+.ctl label b{color:var(--accent-deep);font-weight:500;font-size:13px;letter-spacing:0;
+  text-transform:none}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;
+  background:var(--rule-strong);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;
+  border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:grab;
+  box-shadow:0 1px 6px rgba(160,63,30,.42);transition:transform .18s var(--ease)}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);cursor:grab}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.btn{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  padding:8px 15px;border:1px solid var(--rule-strong);background:var(--bg);color:var(--ink-2);
+  border-radius:3px;cursor:pointer;transition:all .2s var(--ease)}
+.btn:hover{border-color:var(--accent);color:var(--accent-deep);background:rgba(160,63,30,.06)}
+.btn.on{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+
+/* ---------- readouts ---------- */
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:3px;margin:22px 0;overflow:hidden}
+.readout div{background:var(--bg);padding:14px 16px}
+.readout dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);margin:0 0 5px}
+.readout dd{margin:0;font-family:var(--font-mono);font-size:19px;color:var(--ink);
+  transition:color .3s var(--ease)}
+.readout dd.hot{color:var(--accent-deep)}
+.readout dd.cool{color:var(--core)}
+.readout dd.lock{color:var(--calm-deep)}
+@keyframes tick{0%{transform:translateY(-3px);opacity:.45}100%{transform:none;opacity:1}}
+.readout dd.bump{animation:tick .34s var(--ease)}
+@media (prefers-reduced-motion:reduce){.readout dd.bump{animation:none}}
+
+/* ---------- the grade legend, used under every ranked figure ---------- */
+.grades{display:flex;flex-wrap:wrap;gap:6px 14px;margin:16px 0 4px;
+  font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3)}
+.grades i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;
+  vertical-align:-1px}
+.grades span{white-space:nowrap}
+.gr0 i{background:var(--g0)}.gr1 i{background:var(--g1)}.gr2 i{background:var(--g2)}
+.gr3 i{background:var(--g3)}.gr4 i{background:var(--g4)}
+
+/* ---------- cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:14px;margin:34px 0}
+.card{background:var(--bg);border:1px solid var(--rule);border-radius:4px;padding:22px 22px 20px;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .42s var(--ease),box-shadow .42s var(--ease),border-color .3s var(--ease)}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--rule);
+  transition:background .3s var(--ease)}
+.card:hover{transform:translateY(-4px);border-color:var(--rule-strong);
+  box-shadow:0 22px 44px -26px rgba(22,32,27,.38)}
+.card:hover::before{background:var(--accent)}
+.card .cat{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-4);margin-bottom:9px;display:block}
+.card h3{margin:0 0 8px;font-size:18px;line-height:1.3;font-weight:460;letter-spacing:-.005em;
+  position:relative}
+.card h3 button.card-open{appearance:none;-webkit-appearance:none;border:0;background:none;
+  padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.card h3 button.card-open::after{content:"";position:absolute;inset:0}
+.card p{margin:0;font-size:15.5px;line-height:1.5;color:var(--ink-3)}
+.card .num{font-family:var(--font-mono);font-size:13px;color:var(--accent-deep);margin-top:12px;
+  display:block;letter-spacing:-.01em}
+.card[data-cat=dead]::before{background:#b0a08a}
+.card[data-cat=dead]:hover::before{background:var(--danger)}
+.card[data-cat=dead] .num{color:var(--danger)}
+.card[data-cat=live]::before{background:#9ec4a8}
+.card[data-cat=live]:hover::before{background:var(--calm-deep)}
+.card[data-cat=live] .num{color:var(--calm-deep)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 26px}
+#cards .card{opacity:0;transform:translateY(24px) scale(.985);
+  transition:opacity .9s var(--ease),transform .9s var(--ease),
+             box-shadow .42s var(--ease),border-color .3s var(--ease)}
+#cards .card.shown{opacity:1;transform:none}
+#cards .card.shown:hover{transform:translateY(-4px)}
+@media (prefers-reduced-motion:reduce){#cards .card{opacity:1;transform:none}}
+
+/* ---------- the cascade stat strip ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:3px;margin:34px 0;overflow:hidden}
+.stats div{background:var(--bg);padding:20px 18px}
+.stats .n{font-family:var(--font-mono);font-size:clamp(24px,3vw,34px);color:var(--ink);
+  display:block;line-height:1;letter-spacing:-.02em}
+.stats .n.hot{color:var(--accent-deep)}
+.stats .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-4);margin-top:9px;display:block;line-height:1.45}
+
+/* ---------- footer ---------- */
+footer{padding:70px 0 90px;border-top:1px solid var(--rule);background:var(--bg-2);
+  position:relative;z-index:2}
+footer .small{max-width:var(--read);margin:0 auto}
+footer h3{margin-top:0}
+
+/* ---------- responsive ---------- */
+@media(max-width:720px){
+  body{font-size:17.5px}
+  .wrap{padding:0 20px}
+  main section{padding:76px 0}
+  .lede{font-size:19px}
+  .deep-panel{padding:28px 22px}
+  .modal{padding:28px 22px 24px}
+  .fig{aspect-ratio:16/12}
+  h1{max-width:none}
+}
+</style>
+</head>
+<body>
+<canvas id="field"></canvas>
+<div id="grain"></div>
+<div id="rail"><i></i></div>
+
+<div id="topbar"><div class="wrap">
+  <a class="brand" href="#hero">Thirteen thousand skills</a>
+  <nav id="toc">
+    <a class="homelink" href="https://thylinao1.github.io/index.html">Home</a>
+    <a href="#problem" data-sec="problem">Problem</a>
+    <a href="#metric" data-sec="metric">Metric</a>
+    <a href="#cascade" data-sec="cascade">Cascade</a>
+    <a href="#cheap" data-sec="cheap">Cheap levers</a>
+    <a href="#ensemble" data-sec="ensemble">Ensemble</a>
+    <a href="#protocol" data-sec="protocol">Protocol</a>
+    <a href="#results" data-sec="results">Results</a>
+    <a href="#graveyard" data-sec="graveyard">Dead ends</a>
+    <a href="#channel" data-sec="channel">The channel</a>
+    <a href="#lessons" data-sec="lessons">Lessons</a>
+  </nav>
+  <div class="rail-end"><span id="railPct">00%</span></div>
+</div></div>
+
+<div id="shell">
+
+<main>
+
+<section id="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="wrap">
+    <p class="tag">RecSys-HR 2026 &nbsp;/&nbsp; WorkRB Challenge &nbsp;/&nbsp; 1st place</p>
+    <h1>Thirteen thousand skills, in order</h1>
+    <p class="sub">Read one sentence from a job advert. Now rank every skill in the European
+      taxonomy, all 13,891 of them, by how relevant each one is, on a scale from
+      nonsense to exact. Do it for five datasets at once. This page is the method, the numbers,
+      and the discipline that decided which numbers to believe.</p>
+    <div class="meta">
+      <span><b>Maksim Silchenko</b> &nbsp;team thylinao, solo</span>
+      <span>National University of Singapore</span>
+      <span>Final <b>0.8458</b> macro nDCG@100</span>
+      <span>Submission <b>874278</b></span>
+    </div>
+  </div>
+  <div class="scrollcue"><span></span>Scroll</div>
+</section>
+
+<section id="problem">
+  <div class="wrap">
+    <p class="kicker reveal">01 &nbsp;/&nbsp; The problem</p>
+    <h2 class="reveal">A fixed vocabulary of thirteen thousand things</h2>
+    <p class="lede reveal d1">Most retrieval problems search an open corpus. This one searches a
+      closed taxonomy, and that changes what is hard about it.</p>
+
+    <div class="read">
+      <p class="reveal">ESCO is the European Union's catalogue of skills, competences and
+        occupations. Version 1.1 contains exactly <span class="mono">13,891</span> skill
+        concepts. Each one has a preferred label, a paragraph of description, and on average
+        seven alternative labels. There are 97,441 of those in total, collapsing to 96,684
+        distinct normalised strings.</p>
+
+      <p class="reveal">The task: given a piece of text about work, score all 13,891 concepts and
+        return them in order. Five datasets are scored and averaged with equal weight. Four of
+        them are <em>extraction</em>: the query is a sentence or a segment of a job advert,
+        and several skills are correct at once. The fifth is <em>normalisation</em>: the
+        query is a short surface form like <span class="mono">"MS Excel"</span> and the job is to
+        find its canonical entry.</p>
+
+      <div class="stats reveal d1">
+        <div><span class="n" data-count="13891" data-dec="0">13,891</span><span class="l">ESCO concepts<br>in the target space</span></div>
+        <div><span class="n" data-count="286" data-dec="0">286</span><span class="l">labelled validation<br>queries, total</span></div>
+        <div><span class="n" data-count="1873" data-dec="0">1,873</span><span class="l">test queries<br>across five datasets</span></div>
+        <div><span class="n hot" data-count="10" data-dec="0">10</span><span class="l">submissions allowed<br>for the entire event</span></div>
+      </div>
+
+      <h3 class="reveal">Relevance is graded, not binary</h3>
+      <p class="reveal">This is the design decision that invalidates the obvious approach. Every
+        query&ndash;skill pair carries an integer grade from 0 to 4, and the grades are
+        <em>semantic</em> rather than confidence levels:</p>
+    </div>
+
+    <div class="read">
+      <div class="tbl-scroll reveal">
+      <table>
+        <thead><tr><th class="num">Grade</th><th>Meaning</th><th>Example, for the query "maintain the espresso machine"</th></tr></thead>
+        <tbody>
+          <tr><td class="num" style="color:var(--g4)">4</td><td>correct, explicitly demonstrated</td><td class="small">maintain coffee machines</td></tr>
+          <tr><td class="num" style="color:var(--g3)">3</td><td>strongly relevant, implied</td><td class="small">perform equipment maintenance</td></tr>
+          <tr><td class="num" style="color:var(--g2)">2</td><td>adjacent: right area, wrong granularity</td><td class="small">maintain kitchen equipment</td></tr>
+          <tr><td class="num" style="color:var(--g1)">1</td><td>plausible, in-domain, not asked for</td><td class="small">prepare speciality coffees</td></tr>
+          <tr><td class="num" style="color:var(--g0)">0</td><td>unrelated, and every unannotated pair</td><td class="small">operate a forklift</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="small reveal" style="margin-top:-8px">The example rows are illustrative, chosen to
+        show what each grade means. The real annotations are the organisers'.</p>
+
+      <div class="note kill reveal">
+        <p style="margin:0"><b>Why this kills the obvious recipe.</b> Grades 1 and 2 are real
+          credit, awarded precisely for surfacing taxonomic neighbours, but they must rank
+          <em>below</em> the exact and implied items. Train a cross-encoder on binary labels and it
+          learns to push every neighbour to a hard zero, throwing that credit away for nothing. I
+          measured it: a MiniLM cross-encoder fine-tuned on binary targets scored
+          <span class="mono">&minus;0.0758</span> against the base it was supposed to improve.</p>
+      </div>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">The target space <span>3D &middot; drag to rotate</span></p>
+      <canvas class="fig r8" id="cSpace" data-fig="space"></canvas>
+      <p class="grades">
+        <span class="gr4"><i></i>4 exact</span><span class="gr3"><i></i>3 implied</span>
+        <span class="gr2"><i></i>2 adjacent</span><span class="gr1"><i></i>1 plausible</span>
+        <span class="gr0"><i></i>0 unrelated</span>
+      </p>
+      <figcaption><b>Figure 1.</b> A schematic of the 13,891-concept space around one query,
+        coloured by grade. Warm points carry credit; grey ones do not. The cloud is generated,
+        not measured; it is here to show the shape of the problem, which is that a handful
+        of warm points must be lifted out of a very large cold neighbourhood. Drag to rotate.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">One task has no local labels at all</h3>
+      <p class="reveal">Of the five datasets, <span class="mono">TechWolf</span> ships a test split
+        and no validation split. It is one fifth of the final score and 324 of the 1,873 test
+        queries, and there is no way to measure anything about it locally. Every decision that
+        touches it is a bet placed blind.</p>
+      <p class="reveal">What could be established was its <em>shape</em>. Its queries have a median
+        length of 13 words and 169 of 324 carry a bullet prefix, which makes it structurally an
+        extraction task. Its exact alternative-label hit rate is 3 out of 324, against 450 out of
+        450 for the normalisation set, so whatever else it is, it is not normalisation-like.
+        It was treated as Tech/House-like throughout, and that assumption held: it finished at
+        0.8347, in line with the other extraction tasks.</p>
+    </div>
+  </div>
+</section>
+
+<section id="metric">
+  <div class="wrap">
+    <p class="kicker reveal">02 &nbsp;/&nbsp; The metric</p>
+    <h2 class="reveal">Only the first hundred rows exist</h2>
+    <p class="lede reveal d1">Everything below rank 100 is invisible to the score. Everything at
+      the very top is worth exponentially more than everything just below it.</p>
+
+    <div class="read">
+      <p class="reveal">Scoring is macro-averaged nDCG@100 with exponential gain. Two multipliers
+        decide a system's fate: what a grade is worth, and where it sits.</p>
+
+      <div class="eq eq-hero reveal">DCG@100 &nbsp;=&nbsp; &Sigma;<sub>i &le; 100</sub> &nbsp;
+        <b>(2<sup>rel<sub>i</sub></sup> &minus; 1)</b> &nbsp;/&nbsp; <i>log<sub>2</sub>(i + 2)</i>
+        &nbsp;&nbsp;&nbsp;&nbsp; nDCG &nbsp;=&nbsp; DCG@100 / IDCG@100</div>
+
+      <div class="eq-pair reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:26px 0">
+        <div style="background:var(--bg-2);border:1px solid var(--rule);border-radius:3px;padding:16px 18px">
+          <span class="mono" style="font-size:16px;display:block;margin-bottom:7px">2<sup>rel</sup> &minus; 1 &nbsp;=&nbsp; 0, 1, 3, 7, <b style="color:var(--accent-deep)">15</b></span>
+          <span class="small" style="display:block">The gain ladder. A grade-4 item is worth
+            fifteen times a grade-1 item, not four times. Getting one exact skill right outranks
+            getting five plausible ones right.</span>
+        </div>
+        <div style="background:var(--bg-2);border:1px solid var(--rule);border-radius:3px;padding:16px 18px">
+          <span class="mono" style="font-size:16px;display:block;margin-bottom:7px">1 / log<sub>2</sub>(i + 2)</span>
+          <span class="small" style="display:block">The positional discount. Rank 1 is worth 1.00,
+            rank 10 is worth 0.29, rank 100 is worth 0.15. Shallow and slow, which is why
+            reranking depth pays off far further down than intuition suggests.</span>
+        </div>
+      </div>
+
+      <p class="reveal">Multiply those together and the shape of the problem falls out: the score
+        is almost entirely decided by whether the two-to-ten items graded 3 or 4 land in the first
+        handful of rows. Everything else is rounding.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Build a ranking, watch the score <span>interactive</span></p>
+      <canvas class="fig r7" id="cNdcg" data-fig="ndcg"></canvas>
+      <div class="btnrow" style="justify-content:center">
+        <button class="btn" data-ndcg="ideal">Ideal order</button>
+        <button class="btn on" data-ndcg="real">A real system</button>
+        <button class="btn" data-ndcg="binary">Binary-trained</button>
+        <button class="btn" data-ndcg="random">Random</button>
+      </div>
+      <dl class="readout">
+        <div><dt>nDCG@100</dt><dd id="rNdcg">0.000</dd></div>
+        <div><dt>Lost against ideal</dt><dd id="rLost">&ndash;</dd></div>
+        <div><dt>DCG / ideal DCG</dt><dd id="rDcg">0.00</dd></div>
+        <div><dt>Exact item at rank 1</dt><dd id="rTop">&ndash;</dd></div>
+      </dl>
+      <p class="grades">
+        <span class="gr4"><i></i>4</span><span class="gr3"><i></i>3</span>
+        <span class="gr2"><i></i>2</span><span class="gr1"><i></i>1</span><span class="gr0"><i></i>0</span>
+      </p>
+      <figcaption><b>Figure 2.</b> One illustrative query's graded items in four different orders;
+        bar height is each row's contribution to DCG. The instructive preset is
+        <em>binary-trained</em>. It places the five exact and implied items in the top five rows
+        perfectly, exactly as the ideal ordering does, and still loses
+        <span class="mono">0.026</span> of nDCG, purely by ranking the merely-plausible items above
+        the taxonomic neighbours beneath them. That inversion is what a model trained on 0/1 labels
+        learns to do, and it is invisible if you only look at whether the top of the list is right.
+        The numbers here belong to this toy query, not to the competition.</figcaption>
+    </figure>
+
+    <div class="read">
+      <div class="note warn reveal">
+        <p style="margin:0"><b>A trap in the local scorer.</b> The benchmark library's default
+          summary aggregates hierarchically by task group. Normalisation is its own group while the
+          four extraction tasks share one, so the default number weights the normalisation
+          task at roughly 50% instead of the flat 20% the leaderboard uses. Optimising the default
+          optimises the wrong objective. I computed the flat mean explicitly and later confirmed
+          the leaderboard does the same, across all nine of my own placed rows, to within 0.0001, which is what four-decimal display rounding permits, the largest single
+          discrepancy being 0.00006.</p>
+      </div>
+
+      <p class="reveal">One more property matters, and it saved a lot of wasted effort:
+        <strong>nDCG is order-only</strong>. Any strictly increasing transform of the scores leaves
+        it unchanged. Calibrating a single final ranker is therefore a no-op. Calibration matters
+        only where scores from different sources have to be made commensurable, which is why
+        every retrieval lane below enters as a per-query z-score rather than a raw similarity.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cascade">
+  <div class="wrap">
+    <p class="kicker reveal">03 &nbsp;/&nbsp; The system</p>
+    <h2 class="reveal">Retrieve, featurise, rerank, fuse</h2>
+    <p class="lede reveal d1">Four stages. The expensive one is third, and it is not where the
+      largest gains came from.</p>
+
+    <figure class="reveal">
+      <p class="fig-head">The cascade <span>3D &middot; animated</span></p>
+      <canvas class="fig r8" id="cCascade" data-fig="cascade"></canvas>
+      <figcaption><b>Figure 3.</b> 13,891 concepts narrow to a 1,000-candidate pool, which is
+        scored by an ensemble of cross-encoders, fused, and cut to the 100 rows that the metric can
+        see. Depth is a design variable: measured on a fixed reranker, top-100 scores 0.6852,
+        top-200 scores 0.7226 and top-500 scores 0.7393; the later export confirmed the
+        extrapolation, with depth 1,000 beating depth 500 by 0.0029 on lanes plus the cross-encoder
+        alone and by 0.0073 once the prior and the override were added. Candidates and features are
+        therefore exported at 1,000, from which any shallower depth is free.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">Stage 1: twelve lanes, two of which do the retrieving</h3>
+      <p class="reveal">Twelve retrieval lanes score every concept for every query: four domain
+        bi-encoders, two general ones, four lexical, and two string-similarity lanes. The candidate
+        pool comes from just two of them, fused by z-score:</p>
+
+      <div class="eq reveal">base &nbsp;=&nbsp; <b>0.6</b> &middot; z(CurriculumMatch) &nbsp;+&nbsp; <b>0.4</b> &middot; z(ConTeXT)   &rarr;   top 1000 per query</div>
+
+      <p class="reveal">Two things about that line are worth more than they look. The weights were
+        measured, not guessed, and naive equal-weight reciprocal-rank fusion of the three
+        obvious lanes was <em>worse</em> than its best single component, 0.5935 against 0.6416.
+        Averaging rankers is not free. And the fused base reproduces to 0.6499 exactly, which was
+        wired in as a known-value gate: if the pipeline drifts, the run aborts rather than
+        silently producing a worse submission.</p>
+
+      <div class="note good reveal">
+        <p style="margin:0"><b>The finding I did not expect.</b> Every lane other than those two
+          is weak on its own: between 0.095 and 0.53 macro nDCG for the nine with a measured
+          macro, against 0.6416 for the best single retriever. All ten were cut as rankers. As <em>features</em> they are a different
+          story, and the lanes that score against the ESCO description rather than the title
+          dominate feature importance despite being among the weakest standalone. Standalone
+          quality turns out to be a poor guide to whether a signal belongs in a fusion. The
+          clearest single case is <span class="mono">curricdesc</span>, which ranked top-4 in
+          feature importance while scoring worse standalone than the plain CurriculumMatch lane it
+          was derived from. The same principle shapes the final ensemble, with an important
+          qualification, below.</p>
+      </div>
+
+      <h3 class="reveal">Stage 2: thirty-three columns per candidate</h3>
+      <p class="reveal">Each lane contributes two columns: the per-query z-score, and the log of
+        its within-query rank. Nine aggregate columns follow: the base score and its rank, how
+        many lanes place the candidate in their own top 50 and top 200, the mean, spread and max of
+        the lane z-scores, and the two word counts. Twenty-four plus nine is thirty-three.</p>
+      <p class="reveal">The agreement and spread columns are the interesting ones. They let the
+        final model distinguish a candidate that every lane likes moderately from one that a single
+        lane loves.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cheap">
+  <div class="wrap">
+    <p class="kicker reveal">04 &nbsp;/&nbsp; The cheap levers</p>
+    <h2 class="reveal">The two largest gains that needed no GPU</h2>
+    <p class="lede reveal d1">Three interventions that never touched a GPU are worth about a
+      third of the whole climb, and the largest of them is four columns of arithmetic.</p>
+
+    <div class="read">
+      <h3 class="reveal">A learned ranker over signals I already had &nbsp;<span class="mono" style="color:var(--calm-deep);font-size:.7em">+0.0291</span></h3>
+      <p class="reveal">Replacing the hand-weighted fusion with a LambdaRank model over all
+        thirty-three columns moved the score from 0.6499 to 0.6790. Twelve mostly-bad retrievers,
+        combined by a learned model, beat the best of them by more than any of them is worth on its
+        own, and no GPU was involved.</p>
+      <div class="note reveal">
+        <p style="margin:0"><b>A correction I had to make to my own draft of this page.</b> I
+          first wrote that this step was worth +0.1050 and was the largest jump of the campaign.
+          It is not. The 0.7549 figure I was quoting is a later ladder rung that already contains a
+          trained cross-encoder column, so most of that gain is neural. The GPU-free lane fusion is
+          worth +0.0291. I am leaving the correction visible because attributing a neural gain to a
+          cheap lever is exactly the kind of error a nice narrative produces.</p>
+      </div>
+
+      <h3 class="reveal">A smoothed relevance prior &nbsp;<span class="mono" style="color:var(--calm-deep);font-size:.7em">+0.0380</span></h3>
+      <p class="reveal">Some ESCO concepts are simply relevant more often than others. Counting
+        that is four columns of arithmetic: computed only over the candidate pools of each
+        fold's <em>training</em> queries, leave-one-out on the training rows, so no label from an
+        evaluated query ever touches its own features:</p>
+
+      <div class="eq reveal">prior_rel   = (r + 1.0) / (s + 4.0)      <i>P(grade &ge; 1)</i>
+prior_hi    = (h + 0.5) / (s + 8.0)      <i>P(grade &ge; 3)</i>
+prior_logseen = log(1 + s)               <i>how often it was even a candidate</i>
+prior_egain = (g + 1.0) / (s + 4.0)      <i>E[2<sup>y</sup> &minus; 1], the metric's own gain</i></div>
+
+      <p class="reveal">In the submitted model <span class="mono">prior_hi</span> is the
+        highest-importance feature of all, and <span class="mono">prior_egain</span> is fourth,
+        behind two of the cross-encoder log-rank columns. Four columns of counting statistics
+        outrank a four-billion-parameter reranker's score. The effect measured
+        <span class="mono">+0.0380</span> over
+        seven disjoint seeds (figure 4 credits the prior with +0.0331 instead, because that is
+        the ladder rung rather than the isolated lever, and I quote each where it was taken),
+        survived a leave-one-task-out control at <span class="mono">+0.0315</span>, and collapsed
+        entirely when the labels were shuffled, which is the control that matters, because a prior computed from the pool is
+        exactly the kind of feature that can leak if you build it carelessly.</p>
+
+      <h3 class="reveal">An exact-match override &nbsp;<span class="mono" style="color:var(--calm-deep);font-size:.7em">+0.0152 local</span></h3>
+      <p class="reveal">If a query string matches an ESCO alternative label exactly after
+        normalisation, that concept is forced to rank 1 at write time, not offered as a
+        feature for the model to weigh, but overridden outright. ESCO carries 97,441 alternative
+        labels, collapsing to 96,684 distinct normalised strings, of which only 0.74% are
+        ambiguous, with a maximum fan-out of four.
+        Two separate measurements describe its effect, and they should not be run together. In
+        isolation the override is worth <span class="mono">+0.0564</span> on the normalisation task
+        and exactly <span class="mono">0.0000</span> on each of the other three, which averages to
+        <span class="mono">+0.0141</span> over the four local tasks and projects to
+        <span class="mono">+0.0113</span> over the five-task board. Measured instead as a rung of
+        the pipeline ladder, with the prior already in place, it moved the four-task macro by
+        <span class="mono">+0.0152</span>, the difference being the interaction with everything
+        beneath it. It was never isolated on the board itself, since no two submissions differed
+        only by this switch. The asymmetry is
+        the whole story: 450 of 450 normalisation queries hit an exact alternative label, against 3
+        of 324 TechWolf queries.</p>
+
+      <div class="note reveal">
+        <p style="margin:0"><b>The distinction that made it work.</b> The same signal offered as a
+          <em>soft feature</em> (substring containment, handed to the model to weigh) was measured
+          and killed: 0.8616 against a 0.8620 baseline. A hard override and a soft feature
+          are not the same intervention. When you know the answer, telling the model about it is
+          weaker than writing it down.</p>
+      </div>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Where the score came from <span>animated</span></p>
+      <canvas class="fig r45" id="cLadder" data-fig="ladder"></canvas>
+      <figcaption><b>Figure 4.</b> Every step from the fused base at 0.6499 to the final ensemble
+        at 0.8647, drawn as a share of the total gain rather than of the total score, so the small
+        steps stay legible. Green segments needed no GPU and are worth about a third of the whole
+        climb. For scale, the entire extended competition phase (weeks of dense reranker training
+        on cluster GPUs) moved the score by <span class="mono">+0.0011</span>, which is a
+        under a sixtieth of the width of the rightmost segment and would not be visible
+        here.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="ensemble">
+  <div class="wrap">
+    <p class="kicker reveal">05 &nbsp;/&nbsp; The ensemble</p>
+    <h2 class="reveal">The strongest reranker I trained is not in the final system</h2>
+    <p class="lede reveal d1">It was absorbed. What the ensemble was short of was not strength.</p>
+
+    <div class="read">
+      <p class="reveal">Eleven cross-encoders were trained, across two architecture families, each
+        in two stages: a synthetic pre-train on a subsample of a 138,260-row generated corpus
+        (80,000 rows for most members, mixed with up to 14,000 ESCO description-to-skill rows that
+        supply the short-phrase supervision the sentences lack) with a mined negative ladder, then
+        a fine-tune on the real graded annotations inside the candidate pool.
+        All of them train under LambdaLoss with the NDCGLoss2++ scheme, a listwise objective
+        that weights each pair by how much swapping it would change nDCG. When the metric is nDCG
+        and the labels are graded, that is simply the matching objective.</p>
+
+      <div class="tbl-scroll reveal">
+      <table>
+        <thead><tr><th>Key</th><th>Backbone</th><th>Adaptation</th><th class="num">Alone (OOF)</th><th>In final?</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">A</td><td>bge-reranker-base (278M)</td><td>full</td><td class="num">0.7327</td><td></td></tr>
+          <tr><td class="mono">A2</td><td>bge-reranker-base, denser</td><td>full</td><td class="num">0.7490</td><td></td></tr>
+          <tr><td class="mono">A4</td><td>bge-reranker-base, 160&times;48</td><td>full</td><td class="num">0.7666</td><td></td></tr>
+          <tr><td class="mono">B2</td><td>bge-reranker-v2-m3 (568M)</td><td>full</td><td class="num">0.7955</td><td></td></tr>
+          <tr class="win"><td class="mono">C2</td><td>DeBERTa-v3-large, 40&times;32</td><td>full</td><td class="num">0.8161</td><td>yes</td></tr>
+          <tr><td class="mono">C3</td><td>DeBERTa-v3-large, 80&times;32</td><td>full</td><td class="num">0.8212</td><td></td></tr>
+          <tr class="win"><td class="mono">C4</td><td>DeBERTa-v3-large, 160&times;32</td><td>full</td><td class="num">0.8245</td><td>yes</td></tr>
+          <tr><td class="mono">Q</td><td>Qwen3-Reranker-4B</td><td>LoRA r=16</td><td class="num">0.8334</td><td></td></tr>
+          <tr class="win"><td class="mono">Q2</td><td>Qwen3-Reranker-4B, 40&times;32</td><td>LoRA r=16</td><td class="num">0.8375</td><td>yes</td></tr>
+          <tr class="win"><td class="mono">Q8</td><td>Qwen3-Reranker-8B, 16&times;24</td><td>LoRA r=16</td><td class="num">0.8358</td><td>yes</td></tr>
+          <tr><td class="mono">Q8D</td><td>Qwen3-Reranker-8B, 40&times;32</td><td>LoRA r=16</td><td class="num" style="color:var(--accent-deep)">0.8407</td><td style="color:var(--danger)">no</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="small reveal" style="margin-top:-8px">n&times;m is the stage-2 density: n listwise
+        rows sampled per query, m documents per row. Q8's figure is derived rather than logged
+        directly, since the ledger records Q8D as +0.0049 over it at the column level. Highlighted
+        rows are the four in the submitted ensemble.</p>
+
+      <p class="reveal">Look at the last two rows. <strong>Q8D was the strongest single reranker I
+        ever measured</strong>, and every ensemble containing it failed the adoption gate: the pool
+        already held two Qwen members, and its contribution was absorbed. Meanwhile C4 passed.
+        It scores 0.8245 alone, above both DeBERTa columns already in the pool and below all four
+        Qwen-family columns, and it entered by <em>replacing</em> C3 rather than lengthening the
+        ensemble.</p>
+
+      <div class="note warn reveal">
+        <p style="margin:0"><b>But decorrelation is necessary, not sufficient.</b> The campaign
+          measured the counterexample too. ELECTRA-large was the most lineage-decorrelated
+          candidate available (it shares no pre-training with either family) and it
+          failed in all three configurations it was tried in, including one at
+          <span class="mono">&minus;0.0021</span> with zero seeds won. A member has to be both
+          different <em>and</em> good enough that its differences are signal. Q8D was good and not
+          different; ELECTRA was different and not good enough.</p>
+      </div>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Absorbed, or orthogonal <span>3D &middot; drag to rotate</span></p>
+      <canvas class="fig r7" id="cOrtho" data-fig="ortho"></canvas>
+      <figcaption><b>Figure 5.</b> Ensemble members as directions in a schematic score space. A
+        candidate that points where the ensemble already points adds nothing however long its
+        arrow is; a shorter arrow pointing somewhere new adds a genuine component. This is a
+        picture of an argument, not of measured correlations, but the argument is what the
+        ablation ledger says happened.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">One implementation detail worth stealing</h3>
+      <p class="reveal">Qwen3-Reranker ships as a causal language model that answers a yes/no
+        question. Loading it through the usual sequence-classification path attaches a
+        <em>randomly initialised</em> head and discards everything the checkpoint knows about
+        reranking. Instead, score with the difference of two rows of the existing output
+        embedding:</p>
+
+      <div class="code reveal"><span class="c"># h = final hidden state at the last position</span>
+<span class="c"># the reranker was trained to answer "yes" or "no", so read that directly</span>
+score = h @ (W_lm[<span class="s">"yes"</span>] &minus; W_lm[<span class="s">"no"</span>])</div>
+
+      <p class="reveal">Verified to <span class="mono">2.4e-8</span> against evaluating the full
+        logit vector, and it turns a 151,000-way softmax into a single dot product. The resulting
+        scalar head then trains under LoRA. A different checkpoint routed through the generic path
+        earlier in the campaign produced exactly the random-head failure this avoids, and was cut.</p>
+
+      <div class="note warn reveal">
+        <p style="margin:0"><b>A root cause I got wrong, kept here on purpose.</b> The training
+          code drops queries with no grade-2-or-better item inside the candidate set, and a comment
+          in it attributes four diverged local runs to that fix, the reasoning being that a
+          listwise row with all-identical labels has no defined ideal ranking and produces NaN
+          under LambdaLoss. That attribution is wrong. A later direct measurement refuted it
+          outright: zero of 1,144 and zero of 2,860 sampled rows had all-identical labels, so the
+          ideal DCG was never zero. The divergences tracked step count instead, and their real
+          cause was never established. The guard stays in as defensive coding, but it did not fix
+          what the comment claims. A plausible root cause written confidently into a code comment
+          is exactly the kind of thing that survives unchecked into a write-up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="protocol">
+  <div class="wrap">
+    <p class="kicker reveal">06 &nbsp;/&nbsp; The protocol</p>
+    <h2 class="reveal">When the improvements are smaller than the noise</h2>
+    <p class="lede reveal d1">This is the part I think actually decided the outcome, and the part
+      I would most like other people to argue with.</p>
+
+    <div class="read">
+      <p class="reveal">Consider the position after the ensemble reached about 0.864 locally. The
+        remaining candidate improvements were worth <span class="mono">+0.001</span> to
+        <span class="mono">+0.002</span>. The validation set is 286 queries. The normalisation task
+        alone carries roughly <span class="mono">&plusmn;0.03</span> of sampling noise, and the
+        paired minimum detectable effect on its 50 queries, at 80% power, is
+        <span class="mono">&plusmn;0.015</span> to <span class="mono">&plusmn;0.017</span>.
+        Dozens of plausible configurations remained
+        unmeasured. Ten submissions existed in total, each returning one number, hours later.</p>
+
+      <div class="deep-panel reveal">
+        <h3>The default workflow is a machine for inventing improvements</h3>
+        <p>Try things, keep whatever scores higher locally, submit the best. Under these
+          conditions that is not merely inefficient. It is actively harmful. With enough
+          correlated candidate configurations, <em>something</em> will always look better by
+          +0.002. If you adopt it, you have not improved your system; you have moved it to a
+          slightly worse place and lost the ability to tell.</p>
+        <p class="small" style="margin-bottom:0">Worse, the error compounds. Every subsequent
+          comparison is made against a baseline that is itself a lucky draw, so the next real
+          improvement has to overcome an inflated incumbent before it can be seen at all.</p>
+      </div>
+
+      <h3 class="reveal">Pre-registration</h3>
+      <p class="reveal">Every round was written into an append-only ledger <em>before</em> the runs
+        existed, enumerating the exact configurations to be tried and closing the space:
+        <em>no configurations outside these templates without a fresh registration line written
+        before the run</em>. Entries are appended, never rewritten; a correction is a new entry.</p>
+      <p class="reveal">This is not bookkeeping. It is what makes the denominator of the
+        multiple-comparisons problem knowable. A procedure that allows configurations invented
+        after seeing results has no denominator, and therefore no defensible claim about
+        significance, however it is analysed afterwards.</p>
+
+      <h3 class="reveal">Paired seeds, on identical folds</h3>
+      <p class="reveal">Fold assignment is deterministic in the seed and the query count, so a
+        per-seed baseline stored during an earlier round pairs exactly with a candidate measured
+        later. Every comparison runs over seeds 0&ndash;9 and reports the paired mean difference,
+        the number of seeds won, and the spread. Pairing validity was checked rather than assumed:
+        before one round, three configurations had to reproduce the earlier harness seed for seed,
+        and parity was recorded as exact to 0.000000 on all three checks.</p>
+
+      <h3 class="reveal">The gate</h3>
+      <div class="eq eq-hero reveal">&Delta;<sub>paired</sub> &gt; <b>+0.0010</b> &nbsp;&nbsp;AND&nbsp;&nbsp;
+        seeds won &ge; <b>8/10</b> &nbsp;&nbsp;AND&nbsp;&nbsp; sd &le; <b>0.0015</b></div>
+
+      <div class="note kill reveal">
+        <p style="margin:0"><b>The moment that makes the rest of it credible.</b> In the final
+          round, configuration <span class="mono">c4b</span> returned
+          <span class="mono">&Delta; = +0.0010</span> and won <em>ten seeds out of ten</em>. It was
+          recorded as a failure, on the strict inequality. The registration had pre-committed:
+          <em>near-miss = fail, no exceptions, no post-hoc re-argument.</em> A gate that bends once
+          is not a gate, and every other number on this page would be worth less if that one had
+          bent.</p>
+      </div>
+
+      <h3 class="reveal">The multiplicity guard, and the winner's curse</h3>
+      <p class="reveal">Anything that passed faced a confirmation run on <em>fresh</em> seeds
+        10&ndash;19, keeping its pass only if it beat the incumbent there too. This was exercised
+        exactly once, on the only passer of the extended phase. Its discovery estimate was
+        <span class="mono">0.8647</span>; the pooled twenty-seed estimate was
+        <span class="mono">0.8644</span>. The direction is what the winner's curse predicts and the
+        size matches the 0.0003 haircut registered for it in advance, but against a measured
+        across-seed spread of 0.0007, a single 0.0003 gap is well inside noise. Read it as
+        consistent with the curse, not as a measurement of it.</p>
+      <p class="reveal">When selecting among many correlated subsets (one round evaluated
+        twenty-six) a haircut of <span class="mono">0.0003</span> was subtracted from the
+        winner before comparing it to the decision threshold, sized to the selection breadth.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Why pairing is not optional <span>interactive</span></p>
+      <canvas class="fig r7" id="cPaired" data-fig="paired"></canvas>
+      <div class="controls">
+        <div class="ctl"><label>True effect size <b id="lEff">+0.0011</b></label>
+          <input type="range" id="sEff" min="0" max="40" value="11"></div>
+        <div class="ctl"><label>Seeds compared <b id="lSeeds">10</b></label>
+          <input type="range" id="sSeeds" min="3" max="30" value="10"></div>
+      </div>
+      <dl class="readout">
+        <div><dt>Unpaired verdict</dt><dd id="rUnpaired" class="cool">&ndash;</dd></div>
+        <div><dt>Paired verdict</dt><dd id="rPaired" class="hot">&ndash;</dd></div>
+        <div><dt>Seeds won</dt><dd id="rWins">&ndash;</dd></div>
+        <div><dt>Gate</dt><dd id="rGate">&ndash;</dd></div>
+      </dl>
+      <figcaption><b>Figure 6.</b> Two systems differing by the effect size you set, evaluated on
+        the same seeds. Grey dots are the two absolute scores per seed; they scatter far
+        more than the effect. Coral bars are the per-seed <em>difference</em>, which is what
+        pairing recovers. At the true competition effect size the unpaired comparison is
+        hopeless and the paired one is decisive, on identical data. Drag the sliders.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">The slot bar: turning a local score into a probability</h3>
+      <p class="reveal">The last question is when a locally better configuration is worth one of
+        ten irreplaceable submissions. That needs a mapping from local score to leaderboard score,
+        and the mapping is empirical, but it <em>moves</em>, which is the first thing to say
+        about it. Measured seven times across the campaign, it ran from
+        <span class="mono">&minus;0.0086</span> for the first fitted submission to
+        <span class="mono">&minus;0.0235</span> for a mature one. A fitted system transfers worse
+        than a zero-shot one, and the offset roughly doubled as the system grew. The bars below
+        rest on the four most recent own-row offsets only, which do concentrate: mean
+        <span class="mono">&minus;0.02005</span>, standard deviation
+        <span class="mono">0.00077</span>.</p>
+
+      <div class="note good reveal">
+        <p style="margin:0"><b>Two of those seven were free.</b> Two zero-shot baselines already
+          sat on the public leaderboard, and I could score them locally. That gives an offset
+          estimate on day one, without spending a submission. That generalises to any competition with a
+          public baseline row.</p>
+        <p style="margin:14px 0 0"><b>And its limit.</b> Those two free points read
+          &minus;0.0124 and &minus;0.0139, while the mature pipeline settled near &minus;0.020. A
+          zero-shot baseline transfers better than a fitted system does, so the free estimate is
+          optimistic and has to be superseded once real rows exist. It is a starting prior, not a
+          substitute for your own measurements.</p>
+      </div>
+
+      <p class="reveal">Given a target board score, the local score needed to beat it with
+        probability <em>p</em> follows from a one-sided prediction interval on a <em>new</em>
+        offset draw. With four offsets in the final estimate that is a t-interval on three degrees
+        of freedom, not a normal z-interval, a distinction a reviewer caught, and one that
+        moved the thresholds enough to matter:</p>
+
+      <div class="tbl-scroll reveal">
+      <table>
+        <thead><tr><th>Candidate family</th><th class="num">local for ~50%</th><th class="num">for ~90%</th></tr></thead>
+        <tbody>
+          <tr><td>Blend family</td><td class="num">0.8654</td><td class="num">0.8668</td></tr>
+          <tr class="win"><td>Lean single-config family</td><td class="num">0.8640</td><td class="num">0.8654</td></tr>
+          <tr><td>Unconditional</td><td class="num">0.8647</td><td class="num">0.8661</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p class="reveal">These bars were registered before the final round, which made the last
+        decision mechanical rather than a judgement call. The adopted configuration sat at
+        <span class="mono">0.8647</span> local, clearing the lean-family 50% bar of 0.8640,
+        not the 90% bar, and was submitted on exactly that basis. It scored
+        <span class="mono">0.8458</span> against the row it needed to beat at
+        <span class="mono">0.8444</span>.</p>
+
+      <h3 class="reveal">What the protocol cost</h3>
+      <p class="reveal">It is only fair to record the price. The protocol rejected
+        <span class="mono">c4b</span>, which beat its incumbent on ten seeds out of ten. It
+        rejected three Q2D configurations at +0.0009, +0.0009 and +0.0006 with eight and nine
+        seeds won. It rejected an ESCO attribute join at +0.0005 with 6/10. And it refused a
+        recombination of my own already-scored leaderboard rows worth
+        <span class="mono">+0.0002</span>, not excluded by any rule I could point to, though
+        my own review recorded the rules-letter status as ambiguous, since the rules require the
+        submission file to be produced by the real benchmark tasks.</p>
+      <p class="reveal">A protocol tuned this conservatively will, in expectation, leave small real
+        gains on the table. The trade is deliberate. When measurement error exceeds effect size,
+        the dominant risk is not missing a real gain; it is adopting a false one and then
+        building on top of it.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <p class="kicker reveal">07 &nbsp;/&nbsp; Results</p>
+    <h2 class="reveal">One configuration passed</h2>
+    <p class="lede reveal d1">The complete pre-registered ledger of the final phase. Every row was
+      registered before it ran; every row is here.</p>
+
+    <div class="read">
+      <div class="tbl-scroll reveal">
+      <table>
+        <thead><tr><th></th><th class="num">House</th><th class="num">Tech</th><th class="num">TechWolf</th><th class="num">SkillSkape</th><th class="num">SkillNorm</th><th class="num">Macro</th></tr></thead>
+        <tbody>
+          <tr class="win"><td>Submitted system</td><td class="num">0.8387</td><td class="num">0.8390</td><td class="num">0.8347</td><td class="num">0.8683</td><td class="num">0.8480</td><td class="num"><b><span data-final="0.8458">0.8458</span></b></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="small reveal" style="margin-top:-8px">Submission 874278. Configuration C2, C4, Q2,
+        Q8 at depth 1,000, prior and override on, bagged over ten seeds. Build cross-validation on
+        three seeds gave 0.8649 / 0.8659 / 0.8652 &rarr; 0.8653, so the realised local-to-board
+        offset was &minus;0.0195, inside the pre-registered band of &minus;0.0192 to
+        &minus;0.0199.</p>
+
+      <div class="note reveal">
+        <p style="margin:0"><b>The shape of that row.</b> Among the nine accounts above it on the
+          closing public board, it is the only one whose normalisation score <em>exceeds</em> its
+          own extraction average: 0.8480 against 0.8452. Two things produce that sign and only one of them is measured. The
+          alternative-label override lifts normalisation and nothing else. But this system's
+          extraction scores also sat about 0.05 below the top of the board, which lowers the other
+          side of the same comparison. The inversion says as much about where it was weak as about
+          where it was strong.</p>
+      </div>
+    </div>
+
+    <div class="read">
+      <h3 class="reveal">The final-phase ledger</h3>
+      <div class="tbl-scroll reveal">
+      <table>
+        <thead><tr><th>Round</th><th>Configuration</th><th class="num">10-seed</th><th class="num">&Delta; paired</th><th class="num">Wins</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>Incumbents, re-derived on the same seeds</em></td></tr>
+          <tr><td>&ndash;</td><td class="mono">A4,B2,C2,C3,Q2,Q8</td><td class="num">0.8641</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="small">incumbent</td></tr>
+          <tr><td>&ndash;</td><td class="mono">C2,C3,Q2,Q8 (lean)</td><td class="num">0.8637</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="small">incumbent</td></tr>
+          <tr><td>&ndash;</td><td class="mono">blend</td><td class="num">0.8650</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="small">incumbent</td></tr>
+
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>Blend round 2: 5 configurations, 26 subsets</em></td></tr>
+          <tr><td>Blend</td><td class="mono">best subsets</td><td class="num">&ndash;</td><td class="num">+0.0004</td><td class="num">6&ndash;7/10</td><td class="fail">fail</td></tr>
+          <tr><td>Blend</td><td class="mono">Q,Q2,Q8 (Qwen trio)</td><td class="num">0.8617</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="fail">fail</td></tr>
+          <tr><td>Blend</td><td class="mono">A4,B2,Q2,Q8 (no DeBERTa)</td><td class="num">0.8628</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="fail">fail</td></tr>
+          <tr><td>Blend</td><td class="mono">A4,B2,C2,C3 (no Qwen)</td><td class="num">0.8465</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="fail">fail</td></tr>
+
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>B-family</em></td></tr>
+          <tr><td>B-fam</td><td class="mono">A4,B,B2,C2,C3,Q2,Q8</td><td class="num">0.8639</td><td class="num">&minus;0.0002</td><td class="num">3/10</td><td class="fail">fail</td></tr>
+          <tr><td>B-fam</td><td class="mono">B,C2,C3,Q2,Q8</td><td class="num">0.8638</td><td class="num">&minus;0.0003</td><td class="num">4/10</td><td class="fail">fail</td></tr>
+
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>New feature blocks</em></td></tr>
+          <tr><td>Feature</td><td class="mono">cross-encoder dispersion</td><td class="num">0.8641</td><td class="num">&minus;0.0000</td><td class="num">4/10</td><td class="fail">fail</td></tr>
+          <tr><td>Feature</td><td class="mono">ESCO attribute join</td><td class="num">0.8646</td><td class="num">+0.0005</td><td class="num">6/10</td><td class="fail">fail</td></tr>
+
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>Dense-column rounds</em></td></tr>
+          <tr><td>Q8D</td><td class="mono">C2,C3,Q2,Q8D</td><td class="num">0.8635</td><td class="num">&minus;0.0002</td><td class="num">4/10</td><td class="fail">fail</td></tr>
+          <tr><td>Q8D</td><td class="mono">C2,C3,Q2,Q8,Q8D</td><td class="num">0.8642</td><td class="num">+0.0005</td><td class="num">8/10</td><td class="fail">fail (mean)</td></tr>
+          <tr><td>Q8D</td><td class="mono">A4,B2,C2,C3,Q2,Q8D</td><td class="num">0.8636</td><td class="num">&minus;0.0005</td><td class="num">3/10</td><td class="fail">fail</td></tr>
+          <tr><td>E</td><td class="mono">C2,C3,Q2,Q8,E</td><td class="num">0.8637</td><td class="num">+0.0001</td><td class="num">4/10</td><td class="fail">fail</td></tr>
+          <tr><td>E</td><td class="mono">7-column + E</td><td class="num">0.8637</td><td class="num">&minus;0.0004</td><td class="num">3/10</td><td class="fail">fail</td></tr>
+          <tr><td>E</td><td class="mono">E,Q2,Q8</td><td class="num">0.8615</td><td class="num">&minus;0.0021</td><td class="num">0/10</td><td class="fail">fail</td></tr>
+
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>The C4 round</em></td></tr>
+          <tr class="win"><td>C4</td><td class="mono"><b>c4a: C2,C4,Q2,Q8</b></td><td class="num"><b>0.8647</b></td><td class="num"><b>+0.0011</b></td><td class="num"><b>10/10</b></td><td class="pass"><b>pass</b></td></tr>
+          <tr><td>C4</td><td class="mono">c4b: C2,C3,C4,Q2,Q8</td><td class="num">0.8646</td><td class="num">+0.0010</td><td class="num">10/10</td><td class="fail">fail (strict &gt;)</td></tr>
+          <tr><td>C4</td><td class="mono">c4c: A4,B2,C2,C4,Q2,Q8</td><td class="num">0.8646</td><td class="num">+0.0005</td><td class="num">7/10</td><td class="fail">fail</td></tr>
+
+          <tr><td colspan="6" class="small" style="color:var(--ink-4);padding-top:16px"><em>Round Q2D and the combined swap</em></td></tr>
+          <tr><td>Q2D</td><td class="mono">q2da</td><td class="num">&ndash;</td><td class="num">+0.0009</td><td class="num">8/10</td><td class="fail">fail</td></tr>
+          <tr><td>Q2D</td><td class="mono">q2db</td><td class="num">&ndash;</td><td class="num">+0.0009</td><td class="num">8/10</td><td class="fail">fail</td></tr>
+          <tr><td>Q2D</td><td class="mono">q2dc</td><td class="num">&ndash;</td><td class="num">+0.0006</td><td class="num">9/10</td><td class="fail">fail</td></tr>
+          <tr><td>Comb</td><td class="mono">C2,C4,Q2D,Q8D</td><td class="num">0.8639</td><td class="num">+0.0002</td><td class="num">5/10</td><td class="fail">fail</td></tr>
+          <tr><td>Add</td><td class="mono">lean + ESCO attributes</td><td class="num">0.8636</td><td class="num">&minus;0.0001</td><td class="num">4/10</td><td class="fail">fail</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="small reveal" style="margin-top:-8px">Spread across seeds was inside the 0.0015
+        gate for every row where it is reported; the passer measured 0.0007. It then cleared
+        fresh-seed confirmation on seeds 10&ndash;19 at +0.0010 with 9/10 wins, and was submitted.
+        Look at the three Q2D rows: +0.0009, +0.0009 and +0.0006 with eight and nine seeds won.
+        Those are precisely the results a permissive protocol adopts and a fixed gate does not.</p>
+    </div>
+  </div>
+</section>
+
+<section id="graveyard">
+  <div class="wrap">
+    <p class="kicker reveal">08 &nbsp;/&nbsp; Dead ends</p>
+    <h2 class="reveal">Everything that did not work</h2>
+    <p class="lede reveal d1">Each of these cost real time. They are here so that they need not
+      cost anyone else's. Click any card.</p>
+
+    <div class="filters reveal">
+      <button class="btn on" data-filter="all">All</button>
+      <button class="btn" data-filter="dead">Measured failures</button>
+      <button class="btn" data-filter="live">Things that worked</button>
+    </div>
+
+    <div class="grid" id="cards">
+      <div class="card" data-cat="dead"><span class="cat">Reranking</span>
+        <h3><button type="button" class="card-open" data-modal="d-offshelf">Off-the-shelf rerankers</button></h3>
+        <p>A zero-shot general-purpose reranker over the best domain retriever's top 200.</p>
+        <span class="num">&minus;0.061 macro, lost on every task</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Training</span>
+        <h3><button type="button" class="card-open" data-modal="d-binary">Binary training targets</button></h3>
+        <p>Fine-tuning a cross-encoder on 0/1 relevance instead of the real 0&ndash;4 grades.</p>
+        <span class="num">&minus;0.0758</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Data</span>
+        <h3><button type="button" class="card-open" data-modal="d-synth">LLM-generated queries</button></h3>
+        <p>Generating extra labelled queries and mixing them into fine-tuning.</p>
+        <span class="num">&minus;0.0094 at full dose</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Taxonomy</span>
+        <h3><button type="button" class="card-open" data-modal="d-graph">The ESCO hierarchy</button></h3>
+        <p>The obvious missing signal: parent and child concepts. It could not be obtained.</p>
+        <span class="num">+0.0000 over flat attributes</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Features</span>
+        <h3><button type="button" class="card-open" data-modal="d-attrs">ESCO item attributes</button></h3>
+        <p>Skill type, reuse level, label count, description length. The closest of the feature-block calls.</p>
+        <span class="num">+0.0005, 6/10 wins, still a fail</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Features</span>
+        <h3><button type="button" class="card-open" data-modal="d-disp">A disagreement column</button></h3>
+        <p>One standard-deviation feature across the cross-encoder scores.</p>
+        <span class="num">0.8641: identical to baseline</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Preprocessing</span>
+        <h3><button type="button" class="card-open" data-modal="d-bullets">Stripping bullet prefixes</button></h3>
+        <p>Removing the leading markers from 169 of 324 TechWolf queries. Obviously correct, and probably wrong.</p>
+        <span class="num">&minus;0.0120 in a smoke test</span></div>
+
+      <div class="card" data-cat="dead"><span class="cat">Tuning</span>
+        <h3><button type="button" class="card-open" data-modal="d-hp">Hyperparameter search</button></h3>
+        <p>A LightGBM sweep whose winners reversed on disjoint seeds.</p>
+        <span class="num">Abandoned and locked</span></div>
+
+      <div class="card" data-cat="live"><span class="cat">Fusion</span>
+        <h3><button type="button" class="card-open" data-modal="d-ltr">Learning to rank</button></h3>
+        <p>A LambdaRank model over twelve mostly-weak retrieval lanes.</p>
+        <span class="num">+0.0291, and no GPU</span></div>
+
+      <div class="card" data-cat="live"><span class="cat">Features</span>
+        <h3><button type="button" class="card-open" data-modal="d-prior">The relevance prior</button></h3>
+        <p>Four columns of counting statistics over the training folds' candidate pools.</p>
+        <span class="num">+0.0380, seven disjoint seeds</span></div>
+
+      <div class="card" data-cat="live"><span class="cat">Rules</span>
+        <h3><button type="button" class="card-open" data-modal="d-alt">The exact-match override</button></h3>
+        <p>Forcing an exact alternative-label match to rank 1 at write time.</p>
+        <span class="num">+0.0564 on normalisation, 0.0000 elsewhere</span></div>
+
+      <div class="card" data-cat="live"><span class="cat">Calibration</span>
+        <h3><button type="button" class="card-open" data-modal="d-free">Free offset calibration</button></h3>
+        <p>Scoring someone else's published baseline row locally, instead of spending a submission.</p>
+        <span class="num">2 of 7 calibration points, 0 submissions</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="channel">
+  <div class="wrap">
+    <p class="kicker reveal">09 &nbsp;/&nbsp; The channel</p>
+    <h2 class="reveal">What a leaderboard cannot tell you</h2>
+    <p class="lede reveal d1">A fact about data hosting, and a negative result about detection
+      that I reached only after being confidently wrong about it first.</p>
+
+    <div class="read">
+      <div class="note reveal">
+        <p style="margin:0"><b>What this section is not.</b> It concerns how the datasets were
+          hosted, and a methodological result about leaderboard statistics. It makes no claim about
+          any participant, names none, and deliberately withholds the operational detail that would
+          let a reader reconstruct a shortlist. It is here because the organisers asked for
+          insights that would help a future edition.</p>
+      </div>
+
+      <h3 class="reveal">The channel</h3>
+      <p class="reveal">The five graded datasets are published on the Hugging Face Hub. Their
+        <span class="mono">qrels/test</span> configurations were served, unauthenticated, through
+        the public datasets-server API. One request returns their sizes:</p>
+
+      <div class="code reveal">curl <span class="s">"https://datasets-server.huggingface.co/size?dataset=TechWolf%2FSkill-extraction-House-graded&amp;config=qrels"</span></div>
+
+      <p class="reveal">I have two point observations, not continuous coverage. On 30 July, five
+        days before the test phase closed, all five graded repositories exposed public
+        <span class="mono">qrels/test</span> and <span class="mono">queries/test</span> splits whose
+        counts matched the competition's exactly. On 4 August at 01:08 UTC, an hour after close, I
+        re-pulled and recorded the sizes: <span class="mono">528, 583, 582, 1265, 450</span> qrels
+        rows against <span class="mono">261, 338, 324, 500, 450</span> test queries. So the splits
+        were reachable during the competition and remained so after it, though I did not
+        monitor the endpoint continuously and cannot say they were reachable throughout.</p>
+
+      <p class="reveal">The datasets' own cards document the situation candidly: the published test
+        labels are "real but binary" and "derived from the public non-graded ground truths", with
+        the graded 0&ndash;4 annotations "withheld during the ongoing RecSys-HR challenge". So the
+        withheld object was genuinely withheld. What stayed reachable was a binary relevance
+        judgement over the exact test queries. The rules prohibit enriching training with
+        test-source data, which makes this a rules question rather than a grader vulnerability. I
+        reported it to the organisers before results and the summary paper were finalised, and
+        asked explicitly that my own submissions be included in whatever check followed.</p>
+
+      <div class="note good reveal">
+        <p style="margin:0"><b>The lesson for a future edition.</b> A test set is not withheld
+          because the interesting column has been dropped from a published table. It is withheld
+          when the rows themselves are unreachable. Gating the qrels splits for the duration of a
+          competition costs nothing and removes the question entirely.</p>
+      </div>
+
+      <h3 class="reveal">Can a leaderboard reveal that such a channel was used?</h3>
+      <p class="reveal">I spent real effort on this question and got it wrong, so the wrong answers
+        are what this section reports.</p>
+
+      <p class="reveal"><strong>The first statistic.</strong> Cross-sectional: for each row, take
+        the mean extraction score minus the normalisation score, and treat a large positive gap as
+        anomalous. The reasoning is that a source covering the extraction tasks would lift them and
+        leave normalisation behind. One number per row, nothing needed but the public board, and on
+        a short list of rows it appears to separate them cleanly.</p>
+
+      <div class="note kill reveal">
+        <p style="margin:0"><b>It fires on a majority of the board.</b> Computed over every row, a
+          <em>majority</em> have a positive gap. A statistic that flags more than half the
+          population is not detecting an anomaly; it is measuring a property of the tasks.
+          Extraction and normalisation have different attainable ceilings and most systems are
+          better at the first. Withdrawn.</p>
+      </div>
+
+      <p class="reveal"><strong>The second statistic.</strong> A within-account step: between
+        consecutive submissions by one account, does the subset of tasks a source would help move
+        together and sharply while the rest stays flat? This at least controls for the system,
+        which the cross-sectional version does not.</p>
+
+      <div class="note kill reveal">
+        <p style="margin:0"><b>It is confounded by the most ordinary act in competitive machine
+          learning.</b> A task column that does not move between two submissions usually means
+          nothing more than that a per-task prediction file was reused unchanged, a routine
+          thing to do while iterating on one task. On this board that pattern occurs in roughly one
+          consecutive pair in seven, across accounts spanning the full range of scores, including
+          on submissions whose own descriptions identify them as reruns of the same baseline. A
+          pattern with that base rate carries little evidential weight.</p>
+      </div>
+
+      <p class="reveal">I am also not publishing the thresholds. The leaderboard is public and the
+        statistic is deterministic, so exact values would hand any reader a reproducible shortlist
+        of accounts, which is precisely the accusation this page declines to make, merely
+        routed through the reader.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Why a base-rate check kills both <span>animated</span></p>
+      <canvas class="fig r7" id="cSig" data-fig="signature"></canvas>
+      <figcaption><b>Figure 7.</b> Schematic. Left: what a statistic looks like when you evaluate
+        it on the short list you were already looking at: clean separation. Right: the same
+        statistic evaluated on the whole population, where it fires on a majority and the
+        separation disappears. The picture is generic; it is the shape of the mistake, not a plot
+        of any particular board.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">Where this ends up</h3>
+      <div class="deep-panel reveal">
+        <p style="font-size:21px;line-height:1.42;margin-bottom:14px">I do not think any pattern in
+          the public scores can distinguish a compliant system from a non-compliant one here. I was
+          wrong to think otherwise.</p>
+        <p class="small" style="margin-bottom:0">Rules compliance is a question for organisers with
+          access to submissions and code, which is where I left it.</p>
+      </div>
+
+      <p class="reveal">Two things produced that reversal, and both are cheap enough that anyone
+        attempting this kind of analysis should run them first.</p>
+
+      <p class="reveal"><strong>The base-rate check.</strong> How often does the pattern fire across
+        the <em>whole</em> population, rather than across the short list you were already looking
+        at? Both statistics above survive scrutiny on a handful of rows and die on the full
+        board.</p>
+
+      <p class="reveal"><strong>The reference-class check</strong>, which is the uncomfortable one
+        and the one I would emphasise. My own entry was the clearest outlier on the
+        cross-sectional statistic: all nine of my placed rows fall on the opposite side of
+        it. Which means the reference class I was implicitly comparing against was one I had
+        constructed by removing everyone whose system did not resemble mine. A statistic that flags
+        "systems unlike mine" will always find some, and it will always feel like a discovery.</p>
+
+      <div class="note reveal">
+        <p style="margin:0"><b>On the adversarial review.</b> An earlier and considerably more
+          accusatory version of this analysis went through a review in which independent reviewers
+          were instructed to refute each claim, with refutation as the default under uncertainty.
+          Of <span class="mono">72</span> claims examined, <span class="mono">14</span> survived.
+          The detail worth recording is that the cross-sectional statistic was <em>not</em> among
+          the claims that review rejected. It survived, and I withdrew it myself afterwards
+          when the base-rate check destroyed its interpretation. A claim can pass adversarial review
+          and still be wrong. That is an argument for running the cheap population-level check in
+          addition to the expensive argument-level one, not instead of it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="wrap">
+    <p class="kicker reveal">10 &nbsp;/&nbsp; Lessons</p>
+    <h2 class="reveal">What I would tell myself in May</h2>
+    <p class="lede reveal d1">Ranked by contribution per unit of effort, the levers invert almost
+      exactly the order in which one naturally attempts them.</p>
+
+    <div class="read">
+      <div class="stats reveal">
+        <div><span class="n hot">&asymp;+0.138</span><span class="l">Cross-encoders<br>(all the GPU time)</span></div>
+        <div><span class="n" style="color:var(--calm-deep)">+0.0331</span><span class="l">Counting statistics<br>(the prior), no GPU</span></div>
+        <div><span class="n" style="color:var(--calm-deep)">+0.0291</span><span class="l">Learning to rank<br>over lanes, no GPU</span></div>
+        <div><span class="n" style="color:var(--calm-deep)">+0.0152</span><span class="l">Exact matching<br>in the right place, no GPU</span></div>
+        <div><span class="n hot">+0.0011</span><span class="l">The entire<br>extended phase</span></div>
+      </div>
+
+      <h3 class="reveal">Sequence cheap levers first, and not only because they are cheap</h3>
+      <p class="reveal">The three no-GPU levers total about <span class="mono">+0.077</span>: roughly a third of the gain over the fused base, for a rounding error of the cost. That is
+        not an argument against cross-encoders: <span class="mono">+0.138</span> was decisive for
+        this entry, and I know of no configuration of the cheap levers alone that came close.
+        Whether the top of <em>this</em> board was reachable without them I cannot say, since I have
+        no visibility into any other entry's architecture beyond a one-line self-description.</p>
+      <p class="reveal">It is an argument about <em>ordering</em>, and the criticism lands on me.
+        The cheap levers were available from day one and I did not reach the prior until the
+        campaign was two-thirds gone. They also had the largest effects relative to their
+        measurement error, which made them the ones a 286-query validation set could actually
+        verify. By the time the campaign reached effects of +0.001, measurement had become more
+        expensive than training.</p>
+
+      <h3 class="reveal">Ensembles want decorrelation, not strength</h3>
+      <p class="reveal">The strongest reranker I trained is not in the final system, because what
+        it knew was already there. But ELECTRA (the most decorrelated candidate available) failed too, and worse. A member has to be both different <em>and</em> good enough
+        that its differences are signal. Standalone quality is a poor guide on its own; so is
+        novelty on its own.</p>
+      <p class="reveal">This is not new in the ensembling literature. It is worth restating in a
+        competition context because the instinct under time pressure is always to train a bigger
+        version of whatever currently scores highest.</p>
+
+      <h3 class="reveal">Treat the submission quota as the scarce resource it is</h3>
+      <p class="reveal">Ten submissions, each returning one scalar hours later, is a bandit problem
+        with an expensive arm. Two of my seven calibration points came free, from locally scoring
+        baselines someone else had already put on the board. That trick generalises to any
+        competition with a public baseline row.</p>
+
+      <h3 class="reveal">Write down what you are going to do before you do it</h3>
+      <p class="reveal">Everything above rests on an append-only ledger that recorded each round's
+        exact configuration list before the round existed. It is the least glamorous part of the
+        campaign and the one I would keep if I could keep only one. Without it, the last two weeks
+        would have been a search over noise, and I would not have been able to tell.</p>
+
+      <div class="note reveal">
+        <p style="margin:0"><b>On the final standing.</b> At the close of the test phase the public
+          board carried 98 rows from 29 accounts, and my best row ranked tenth <em>on score</em>.
+          The organisers then verified rule compliance across entries (a process they
+          described as taking considerably longer than expected) and the final standing
+          announced afterwards placed this entry first. I have no visibility into that process,
+          and this page does not speculate about the compliance status of any other entry. I make
+          no claim that the protocol described in section 6 is why the entry finished first; on
+          score it did not separate itself from anything. What the protocol did was make the
+          numbers on this page reportable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="small">
+      <h3>Notes on this page</h3>
+      <p>Written by Maksim Silchenko, team thylinao, competing solo, at the National University of
+        Singapore. The RecSys-HR 2026 WorkRB challenge was organised by TechWolf and ran on
+        Codabench with 63 participants and 322 submissions. The full training code was submitted to
+        the organisers as the rules require. A longer technical report covering the same material
+        with complete ablation tables is being posted to arXiv; this line will carry the link once
+        it is live.</p>
+
+      <p>Every quantitative claim about my own system traces to an entry in an append-only
+        measurement ledger kept throughout the campaign, or to a leaderboard record identified by
+        submission number. Several figures are generated rather than measured, and their captions
+        say so: the grade examples in section 1, the point cloud in figure 1, the single toy query
+        in figure 2, the geometry in figure 5, the simulated seeds in figure 6 (whose scatter is
+        calibrated to the recorded across-seed spread of 0.0023 to 0.0033), and both panels of
+        figure 7. Figures 3 and 4 carry real measured numbers. Nothing on this page is a model's
+        summary of a measurement.</p>
+
+      <p>Compute was provided by the School of Computing, National University of Singapore
+        (A100-80GB, H100-96GB and H200-141GB nodes), for a campaign total of roughly 250&ndash;300
+        single-GPU hours. Stage-1 training data is
+        <span class="mono">TechWolf/Synthetic-ESCO-skill-sentences</span>, CC-BY-4.0. The target
+        taxonomy is ESCO v1.1. Model checkpoints are named in section 5 and are all publicly
+        available.</p>
+
+      <p>Section 9 concerns a property of how the challenge datasets were hosted and the statistics
+        that follow from it. It names no participant and makes no claim about anyone's compliance.
+        The claims in it that survived did so through an adversarial review with refutation as the
+        default; the statistic I withdrew is reported alongside the ones that held.</p>
+
+      <p>Large language models were used throughout this project, mainly for code and drafting,
+        including this page. Every quantitative claim traces to a recorded measurement or a grader
+        record rather than to a model's summary of one.</p>
+
+      <p>Thanks to the organisers for a well-specified benchmark, for answering rules questions in
+        public, and for taking verification seriously enough to delay the results.</p>
+
+      <p>Corrections are welcome. If a figure here misrepresents your work, tell me and I will
+        fix it.</p>
+
+      <p style="margin-bottom:0"><a href="https://thylinao1.github.io/index.html">Back to the other
+        work &#8599;</a></p>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /shell -->
+
+<div id="scrim"></div>
+
+<div class="modal" id="d-offshelf"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; reranking</p>
+  <h3>Off-the-shelf rerankers are not a free win</h3>
+  <p>A zero-shot <span class="mono">bge-reranker-base</span> applied over the top 200 candidates of
+    the best domain retriever lost on every single task: House &minus;0.036, Tech &minus;0.069,
+    SkillSkape &minus;0.102, normalisation &minus;0.038. Macro &minus;0.061.</p>
+  <p>The diagnostic that mattered: grade-4 recall <em>inside the reranked set</em> was 0.87 to 1.00.
+    The right answers were there. A general-purpose web-passage reranker simply orders ESCO skill
+    concepts worse than a domain-tuned cosine does. This is an ordering failure, not a recall
+    failure, and no amount of deeper retrieval fixes it.</p>
+  <p style="margin-bottom:0">The conclusion shaped the rest of the campaign: the reranker has to be
+    trained on this problem's actual grade scale. That is what made the expensive stage expensive.</p>
+</div>
+
+<div class="modal" id="d-binary"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; training</p>
+  <h3>Binary training targets</h3>
+  <p>A MiniLM-L6 cross-encoder fine-tuned on 0/1 relevance instead of the real 0&ndash;4 grades
+    measured <span class="mono">&minus;0.0758</span> against the base it was meant to improve.</p>
+  <p>The mechanism is the grade scale. Grades 1 and 2 are awarded precisely for surfacing taxonomic
+    neighbours (a parent concept, a sibling at the wrong granularity) and they carry
+    real credit under exponential gain. A model trained on binary labels learns to drive every one
+    of those to a hard zero. It gains nothing for doing so, because the exact items were already
+    ranked above them, and it loses all the partial credit underneath.</p>
+  <p style="margin-bottom:0">After this measurement, every reranker in the campaign trained on
+    graded or soft targets under a listwise objective. There was never a second binary run.</p>
+</div>
+
+<div class="modal" id="d-synth"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; data</p>
+  <h3>LLM-generated queries</h3>
+  <p>With 286 labelled queries, generating more looks like the highest-leverage move available. The
+    measured slope of <em>real</em> labelled data was <span class="mono">+0.01266</span> per
+    doubling, so the prize was real.</p>
+  <p>It measured <span class="mono">&minus;0.0094</span> at full dose against a
+    <span class="mono">+0.005</span> pass threshold, and was killed under both variants tried.</p>
+  <p>The root cause was content mismatch rather than generation quality. Synthetic House queries
+    were <em>too easy</em> (base nDCG 0.644 on them against 0.606 on the real ones), so
+    training on them taught the model a distribution it would not face. House took the largest dose
+    and lost the most, &minus;0.016.</p>
+  <p style="margin-bottom:0">The harness itself was clean: the leak filter dropped nothing at a
+    maximum cosine of 0.61, and the cross-encoder known-value gate reproduced within tolerance. The
+    lever failed on its merits.</p>
+</div>
+
+<div class="modal" id="d-graph"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; taxonomy</p>
+  <h3>The ESCO hierarchy</h3>
+  <p>ESCO is a graph. Grade 2 is defined as "right area, wrong granularity", which is
+    <em>literally a statement about parent and child concepts</em>. Using the hierarchy is the most
+    obvious idea in the whole problem.</p>
+  <p>It could not be obtained. The documented bulk downloads returned 404 and 401. The public REST
+    API does serve broader and narrower concepts, verified working, but a full pass is 13,891
+    requests, and egress began returning network errors after eight concurrent calls.</p>
+  <p>What was reachable was a flat list: labels, alternative labels, descriptions, skill type,
+    reuse level. Measured against those flat attributes, graph edges contributed
+    <span class="mono">+0.0000</span>.</p>
+  <p style="margin-bottom:0">The hierarchy half of the plan was cut outright. If a future edition
+    wants this lever exercised, shipping the edge list with the data would do it.</p>
+</div>
+
+<div class="modal" id="d-attrs"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; features</p>
+  <h3>ESCO item attributes</h3>
+  <p>Skill type, reuse level, log of the alternative-label count, log of the description length.
+    Joined at 13,891 of 13,891 rows: complete coverage, no missing values, four clean
+    columns.</p>
+  <p>It measured <span class="mono">+0.0005</span> with 6 of 10 seeds won. The gate required
+    &gt; +0.0010 and at least 8 of 10.</p>
+  <p style="margin-bottom:0">This was the closest of the feature-block rejections, and the one I
+    would most like to have adopted. (Closer calls came later: three Q2D configurations at +0.0009,
+    +0.0009 and +0.0006 with eight and nine seeds won, and c4b at +0.0010 with all ten.) It is a good illustration of what a pre-registered gate is for: a
+    positive point estimate with a coin-flip win rate is exactly the shape of a result that is
+    probably noise, and exactly the shape that is most tempting to keep.</p>
+</div>
+
+<div class="modal" id="d-disp"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; features</p>
+  <h3>A disagreement column</h3>
+  <p>The idea: when the cross-encoders disagree about a candidate, that disagreement is itself
+    information. Add one standard-deviation column across their z-scores and let the fusion model
+    use it.</p>
+  <p>It measured <span class="mono">0.8641</span>. The baseline measured
+    <span class="mono">0.8641</span>. Identical to four decimals, 4 of 10 seeds won.</p>
+  <p style="margin-bottom:0">In hindsight the reason is obvious: the fusion model already receives
+    every member's score as its own column, and a gradient-boosted tree ensemble can represent
+    disagreement between them directly. The engineered summary added nothing the model could not
+    already compute. Worth remembering before hand-crafting any aggregate over features a
+    non-linear model already sees.</p>
+</div>
+
+<div class="modal" id="d-bullets"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; preprocessing</p>
+  <h3>Stripping bullet prefixes</h3>
+  <p>Leading <span class="mono">"* "</span> and <span class="mono">"- "</span> markers appear in 42
+    of 338 test Tech queries and 169 of 324 test TechWolf queries: more than half of the
+    task with no local labels. Removing formatting noise before encoding is textbook.</p>
+  <p>Measured on the task where it <em>could</em> be measured (in a smoke test over a
+    subsampled corpus) it lost <span class="mono">&minus;0.0120</span>.</p>
+  <p style="margin-bottom:0">The full-pipeline recheck was never run; it would have cost cluster
+    hours against a single remaining submission slot. So I have no confirmed explanation, only the
+    suspicion that the encoders learned something from list structure. Not applied, on a
+    measurement I would not call conclusive, but which was enough to stop me shipping the
+    intervention to a task I could not measure at all.</p>
+</div>
+
+<div class="modal" id="d-hp"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">Measured failure &middot; tuning</p>
+  <h3>Hyperparameter search</h3>
+  <p>A sweep over the fusion model's hyperparameters selected settings that <em>reversed</em> when
+    re-measured on disjoint seeds.</p>
+  <p>The sweep was abandoned and the parameters locked for the remainder of the campaign, with a
+    standing rule that they could not be reopened.</p>
+  <p style="margin-bottom:0">This is selection noise in its purest form. A hyperparameter search
+    over a 286-query validation set is mostly a search over the noise: with enough configurations,
+    the best one is whichever got the luckiest folds. The tell is that the ranking does not survive
+    a change of seed, which is a cheap check, and one worth running before trusting any
+    sweep on a small set.</p>
+</div>
+
+<div class="modal" id="d-ltr"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">What worked &middot; fusion</p>
+  <h3>Learning to rank over cheap signals</h3>
+  <p>Twelve retrieval lanes, ten of which are individually poor (0.095 to 0.53 macro nDCG for
+    the nine with a measured macro, against 0.6416 for the best single retriever), combined by a
+    LambdaRank model over thirty-three columns. From 0.6499 to 0.6790.</p>
+  <p><span class="mono">+0.0291</span>, with no GPU involved at any point.</p>
+  <p><b>A correction.</b> I first wrote this card claiming +0.1050 and calling it the largest jump
+    of the campaign. That was wrong: the figure I was quoting, 0.7549, is a later ladder rung that
+    already contains a trained cross-encoder column, so most of that gain is neural. The lane
+    fusion on its own is worth +0.0291. Attributing a neural gain to a cheap lever is exactly the
+    error a tidy narrative produces, so the correction stays visible.</p>
+  <p>The contrast that makes the point: naive equal-weight reciprocal-rank fusion of the three most
+    obvious lanes measured 0.5935, <em>worse</em> than the best lane alone at 0.6416. Combining
+    rankers is not automatically good. Learning the combination is what turns weak, diverse signals
+    into a strong one.</p>
+  <p style="margin-bottom:0">The clearest single case of a weak lane mattering is
+    <span class="mono">curricdesc</span>, which ranked top-4 in feature importance while scoring
+    worse standalone than the plain CurriculumMatch lane it was derived from.</p>
+</div>
+
+<div class="modal" id="d-prior"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">What worked &middot; features</p>
+  <h3>The relevance prior</h3>
+  <p>Some ESCO concepts are relevant more often than others, and that is learnable from counts
+    alone. Four smoothed columns: the probability a concept is graded at least 1, the probability it
+    is graded at least 3, how often it appears as a candidate at all, and its expected exponential
+    gain, which is the metric's own currency.</p>
+  <p><span class="mono">+0.0380</span> over seven disjoint seeds. Two of the four
+    are the two that matter most. In the submitted model <span class="mono">prior_hi</span> is
+    the highest-importance feature of all and <span class="mono">prior_egain</span> is fourth:
+    four columns of counting statistics outranking a four-billion-parameter reranker's score.</p>
+  <p><b>The part that needed care.</b> A prior computed from labels is exactly the kind of feature
+    that leaks. It is counted only over the candidate pools of each fold's <em>training</em>
+    queries, leave-one-out on training rows, so no label from an evaluated query touches its own
+    features. Two controls back that up: a leave-one-task-out run held at
+    <span class="mono">+0.0315</span>, and a label-shuffled control collapsed the effect entirely.</p>
+  <p style="margin-bottom:0">The shuffle control is the one that matters. Without it, a leaking
+    feature and a real one look identical.</p>
+</div>
+
+<div class="modal" id="d-alt"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">What worked &middot; rules</p>
+  <h3>The exact-match override</h3>
+  <p>If a query string matches an ESCO alternative label exactly after normalisation, force that
+    concept to rank 1 at write time. ESCO carries 97,441 alternative labels, 7.01 per concept,
+    collapsing to 96,684 distinct normalised strings, of which only 0.74% are ambiguous, with a
+    maximum fan-out of four.</p>
+  <p>The measurement is local and entirely one-sided: <span class="mono">+0.0564</span> on the
+    normalisation task and exactly <span class="mono">0.0000</span> on each of the other three,
+    which projects to <span class="mono">+0.0152</span> on the four-task local macro and
+    <span class="mono">+0.0113</span> on the five-task board average. It was never isolated on the
+    board itself, since no two submissions differed only by this switch. 450 of 450 normalisation
+    queries hit an exact alternative label, against 3 of 324 for TechWolf.</p>
+  <p style="margin-bottom:0"><b>The distinction that made it work.</b> The same signal as a soft
+    feature, substring containment, offered to the model to weigh, was measured and
+    killed at 0.8616 against a 0.8620 baseline. A hard override and a soft feature are not the same
+    intervention. When you know the answer, writing it down beats telling a model about it.</p>
+</div>
+
+<div class="modal" id="d-free"><button class="modal-x" aria-label="Close">&times;</button>
+  <p class="kicker">What worked &middot; calibration</p>
+  <h3>Free offset calibration</h3>
+  <p>Local cross-validation and leaderboard score differ by an offset, and knowing that offset is
+    what turns a local number into a submission decision. Measuring it normally costs a submission,
+    and there were only ten.</p>
+  <p>Two zero-shot baselines already sat on the public leaderboard, and both could be scored
+    locally: one read 0.6416 locally against 0.6292 on the board, the other 0.6214 against 0.6075.
+    Two offset estimates, zero submissions spent, available on day one.</p>
+  <p>Across the campaign the offset was measured seven times, and it <em>moved</em>: from
+    <span class="mono">&minus;0.0086</span> for the first fitted submission to
+    <span class="mono">&minus;0.0235</span> for a mature one. The four most recent own-row offsets
+    do concentrate: mean <span class="mono">&minus;0.02005</span>, standard deviation
+    <span class="mono">0.00077</span>. Those four are what the slot bars in section 6 rest
+    on.</p>
+  <p style="margin-bottom:0"><b>The limit of the free trick.</b> Those two free points read
+    &minus;0.0124 and &minus;0.0139, while the mature pipeline settled near &minus;0.020. A
+    zero-shot baseline transfers better than a fitted system does, so the free estimate is
+    optimistic and must be superseded once real rows exist. It is a starting prior, not a
+    substitute for your own measurements.</p>
+</div>
+<script>
+(function(){
+"use strict";
+var mqReduce = matchMedia("(prefers-reduced-motion: reduce)");
+var reduce = mqReduce.matches;
+mqReduce.addEventListener("change", function(e){ reduce = e.matches; });
+
+/* ---------------- palette ---------------- */
+var INK="#16201b", INK2="#39443c", INK3="#5c665e", INK4="#78827a",
+    RULE="rgba(22,32,27,0.11)", RULE2="rgba(22,32,27,0.26)",
+    BG="#f0f2ec", BG2="#e6ebe1", BG3="#d7ded0", DEEP="#14231e",
+    DINK="#edf1ec", DINK2="#93a39a", DRULE="rgba(237,241,236,0.16)",
+    CORE="#1f5f52", CORES="#8fb3aa", ACC="#a03f1e", ACCD="#7d2f14",
+    CALM="#3f7d4a", CALMD="#2b5e35", DANGER="#9e3418";
+/* the graded-relevance ramp, grade 0..4: stone, sage, teal, ochre, rust */
+var GR = ["#b4bbb2","#8fae9f","#4b8a76","#c48a35","#a03f1e"];
+var GRT = ["#6f766d","#5b8171","#357062","#9a6a24","#7d2f14"];  /* darker, for text */
+
+/* ---------------- helpers ---------------- */
+var _hd = new WeakMap();
+function hidpi(c, ratio){
+  var dpr = Math.min(devicePixelRatio || 1, 2);
+  var r = c.getBoundingClientRect();
+  var w = Math.max(1, Math.round(r.width));
+  var h = Math.max(1, Math.round(r.height || w * (ratio||0.5)));
+  var k = _hd.get(c);
+  if(k && k.w===w && k.h===h && k.dpr===dpr){ k.x.clearRect(0,0,w,h); return k; }
+  c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
+  var x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
+  var rec = {x:x, w:w, h:h, dpr:dpr};
+  _hd.set(c, rec); return rec;
+}
+function rr(x,a,b,c,d,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+c,b,a+c,b+d,r);
+  x.arcTo(a+c,b+d,a,b+d,r);x.arcTo(a,b+d,a,b,r);x.arcTo(a,b,a+c,b,r);x.closePath();}
+function lab(x,t,px,py,col,size,ls){
+  x.save();x.fillStyle=col||INK4;x.font=(size||11)+"px 'IBM Plex Mono',monospace";
+  if(ls){var s=String(t),cx=px;for(var i=0;i<s.length;i++){x.fillText(s[i],cx,py);
+    cx+=x.measureText(s[i]).width+ls;}}else x.fillText(t,px,py);x.restore();
+}
+function lerp(a,b,t){return a+(b-a)*t}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function ease(t){return t<0?0:t>1?1:1-Math.pow(1-t,3)}
+function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;
+  var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return((t^t>>>14)>>>0)/4294967296;}}
+function gauss(rnd){var u=1-rnd(),v=rnd();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function hex2rgb(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function mixc(a,b,t){var A=hex2rgb(a),B=hex2rgb(b);
+  return "rgb("+Math.round(lerp(A[0],B[0],t))+","+Math.round(lerp(A[1],B[1],t))+","+Math.round(lerp(A[2],B[2],t))+")";}
+function rgba(h,a){var c=hex2rgb(h);return "rgba("+c[0]+","+c[1]+","+c[2]+","+a+")";}
+
+/* ---------------- a small 3D engine ----------------
+   Right-handed, camera on +z looking at the origin. Points are rotated by
+   yaw then pitch, projected with a real perspective divide, and drawn back
+   to front (painter's algorithm). No library: three.js would be 600KB for
+   what is four matrix multiplies. */
+function mk3d(w,h,opts){
+  opts = opts || {};
+  return {
+    yaw: opts.yaw||0, pitch: opts.pitch||0,
+    dist: opts.dist||3.4, focal: opts.focal|| (Math.min(w,h)*0.9),
+    cx: w/2, cy: h/2, w:w, h:h
+  };
+}
+function project(cam, p){
+  var cy=Math.cos(cam.yaw), sy=Math.sin(cam.yaw);
+  var cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
+  /* yaw about y */
+  var x1 =  p[0]*cy + p[2]*sy;
+  var z1 = -p[0]*sy + p[2]*cy;
+  /* pitch about x */
+  var y2 =  p[1]*cp - z1*sp;
+  var z2 =  p[1]*sp + z1*cp;
+  var z  =  z2 + cam.dist;
+  if(z < 0.05) z = 0.05;
+  var s  =  cam.focal / z;
+  return [cam.cx + x1*s, cam.cy - y2*s, z, s];
+}
+/* pointer drag support, shared by every 3D figure */
+function draggable(canvas, cam){
+  var down=false, lx=0, ly=0;
+  canvas.style.touchAction = "pan-y";
+  canvas.addEventListener("pointerdown", function(e){
+    down=true; lx=e.clientX; ly=e.clientY; cam.user=true;
+    canvas.setPointerCapture(e.pointerId); canvas.style.cursor="grabbing";
+  });
+  canvas.addEventListener("pointermove", function(e){
+    if(!down) return;
+    cam.yaw   += (e.clientX-lx)*0.0075;
+    cam.pitch  = clamp(cam.pitch + (e.clientY-ly)*0.0060, -1.15, 1.15);
+    lx=e.clientX; ly=e.clientY;
+  });
+  function up(e){ down=false; canvas.style.cursor="grab";
+    try{ canvas.releasePointerCapture(e.pointerId); }catch(_){} }
+  canvas.addEventListener("pointerup", up);
+  canvas.addEventListener("pointercancel", up);
+  canvas.style.cursor="grab";
+}
+
+/* ---------------- animation registry, visibility gated ---------------- */
+var ticks = [];
+function register(el, fn, ratio){
+  var rec = {el:el, fn:fn, on:false, t:0, ratio:ratio||0.5};
+  ticks.push(rec);
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ rec.on = e.isIntersecting; });
+  }, {rootMargin:"140px 0px 140px 0px", threshold:0});
+  io.observe(el);
+  return rec;
+}
+var last = 0;
+function loop(now){
+  var dt = Math.min(0.05, (now - last)/1000) || 0.016; last = now;
+  for(var i=0;i<ticks.length;i++){
+    var r = ticks[i];
+    if(!r.on) continue;
+    r.t += reduce ? 0 : dt;
+    try{ r.fn(r.t, dt); }catch(e){}
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(function(n){ last=n; loop(n); });
+var _rsz = null;
+addEventListener("resize", function(){
+  if(_rsz) clearTimeout(_rsz);
+  _rsz = setTimeout(function(){
+    for(var i=0;i<ticks.length;i++){
+      if(!ticks[i].on) continue;
+      try{ ticks[i].fn(ticks[i].t, 0); }catch(e){}
+    }
+  }, 120);
+}, {passive:true});
+
+/* ---------------- reveal, headings, equations, scrub, counters ---------------- */
+var revObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -7% 0px", threshold:0.04});
+document.querySelectorAll(".reveal").forEach(function(el){ revObs.observe(el); });
+
+var inObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); inObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -12% 0px", threshold:0.15});
+document.querySelectorAll("h2, .eq").forEach(function(el){ inObs.observe(el); });
+
+/* the hero headline arrives word by word */
+(function(){
+  var h1 = document.querySelector("#hero h1"); if(!h1) return;
+  var words = h1.textContent.trim().split(/\s+/);
+  h1.textContent = "";
+  words.forEach(function(wd,i){
+    var sp = document.createElement("span");
+    sp.className = "w"; sp.textContent = wd;
+    sp.style.transitionDelay = (0.12 + i*0.085).toFixed(3)+"s";
+    h1.appendChild(sp);
+    if(i < words.length-1) h1.appendChild(document.createTextNode(" "));
+  });
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    h1.querySelectorAll(".w").forEach(function(sp){ sp.classList.add("in"); });
+  }); });
+})();
+
+/* cards arrive in a stagger, by row */
+(function(){
+  var cs = [].slice.call(document.querySelectorAll("#cards .card"));
+  var cObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var i = cs.indexOf(e.target);
+      e.target.style.transitionDelay = ((i % 4) * 0.09).toFixed(2)+"s";
+      e.target.classList.add("shown");
+      cObs.unobserve(e.target);
+    });
+  }, {rootMargin:"0px 0px -6% 0px", threshold:0.06});
+  cs.forEach(function(c){ cObs.observe(c); });
+})();
+
+/* every figure carries a progress rule that fills as it crosses the viewport */
+(function(){
+  var figs = [].slice.call(document.querySelectorAll("main figure"));
+  figs.forEach(function(f){
+    var d = document.createElement("div"); d.className = "scrub";
+    d.innerHTML = "<i></i>"; f.insertBefore(d, f.firstChild);
+  });
+  function upd(){
+    for(var i=0;i<figs.length;i++){
+      var r = figs[i].getBoundingClientRect();
+      if(r.bottom < 0 || r.top > innerHeight) continue;
+      var pr = clamp((innerHeight*0.86 - r.top) / (r.height*0.82), 0, 1);
+      var bar = figs[i].querySelector(".scrub i");
+      if(bar) bar.style.width = (pr*100).toFixed(1)+"%";
+    }
+  }
+  addEventListener("scroll", upd, {passive:true}); addEventListener("resize", upd, {passive:true});
+  upd();
+})();
+
+/* numbers count themselves up once */
+(function(){
+  var nObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el = e.target, txt = el.getAttribute("data-final"), suf = el.getAttribute("data-suffix")||"";
+      var mant = parseFloat(txt), t0 = null;
+      function step(ts){
+        if(t0===null) t0 = ts;
+        var kk = clamp((ts-t0)/900, 0, 1);
+        el.textContent = (mant*ease(kk)).toFixed(4) + suf;
+        if(kk < 1) requestAnimationFrame(step); else el.textContent = txt + suf;
+      }
+      if(!reduce) requestAnimationFrame(step); else el.textContent = txt + suf;
+      nObs.unobserve(el);
+    });
+  }, {threshold:0.4});
+  document.querySelectorAll("[data-final]").forEach(function(el){ nObs.observe(el); });
+
+  /* integer counters in the stat strips */
+  var cObs2 = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target, tgt=parseFloat(el.getAttribute("data-count")), t0=null;
+      var fin = el.textContent;
+      function step(ts){
+        if(t0===null) t0=ts;
+        var k=clamp((ts-t0)/1100,0,1);
+        el.textContent = Math.round(tgt*ease(k)).toLocaleString("en-US");
+        if(k<1) requestAnimationFrame(step); else el.textContent = fin;
+      }
+      if(!reduce) requestAnimationFrame(step);
+      cObs2.unobserve(el);
+    });
+  }, {threshold:0.5});
+  document.querySelectorAll("[data-count]").forEach(function(el){ cObs2.observe(el); });
+})();
+
+/* ---------------- rail + topbar + scrollspy ---------------- */
+var railI = document.querySelector("#rail i"), topbar = document.getElementById("topbar");
+var scrollP = 0;
+function onScroll(){
+  var h = document.documentElement.scrollHeight - innerHeight;
+  var p = h > 0 ? scrollY / h : 0;
+  scrollP = p;
+  railI.style.width = (p*100).toFixed(2) + "%";
+  var pct = document.getElementById("railPct");
+  if(pct) pct.textContent = String(Math.round(p*100)).padStart(2,"0") + "%";
+  topbar.classList.toggle("stuck", scrollY > 40);
+}
+addEventListener("scroll", onScroll, {passive:true}); onScroll();
+
+var links = [].slice.call(document.querySelectorAll("#toc a")), map = {};
+links.forEach(function(a){ map[a.dataset.sec] = a; });
+var spy = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(e.isIntersecting){
+      links.forEach(function(a){ a.classList.remove("active"); });
+      var a = map[e.target.id]; if(a) a.classList.add("active");
+    }
+  });
+}, {rootMargin:"-45% 0px -50% 0px"});
+document.querySelectorAll("main section").forEach(function(s){ spy.observe(s); });
+
+/* ---------------- the drifting gradient field ----------------
+   Four soft radial blobs whose colours interpolate along a scroll-driven
+   palette. This is the page's "background changes as you read" behaviour:
+   the field starts cool at the problem statement and warms through the
+   results, tracking the grade ramp the figures use. */
+(function(){
+  var c = document.getElementById("field"); if(!c) return;
+  var STOPS = [
+    ["#dfe8dd","#d3e2d8","#e7ece2"],   /* problem: cool sage */
+    ["#d9e6de","#dee6d6","#e8ece1"],   /* metric */
+    ["#e2e7d9","#eae2cd","#e9ece0"],   /* cascade */
+    ["#efe4cd","#e8dcc6","#f0e9dc"],   /* levers: warming to ochre */
+    ["#f0dfd0","#e6d5c6","#f1e6da"],   /* ensemble */
+    ["#e4e6dc","#d8e3da","#eaeee4"],   /* protocol: cools again */
+    ["#f0ddd0","#e7d3c6","#f2e6db"],   /* results: warm rust */
+    ["#e5e8de","#dce4dc","#ebeee5"]    /* channel/lessons: neutral */
+  ];
+  function palAt(p){
+    var n = STOPS.length - 1;
+    var f = clamp(p,0,1) * n, i = Math.min(n-1, Math.floor(f)), t = f - i;
+    var a = STOPS[i], b = STOPS[i+1];
+    return [mixc(a[0],b[0],t), mixc(a[1],b[1],t), mixc(a[2],b[2],t)];
+  }
+  register(document.body, function(t){
+    var k = hidpi(c, 1), x = k.x, w = k.w, h = k.h;
+    var pal = palAt(scrollP);
+    x.fillStyle = "#f0f2ec"; x.fillRect(0,0,w,h);
+    var blobs = [
+      [0.18 + 0.10*Math.sin(t*0.11),       0.24 + 0.09*Math.cos(t*0.093), 0.62, pal[0]],
+      [0.82 + 0.09*Math.cos(t*0.077),      0.34 + 0.11*Math.sin(t*0.061), 0.58, pal[1]],
+      [0.52 + 0.13*Math.sin(t*0.049+1.7),  0.80 + 0.08*Math.cos(t*0.083), 0.66, pal[2]],
+      [0.10 + 0.08*Math.cos(t*0.065+0.6),  0.88 + 0.07*Math.sin(t*0.055), 0.50, pal[0]]
+    ];
+    for(var i=0;i<blobs.length;i++){
+      var b = blobs[i], px = b[0]*w, py = b[1]*h, rad = b[2]*Math.max(w,h);
+      var g = x.createRadialGradient(px,py,0,px,py,rad);
+      g.addColorStop(0, b[3]);
+      g.addColorStop(1, "rgba(240,242,236,0)");
+      x.fillStyle = g; x.fillRect(0,0,w,h);
+    }
+  });
+})();
+
+/* ---------------- hero: a rotating cloud of the taxonomy ---------------- */
+(function(){
+  var c = document.getElementById("heroCanvas"); if(!c) return;
+  var rnd = mulberry(20260822), P = [];
+  /* a shell of points: most cold, a handful warm, as the real problem is */
+  for(var i=0;i<620;i++){
+    var a = gauss(rnd), b = gauss(rnd), d = gauss(rnd);
+    var n = Math.sqrt(a*a+b*b+d*d) || 1e-6;
+    var r = 0.75 + 0.55*Math.pow(rnd(), 0.6);
+    var g = 0;
+    var q = rnd();
+    if(q > 0.988) g = 4; else if(q > 0.972) g = 3;
+    else if(q > 0.945) g = 2; else if(q > 0.86) g = 1;
+    /* warm points sit closer in, which is what a good retriever produces */
+    if(g >= 3) r *= 0.42; else if(g === 2) r *= 0.62; else if(g === 1) r *= 0.80;
+    P.push([a/n*r, b/n*r, d/n*r, g]);
+  }
+  var cam = null;
+  register(c, function(t){
+    var k = hidpi(c, 0.62), x = k.x, w = k.w, h = k.h;
+    if(!cam || cam.w!==w){ cam = mk3d(w,h,{dist:3.0, focal:Math.min(w,h)*1.05}); }
+    cam.w = w;
+    /* the type owns the left of the hero, so the taxonomy sits in its own field
+       on the right. Below the two-column breakpoint it recentres and sinks. */
+    var wide = w > 900;
+    cam.cx = wide ? w*0.735 : w*0.5;
+    cam.cy = wide ? h*0.50  : h*0.72;
+    cam.focal = Math.min(w,h) * (wide ? 1.02 : 0.92);
+    cam.yaw = t*0.085; cam.pitch = 0.20 + 0.12*Math.sin(t*0.055);
+    x.clearRect(0,0,w,h);
+    var pts = [], i;
+    for(i=0;i<P.length;i++){
+      var pr = project(cam, P[i]);
+      pts.push([pr[0], pr[1], pr[2], pr[3], P[i][3]]);
+    }
+    pts.sort(function(a,b){ return b[2]-a[2]; });
+    for(i=0;i<pts.length;i++){
+      var p = pts[i], g = p[4];
+      var depth = clamp((4.6 - p[2]) / 2.6, 0, 1);
+      var rad = (g>=3 ? 3.3 : g===2 ? 2.5 : 1.9) * (0.55 + depth*0.85);
+      /* on a light ground the near points want MORE ink, not more glow */
+      var al  = (g>=3 ? 0.96 : g===2 ? 0.78 : g===1 ? 0.56 : 0.34) * (0.36 + depth*0.64);
+      x.fillStyle = g>=1 ? rgba(GR[g], al) : "rgba(98,110,100,"+(al*0.9)+")";
+      x.beginPath(); x.arc(p[0], p[1], rad, 0, 6.283); x.fill();
+      if(g === 4){
+        x.strokeStyle = rgba(GR[4], al*0.42); x.lineWidth = 1;
+        x.beginPath(); x.arc(p[0], p[1], rad*3.1, 0, 6.283); x.stroke();
+      }
+    }
+  }, 0.05);
+})();
+
+/* ---------------- registry of figure painters ---------------- */
+var FIG = {};
+
+/* Figure 1 -- the graded neighbourhood, in 3D */
+FIG.space = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  if(!st.P){
+    var rnd = mulberry(7), P = [];
+    for(var i=0;i<760;i++){
+      var a=gauss(rnd), b=gauss(rnd), d=gauss(rnd);
+      var n=Math.sqrt(a*a+b*b+d*d)||1e-6;
+      var q=rnd(), g;
+      if(q>0.9930) g=4; else if(q>0.9800) g=3;
+      else if(q>0.9450) g=2; else if(q>0.8300) g=1; else g=0;
+      var r = g>=4 ? 0.20+0.10*rnd()
+            : g===3 ? 0.34+0.14*rnd()
+            : g===2 ? 0.52+0.18*rnd()
+            : g===1 ? 0.72+0.22*rnd()
+            :         0.98+0.42*rnd();
+      P.push([a/n*r, b/n*r, d/n*r, g]);
+    }
+    st.P = P;
+    st.cam = mk3d(w,h,{dist:2.9, focal:Math.min(w,h)*1.02, pitch:0.18});
+    draggable(c, st.cam);
+  }
+  var cam = st.cam;
+  cam.cx = w*0.5; cam.cy = h*0.50; cam.w = w;
+  cam.focal = Math.min(w,h)*1.02;
+  if(!cam.user && !reduce) cam.yaw = t*0.16;
+
+  /* the query sits at the origin */
+  var o = project(cam, [0,0,0]);
+  var pts = [], i;
+  for(i=0;i<st.P.length;i++){
+    var pr = project(cam, st.P[i]);
+    pts.push([pr[0], pr[1], pr[2], st.P[i][3]]);
+  }
+  pts.sort(function(a,b){ return b[2]-a[2]; });
+
+  /* leader lines to the items that carry the most gain */
+  for(i=0;i<pts.length;i++){
+    if(pts[i][3] < 3) continue;
+    x.strokeStyle = rgba(GR[pts[i][3]], 0.20); x.lineWidth = 1;
+    x.beginPath(); x.moveTo(o[0],o[1]); x.lineTo(pts[i][0],pts[i][1]); x.stroke();
+  }
+  for(i=0;i<pts.length;i++){
+    var p = pts[i], g = p[3];
+    var depth = clamp((4.4 - p[2]) / 2.6, 0, 1);
+    var rad = (g>=3 ? 3.8 : g===2 ? 2.9 : g===1 ? 2.3 : 1.9) * (0.6 + depth*0.8);
+    var al  = (g>=3 ? 0.96 : g===2 ? 0.80 : g===1 ? 0.60 : 0.44) * (0.5 + depth*0.5);
+    x.fillStyle = rgba(GR[g], al);
+    x.beginPath(); x.arc(p[0], p[1], rad, 0, 6.283); x.fill();
+  }
+  /* the query marker, drawn last so it always reads */
+  x.fillStyle = INK; x.beginPath(); x.arc(o[0],o[1],4.6,0,6.283); x.fill();
+  x.strokeStyle = rgba("#16201b",0.32); x.lineWidth=1.4;
+  x.beginPath(); x.arc(o[0],o[1],10,0,6.283); x.stroke();
+  lab(x, "THE QUERY", o[0]+15, o[1]+4, INK3, 10.5, 0.9);
+  lab(x, "13,891 concepts · a handful carry credit", 14, h-14, INK4, 10.5);
+  lab(x, "drag to rotate", w-96, h-14, INK4, 10);
+};
+
+/* Figure 2 -- nDCG, built from a ranking you choose */
+FIG.ndcg = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  if(!st.init){
+    st.init = true; st.mode = "real"; st.anim = 0; st.cur = null;
+    /* one query's graded items: 2 exact, 3 implied, 6 adjacent, 14 plausible */
+    var G = [];
+    G.push(4,4,3,3,3);
+    for(var i=0;i<6;i++) G.push(2);
+    for(i=0;i<14;i++) G.push(1);
+    st.grades = G;
+    st.N = G.length;          /* 25: five golds, six adjacent, fourteen plausible */
+    st.orders = {
+      ideal:  null,   /* computed */
+      real:   null,
+      binary: null,
+      random: null
+    };
+    var idx = G.map(function(g,i){ return i; });
+    st.orders.ideal = idx.slice().sort(function(a,b){ return G[b]-G[a]; });
+    /* a real system: mostly right, with local mistakes */
+    /* a real system: mostly right, with local mistakes. The noise is drawn ONCE per
+       item and cached -- a comparator that re-randomises on every call violates the
+       ordering contract sort() relies on, and V8 is entitled to return anything. */
+    var r1 = mulberry(11), jitter = idx.map(function(){ return gauss(r1)*0.85; });
+    st.orders.real = idx.slice().sort(function(a,b){
+      return (G[b] + jitter[b]) - (G[a] + jitter[a]); });
+    /* binary-trained: exact items first, then neighbours actively buried */
+    st.orders.binary = idx.slice().sort(function(a,b){
+      var sa = G[a]===4 ? 10 : (G[a]===3 ? 6 : -G[a]);
+      var sb = G[b]===4 ? 10 : (G[b]===3 ? 6 : -G[b]);
+      return sb - sa; });
+    var r2 = mulberry(29), rkey = idx.map(function(){ return r2(); });
+    st.orders.random = idx.slice().sort(function(a,b){ return rkey[a]-rkey[b]; });
+    st.cur = st.orders.real.slice();
+    st.from = st.cur.slice();
+    /* a preset clicked before this figure first drew is queued, not dropped */
+    if(st.pendingMode && st.orders[st.pendingMode]){
+      st.cur = st.orders[st.pendingMode].slice();
+      st.from = st.cur.slice();
+      st.mode = st.pendingMode; st.pendingMode = null;
+    }
+  }
+  var N = st.N, G = st.grades;
+  st.anim = clamp(st.anim + (reduce ? 1 : 0.055), 0, 1);
+  var ea = ease(st.anim);
+
+  function dcgOf(order){
+    var s=0; for(var i=0;i<order.length;i++) s += (Math.pow(2,G[order[i]])-1)/Math.log2(i+2);
+    return s;
+  }
+  var idcg = dcgOf(st.orders.ideal);
+  var dcg  = dcgOf(st.cur);
+
+  var padL=54, padR=16, padT=58, padB=34;
+  var bw = (w-padL-padR)/N, maxc = (Math.pow(2,4)-1)/Math.log2(2);
+  var base = h-padB;
+  /* axis */
+  x.strokeStyle = RULE; x.lineWidth=1;
+  x.beginPath(); x.moveTo(padL, base+0.5); x.lineTo(w-padR, base+0.5); x.stroke();
+  lab(x,"RANK",padL,h-12,INK4,10,1.0);
+  lab(x,"CONTRIBUTION TO DCG",14,22,INK4,10,1.0);
+  lab(x,"(the metric keeps 100 rows; 25 shown)",14,36,INK4,10);
+
+  for(var i=0;i<N;i++){
+    var gi = st.cur[i], gj = st.from[i] !== undefined ? st.from[i] : gi;
+    var g  = G[gi];
+    var contribTo   = (Math.pow(2,g)-1)/Math.log2(i+2);
+    var gFrom = G[gj];
+    var contribFrom = (Math.pow(2,gFrom)-1)/Math.log2(i+2);
+    var contrib = lerp(contribFrom, contribTo, ea);
+    var gg = ea > 0.5 ? g : gFrom;
+    var bh = (contrib/maxc) * (base-padT);
+    var bx = padL + i*bw;
+    x.fillStyle = rgba(GR[gg], 0.88);
+    rr(x, bx+1, base-bh, Math.max(1,bw-2.6), bh, 1.5); x.fill();
+    if(g===4 && ea>0.6){
+      x.save(); x.setLineDash([2,3]);
+      x.strokeStyle = rgba(GR[4],0.45); x.lineWidth=1;
+      x.beginPath(); x.moveTo(bx+bw/2, base-bh-5); x.lineTo(bx+bw/2, base-bh-22); x.stroke();
+      x.restore();
+      x.save(); x.textAlign="center"; x.font="9.5px 'IBM Plex Mono',monospace";
+      x.fillStyle = GRT[4]; x.fillText("grade 4", bx+bw/2, base-bh-27); x.restore();
+    }
+  }
+
+  st.readout = {ndcg: dcg/idcg, dcg: dcg, idcg: idcg,
+                top: G[st.cur[0]]};
+};
+
+/* Figure 3 -- the cascade, as stacked planes in 3D */
+FIG.cascade = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  if(!st.cam){
+    st.cam = mk3d(w,h,{dist:3.6, focal:Math.min(w,h)*1.10, pitch:0.48, yaw:-0.42});
+    draggable(c, st.cam);
+    var rnd = mulberry(5), pts=[];
+    for(var i=0;i<420;i++) pts.push([ (rnd()*2-1), (rnd()*2-1), rnd() ]);
+    st.pts = pts;
+  }
+  var cam = st.cam;
+  cam.cx = w*0.44; cam.cy = h*0.46; cam.w=w; cam.focal = Math.min(w,h)*1.10;
+  if(!cam.user && !reduce) cam.yaw = -0.42 + 0.32*Math.sin(t*0.13);
+
+  var LAYERS = [
+    {y: 0.95, s: 1.00, n:"13,891",  l:"the whole taxonomy",   col:GR[0], keep:1.00},
+    {y: 0.28, s: 0.42, n:"1,000",   l:"candidate pool",       col:GR[2], keep:0.072},
+    {y:-0.38, s: 0.20, n:"500",     l:"submitted rows",       col:GR[3], keep:0.036},
+    {y:-0.95, s: 0.10, n:"100",     l:"what the metric sees", col:GR[4], keep:0.018}
+  ];
+  /* draw far to near */
+  for(var li=LAYERS.length-1; li>=0; li--){
+    var L = LAYERS[li], s = L.s;
+    var corners = [[-s,L.y,-s],[s,L.y,-s],[s,L.y,s],[-s,L.y,s]].map(function(p){ return project(cam,p); });
+    x.beginPath();
+    x.moveTo(corners[0][0],corners[0][1]);
+    for(var k=1;k<4;k++) x.lineTo(corners[k][0],corners[k][1]);
+    x.closePath();
+    x.fillStyle = rgba(L.col, 0.16); x.fill();
+    x.strokeStyle = rgba(L.col, 0.85); x.lineWidth = 1.4; x.stroke();
+    /* the points that survive to this layer */
+    var keepN = Math.max(6, Math.round(st.pts.length * Math.pow(L.keep, 0.34)));
+    for(var pi=0; pi<keepN; pi++){
+      var q = st.pts[pi];
+      var pr = project(cam, [q[0]*s*0.92, L.y, q[1]*s*0.92]);
+      x.fillStyle = rgba(L.col, 0.66);
+      x.beginPath(); x.arc(pr[0],pr[1], 1.7, 0, 6.283); x.fill();
+    }
+    var lc = project(cam, [s*1.06, L.y, s*1.06]);
+    lab(x, L.n, lc[0]+8, lc[1]+2, GRT[li===0?0:(li===1?2:(li===2?3:4))], 12.5);
+    lab(x, L.l, lc[0]+8, lc[1]+15, INK4, 10);
+  }
+  /* the funnel edges */
+  x.strokeStyle = rgba("#78827a",0.34); x.lineWidth=1; x.setLineDash([2,4]);
+  for(var e=0;e<4;e++){
+    var sgnx = (e===0||e===3)?-1:1, sgnz = (e<2)?-1:1;
+    x.beginPath();
+    for(var li2=0; li2<LAYERS.length; li2++){
+      var LL=LAYERS[li2];
+      var pp = project(cam,[sgnx*LL.s, LL.y, sgnz*LL.s]);
+      if(li2===0) x.moveTo(pp[0],pp[1]); else x.lineTo(pp[0],pp[1]);
+    }
+    x.stroke();
+  }
+  x.setLineDash([]);
+  lab(x, "retrieve → featurise → rerank → fuse", 14, h-14, INK3, 10.5);
+  lab(x, "drag to rotate", w-96, h-14, INK4, 10);
+};
+
+/* Figure 4 -- where the score came from.
+   Drawn as a share of the total GAIN (0.2148) rather than of the total score,
+   because at true scale the 0.6499 base swallows every step worth looking at. */
+FIG.ladder = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  var STEPS = [
+    {d:0.0291, l:"learning to rank",    s:"12 lanes",        gpu:false},
+    {d:0.0388, l:"first cross-encoder", s:"MiniLM feature",  gpu:true},
+    {d:0.0215, l:"depth + capacity",    s:"bge, top-500",    gpu:true},
+    {d:0.0156, l:"depth 1000",          s:"deeper pool",     gpu:true},
+    {d:0.0331, l:"relevance prior",     s:"4 count columns", gpu:false},
+    {d:0.0152, l:"altLabel override",   s:"exact match",     gpu:false},
+    {d:0.0616, l:"the full ensemble",   s:"C2,C4,Q2,Q8",     gpu:true}
+  ];
+  var total = 0;
+  for(var q=0;q<STEPS.length;q++) total += STEPS[q].d;
+
+  var padL=92, padR=76, padT=54, padB=44;
+  var x0=padL, x1=w-padR, span=x1-x0;
+  var barH = Math.min(46, (h-padT-padB)*0.30);
+  var barY = padT;
+
+  st.grow = clamp((st.grow===undefined?0:st.grow) + (reduce?1:0.016), 0, 1);
+  var g = ease(st.grow);
+
+  /* the base, marked as a starting point rather than a segment */
+  lab(x,"0.6499", 14, barY+barH*0.42, INK3, 13);
+  lab(x,"fused base", 14, barY+barH*0.42+14, INK4, 10);
+  x.strokeStyle="rgba(22,32,27,0.22)"; x.lineWidth=1;
+  x.beginPath(); x.moveTo(x0-10, barY-6); x.lineTo(x0-10, barY+barH+6); x.stroke();
+
+  var acc=0, i, S;
+  for(i=0;i<STEPS.length;i++){
+    S = STEPS[i];
+    var wFull=(S.d/total)*span;
+    var shown=clamp((g*total - acc)/S.d, 0, 1);
+    if(shown<=0){ acc+=S.d; continue; }
+    var bx=x0+(acc/total)*span;
+    x.fillStyle = S.gpu ? rgba(ACC,0.82) : rgba(CALM,0.74);
+    x.fillRect(bx, barY, Math.max(0.6, wFull*shown), barH);
+    x.strokeStyle="rgba(255,255,255,0.8)"; x.lineWidth=1.2;
+    x.beginPath(); x.moveTo(bx+0.6,barY); x.lineTo(bx+0.6,barY+barH); x.stroke();
+    acc+=S.d;
+  }
+  /* the final score, at the right-hand end */
+  if(g>0.985){
+    lab(x,"0.8647", x1+10, barY+barH*0.42, ACCD, 13);
+    lab(x,"final", x1+10, barY+barH*0.42+14, INK4, 10);
+  }
+
+  /* callouts: two staggered rows so nothing collides */
+  acc=0;
+  for(i=0;i<STEPS.length;i++){
+    S=STEPS[i];
+    var mid = x0 + ((acc + S.d/2)/total)*span;
+    acc += S.d;
+    if(g*total < acc - S.d*0.5) continue;
+    var row = i % 2;
+    var ly = barY + barH + 22 + row*34;
+    x.strokeStyle="rgba(22,32,27,0.16)"; x.lineWidth=1;
+    x.beginPath(); x.moveTo(mid, barY+barH+2); x.lineTo(mid, ly-12); x.stroke();
+    x.save(); x.textAlign="center";
+    x.font="12px 'IBM Plex Mono',monospace";
+    x.fillStyle = S.gpu ? ACCD : CALMD;
+    x.fillText("+"+S.d.toFixed(4), mid, ly);
+    x.font="10.5px 'IBM Plex Mono',monospace"; x.fillStyle=INK3;
+    x.fillText(S.l, mid, ly+14);
+    x.fillStyle=INK4; x.font="10px 'IBM Plex Mono',monospace";
+    x.fillText(S.s, mid, ly+26);
+    x.restore();
+  }
+
+  lab(x,"SHARE OF THE TOTAL GAIN, 0.6499 → 0.8647", 14, 24, INK3, 11, 0.9);
+  var lx=w-padR-176;
+  x.fillStyle=rgba(CALM,0.74); x.fillRect(lx,15,10,10);
+  lab(x,"no GPU", lx+15, 24, CALMD, 10.5);
+  x.fillStyle=rgba(ACC,0.82); x.fillRect(lx+74,15,10,10);
+  lab(x,"GPU", lx+89, 24, ACCD, 10.5);
+  lab(x,"the no-GPU segments total +0.077, about a third of the climb", 14, h-14, INK4, 10.5);
+};
+
+/* Figure 5 -- absorbed, or orthogonal: members as directions.
+   The Qwen members and Q8D are near-parallel by construction (that IS the
+   finding), so their labels would stack. A small collision pass pushes label
+   rows apart vertically and draws a leader to each anchor. */
+FIG.ortho = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  if(!st.cam){
+    st.cam = mk3d(w,h,{dist:2.35, focal:Math.min(w,h)*1.72, pitch:0.26, yaw:0.5});
+    draggable(c, st.cam);
+  }
+  var cam = st.cam;
+  cam.cx=w*0.19; cam.cy=h*0.82; cam.w=w; cam.focal=Math.min(w,h)*1.72;
+  if(!cam.user && !reduce) cam.yaw = 0.5 + 0.42*Math.sin(t*0.13);
+
+  var HAVE = [
+    {v:[0.92,0.10,0.22], n:"Q2 · Qwen 4B",  c:CORE, len:1.00},
+    {v:[0.86,0.26,0.34], n:"Q8 · Qwen 8B",  c:CORE, len:1.10}
+  ];
+  var CAND = [
+    {v:[0.95,0.16,0.26], n:"Q8D · strongest alone", c:DANGER,    verdict:"absorbed",  len:1.42},
+    {v:[0.22,0.86,0.30], n:"C4 · DeBERTa",          c:CALMD,     verdict:"adopted",   len:1.02},
+    {v:[0.10,0.14,0.92], n:"ELECTRA",               c:"#a8791f", verdict:"too weak",  len:0.50}
+  ];
+  var labels = [];
+  function arrow(v, len, col, wid, dash, name){
+    var o = project(cam,[0,0,0]);
+    var e = project(cam,[v[0]*len, v[1]*len, v[2]*len]);
+    x.save();
+    if(dash) x.setLineDash([3,4]);
+    x.strokeStyle = col; x.lineWidth = wid;
+    x.beginPath(); x.moveTo(o[0],o[1]); x.lineTo(e[0],e[1]); x.stroke();
+    x.restore();
+    x.fillStyle = col;
+    x.beginPath(); x.arc(e[0],e[1], wid+1.6, 0, 6.283); x.fill();
+    if(name) labels.push({x:e[0], y:e[1], n:name, c:col});
+    return e;
+  }
+  /* the plane the two Qwen members already span */
+  var span = [];
+  for(var a=0;a<=24;a++){
+    var th=a/24*Math.PI*0.5;
+    var vx = HAVE[0].v[0]*Math.cos(th)+HAVE[1].v[0]*Math.sin(th);
+    var vy = HAVE[0].v[1]*Math.cos(th)+HAVE[1].v[1]*Math.sin(th);
+    var vz = HAVE[0].v[2]*Math.cos(th)+HAVE[1].v[2]*Math.sin(th);
+    var n = Math.sqrt(vx*vx+vy*vy+vz*vz);
+    span.push(project(cam,[vx/n*1.30, vy/n*1.30, vz/n*1.30]));
+  }
+  var oo = project(cam,[0,0,0]);
+  x.beginPath(); x.moveTo(oo[0],oo[1]);
+  for(var k=0;k<span.length;k++) x.lineTo(span[k][0],span[k][1]);
+  x.closePath();
+  x.fillStyle = rgba(CORE,0.15); x.fill();
+  x.strokeStyle = rgba(CORE,0.36); x.lineWidth=1; x.stroke();
+
+  for(var i=0;i<HAVE.length;i++) arrow(HAVE[i].v, HAVE[i].len, rgba(CORE,0.88), 2.2, false, HAVE[i].n);
+  for(i=0;i<CAND.length;i++) arrow(CAND[i].v, CAND[i].len, CAND[i].c, 2.5, true, CAND[i].n);
+
+  /* push overlapping label rows apart, then draw a leader to each anchor */
+  labels.sort(function(p,q){ return p.y - q.y; });
+  var MINGAP = 16;
+  for(i=1;i<labels.length;i++){
+    if(labels[i].y - labels[i-1].y < MINGAP) labels[i].y = labels[i-1].y + MINGAP;
+  }
+  for(i=0;i<labels.length;i++){
+    var L = labels[i], tx = L.x + 14;
+    x.strokeStyle = rgba("#78827a", 0.38); x.lineWidth = 1;
+    x.beginPath(); x.moveTo(L.x+4, L.y); x.lineTo(tx-3, L.y); x.stroke();
+    x.save(); x.font="10.5px 'IBM Plex Mono',monospace";
+    var tw = x.measureText(L.n).width;
+    x.fillStyle = rgba("#e6ebe1", 0.86); x.fillRect(tx-3, L.y-8, tw+6, 15);
+    x.restore();
+    lab(x, L.n, tx, L.y+3.5, L.c, 10.5);
+  }
+
+  lab(x,"the ensemble already spans this plane", 14, h-34, CORE, 10.5);
+  lab(x,"length = strength alone   ·   angle = what it knows that the others do not", 14, h-16, INK4, 10.5);
+  var vx0 = w-172, vy0 = 26;
+  lab(x,"VERDICT", vx0, vy0, INK4, 10, 1.1);
+  for(i=0;i<CAND.length;i++){
+    x.fillStyle = CAND[i].c;
+    x.beginPath(); x.arc(vx0+4, vy0+16+i*17-3.5, 3.4, 0, 6.283); x.fill();
+    lab(x, CAND[i].verdict, vx0+14, vy0+16+i*17, INK3, 10.5);
+  }
+  lab(x,"drag to rotate", w-96, h-16, INK4, 10);
+};
+
+/* Figure 6 -- paired versus unpaired, interactive */
+FIG.paired = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  var eff   = (st.eff===undefined ? 0.0011 : st.eff);
+  var nseed = (st.nseed===undefined ? 10 : st.nseed);
+  /* per-seed fold difficulty dominates the absolute score; the effect rides on top */
+  var rnd = mulberry(4242), A=[], B=[], D=[];
+  for(var i=0;i<nseed;i++){
+    /* calibrated to the recorded across-seed spread of the macro (0.0023-0.0033),
+       not invented: fold difficulty is what actually moves the absolute number */
+    var foldNoise = gauss(rnd)*0.0030;          /* shared by both systems */
+    var indA = gauss(rnd)*0.00045;              /* independent jitter */
+    var indB = gauss(rnd)*0.00045;
+    var a = 0.8640 + foldNoise + indA;
+    var b = a - indA + eff + indB;
+    A.push(a); B.push(b); D.push(b-a);
+  }
+  var mean = function(v){var s=0;for(var i=0;i<v.length;i++)s+=v[i];return s/v.length;};
+  var sd = function(v){var m=mean(v),s=0;for(var i=0;i<v.length;i++)s+=(v[i]-m)*(v[i]-m);
+    return Math.sqrt(s/Math.max(1,v.length-1));};
+  var mD=mean(D), sD=sd(D), wins=D.filter(function(d){return d>0;}).length;
+  var pooled = Math.sqrt((sd(A)*sd(A)+sd(B)*sd(B))/2);
+  var tUnp = (mean(B)-mean(A)) / (pooled*Math.sqrt(2/nseed) || 1e-9);
+  var tPar = mD / ((sD/Math.sqrt(nseed)) || 1e-9);
+
+  var padL=64, padR=18, padT=44, padB=34;
+  var pw = w-padL-padR, ph = h-padT-padB;
+  /* top band: absolute scores, which scatter hugely */
+  var topTop = padT, topH = ph*0.46, topBase = topTop + topH;
+  var lo=0.8555, hi=0.8725;
+  function yA(v){ return topBase - ((v-lo)/(hi-lo))*topH; }
+  x.strokeStyle=RULE; x.lineWidth=1;
+  x.beginPath(); x.moveTo(padL, topBase+0.5); x.lineTo(w-padR, topBase+0.5); x.stroke();
+  lab(x,"ABSOLUTE SCORES", 14, 20, INK4, 10, 1.0);
+  lab(x,"grey = incumbent   ·   blue = candidate", 14, 34, INK4, 10);
+  for(i=0;i<nseed;i++){
+    var px = padL + (i+0.5)*(pw/nseed);
+    x.strokeStyle="rgba(22,32,27,0.22)"; x.lineWidth=1.2;
+    x.beginPath(); x.moveTo(px, yA(A[i])); x.lineTo(px, yA(B[i])); x.stroke();
+    x.fillStyle="rgba(22,32,27,0.40)";
+    x.beginPath(); x.arc(px, yA(A[i]), 3.2, 0, 6.283); x.fill();
+    x.fillStyle=rgba(CORE,0.75);
+    x.beginPath(); x.arc(px, yA(B[i]), 3.2, 0, 6.283); x.fill();
+  }
+  /* bottom band: per-seed differences, which are tight */
+  var bh = ph*0.40;
+  var zero = h - padB - bh*0.22;
+  var dmax = Math.max(0.0022, Math.max.apply(null, D.map(Math.abs))*1.25);
+  x.strokeStyle=RULE2; x.lineWidth=1;
+  x.beginPath(); x.moveTo(padL, zero+0.5); x.lineTo(w-padR, zero+0.5); x.stroke();
+  lab(x,"PER-SEED DIFFERENCE  (candidate minus incumbent)", 14, zero - bh*0.46 - 14, INK4, 10, 1.0);
+  for(i=0;i<nseed;i++){
+    var px2 = padL + (i+0.5)*(pw/nseed);
+    var hgt = (D[i]/dmax)*(bh*0.46);
+    x.fillStyle = D[i] > 0 ? rgba(ACC,0.80) : rgba("#78827a",0.58);
+    var bw3 = Math.max(3, (pw/nseed)*0.52);
+    x.fillRect(px2-bw3/2, zero - Math.max(0,hgt), bw3, Math.abs(hgt));
+  }
+  /* the gate threshold line */
+  var gy = zero - (0.0010/dmax)*(bh*0.46);
+  x.save(); x.setLineDash([4,4]); x.strokeStyle=rgba(CALMD,0.7); x.lineWidth=1.2;
+  x.beginPath(); x.moveTo(padL, gy); x.lineTo(w-padR, gy); x.stroke(); x.restore();
+  x.save(); x.fillStyle=BG2; x.fillRect(padL+2, gy-13, 92, 13); x.restore();
+  lab(x,"gate +0.0010", padL+5, gy-3, CALMD, 10);
+  lab(x,"seed →", 14, h-10, INK4, 10);
+  lab(x,"the scatter above is ~3x the effect below", w-padR-272, h-10, INK4, 10);
+
+  st.readout = {
+    unpaired: Math.abs(tUnp) > 2.0 ? "detected" : "invisible",
+    paired:   (mD > 0.0010 && wins >= Math.ceil(nseed*0.8)) ? "detected" : (Math.abs(tPar)>2.0?"visible":"invisible"),
+    wins: wins + "/" + nseed,
+    gate: (mD > 0.0010 && wins >= Math.ceil(nseed*0.8) && sD <= 0.0015) ? "PASS" : "FAIL",
+    tU: tUnp, tP: tPar
+  };
+};
+
+/* Figure 7 -- why a base-rate check kills a statistic */
+FIG.signature = function(c, x, w, h, t, st){
+  x.fillStyle = BG2; x.fillRect(0,0,w,h);
+  if(!st.pop){
+    var rnd = mulberry(97), pop=[];
+    /* the whole population: gaps mostly positive, because the tasks differ */
+    for(var i=0;i<180;i++) pop.push(0.030 + gauss(rnd)*0.038);
+    st.pop = pop;
+    /* The short list you were already looking at. These are GENERATED from the
+       same seed as the population, deliberately: drawing the real per-account
+       values here would turn a figure captioned "schematic" into a published
+       shortlist, which is the thing section 9 declines to publish. */
+    var rs = mulberry(211), sl = [];
+    for(var j=0;j<7;j++) sl.push(0.058 + rs()*0.026);
+    st.shortlist = sl;
+    st.mine = -0.003;
+  }
+  var half=(w-30)/2, top=44, bot=h-56;
+  var LO=-0.06, HI=0.12;
+  function ypos(v){ return bot - ((v-LO)/(HI-LO))*(bot-top); }
+  var phase = reduce ? 1 : clamp((t%9)/3.2, 0, 1);
+  var ph2 = ease(phase);
+
+  function panel(ox, pts, title, sub, showAll){
+    x.strokeStyle=RULE; x.lineWidth=1; x.strokeRect(ox, top, half, bot-top);
+    /* zero line */
+    x.save(); x.setLineDash([3,4]); x.strokeStyle="rgba(22,32,27,0.24)";
+    x.beginPath(); x.moveTo(ox, ypos(0)); x.lineTo(ox+half, ypos(0)); x.stroke(); x.restore();
+    lab(x,"gap = 0", ox+6, ypos(0)-6, INK4, 9.5);
+    var rnd2 = mulberry(showAll?31:17);
+    for(var i=0;i<pts.length;i++){
+      var px = ox + 14 + rnd2()*(half-28);
+      var py = ypos(pts[i]);
+      var pos = pts[i] > 0;
+      x.fillStyle = showAll ? (pos ? rgba(GR[3],0.52) : rgba(GR[2],0.46))
+                            : rgba(GR[4],0.78);
+      x.beginPath(); x.arc(px, py, showAll?2.5:4.0, 0, 6.283); x.fill();
+    }
+    lab(x,title, ox, 24, INK3, 11, 0.9);
+    lab(x,sub, ox, bot+18, INK4, 10);
+  }
+  panel(14, st.shortlist, "THE SHORT LIST", "looks like clean separation");
+  panel(14+half+2, st.pop, "THE WHOLE POPULATION", "a majority sit above zero", true);
+
+  /* my own row, which sits on the wrong side -- the reference-class problem */
+  if(ph2 > 0.55){
+    var al = clamp((ph2-0.55)/0.45,0,1);
+    var mx = 14 + half*0.5, my = ypos(st.mine);
+    x.strokeStyle = rgba(ACCD, 0.55*al); x.lineWidth=1.4;
+    x.save(); x.setLineDash([2,3]);
+    x.beginPath(); x.moveTo(14, my); x.lineTo(14+half, my); x.stroke(); x.restore();
+    x.fillStyle = rgba(ACCD, al);
+    x.beginPath(); x.arc(mx, my, 4.4, 0, 6.283); x.fill();
+    x.save(); x.globalAlpha = al;
+    x.font="10.5px 'IBM Plex Mono',monospace";
+    var msg = "my own entry, on the wrong side of my own statistic";
+    var mw = x.measureText(msg).width;
+    x.fillStyle = "rgba(230,235,225,0.92)"; x.fillRect(mx+6, my-8, mw+8, 15);
+    x.restore();
+    x.save(); x.globalAlpha = al;
+    lab(x, msg, mx+10, my+4, ACCD, 10.5);
+    x.restore();
+  }
+  lab(x,"schematic · the shape of the mistake, not a plot of any board", 14, h-8, INK4, 10);
+};
+
+/* ---------------- mount every figure canvas ---------------- */
+var FIGSTATE = {};
+document.querySelectorAll("canvas[data-fig]").forEach(function(c){
+  var key = c.getAttribute("data-fig");
+  var fn = FIG[key];
+  if(!fn) return;
+  var st = FIGSTATE[c.id] = {};
+  register(c, function(t){
+    var k = hidpi(c, 0.5);
+    fn(c, k.x, k.w, k.h, t, st);
+    if(st.readout && st.onReadout) st.onReadout(st.readout);
+  }, 0.05);
+});
+
+/* ---------------- Figure 2 controls: the nDCG presets ---------------- */
+(function(){
+  var st = FIGSTATE["cNdcg"]; if(!st) return;
+  var rN=document.getElementById("rNdcg"), rD=document.getElementById("rDcg"),
+      rL=document.getElementById("rLost"), rT=document.getElementById("rTop");
+  function bump(el){ if(!el) return; el.classList.remove("bump");
+    void el.offsetWidth; el.classList.add("bump"); }
+  var lastN = null;
+  st.onReadout = function(r){
+    if(!rN) return;
+    var s = r.ndcg.toFixed(4);
+    if(s !== lastN){ lastN = s; bump(rN); }
+    rN.textContent = s;
+    var lost = 1 - r.ndcg;
+    rL.textContent = lost < 0.00005 ? "nothing" : "\u2212" + lost.toFixed(4);
+    rL.className = lost < 0.00005 ? "lock" : "hot";
+    rD.textContent = r.dcg.toFixed(1) + " / " + r.idcg.toFixed(1);
+    rT.textContent = r.top === 4 ? "yes" : "no";
+    rT.className = r.top === 4 ? "lock" : "hot";
+    rN.className = (r.ndcg > 0.995 ? "lock" : r.ndcg > 0.80 ? "" : "hot");
+  };
+  document.querySelectorAll("[data-ndcg]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("[data-ndcg]").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on");
+      var m = b.getAttribute("data-ndcg");
+      if(!st.orders){ st.pendingMode = m; return; }   /* queued; applied on first draw */
+      st.from = st.cur.slice();
+      st.cur  = st.orders[m].slice();
+      st.anim = 0; st.mode = m;
+    });
+  });
+})();
+
+/* ---------------- Figure 6 controls: effect size and seed count ---------------- */
+(function(){
+  var st = FIGSTATE["cPaired"]; if(!st) return;
+  var sE=document.getElementById("sEff"), sS=document.getElementById("sSeeds"),
+      lE=document.getElementById("lEff"), lS=document.getElementById("lSeeds"),
+      rU=document.getElementById("rUnpaired"), rP=document.getElementById("rPaired"),
+      rW=document.getElementById("rWins"), rG=document.getElementById("rGate");
+  function sync(){
+    var eff = (+sE.value)/10000;
+    var n   = +sS.value;
+    st.eff = eff; st.nseed = n;
+    lE.textContent = (eff>=0?"+":"") + eff.toFixed(4);
+    lS.textContent = n;
+  }
+  st.onReadout = function(r){
+    if(!rU) return;
+    rU.textContent = r.unpaired; rP.textContent = r.paired;
+    rW.textContent = r.wins;     rG.textContent = r.gate;
+    rU.className = r.unpaired==="detected" ? "lock" : "cool";
+    rP.className = r.paired==="detected"   ? "lock" : "hot";
+    rG.className = r.gate==="PASS" ? "lock" : "hot";
+  };
+  if(sE){ sE.addEventListener("input", sync); sS.addEventListener("input", sync); sync(); }
+})();
+
+/* ---------------- modals ---------------- */
+(function(){
+  var scrim = document.getElementById("scrim"), open = null, lastFocus = null;
+  function show(id){
+    var m = document.getElementById(id); if(!m) return;
+    if(open) open.classList.remove("on");
+    lastFocus = document.activeElement;
+    open = m; m.classList.add("on"); scrim.classList.add("on");
+    m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true");
+    var xbtn = m.querySelector(".modal-x"); if(xbtn) xbtn.focus();
+    document.body.style.overflow = "hidden";
+    /* a canvas inside a modal has zero size until it is shown */
+    m.querySelectorAll("canvas[data-fig]").forEach(function(c){ _hd.delete(c); });
+  }
+  function hide(){
+    if(open) open.classList.remove("on");
+    open = null; scrim.classList.remove("on");
+    document.body.style.overflow = "";
+    if(lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.querySelectorAll("[data-modal]").forEach(function(b){
+    b.addEventListener("click", function(e){ e.preventDefault(); show(b.getAttribute("data-modal")); });
+  });
+  document.querySelectorAll(".modal-x").forEach(function(b){ b.addEventListener("click", hide); });
+  scrim.addEventListener("click", hide);
+  addEventListener("keydown", function(e){ if(e.key === "Escape" && open) hide(); });
+})();
+
+/* ---------------- dead-end card filters ---------------- */
+(function(){
+  var cards = [].slice.call(document.querySelectorAll("#cards .card"));
+  document.querySelectorAll("[data-filter]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("[data-filter]").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on");
+      var f = b.getAttribute("data-filter");
+      cards.forEach(function(cd){
+        var show = (f === "all") || (cd.getAttribute("data-cat") === f);
+        cd.style.display = show ? "" : "none";
+      });
+    });
+  });
+})();
+
+})();
+</script>
+</body>
+</html>

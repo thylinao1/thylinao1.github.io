@@ -236,19 +236,34 @@ a:focus-visible,.modal-x:focus-visible{outline:2px solid var(--accent-deep);outl
 #topbar:not(.stuck) .brand{color:var(--ink-3)}
 #topbar:not(.stuck) #toc a{color:var(--ink-4)}
 #topbar:not(.stuck) #toc a:hover{color:var(--ink-2);background:rgba(22,32,27,.05)}
-#topbar .wrap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;
-  height:56px;gap:26px}
+#topbar .wrap{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;
+  height:56px;gap:18px}
+#topbar .homebtn{justify-self:start;display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);text-decoration:none;white-space:nowrap;
+  padding:6px 13px 6px 11px;border:1px solid var(--rule-strong);border-radius:999px;
+  background:rgba(255,255,255,.34);
+  transition:color .22s var(--ease),border-color .22s var(--ease),
+             background .22s var(--ease),transform .22s var(--ease),box-shadow .22s var(--ease)}
+#topbar .homebtn svg{flex:none;transition:transform .26s var(--ease)}
+#topbar .homebtn:hover{color:var(--accent-deep);border-color:var(--accent-soft);
+  background:rgba(160,63,30,.07);transform:translateY(-1px);
+  box-shadow:0 6px 16px -10px rgba(22,32,27,.5)}
+#topbar .homebtn:hover svg{transform:translateX(-3px)}
+#topbar .homebtn:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px}
 #topbar .brand{justify-self:start;white-space:nowrap;font-family:var(--font-mono);font-size:12.5px;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:none}
 #topbar .brand:hover{color:var(--ink)}
 #topbar .rail-end{justify-self:end;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--ink-4);white-space:nowrap}
 @media(max-width:1340px){#topbar .rail-end{display:none}
-  #topbar .wrap{grid-template-columns:auto minmax(0,1fr)}}
+  #topbar .wrap{grid-template-columns:auto auto minmax(0,1fr)}}
 /* the brand duplicates the page title that the nav already sits under; below
-   1150px it is the least useful thing competing for the row */
+   1150px it is the least useful thing competing for the row. The home button
+   never goes: it is the only way back to the rest of the site. */
 @media(max-width:1150px){#topbar .brand{display:none}
-  #topbar .wrap{grid-template-columns:minmax(0,1fr)}}
+  #topbar .wrap{grid-template-columns:auto minmax(0,1fr)}}
+@media(max-width:860px){#topbar .wrap{grid-template-columns:auto;justify-content:start}}
 #toc{justify-self:stretch;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;
   justify-content:center;-webkit-overflow-scrolling:touch;
   mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
@@ -259,11 +274,6 @@ a:focus-visible,.modal-x:focus-visible{outline:2px solid var(--accent-deep);outl
 @media(max-width:1260px){#toc a{font-size:11px;padding:6px 6px;letter-spacing:.04em}}
 #toc a:hover{color:var(--ink-2);background:var(--bg-2)}
 #toc a.active{color:var(--accent-deep);background:rgba(160,63,30,.10)}
-#toc a.homelink{color:var(--ink-3);margin-right:8px;position:relative}
-#toc a.homelink::after{content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);
-  width:1px;height:13px;background:var(--rule-strong)}
-#toc a.homelink:hover{color:var(--accent-deep);background:rgba(160,63,30,.08)}
-#topbar:not(.stuck) #toc a.homelink{color:var(--ink-3)}
 @media(max-width:860px){#toc{display:none}}
 
 /* ---------- hero ---------- */
@@ -433,9 +443,12 @@ footer h3{margin-top:0}
 <div id="rail"><i></i></div>
 
 <div id="topbar"><div class="wrap">
+  <a class="homebtn" href="https://thylinao1.github.io/index.html" aria-label="Back to Maksim Silchenko's site">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
+    <span>Home</span>
+  </a>
   <a class="brand" href="#hero">Thirteen thousand skills</a>
   <nav id="toc">
-    <a class="homelink" href="https://thylinao1.github.io/index.html">Home</a>
     <a href="#problem" data-sec="problem">Problem</a>
     <a href="#metric" data-sec="metric">Metric</a>
     <a href="#cascade" data-sec="cascade">Cascade</a>
@@ -655,7 +668,7 @@ footer h3{margin-top:0}
       largest gains came from.</p>
 
     <figure class="reveal">
-      <p class="fig-head">The cascade <span>3D &middot; animated</span></p>
+      <p class="fig-head">The cascade <span>3D &middot; drag to rotate</span></p>
       <canvas class="fig r8" id="cCascade" data-fig="cascade"></canvas>
       <figcaption><b>Figure 3.</b> 13,891 concepts narrow to a 1,000-candidate pool, which is
         scored by an ensemble of cross-encoders, fused, and cut to the 100 rows that the metric can
@@ -778,7 +791,7 @@ prior_egain = (g + 1.0) / (s + 4.0)      <i>E[2<sup>y</sup> &minus; 1], the metr
     </div>
 
     <figure class="reveal d1">
-      <p class="fig-head">Where the score came from <span>animated</span></p>
+      <p class="fig-head">Where the score came from <span>share of the total gain</span></p>
       <canvas class="fig r45" id="cLadder" data-fig="ladder"></canvas>
       <figcaption><b>Figure 4.</b> Every step from the fused base at 0.6499 to the final ensemble
         at 0.8647, drawn as a share of the total gain rather than of the total score, so the small
@@ -1308,7 +1321,7 @@ score = h @ (W_lm[<span class="s">"yes"</span>] &minus; W_lm[<span class="s">"no
     </div>
 
     <figure class="reveal d1">
-      <p class="fig-head">Why a base-rate check kills both <span>animated</span></p>
+      <p class="fig-head">Why a base-rate check kills both <span>schematic</span></p>
       <canvas class="fig r7" id="cSig" data-fig="signature"></canvas>
       <figcaption><b>Figure 7.</b> Schematic. Left: what a statistic looks like when you evaluate
         it on the short list you were already looking at: clean separation. Right: the same
@@ -2487,69 +2500,133 @@ FIG.paired = function(c, x, w, h, t, st){
   };
 };
 
-/* Figure 7 -- why a base-rate check kills a statistic */
+/* Figure 7 -- why a base-rate check kills a statistic.
+   Runs as a loop rather than a still: the short list lands first and looks
+   clean, then the whole population floods in behind it and a live tally
+   climbs past half, which is the moment the statistic dies. */
 FIG.signature = function(c, x, w, h, t, st){
   x.fillStyle = BG2; x.fillRect(0,0,w,h);
   if(!st.pop){
-    var rnd = mulberry(97), pop=[];
-    /* the whole population: gaps mostly positive, because the tasks differ */
-    for(var i=0;i<180;i++) pop.push(0.030 + gauss(rnd)*0.038);
+    /* The share above zero is CONSTRUCTED to be exactly the real board's 57%,
+       the figure the prose quotes, rather than left to the sampler. Draw a
+       spread, then shift it so the 43rd percentile sits on zero. */
+    var rnd = mulberry(97), N = 180, SHARE = 0.57, raw = [];
+    for(var i=0;i<N;i++) raw.push(clamp(gauss(rnd)*0.030, -0.062, 0.108));
+    var sorted = raw.slice().sort(function(a,b){ return a-b; });
+    var pivot = sorted[Math.floor(N*(1-SHARE))];
+    var pop = [];
+    for(i=0;i<N;i++) pop.push({v: raw[i]-pivot, jx: rnd(), jy: rnd()});
     st.pop = pop;
-    /* The short list you were already looking at. These are GENERATED from the
-       same seed as the population, deliberately: drawing the real per-account
+    /* The short list you were already looking at. GENERATED from the same
+       seed as the population, deliberately: drawing the real per-account
        values here would turn a figure captioned "schematic" into a published
        shortlist, which is the thing section 9 declines to publish. */
     var rs = mulberry(211), sl = [];
-    for(var j=0;j<7;j++) sl.push(0.058 + rs()*0.026);
+    for(var j=0;j<7;j++) sl.push({v:0.058 + rs()*0.026, jx:rs()});
     st.shortlist = sl;
     st.mine = -0.003;
+    st.above = st.pop.filter(function(q){ return q.v > 0; }).length;
   }
+  /* Builds once and then holds. A looping version spends part of every cycle
+     blank, which reads as a broken figure to anyone who lands on it mid-loop. */
+  var DONE = 6.6;
+  var tt = reduce ? DONE : Math.min(t, DONE);
+  function seg(a,b){ return clamp((tt-a)/(b-a), 0, 1); }
+  var pShort = ease(seg(0.30, 1.70));
+  var pClean = seg(1.60, 2.10);
+  var pPop   = ease(seg(2.20, 5.10));
+  var pTally = seg(4.10, 5.50);
+  var pMine  = ease(seg(5.40, 6.50));
+
   var half=(w-30)/2, top=44, bot=h-56;
   var LO=-0.06, HI=0.12;
   function ypos(v){ return bot - ((v-LO)/(HI-LO))*(bot-top); }
-  var phase = reduce ? 1 : clamp((t%9)/3.2, 0, 1);
-  var ph2 = ease(phase);
 
-  function panel(ox, pts, title, sub, showAll){
+  function frame(ox, title){
     x.strokeStyle=RULE; x.lineWidth=1; x.strokeRect(ox, top, half, bot-top);
-    /* zero line */
     x.save(); x.setLineDash([3,4]); x.strokeStyle="rgba(22,32,27,0.24)";
     x.beginPath(); x.moveTo(ox, ypos(0)); x.lineTo(ox+half, ypos(0)); x.stroke(); x.restore();
     lab(x,"gap = 0", ox+6, ypos(0)-6, INK4, 9.5);
-    var rnd2 = mulberry(showAll?31:17);
-    for(var i=0;i<pts.length;i++){
-      var px = ox + 14 + rnd2()*(half-28);
-      var py = ypos(pts[i]);
-      var pos = pts[i] > 0;
-      x.fillStyle = showAll ? (pos ? rgba(GR[3],0.52) : rgba(GR[2],0.46))
-                            : rgba(GR[4],0.78);
-      x.beginPath(); x.arc(px, py, showAll?2.5:4.0, 0, 6.283); x.fill();
-    }
     lab(x,title, ox, 24, INK3, 11, 0.9);
-    lab(x,sub, ox, bot+18, INK4, 10);
   }
-  panel(14, st.shortlist, "THE SHORT LIST", "looks like clean separation");
-  panel(14+half+2, st.pop, "THE WHOLE POPULATION", "a majority sit above zero", true);
+  var oxL = 14, oxR = 14+half+2;
+  frame(oxL, "THE SHORT LIST");
+  frame(oxR, "THE WHOLE POPULATION");
 
-  /* my own row, which sits on the wrong side -- the reference-class problem */
-  if(ph2 > 0.55){
-    var al = clamp((ph2-0.55)/0.45,0,1);
-    var mx = 14 + half*0.5, my = ypos(st.mine);
-    x.strokeStyle = rgba(ACCD, 0.55*al); x.lineWidth=1.4;
-    x.save(); x.setLineDash([2,3]);
-    x.beginPath(); x.moveTo(14, my); x.lineTo(14+half, my); x.stroke(); x.restore();
-    x.fillStyle = rgba(ACCD, al);
-    x.beginPath(); x.arc(mx, my, 4.4, 0, 6.283); x.fill();
-    x.save(); x.globalAlpha = al;
-    x.font="10.5px 'IBM Plex Mono',monospace";
-    var msg = "my own entry, on the wrong side of my own statistic";
-    var mw = x.measureText(msg).width;
-    x.fillStyle = "rgba(230,235,225,0.92)"; x.fillRect(mx+6, my-8, mw+8, 15);
+  /* left: the seven arrive one at a time */
+  var nShort = Math.round(pShort * st.shortlist.length);
+  for(var i=0;i<nShort;i++){
+    var q = st.shortlist[i];
+    var appear = clamp(pShort*st.shortlist.length - i, 0, 1);
+    var px = oxL + 14 + q.jx*(half-28);
+    var py = ypos(q.v) + (1-ease(appear))*-14;
+    x.globalAlpha = ease(appear);
+    x.fillStyle = rgba(GR[4],0.80);
+    x.beginPath(); x.arc(px, py, 4.2, 0, 6.283); x.fill();
+    x.globalAlpha = 1;
+  }
+  if(pClean > 0){
+    x.globalAlpha = pClean;
+    lab(x,"looks like clean separation", oxL, bot+18, INK4, 10);
+    x.globalAlpha = 1;
+  }
+
+  /* right: the population floods in, and the tally climbs with it */
+  var nPop = Math.round(pPop * st.pop.length);
+  var aboveSoFar = 0;
+  for(i=0;i<nPop;i++){
+    var r = st.pop[i];
+    if(r.v > 0) aboveSoFar++;
+    var rx = oxR + 14 + r.jx*(half-28);
+    var ry = ypos(r.v);
+    var app = clamp(pPop*st.pop.length - i, 0, 1);
+    x.globalAlpha = 0.30 + 0.70*ease(app);
+    x.fillStyle = r.v > 0 ? rgba(GR[3],0.55) : rgba(GR[2],0.48);
+    x.beginPath(); x.arc(rx, ry, 2.5 + (1-ease(app))*2.4, 0, 6.283); x.fill();
+    x.globalAlpha = 1;
+  }
+  if(nPop > 0){
+    var pct = Math.round(100*aboveSoFar/Math.max(1,nPop));
+    var msg = aboveSoFar + " of " + nPop + " above zero";
+    lab(x, msg, oxR, bot+18, INK4, 10);
+    /* a bar that crosses the halfway mark, which is the whole argument */
+    var bw = half-28, bx = oxR+14, by = bot+30;
+    x.fillStyle = "rgba(22,32,27,0.10)"; x.fillRect(bx, by, bw, 4);
+    x.fillStyle = pct > 50 ? rgba(GR[4],0.75) : rgba(GR[3],0.62);
+    x.fillRect(bx, by, bw*(pct/100), 4);
+    x.strokeStyle = "rgba(22,32,27,0.42)"; x.lineWidth=1;
+    x.beginPath(); x.moveTo(bx+bw*0.5, by-3); x.lineTo(bx+bw*0.5, by+7); x.stroke();
+    lab(x,"half", bx+bw*0.5-11, by+18, INK4, 9);
+    if(pTally > 0 && pct > 50){
+      x.globalAlpha = pTally;
+      lab(x, pct + "% of the field, not a minority", bx+bw*0.5+16, by+18, GRT[4], 10);
+      x.globalAlpha = 1;
+    }
+  }
+
+  /* and the row that should have stopped me: my own, on the wrong side */
+  if(pMine > 0){
+    var mx = oxL + half*0.5, my = ypos(st.mine);
+    x.save();
+    x.globalAlpha = pMine;
+    x.strokeStyle = rgba(ACCD, 0.55); x.lineWidth=1.4; x.setLineDash([2,3]);
+    x.beginPath(); x.moveTo(oxL, my); x.lineTo(oxL + half*pMine, my); x.stroke();
     x.restore();
-    x.save(); x.globalAlpha = al;
-    lab(x, msg, mx+10, my+4, ACCD, 10.5);
+    x.save(); x.globalAlpha = pMine;
+    x.font="10.5px 'IBM Plex Mono',monospace";
+    var note = "my own entry, on the wrong side of my own statistic";
+    var nw = x.measureText(note).width;
+    x.fillStyle = "rgba(230,235,225,0.92)"; x.fillRect(mx+6, my-8, nw+8, 15);
+    x.restore();
+    x.save(); x.globalAlpha = pMine;
+    x.fillStyle = rgba(ACCD, 1);
+    x.beginPath(); x.arc(mx, my, 4.4, 0, 6.283); x.fill();
+    x.restore();
+    x.save(); x.globalAlpha = pMine;
+    lab(x, note, mx+10, my+4, ACCD, 10.5);
     x.restore();
   }
+
   lab(x,"schematic · the shape of the mistake, not a plot of any board", 14, h-8, INK4, 10);
 };
 

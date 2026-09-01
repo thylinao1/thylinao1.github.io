@@ -609,6 +609,13 @@
   /* ================= incoming internship badge ================= */
   .exp-meta .type.incoming{background:var(--accent); color:#fff}
 
+  /* ================= gold glow for 1st place ================= */
+  .gold-1st{color:#d8b34a; font-weight:inherit; animation:goldGlow 2.6s ease-in-out infinite}
+  @keyframes goldGlow{0%,100%{text-shadow:0 0 4px rgba(216,179,74,.35)} 50%{text-shadow:0 0 14px rgba(216,179,74,.75), 0 0 26px rgba(216,179,74,.35)}}
+  .res-badge.gold{background:none; color:#b8860b; border:1px solid #d8b34a; box-shadow:0 0 9px 1px rgba(216,179,74,.45); animation:goldBadgeGlow 2.6s ease-in-out infinite}
+  @keyframes goldBadgeGlow{0%,100%{box-shadow:0 0 7px 0 rgba(216,179,74,.35)} 50%{box-shadow:0 0 16px 3px rgba(216,179,74,.65)}}
+  @media(prefers-reduced-motion:reduce){.gold-1st,.res-badge.gold{animation:none}}
+
   /* ================= image lightbox (rounded popup) ================= */
   .lightbox-card{
     position:relative; background:var(--bg); color:var(--ink);
@@ -688,6 +695,7 @@
     <div class="meta">
       <span><strong>Based</strong> · Singapore</span>
       <span><strong>NUS</strong> · MSc, School of Computing (Business Analytics), Specialised in Statistics</span>
+      <span><strong>NUS</strong> · Research Assistant, Recommender Systems</span>
       <span><strong>Tazapay</strong> · AI &amp; Analytics Intern</span>
     </div>
 
@@ -701,15 +709,17 @@
         <div class="hero-bio">
           <p>
             I'm an MSc student at NUS School of Computing (Business Analytics),
-            specializing in Statistics. Recently I won the Google Cloud Rapid&nbsp;Agent
+            specializing in Statistics. Recently I won the AKBC 2026 Shared Task at
+            EMNLP 2026 (1st place), won the Google Cloud Rapid&nbsp;Agent
             Hackathon (1st place), received a BlueDot Impact grant for chain-of-thought
             interpretability, and previously won the National Mathematics Olympiad
             (top 0.015% nationally).
           </p>
           <p>
             My work sits at the intersection of causal inference and production machine
-            learning systems. I'm currently an AI &amp; Analytics intern at Tazapay, a
-            cross-border payments company, and my previous experience
+            learning systems. I'm currently a research assistant at NUS working on
+            sequential recommendation with an industry partner, and an AI &amp; Analytics
+            intern at Tazapay, a cross-border payments company. My previous experience
             spans quantitative research at Orbuc, a London-based crypto startup, and a data
             &amp; analytics consultancy at The TCM Group, alongside independent projects in
             causal inference and Bayesian experimentation.
@@ -770,11 +780,16 @@
     <div class="awards">
       <div class="award">
         <div class="ord">01</div>
-        <h4><span class="google-wm"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></span> Cloud Rapid Agent Hackathon · 1st Place <span style="color:#d8b34a">(Gold)</span></h4>
-        <p>First place ($5k prize), 15,000 teams, for <a href="https://devpost.com/software/autosre-the-autonomous-on-call-engineer" target="_blank" rel="noopener">AutoSRE</a>, an autonomous on-call engineer that triages and resolves production incidents (Jul&nbsp;'26).</p>
+        <h4>AKBC 2026 Shared Task @ EMNLP · <span class="gold-1st">1st Place</span></h4>
+        <p><span class="gold-1st">1st place</span> (0.7060 macro F1) in the <a href="https://www.akbc.ws/2026/shared-task.html" target="_blank" rel="noopener">AKBC 2026 Shared Task</a> on predicting complete knowledge base entries from language models. Winning system paper at the AKBC workshop, EMNLP 2026, Budapest (Sep&nbsp;'26).</p>
       </div>
       <div class="award">
         <div class="ord">02</div>
+        <h4><span class="google-wm"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></span> Cloud Rapid Agent Hackathon · 1st Place <span style="color:#d8b34a">(Gold)</span></h4>
+        <p>1st place ($5k prize), 15,000 teams, for <a href="https://devpost.com/software/autosre-the-autonomous-on-call-engineer" target="_blank" rel="noopener">AutoSRE</a>, an autonomous on-call engineer that triages and resolves production incidents (Jul&nbsp;'26).</p>
+      </div>
+      <div class="award">
+        <div class="ord">03</div>
         <div class="award-head">
           <h4><span class="bluedot-wm">BlueDot Impact</span> Rapid Grant</h4>
           <div class="award-logos"><span class="chip"><img src="assets/logos/bluedot.png" alt="BlueDot Impact" width="22" height="22"></span></div>
@@ -782,12 +797,12 @@
         <p>Awarded a <a href="https://bluedot.org/programs/rapid-grants" target="_blank" rel="noopener">BlueDot Impact Rapid Grant</a> (Jun&nbsp;'26) to fund <a href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Bayesian Causal Faithfulness for LLM Chain-of-Thought</a>: calibrated uncertainty for whether a model's reasoning is faithful or post-hoc.</p>
       </div>
       <div class="award">
-        <div class="ord">03</div>
+        <div class="ord">04</div>
         <h4>National Mathematics Olympiad Winner</h4>
         <p>Winner of the Russian National Mathematics Olympiad (Moscow Institute of Physics &amp; Technology), top 0.015% nationally.</p>
       </div>
       <div class="award">
-        <div class="ord">04</div>
+        <div class="ord">05</div>
         <div class="award-head">
           <h4><span style="color:var(--accent)">First-Class Honours</span> &amp; Top of Cohort</h4>
           <div class="award-logos"><span class="chip"><img src="assets/logos/bayes.png" alt="Bayes Business School" width="22" height="22"></span></div>
@@ -795,7 +810,7 @@
         <p>Graduated with First-Class Honours (highest distinction) from Bayes Business School; top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>, and ESADE <em>Mergers &amp; Acquisitions</em>.</p>
       </div>
       <div class="award">
-        <div class="ord">05</div>
+        <div class="ord">06</div>
         <div class="award-head">
           <h4>Full Scholarships</h4>
           <div class="award-logos">
@@ -805,18 +820,6 @@
           </div>
         </div>
         <p>Full Scholarships at the National University of Singapore (Spring 2025) and ESADE Business School (Autumn 2024) exchanges, plus a fully-funded scholarship for the Beijing University of Posts &amp; Telecommunications Agentic AI Bootcamp (Jun to Jul 2026).</p>
-      </div>
-      <div class="award">
-        <div class="ord">06</div>
-        <div class="award-head">
-          <h4>Extracurricular Coursework</h4>
-          <div class="award-logos">
-            <span class="chip"><img src="assets/logos/mit.png" alt="MIT" width="22" height="22"></span>
-            <span class="chip"><img src="assets/logos/stanford.png" alt="Stanford" width="22" height="22"></span>
-            <span class="chip"><img src="assets/logos/imperial.png" alt="Imperial College London" width="22" height="22"></span>
-          </div>
-        </div>
-        <p>Stanford CS229 / CS230 · MIT RES.6-012 Probability · Imperial Mathematics for ML · IBM Data Science Specialization · McElreath's Statistical Rethinking (2026).</p>
       </div>
     </div>
   </div>
@@ -835,6 +838,18 @@
         <div class="led-side">
           <span class="lh-label lh-result">Result</span>
           <span class="lh-label lh-solutions">Solutions</span>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Aug to Sep 2026</div>
+        <div class="led-main">
+          <div class="led-title">AKBC 2026 Shared Task @ EMNLP · Knowledge Base Construction from Language Models</div>
+          <div class="led-note">1st place, 0.7060 macro F1 on the official test set, announced 1 September 2026. A 31B base model in completion mode, no training, no retrieval; the winning paper corrects how the field measures selection headroom. To appear at the AKBC workshop, EMNLP 2026 (Budapest).</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge gold">1st Place</span>
+          <a class="res-badge win glow" href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">Write-up &#8599;</a>
         </div>
       </div>
 
@@ -870,7 +885,7 @@
         <div class="led-date">Jul 2026</div>
         <div class="led-main">
           <div class="led-title">UbiComp 2026 · Trustworthy Agentic AI Challenge</div>
-          <div class="led-note">1st place in the workshop challenge on trustworthy tool-using LLM agents. Paper accepted at the TCSAUC workshop, UbiComp/ISWC 2026 (Shanghai).</div>
+          <div class="led-note">1st place in the workshop challenge on trustworthy tool-using LLM agents. Paper accepted at the TCSAUC workshop, UbiComp/ISWC 2026; presenting in person in Shanghai on 12 October 2026, supported by a SIGMOBILE student travel grant.</div>
         </div>
         <div class="led-side">
           <span class="res-badge win-plain">1st Place</span>
@@ -1000,11 +1015,47 @@
         <div class="led-date">Aug 2026</div>
         <div class="led-main">
           <div class="led-title">ARC White-Box Estimation Challenge &middot; Estimating a Random Network</div>
-          <div class="led-note">Predicting the expected activations of a random 32-layer ReLU MLP under a compute budget 15,000x smaller than the one that produced the answer key. Quasi-Monte Carlo sampler on six scrambled Sobol nets.</div>
+          <div class="led-note">Predicting the expected activations of a random 32-layer ReLU MLP under a compute budget 15,000x smaller than the one that produced the answer key. Quasi-Monte Carlo sampler on 6 scrambled Sobol nets.</div>
         </div>
         <div class="led-side">
           <span class="res-badge win-plain">Phase 1</span>
           <a class="res-badge win glow" href="projects/white-box-estimation.html" target="_blank" rel="noopener">Write-up &#8599;</a>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Aug to Sep 2026</div>
+        <div class="led-main">
+          <div class="led-title">TikTok TechJam 2026 &middot; Shadow Commit</div>
+          <div class="led-note">A transaction layer for autonomous coding agents: each agent turn runs against a sealed copy of the workspace, the full set of effects it produced is judged after it runs, and nothing reaches the real workspace until a policy or a person approves it. Track 1 (safety middleware for AI coding agents).</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win-plain">Submitted</span>
+          <a class="solution-btn" href="https://thylinao1.github.io/shadowcommit-site-zff3/" target="_blank" rel="noopener" aria-label="Open the Shadow Commit showcase site">showcase
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Aug 2026</div>
+        <div class="led-main">
+          <div class="led-title">PSA Code Sprint 2026 &middot; RELAY</div>
+          <div class="led-note">An exception layer for container-terminal transhipment: after a disruption it identifies the connections about to be missed, re-plans a shift's limited budget against a digital twin with CP-SAT, and routes every action through a priced, reversible, human-approved decision on a tamper-evident record.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win-plain">Submitted</span>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Aug 2026</div>
+        <div class="led-main">
+          <div class="led-title">American Express AI Hackathon 2026 &middot; One Loop</div>
+          <div class="led-note">Team entry, built with NUS classmates. Under judging.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win-plain">Submitted</span>
         </div>
       </div>
 
@@ -1042,6 +1093,28 @@
     <div class="section-num">§ 01 · Internships</div>
 
     <div class="exp-list">
+
+      <!-- NUS RA (current) -->
+      <article class="exp">
+        <div class="exp-meta">
+          <span class="date">Aug 2026 to Present</span>
+          <span class="type incoming">Current</span>
+        </div>
+        <div class="exp-body">
+          <h3>National University of Singapore · Research Assistant</h3>
+          <p class="sub">Recommender-systems research with a smartphone-industry partner · NUS School of Computing · Singapore</p>
+          <ul>
+            <li>Research on sequential recommendation for OS-level, cross-app behaviour data, where the modelled sequence spans installs, uninstalls and app usage rather than activity inside a single app.</li>
+            <li>Evaluating generative recommendation architectures against strong sequential baselines under strict inference-compute budgets, alongside work on recommendation diversity.</li>
+          </ul>
+          <div class="tags">
+            <span class="tag">Sequential Recommendation</span>
+            <span class="tag">Generative RecSys</span>
+            <span class="tag">Efficient Inference</span>
+            <span class="tag">Diversity</span>
+          </div>
+        </div>
+      </article>
 
       <!-- Tazapay (incoming) -->
       <article class="exp">
@@ -1421,6 +1494,7 @@
             <li><strong>National University of Singapore (NUS)</strong> · bootcamp covering Probability &amp; Statistics, Calculus, Linear Algebra, Cloud Computing, and Data Analytics &amp; ML.</li>
             <li><strong>University of Oxford</strong> · ML Representation Learning &amp; Generative AI Bootcamp 2026. Standout lectures from Tom Rainforth (intelligent data gathering) and Ricardo Silva (causal discovery and the extrapolation of causal effects).</li>
             <li><strong>Beijing University of Posts &amp; Telecommunications (BUPT)</strong>, Agentic AI Bootcamp (Jun to Jul 2026) · Fully-Funded Scholarship · 1st Place, Final Project.</li>
+            <li><strong>Technical Alignment Research Accelerator (TARA)</strong>, Singapore Cohort, Round 2 2026 (Sep to Dec 2026) · part-time technical AI-safety programme.</li>
           </ul>
         </div>
       </div>

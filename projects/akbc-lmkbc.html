@@ -292,13 +292,25 @@ section.alt .eq-pair div{background:#fff}
 #heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
 @media(min-width:901px){
   #heroCanvas{
-    -webkit-mask-image:linear-gradient(90deg,transparent 26%,rgba(0,0,0,.35) 44%,#000 58%,#000 97%,transparent 100%);
-            mask-image:linear-gradient(90deg,transparent 26%,rgba(0,0,0,.35) 44%,#000 58%,#000 97%,transparent 100%)}
+    -webkit-mask-image:linear-gradient(90deg,transparent 14%,rgba(0,0,0,.32) 38%,#000 58%,#000 97%,transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 14%,rgba(0,0,0,.32) 38%,#000 58%,#000 97%,transparent 100%)}
+  /* the title column keeps its own scrim, so the scene never competes with the words */
+  #hero::after{background:
+    linear-gradient(100deg,rgba(17,35,48,.50) 0%,rgba(17,35,48,.20) 32%,transparent 54%),
+    linear-gradient(180deg,rgba(17,35,48,.40) 0%,rgba(17,35,48,.16) 28%,transparent 48%),
+    radial-gradient(105% 82% at 76% 28%,rgba(90,158,143,.24),transparent 58%),
+    radial-gradient(80% 70% at 8% 92%,rgba(123,189,174,.14),transparent 62%),
+    linear-gradient(180deg,transparent 58%,rgba(20,40,55,.55) 100%)}
 }
 @media(max-width:900px){
   #heroCanvas{
-    -webkit-mask-image:linear-gradient(180deg,transparent 16%,#000 48%,#000 92%,transparent 100%);
-            mask-image:linear-gradient(180deg,transparent 16%,#000 48%,#000 92%,transparent 100%)}
+    -webkit-mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.45) 52%,#000 76%,#000 96%,transparent 100%);
+            mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.45) 52%,#000 76%,#000 96%,transparent 100%)}
+  #hero::after{background:
+    linear-gradient(180deg,rgba(17,35,48,.52) 0%,rgba(17,35,48,.26) 30%,transparent 56%),
+    radial-gradient(105% 82% at 76% 28%,rgba(90,158,143,.24),transparent 58%),
+    radial-gradient(80% 70% at 8% 92%,rgba(123,189,174,.14),transparent 62%),
+    linear-gradient(180deg,transparent 58%,rgba(20,40,55,.55) 100%)}
 }
 #hero .wrap{position:relative;z-index:3;padding-top:84px;padding-bottom:70px}
 @media(min-width:901px){
@@ -310,7 +322,7 @@ section.alt .eq-pair div{background:#fff}
 #hero .tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
   background:var(--accent-bright);margin-right:11px;vertical-align:1px;
   box-shadow:0 0 0 4px rgba(123,189,174,.20)}
-#hero h1{color:#fff}
+#hero h1{color:#fff;max-width:30ch}
 #hero .sub{font-size:21px;line-height:1.5;color:#c7dae4;max-width:600px;margin:0 0 6px}
 #hero .sub b{color:#fff;font-weight:600}
 #hero .first-place{font-weight:600}
@@ -534,6 +546,14 @@ section.alt .board-track{background:#dfeeea}
 footer{padding:74px 0 92px;background:var(--deep);color:#c2d3dd;position:relative;overflow:hidden}
 footer::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(90% 120% at 12% 0%,rgba(90,158,143,.18),transparent 60%)}
+#footCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.4) 52%,#000 68%,#000 98%,transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.4) 52%,#000 68%,#000 98%,transparent 100%)}
+@media(max-width:900px){
+  #footCanvas{
+    -webkit-mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.5) 46%,#000 72%,#000 100%);
+            mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.5) 46%,#000 72%,#000 100%)}
+}
 footer .wrap{position:relative;z-index:1}
 footer h3{margin-top:0;color:#fff}
 footer .small{color:#a8bdc9}
@@ -596,7 +616,7 @@ main .cite b{color:var(--ink)}
 <div id="rail" aria-hidden="true"><i></i></div>
 
 <div id="topbar"><div class="wrap">
-  <a class="homebtn" href="../index.html"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.2 2 3.2 6l4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Portfolio</a>
+  <a class="homebtn" href="../index.html"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.2 2 3.2 6l4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</a>
   <a class="brand" href="#hero">Coverage is not knowledge</a>
   <nav id="toc" aria-label="Sections of this page">
     <a href="#task" data-sec="task">The task</a>
@@ -624,9 +644,7 @@ main .cite b{color:var(--ink)}
       &nbsp;&middot;&nbsp; team thylinao, solo</p>
     <div class="hbtns">
       <a class="hbtn solid" href="https://www.akbc.ws/2026/shared-task.html" target="_blank" rel="noopener">Official results <span class="arrow">&rarr;</span></a>
-      <a class="hbtn" href="https://www.akbc.ws/2026/AKBC%20Shared%20Task%202026%20Final%20Leaderboard.pdf" target="_blank" rel="noopener">Final leaderboard, PDF</a>
       <a class="hbtn" href="https://github.com/thylinao1/lm-kbc-2026" target="_blank" rel="noopener">Code</a>
-      <a class="hbtn" href="../index.html">Back to portfolio</a>
     </div>
     <dl class="hstats">
       <div><dt>Final macro F1</dt><dd><span class="count" data-final="0.7060" data-dec="4">0.7060</span></dd></div>
@@ -1177,9 +1195,9 @@ answer  = argmax<sub>v in draws</sub> score(v)</div>
       per relation view is the more informative one, and it says something the total does not.</p>
 
     <figure class="reveal d1">
-      <p class="fig-head">Official final leaderboard <span>interactive, hover or focus a row</span></p>
+      <p class="fig-head">Official final leaderboard, top 5 <span>interactive, hover or focus a row</span></p>
       <div class="board" id="board" role="table"
-        aria-label="Official AKBC 2026 shared task final leaderboard, ranked by macro F1">
+        aria-label="Official AKBC 2026 shared task final leaderboard, top 5 by macro F1">
         <div role="row" class="board-row head">
           <span role="columnheader" class="board-rank">#</span>
           <span role="columnheader" class="board-th">Team</span>
@@ -1191,16 +1209,9 @@ answer  = argmax<sub>v in draws</sub> score(v)</div>
         <div role="row" class="board-row" tabindex="0" style="--w:.8345"><span role="cell" class="board-rank">03</span><span role="cell" class="board-team">cedarz</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6836</span><span class="board-gap">0.0224 behind</span></div>
         <div role="row" class="board-row" tabindex="0" style="--w:.7727"><span role="cell" class="board-rank">04</span><span role="cell" class="board-team">t-800</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6700</span><span class="board-gap">0.0360 behind</span></div>
         <div role="row" class="board-row" tabindex="0" style="--w:.7591"><span role="cell" class="board-rank">05</span><span role="cell" class="board-team">acro-sasaki</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6670</span><span class="board-gap">0.0390 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.7505"><span role="cell" class="board-rank">06</span><span role="cell" class="board-team">ICI Interns</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6651</span><span class="board-gap">0.0409 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.7059"><span role="cell" class="board-rank">07</span><span role="cell" class="board-team">dukesun99</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6553</span><span class="board-gap">0.0507 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.5859"><span role="cell" class="board-rank">08</span><span role="cell" class="board-team">mikolaj_tym</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6289</span><span class="board-gap">0.0771 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.5359"><span role="cell" class="board-rank">09</span><span role="cell" class="board-team">yamm1212</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.6179</span><span class="board-gap">0.0881 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.3991"><span role="cell" class="board-rank">10</span><span role="cell" class="board-team">vquclinh</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.5878</span><span class="board-gap">0.1182 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.3177"><span role="cell" class="board-rank">11</span><span role="cell" class="board-team">DataMind</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.5699</span><span class="board-gap">0.1361 behind</span></div>
-        <div role="row" class="board-row" tabindex="0" style="--w:0.1855"><span role="cell" class="board-rank">12</span><span role="cell" class="board-team">fon1as</span><span role="cell" class="board-track"><i class="board-fill"></i></span><span role="cell" class="board-score">0.5408</span><span class="board-gap">0.1652 behind</span></div>
       </div>
       <div class="board-axis" aria-hidden="true"><span>0.50</span><span>0.61</span><span>0.72</span></div>
-      <figcaption><b>Figure 9, interactive.</b> The official final leaderboard. Bars grow
+      <figcaption><b>Figure 9, interactive.</b> The top 5 of the official final leaderboard. Bars grow
         when the figure reaches the viewport, and hovering or focusing a row reports that team's gap
         to 1st place. The bar axis starts at 0.50 rather than 0.00 so that the differences at the top
         of the board are legible; the printed scores are the official figures and are not
@@ -1329,6 +1340,7 @@ answer  = argmax<sub>v in draws</sub> score(v)</div>
 </main>
 
 <footer>
+  <canvas id="footCanvas" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="read">
       <h3>Notes on this page</h3>
@@ -1339,7 +1351,7 @@ answer  = argmax<sub>v in draws</sub> score(v)</div>
         from the run log, quoted at the precision it was recorded at. Figures 1, 5, 6, 9 and 10
         display those measurements; figures 3, 4, 7 and 8 are drawn to scale from them. Figure 5 in
         particular is a deterministic illustration constructed to converge on the 2 published chance rates, and it is labelled as such in its own caption rather than only here.</p>
-      <p class="small">Large language models were used in this project, for code and for drafting,
+      <p class="small">Large language models were used in this project only as assistance, for code and for drafting,
         including this page. Every quantitative claim traces to a recorded measurement or an official
         result rather than to a model's summary of one.</p>
       <p class="small">Corrections are welcome. If something here misstates the task, the
@@ -1347,9 +1359,7 @@ answer  = argmax<sub>v in draws</sub> score(v)</div>
 
       <div class="footlinks">
         <a href="https://www.akbc.ws/2026/shared-task.html" target="_blank" rel="noopener">Official results</a>
-        <a href="https://www.akbc.ws/2026/AKBC%20Shared%20Task%202026%20Final%20Leaderboard.pdf" target="_blank" rel="noopener">Final leaderboard, PDF</a>
         <a href="https://github.com/thylinao1/lm-kbc-2026" target="_blank" rel="noopener">Code</a>
-        <a href="../index.html">Back to portfolio</a>
       </div>
     </div>
   </div>
@@ -1878,28 +1888,166 @@ paintRail();
   draw(0);
 })();
 
-/* ================= HERO: a rotating cloud of draws ================= */
+/* ================= HERO: a lit 3D surface with a plateau cut into it =================
+   One canvas, hand rolled perspective, no libraries. The form is a folded sheet: the
+   score surface of the task, with the flat mesa where many different configurations
+   land on exactly the same number, and gold level lines tracing its rim. Geometry,
+   normals, level lines and every colour string are built once, up front, so the frame
+   loop allocates nothing. Facets are opaque and depth sorted, so the sheet occludes
+   itself and the plane under it. */
 (function(){
   var c = document.getElementById("heroCanvas"); if(!c) return;
-  var rnd = mulberry(20260901), pts = [];
-  /* the tight group: what the model actually knows, sitting inside one tolerance window */
-  var CN = 118, SN = 430;
-  var cx0 = 0.16, cy0 = -0.05, cz0 = 0.10;
-  var i;
-  for(i=0;i<CN;i++){
-    pts.push({x:cx0+gauss(rnd)*0.085, y:cy0+gauss(rnd)*0.075, z:cz0+gauss(rnd)*0.085,
-              k:1, ph:rnd()*6.283, s:0.75+rnd()*0.55});
-  }
-  /* the spread: everything else a wide pool contains */
-  for(i=0;i<SN;i++){
-    var th = rnd()*6.283, u = rnd()*2-1, rad = 0.42 + Math.pow(rnd(),0.62)*0.72;
-    var sp = Math.sqrt(Math.max(0,1-u*u));
-    pts.push({x:Math.cos(th)*sp*rad, y:u*rad*0.72, z:Math.sin(th)*sp*rad,
-              k:0, ph:rnd()*6.283, s:0.45+rnd()*0.55});
-  }
-  /* the cloud leans very slightly toward the pointer, damped so it never snaps */
-  var pxWant = 0, pyWant = 0, pxNow = 0, pyNow = 0;
   var heroEl = document.getElementById("hero");
+  var i, j, k, m;
+
+  /* ---------- the surface, sampled once ---------- */
+  var NU = 54, NV = 32;                 /* cells */
+  var VU = NU+1, VV = NV+1, NVERT = VU*VV, NCELL = NU*NV;
+  var EX = 1.24, EZ = 0.58;             /* a wide sheet, shallow in depth */
+  var PLAT = 0.34;                      /* the height everything flattens onto */
+  function surf(u,v){
+    var a = 0.325*Math.sin(u*5.6 + v*2.1 - 0.6)*Math.cos(v*3.2 + 0.4);
+    var b = 0.150*Math.sin(u*9.1 - v*6.3 + 1.4);
+    var d = 0.105*Math.cos(u*3.4 + v*7.9);
+    var hh = a + b + d;
+    var du = (u-0.60)/0.36, dv = (v-0.48)/0.46;
+    var rr = Math.sqrt(du*du + dv*dv);
+    var mm = 1 - clamp((rr-0.50)/0.54, 0, 1);
+    mm = mm*mm*(3-2*mm);                /* smooth shoulder onto the mesa */
+    return hh*(1-mm) + PLAT*mm;
+  }
+  var vX = new Float32Array(NVERT), vY = new Float32Array(NVERT), vZ = new Float32Array(NVERT);
+  for(j=0;j<VV;j++) for(i=0;i<VU;i++){
+    var u = i/NU, v = j/NV, id = j*VU + i;
+    vX[id] = (u-0.5)*2*EX; vZ[id] = (v-0.5)*2*EZ; vY[id] = surf(u,v);
+  }
+  /* smooth normals, one a vertex from the slope of the field, then averaged onto the
+     cell: flat facet normals made the sheet read as a chequerboard */
+  var mX = new Float32Array(NVERT), mY = new Float32Array(NVERT), mZ = new Float32Array(NVERT);
+  var EPS = 0.004;
+  for(j=0;j<VV;j++) for(i=0;i<VU;i++){
+    var uu = i/NU, vv = j/NV, vid = j*VU+i;
+    var gu = (surf(uu+EPS,vv) - surf(uu-EPS,vv))/(2*EPS*2*EX);
+    var gv = (surf(uu,vv+EPS) - surf(uu,vv-EPS))/(2*EPS*2*EZ);
+    var gl = Math.sqrt(gu*gu + 1 + gv*gv);
+    mX[vid] = -gu/gl; mY[vid] = 1/gl; mZ[vid] = -gv/gl;
+  }
+  var nX = new Float32Array(NCELL), nY = new Float32Array(NCELL), nZ = new Float32Array(NCELL);
+  for(j=0;j<NV;j++) for(i=0;i<NU;i++){
+    var b0 = j*VU+i, b1 = b0+1, b2 = b0+VU+1, b3 = b0+VU;
+    var ax2 = (mX[b0]+mX[b1]+mX[b2]+mX[b3])*0.25,
+        ay2 = (mY[b0]+mY[b1]+mY[b2]+mY[b3])*0.25,
+        az2 = (mZ[b0]+mZ[b1]+mZ[b2]+mZ[b3])*0.25;
+    var al = Math.sqrt(ax2*ax2 + ay2*ay2 + az2*az2) || 1;
+    nX[j*NU+i] = ax2/al; nY[j*NU+i] = ay2/al; nZ[j*NU+i] = az2/al;
+  }
+
+  /* ---------- the skirt: the boundary dropped to a base, so this is a solid slab
+       and not a sheet of cloth ---------- */
+  var BASE = -0.30;
+  var RL = 2*(VU + VV) - 4;
+  var RING = new Int32Array(RL);
+  (function(){
+    var n = 0, a;
+    for(a=0;a<VU;a++)      RING[n++] = a;
+    for(a=1;a<VV;a++)      RING[n++] = a*VU + VU-1;
+    for(a=VU-2;a>=0;a--)   RING[n++] = (VV-1)*VU + a;
+    for(a=VV-2;a>=1;a--)   RING[n++] = a*VU;
+  })();
+  var wNX = new Float32Array(RL), wNZ = new Float32Array(RL);
+  for(i=0;i<RL;i++){
+    var r0 = RING[i], r1 = RING[(i+1)%RL];
+    var dx2 = vX[r1]-vX[r0], dz2 = vZ[r1]-vZ[r0];
+    var nx2 = dz2, nz2 = -dx2;
+    var mx2 = (vX[r0]+vX[r1])*0.5, mz2 = (vZ[r0]+vZ[r1])*0.5;
+    if(nx2*mx2 + nz2*mz2 < 0){ nx2 = -nx2; nz2 = -nz2; }
+    var nl2 = Math.sqrt(nx2*nx2 + nz2*nz2) || 1;
+    wNX[i] = nx2/nl2; wNZ[i] = nz2/nl2;
+  }
+
+  /* ---------- level lines, marching squares, stored per cell so they occlude ---------- */
+  var LEV = [PLAT-0.02, 0.075, -0.165];
+  var LEVK = [0, 1, 1];                 /* 0 gold, 1 mint */
+  var segOff = new Int32Array(NCELL+1);
+  var sxA, syA, szA, sxB, syB, szB, segK;
+  (function(){
+    var ax=[], ay=[], az=[], bx=[], by=[], bz=[], kk=[], counts = new Int32Array(NCELL);
+    var hx = new Float64Array(4), hy = new Float64Array(4), hz = new Float64Array(4);
+    for(j=0;j<NV;j++) for(i=0;i<NU;i++){
+      var cell = j*NU+i;
+      var c0 = j*VU+i, c1 = c0+1, c2 = c0+VU+1, c3 = c0+VU;   /* clockwise ring */
+      var ring = [c0,c1,c2,c3];
+      for(var L=0;L<LEV.length;L++){
+        var lv = LEV[L], n = 0;
+        for(var e=0;e<4;e++){
+          var p = ring[e], q = ring[(e+1)&3];
+          var h0 = vY[p], h1 = vY[q];
+          if((h0 < lv) === (h1 < lv)) continue;
+          var tt = (lv - h0)/(h1 - h0);
+          if(n < 4){
+            hx[n] = vX[p] + (vX[q]-vX[p])*tt;
+            hy[n] = lv;
+            hz[n] = vZ[p] + (vZ[q]-vZ[p])*tt;
+            n++;
+          }
+        }
+        for(var s=0; s+1<n; s+=2){
+          ax.push(hx[s]); ay.push(hy[s]); az.push(hz[s]);
+          bx.push(hx[s+1]); by.push(hy[s+1]); bz.push(hz[s+1]);
+          kk.push(LEVK[L]); counts[cell]++;
+        }
+      }
+    }
+    var acc = 0;
+    for(i=0;i<NCELL;i++){ segOff[i] = acc; acc += counts[i]; }
+    segOff[NCELL] = acc;
+    sxA = new Float32Array(ax); syA = new Float32Array(ay); szA = new Float32Array(az);
+    sxB = new Float32Array(bx); syB = new Float32Array(by); szB = new Float32Array(bz);
+    segK = new Uint8Array(kk);
+  })();
+
+  /* ---------- colour: shade crossed with distance, built once ---------- */
+  var SH = 40, FG = 14;
+  var SURF = new Array(SH*FG);
+  var SHADOW = [11,27,39], MID = [24,63,71], HI = [116,186,172], HAZE = [26,52,70];
+  function seg3(t){
+    var o = [0,0,0], u2;
+    if(t < 0.55){ u2 = t/0.55; for(var q=0;q<3;q++) o[q] = SHADOW[q] + (MID[q]-SHADOW[q])*u2; }
+    else { u2 = (t-0.55)/0.45; for(var q2=0;q2<3;q2++) o[q2] = MID[q2] + (HI[q2]-MID[q2])*u2; }
+    return o;
+  }
+  for(i=0;i<SH;i++){
+    var base = seg3(i/(SH-1));
+    for(j=0;j<FG;j++){
+      var near = 0.26 + 0.74*(j/(FG-1));
+      SURF[i*FG+j] = "rgb(" + Math.round(HAZE[0] + (base[0]-HAZE[0])*near) + ","
+                            + Math.round(HAZE[1] + (base[1]-HAZE[1])*near) + ","
+                            + Math.round(HAZE[2] + (base[2]-HAZE[2])*near) + ")";
+    }
+  }
+  function ramp(r,g,b,a0,a1,n){
+    var o = new Array(n);
+    for(var q=0;q<n;q++) o[q] = "rgba("+r+","+g+","+b+","+(a0+(a1-a0)*(q/(n-1))).toFixed(3)+")";
+    return o;
+  }
+  var K_GOLD = ramp(216,179,74, 0.10,0.92, FG),
+      K_MINT = ramp(140,206,192,0.05,0.44, FG),
+      K_RIM  = ramp(190,232,220,0.03,0.38, FG),
+      K_RING = ramp( 90,158,143,0.008,0.09, 8);
+
+  /* ---------- projection scratch ---------- */
+  var pX = new Float32Array(NVERT), pY = new Float32Array(NVERT), pQ = new Float32Array(NVERT);
+  var pOK = new Uint8Array(NVERT);
+  var rbX = new Float32Array(RL), rbY = new Float32Array(RL);
+  var rbOK = new Uint8Array(RL);
+  var NITEM = NCELL + RL;
+  var cDep = new Float32Array(NITEM);
+  var NB = 64;
+  var bCnt = new Int32Array(NB), bOff = new Int32Array(NB), ord = new Int32Array(NITEM);
+  var cOK = new Uint8Array(NITEM);
+
+  /* ---------- pointer parallax, damped so nothing snaps ---------- */
+  var pxWant = 0, pyWant = 0, pxNow = 0, pyNow = 0;
   if(heroEl){
     heroEl.addEventListener("pointermove", function(e){
       var r = heroEl.getBoundingClientRect();
@@ -1908,60 +2056,351 @@ paintRail();
     }, {passive:true});
     heroEl.addEventListener("pointerleave", function(){ pxWant = 0; pyWant = 0; }, {passive:true});
   }
+
+  /* ---------- cached gradients, rebuilt only when the canvas resizes ---------- */
+  var gW = -1, gH = -1, gA = null, gB = null, gVig = null, gRA = 0, gRB = 0;
+  function ensureGrads(x, w, h){
+    if(w === gW && h === gH) return;
+    gW = w; gH = h;
+    var big = Math.max(w,h);
+    gRA = big*0.52;
+    gA = x.createRadialGradient(0,0,gRA*0.05,0,0,gRA);
+    gA.addColorStop(0,   "rgba(90,158,143,0.17)");
+    gA.addColorStop(0.42,"rgba(74,136,140,0.055)");
+    gA.addColorStop(1,   "rgba(90,158,143,0)");
+    gRB = big*0.26;
+    gB = x.createRadialGradient(0,0,gRB*0.05,0,0,gRB);
+    gB.addColorStop(0,"rgba(216,179,74,0.085)");
+    gB.addColorStop(1,"rgba(216,179,74,0)");
+    gVig = x.createRadialGradient(w*0.64,h*0.50,big*0.30,w*0.64,h*0.50,big*0.92);
+    gVig.addColorStop(0,"rgba(13,28,40,0)");
+    gVig.addColorStop(1,"rgba(13,28,40,0.44)");
+  }
+
+  var f = 3.0;
+
   function draw(t, dt){
-    var k = hidpi(c,1), x=k.x, w=k.w, h=k.h;
+    var kk2 = hidpi(c,1), x = kk2.x, w = kk2.w, h = kk2.h;
     x.clearRect(0,0,w,h);
     var mob = w < 900;
-    var lag = reduce ? 1 : Math.min(1, (dt||0.016)*2.6);
-    pxNow += (pxWant - pxNow) * lag;
-    pyNow += (pyWant - pyNow) * lag;
-    var ox = (mob ? w*0.5 : w*0.735) + pxNow*w*0.035;
-    var oy = (mob ? h*0.74 : h*0.48) + pyNow*h*0.03;
-    var scale = Math.min(w,h) * (mob?0.32:0.47);
-    var ry = (reduce ? 0.9 : t*0.115) + 0.55 + pxNow*0.55;
-    var tilt = 0.26 + (reduce?0:0.09*Math.sin(t*0.17)) + pyNow*0.36;
-    var f = 3.4;
-    var cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
-    var out = [], i, p;
-    for(i=0;i<pts.length;i++){
-      p = pts[i];
-      var breathe = reduce ? 0 : 0.02*Math.sin(t*0.5 + p.ph);
-      var X = p.x*(1+breathe), Y = p.y*(1+breathe), Z = p.z*(1+breathe);
-      var X1 = X*cs + Z*sn, Z1 = -X*sn + Z*cs;
-      var Y1 = Y*ct - Z1*st, Z2 = Y*st + Z1*ct;
-      var d = f - Z2;
-      if(d < 0.4) continue;
-      var q = f/d;
-      out.push({sx:ox + X1*scale*q, sy:oy + Y1*scale*q, q:q, k:p.k, s:p.s, z:Z2});
+    var lag = reduce ? 1 : Math.min(1,(dt||0.016)*2.6);
+    pxNow += (pxWant - pxNow)*lag;
+    pyNow += (pyWant - pyNow)*lag;
+    ensureGrads(x, w, h);
+
+    /* ---- 1. two soft depth glows ---- */
+    x.save();
+    x.translate(w*(mob?0.54:0.76) + pxNow*w*0.022, h*(mob?0.60:0.50) + pyNow*h*0.02);
+    x.fillStyle = gA; x.fillRect(-gRA,-gRA,gRA*2,gRA*2);
+    x.restore();
+    x.save();
+    x.translate(w*(mob?0.72:0.90) + pxNow*w*0.05, h*(mob?0.42:0.32) + pyNow*h*0.04);
+    x.fillStyle = gB; x.fillRect(-gRB,-gRB,gRB*2,gRB*2);
+    x.restore();
+
+    /* ---- 2. the plane the sheet floats over ---- */
+    var hy = h*(mob?0.94:0.815), floorY = h*1.12;
+    var vpx = w*(mob?0.54:0.72) + pxNow*w*0.06;
+    var span = floorY - hy, creep = reduce ? 0 : (t*0.09) % 1;
+    x.lineWidth = 1;
+    x.strokeStyle = "rgba(90,158,143,0.07)";
+    x.beginPath();
+    for(i=1;i<=15;i++){
+      var yy = hy + span/(i + creep);
+      if(yy > h*1.2) continue;
+      x.moveTo(0,yy); x.lineTo(w,yy);
     }
-    out.sort(function(a,b){ return a.z - b.z; });
-    /* the tolerance window drawn as a soft halo around the tight group */
-    var hX = cx0*cs + cz0*sn, hZ1 = -cx0*sn + cz0*cs;
-    var hY = cy0*ct - hZ1*st, hZ2 = cy0*st + hZ1*ct;
-    var hd = f - hZ2;
-    if(hd > 0.4){
-      var hq = f/hd, hx = ox + hX*scale*hq, hy = oy + hY*scale*hq;
-      var hr = 0.30*scale*hq;
-      var gg = x.createRadialGradient(hx,hy,hr*0.15,hx,hy,hr);
-      gg.addColorStop(0, "rgba(90,158,143,0.26)");
-      gg.addColorStop(1, "rgba(90,158,143,0)");
-      x.fillStyle = gg; x.beginPath(); x.arc(hx,hy,hr,0,6.283); x.fill();
-      x.strokeStyle = "rgba(123,189,174,0.34)"; x.lineWidth = 1;
-      x.beginPath(); x.arc(hx,hy,hr*0.62,0,6.283); x.stroke();
+    for(j=-11;j<=11;j++){ x.moveTo(vpx + j*w*0.135, floorY); x.lineTo(vpx, hy); }
+    x.stroke();
+    x.strokeStyle = "rgba(123,189,174,0.055)";
+    x.beginPath(); x.moveTo(0,hy); x.lineTo(w,hy); x.stroke();
+
+    /* ---- 3. where the sheet meets the plane, and the rings running out from it ---- */
+    var ox = (mob ? w*0.55 : w*0.775) + pxNow*w*0.035;
+    var oy = (mob ? h*0.80 : h*0.515) + pyNow*h*0.03;
+    var scale = Math.min(w,h) * (mob ? 0.32 : 0.215);
+    var contY = hy + (h-hy)*0.26;
+    for(i=6;i>=1;i--){
+      x.fillStyle = K_RING[i+1];
+      x.beginPath();
+      x.ellipse(ox, contY, scale*1.9*(i/6), scale*0.26*(i/6), 0, 0, 6.283);
+      x.fill();
     }
-    for(i=0;i<out.length;i++){
-      var o = out[i];
-      var depth = clamp((o.q - 0.55) / 1.5, 0, 1);
-      var rr2 = (o.k ? 1.7 : 1.25) * o.s * (0.55 + depth*1.05);
-      if(o.k){
-        x.fillStyle = "rgba(123,189,174," + (0.34 + depth*0.62).toFixed(3) + ")";
-      } else {
-        x.fillStyle = "rgba(190,215,228," + (0.09 + depth*0.34).toFixed(3) + ")";
+    if(!reduce){
+      for(i=0;i<3;i++){
+        var ph = (t*0.085 + i/3) % 1;
+        var rx2 = scale*(0.5 + ph*2.6);
+        x.strokeStyle = K_RING[clamp((7*(1-ph))|0, 0, 7)];
+        x.lineWidth = 1;
+        x.beginPath(); x.ellipse(ox, contY, rx2, rx2*0.12, 0, 0, 6.283); x.stroke();
       }
-      x.beginPath(); x.arc(o.sx, o.sy, Math.abs(rr2), 0, 6.283); x.fill();
+    }
+
+    /* ---- 4. the sheet ---- */
+    var ry = (reduce ? 0.62 : 0.62 + 0.30*Math.sin(t*0.055)) + pxNow*0.42;
+    var tilt = 0.58 + (reduce?0:0.045*Math.sin(t*0.11)) + pyNow*0.20;
+    var cs = Math.cos(ry), sn = Math.sin(ry), ct = Math.cos(tilt), st = Math.sin(tilt);
+
+    var X1, Z1, Y1, Z2, dd, qz;
+    for(i=0;i<NVERT;i++){
+      X1 = vX[i]*cs + vZ[i]*sn; Z1 = -vX[i]*sn + vZ[i]*cs;
+      Y1 = vY[i]*ct - Z1*st;    Z2 = vY[i]*st + Z1*ct;
+      dd = f - Z2;
+      if(dd < 0.5){ pOK[i] = 0; continue; }
+      qz = f/dd;
+      pX[i] = ox + X1*scale*qz; pY[i] = oy - Y1*scale*qz; pQ[i] = qz; pOK[i] = 1;
+    }
+
+    /* the light orbits the sheet instead of the sheet deforming, so the surface stays
+       still while the highlight travels across it */
+    var la = (reduce ? 2.15 : 2.15 + 0.62*Math.sin(t*0.075));
+    var lx = Math.cos(la)*0.94, ly = 0.34, lz = Math.sin(la)*0.94;
+    var ll = Math.sqrt(lx*lx + ly*ly + lz*lz);
+    lx/=ll; ly/=ll; lz/=ll;
+    /* rotate the light into object space: the rotation is orthonormal, so transpose it */
+    var l1x = lx, l1y = ly*ct + lz*st, l1z = -ly*st + lz*ct;
+    var lox =  l1x*cs - l1z*sn, loy = l1y, loz = l1x*sn + l1z*cs;
+
+    for(i=0;i<RL;i++){
+      var rv = RING[i];
+      var rX1 = vX[rv]*cs + vZ[rv]*sn, rZ1 = -vX[rv]*sn + vZ[rv]*cs;
+      var rY1 = BASE*ct - rZ1*st,      rZ2 = BASE*st + rZ1*ct;
+      var rd = f - rZ2;
+      if(rd < 0.5){ rbOK[i] = 0; continue; }
+      var rq = f/rd;
+      rbX[i] = ox + rX1*scale*rq; rbY[i] = oy - rY1*scale*rq; rbOK[i] = 1;
+    }
+
+    bCnt.fill(0);
+    var bi, cell;
+    for(j=0;j<NV;j++) for(i=0;i<NU;i++){
+      cell = j*NU+i;
+      var q0 = j*VU+i, q1 = q0+1, q2 = q0+VU+1, q3 = q0+VU;
+      if(!pOK[q0] || !pOK[q1] || !pOK[q2] || !pOK[q3]){ cOK[cell] = 0; continue; }
+      var dq = (pQ[q0]+pQ[q1]+pQ[q2]+pQ[q3])*0.25;
+      cDep[cell] = clamp((dq-0.72)/0.90, 0, 1);
+      cOK[cell] = 1;
+      bi = (cDep[cell]*(NB-1))|0; if(bi<0) bi=0; else if(bi>NB-1) bi=NB-1;
+      bCnt[bi]++;
+    }
+    for(i=0;i<RL;i++){
+      var i2 = (i+1)%RL, wi = NCELL + i;
+      var t0 = RING[i], t1 = RING[i2];
+      if(!pOK[t0] || !pOK[t1] || !rbOK[i] || !rbOK[i2]){ cOK[wi] = 0; continue; }
+      cDep[wi] = clamp(((pQ[t0]+pQ[t1])*0.5 - 0.72)/0.90, 0, 1);
+      cOK[wi] = 1;
+      bi = (cDep[wi]*(NB-1))|0; if(bi<0) bi=0; else if(bi>NB-1) bi=NB-1;
+      bCnt[bi]++;
+    }
+    var acc = 0;
+    for(i=0;i<NB;i++){ bOff[i] = acc; acc += bCnt[i]; }
+    var nOrd = acc;
+    for(i=0;i<NITEM;i++){
+      if(!cOK[i]) continue;
+      bi = (cDep[i]*(NB-1))|0; if(bi<0) bi=0; else if(bi>NB-1) bi=NB-1;
+      ord[bOff[bi]++] = i;
+    }
+
+    var dim = mob ? 0.72 : 1;
+    x.lineWidth = 1;
+    for(m=0;m<nOrd;m++){
+      cell = ord[m];
+      if(cell >= NCELL){
+        var wk = cell - NCELL, wn = (wk+1)%RL;
+        var wt0 = RING[wk], wt1 = RING[wn];
+        var wlam = wNX[wk]*lox + wNZ[wk]*loz;
+        if(wlam < 0) wlam = -wlam*0.22;
+        var wsh = (clamp(0.10 + 0.72*wlam*wlam, 0, 1)*(SH-1))|0;
+        var wfg = (cDep[cell]*(FG-1))|0;
+        var wcol = SURF[wsh*FG + wfg];
+        x.fillStyle = wcol; x.strokeStyle = wcol;
+        x.beginPath();
+        x.moveTo(pX[wt0],pY[wt0]); x.lineTo(pX[wt1],pY[wt1]);
+        x.lineTo(rbX[wn],rbY[wn]); x.lineTo(rbX[wk],rbY[wk]); x.closePath();
+        x.fill(); x.stroke();
+        /* the lip where the top meets the side, drawn with its own wall so it occludes */
+        x.strokeStyle = K_RIM[wfg];
+        x.beginPath(); x.moveTo(pX[wt0],pY[wt0]); x.lineTo(pX[wt1],pY[wt1]); x.stroke();
+        continue;
+      }
+      var ci2 = cell % NU, cj = (cell / NU)|0;
+      var w0 = cj*VU+ci2, w1 = w0+1, w2 = w0+VU+1, w3 = w0+VU;
+      var lam = nX[cell]*lox + nY[cell]*loy + nZ[cell]*loz;
+      if(lam < 0) lam = -lam*0.34;                     /* a little bounce off the plane */
+      /* squared falloff: mid slopes stay in the slate, only the crests take the light */
+      var sh = (clamp(0.16 + 0.98*lam*lam, 0, 1)*(SH-1))|0;
+      var fg = (cDep[cell]*(FG-1))|0;
+      var col = SURF[sh*FG + fg];
+      x.fillStyle = col; x.strokeStyle = col;          /* stroke closes the facet seams */
+      x.beginPath();
+      x.moveTo(pX[w0],pY[w0]); x.lineTo(pX[w1],pY[w1]);
+      x.lineTo(pX[w2],pY[w2]); x.lineTo(pX[w3],pY[w3]); x.closePath();
+      x.fill(); x.stroke();
+
+      if(!(ci2 % 6) || !(cj % 6)){
+        var wf = (clamp(lam*1.35,0,1)*(FG-1)*dim)|0;
+        x.strokeStyle = K_RIM[wf];
+        x.beginPath();
+        if(!(ci2 % 6)){ x.moveTo(pX[w0],pY[w0]); x.lineTo(pX[w3],pY[w3]); }
+        if(!(cj % 6)){ x.moveTo(pX[w0],pY[w0]); x.lineTo(pX[w1],pY[w1]); }
+        x.stroke();
+      }
+
+      var s0 = segOff[cell], s1 = segOff[cell+1];
+      if(s0 === s1) continue;
+      for(k=s0;k<s1;k++){
+        var aX1 = sxA[k]*cs + szA[k]*sn, aZ1 = -sxA[k]*sn + szA[k]*cs;
+        var aY1 = syA[k]*ct - aZ1*st,    aZ2 = syA[k]*st + aZ1*ct;
+        var bX1 = sxB[k]*cs + szB[k]*sn, bZ1 = -sxB[k]*sn + szB[k]*cs;
+        var bY1 = syB[k]*ct - bZ1*st,    bZ2 = syB[k]*st + bZ1*ct;
+        var ad = f - aZ2, bd = f - bZ2;
+        if(ad < 0.5 || bd < 0.5) continue;
+        var aq = f/ad, bq = f/bd;
+        x.strokeStyle = segK[k] ? K_MINT[(fg*dim)|0] : K_GOLD[(fg*dim)|0];
+        x.lineWidth = segK[k] ? 1 : 1.5;
+        x.beginPath();
+        x.moveTo(ox + aX1*scale*aq, oy - aY1*scale*aq);
+        x.lineTo(ox + bX1*scale*bq, oy - bY1*scale*bq);
+        x.stroke();
+        x.lineWidth = 1;
+      }
+    }
+
+    /* ---- 5. vignette ---- */
+    x.fillStyle = gVig; x.fillRect(0,0,w,h);
+  }
+
+  if(reduce){
+    /* one static frame of the whole scene, no loop */
+    draw(1.35, 0);
+    var rq = null;
+    addEventListener("resize", function(){
+      if(rq) clearTimeout(rq);
+      rq = setTimeout(function(){ draw(1.35, 0); }, 140);
+    }, {passive:true});
+  } else {
+    register(c, draw, 1);
+    draw(0, 0.016);
+  }
+})();
+
+/* ================= FOOTER: the same surface, drawn as a wireframe and thinned right out ================= */
+(function(){
+  var c = document.getElementById("footCanvas"); if(!c) return;
+  var i, j;
+  var NU = 22, NV = 13, VU = NU+1, VV = NV+1, NVERT = VU*VV;
+  var EX = 1.24, EZ = 0.58, PLAT = 0.34;
+  function surf(u,v){
+    var a = 0.325*Math.sin(u*5.6 + v*2.1 - 0.6)*Math.cos(v*3.2 + 0.4);
+    var b = 0.150*Math.sin(u*9.1 - v*6.3 + 1.4);
+    var d = 0.105*Math.cos(u*3.4 + v*7.9);
+    var hh = a + b + d;
+    var du = (u-0.60)/0.36, dv = (v-0.48)/0.46;
+    var rr = Math.sqrt(du*du + dv*dv);
+    var mm = 1 - clamp((rr-0.50)/0.54, 0, 1);
+    mm = mm*mm*(3-2*mm);
+    return hh*(1-mm) + PLAT*mm;
+  }
+  var vX = new Float32Array(NVERT), vY = new Float32Array(NVERT), vZ = new Float32Array(NVERT);
+  for(j=0;j<VV;j++) for(i=0;i<VU;i++){
+    var u = i/NU, v = j/NV, id = j*VU+i;
+    vX[id] = (u-0.5)*2*EX; vZ[id] = (v-0.5)*2*EZ; vY[id] = surf(u,v);
+  }
+  var pX = new Float32Array(NVERT), pY = new Float32Array(NVERT);
+  var pD = new Float32Array(NVERT), pOK = new Uint8Array(NVERT);
+
+  var FG = 10;
+  function ramp(r,g,b,a0,a1,n){
+    var o = new Array(n);
+    for(var q=0;q<n;q++) o[q] = "rgba("+r+","+g+","+b+","+(a0+(a1-a0)*(q/(n-1))).toFixed(3)+")";
+    return o;
+  }
+  var F_LINE = ramp(123,189,174,0.02,0.20,FG), F_GOLD = ramp(216,179,74,0.03,0.30,FG);
+
+  var gW=-1, gH=-1, glow=null, gR=0;
+  function ensureGrads(x,w,h){
+    if(w===gW && h===gH) return;
+    gW=w; gH=h; gR=Math.max(w,h)*0.55;
+    glow = x.createRadialGradient(0,0,gR*0.06,0,0,gR);
+    glow.addColorStop(0,"rgba(90,158,143,0.07)");
+    glow.addColorStop(1,"rgba(90,158,143,0)");
+  }
+
+  var f = 3.0;
+  function draw(t, dt){
+    var kk = hidpi(c,0.4), x = kk.x, w = kk.w, h = kk.h;
+    x.clearRect(0,0,w,h);
+    var mob = w < 900;
+    ensureGrads(x,w,h);
+
+    x.save();
+    x.translate(w*(mob?0.5:0.80), h*0.44);
+    x.fillStyle = glow; x.fillRect(-gR,-gR,gR*2,gR*2);
+    x.restore();
+
+    var hy = h*0.70, floorY = h*1.10, vpx = w*(mob?0.5:0.76);
+    var span = floorY - hy;
+    x.lineWidth = 1; x.strokeStyle = "rgba(90,158,143,0.05)";
+    x.beginPath();
+    for(i=1;i<=9;i++){
+      var yy = hy + span/i;
+      if(yy > h*1.2) continue;
+      x.moveTo(0,yy); x.lineTo(w,yy);
+    }
+    for(j=-9;j<=9;j++){ x.moveTo(vpx + j*w*0.16, floorY); x.lineTo(vpx, hy); }
+    x.stroke();
+
+    var ox = mob ? w*0.58 : w*0.775, oy = h*0.46, scale = Math.min(w,h)*(mob?0.19:0.255);
+    var ry = (reduce ? 0.72 : 0.72 + 0.22*Math.sin(t*0.03));
+    var tilt = 0.52;
+    var cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
+    var X1,Z1,Y1,Z2,dd,qz;
+    for(i=0;i<NVERT;i++){
+      X1 = vX[i]*cs + vZ[i]*sn; Z1 = -vX[i]*sn + vZ[i]*cs;
+      Y1 = vY[i]*ct - Z1*st;    Z2 = vY[i]*st + Z1*ct;
+      dd = f - Z2;
+      if(dd < 0.5){ pOK[i]=0; continue; }
+      qz = f/dd;
+      pX[i] = ox + X1*scale*qz; pY[i] = oy - Y1*scale*qz;
+      pD[i] = clamp((qz-0.72)/0.90, 0, 1); pOK[i] = 1;
+    }
+    /* every other line of the same mesh, so the shape is legible but quiet */
+    for(j=0;j<VV;j+=2){
+      var run = 0;
+      for(i=0;i<VU;i++){
+        var id2 = j*VU+i;
+        if(!pOK[id2]){ if(run){ x.stroke(); run = 0; } continue; }
+        if(!run){ x.beginPath(); x.moveTo(pX[id2],pY[id2]); run = 1;
+                  x.strokeStyle = (vY[id2] > PLAT-0.03) ? F_GOLD[(pD[id2]*(FG-1))|0]
+                                                        : F_LINE[(pD[id2]*(FG-1))|0]; }
+        else x.lineTo(pX[id2],pY[id2]);
+      }
+      if(run) x.stroke();
+    }
+    for(i=0;i<VU;i+=2){
+      var run2 = 0;
+      for(j=0;j<VV;j++){
+        var id3 = j*VU+i;
+        if(!pOK[id3]){ if(run2){ x.stroke(); run2 = 0; } continue; }
+        if(!run2){ x.beginPath(); x.moveTo(pX[id3],pY[id3]); run2 = 1;
+                   x.strokeStyle = F_LINE[(pD[id3]*(FG-1))|0]; }
+        else x.lineTo(pX[id3],pY[id3]);
+      }
+      if(run2) x.stroke();
     }
   }
-  register(c, draw, 1); draw(0, 1);
+
+  if(reduce){
+    draw(1.2, 0);
+    var rq = null;
+    addEventListener("resize", function(){
+      if(rq) clearTimeout(rq);
+      rq = setTimeout(function(){ draw(1.2, 0); }, 140);
+    }, {passive:true});
+  } else {
+    register(c, draw, 0.4);
+    draw(0, 0.016);
+  }
 })();
 
 /* ================= FIG 1: the two scoring rules ================= */

@@ -613,8 +613,10 @@
   .gold-1st{color:#d8b34a; font-weight:inherit; animation:goldGlow 2.6s ease-in-out infinite}
   @keyframes goldGlow{0%,100%{text-shadow:0 0 4px rgba(216,179,74,.35)} 50%{text-shadow:0 0 14px rgba(216,179,74,.75), 0 0 26px rgba(216,179,74,.35)}}
   .res-badge.gold{background:none; color:#b8860b; border:1px solid #d8b34a; box-shadow:0 0 9px 1px rgba(216,179,74,.45); animation:goldBadgeGlow 2.6s ease-in-out infinite}
+  .res-badge.silver{background:none; color:#6e7a84; border:1px solid #aeb9c2; box-shadow:0 0 9px 1px rgba(150,165,178,.5); animation:silverBadgeGlow 2.6s ease-in-out infinite}
+  @keyframes silverBadgeGlow{0%,100%{box-shadow:0 0 7px 0 rgba(150,165,178,.4)} 50%{box-shadow:0 0 16px 3px rgba(150,165,178,.7)}}
   @keyframes goldBadgeGlow{0%,100%{box-shadow:0 0 7px 0 rgba(216,179,74,.35)} 50%{box-shadow:0 0 16px 3px rgba(216,179,74,.65)}}
-  @media(prefers-reduced-motion:reduce){.gold-1st,.res-badge.gold{animation:none}}
+  @media(prefers-reduced-motion:reduce){.gold-1st,.res-badge.gold,.res-badge.silver{animation:none}}
 
   /* ================= image lightbox (rounded popup) ================= */
   .lightbox-card{
@@ -646,6 +648,19 @@
   .led-inline .pz + .pz{margin-top:7px}
 
   /* education: bootcamps subsection */
+  .edu-date{font-style:italic; color:var(--ink-3); font-size:13.5px; white-space:nowrap; font-weight:400}
+  ul.bc-dated li{display:flex; justify-content:space-between; align-items:baseline; gap:18px}
+  ul.bc-dated .bc-main{display:block}
+  .edu-ra{margin:16px 0 4px; padding:14px 16px; border:1px solid var(--rule); border-radius:8px; background:rgba(255,255,255,.35)}
+  .edu-ra-head{display:flex; justify-content:space-between; align-items:baseline; gap:18px; margin:0 0 3px}
+  .edu-ra-head strong{color:var(--ink); font-weight:600; font-size:15.5px}
+  .edu-ra-role{margin:0 0 12px; font-style:italic; color:var(--ink-2); font-size:14px}
+  .edu-ra ul.exchanges{margin-top:0}
+  .edu-ra ul.exchanges li{font-size:14.5px}
+  @media(max-width:640px){
+    ul.bc-dated li,.edu-ra-head{flex-direction:column; gap:2px}
+    .edu-date{font-size:12.5px}
+  }
   .edu-subhead{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); font-weight:500; margin:0 0 14px}
   .edu-bootcamps{margin:0; padding:0; list-style:none}
   .edu-bootcamps li{position:relative; padding-left:20px; margin:0 0 16px; color:var(--ink-2); font-size:15px; line-height:1.55}
@@ -717,8 +732,8 @@
           </p>
           <p>
             My work sits at the intersection of causal inference and production machine
-            learning systems. I'm currently a research assistant at NUS working on
-            sequential recommendation with an industry partner, and an AI &amp; Analytics
+            learning systems. I'm currently a research assistant on the HONOR x NUS
+            joint research project on recommender systems, and an AI &amp; Analytics
             intern at Tazapay, a cross-border payments company. My previous experience
             spans quantitative research at Orbuc, a London-based crypto startup, and a data
             &amp; analytics consultancy at The TCM Group, alongside independent projects in
@@ -845,7 +860,7 @@
         <div class="led-date">Aug to Sep 2026</div>
         <div class="led-main">
           <div class="led-title">AKBC 2026 Shared Task @ EMNLP · Knowledge Base Construction from Language Models</div>
-          <div class="led-note">1st place, 0.7060 macro F1 on the official test set, announced 1 September 2026. A 31B base model in completion mode, no training, no retrieval; the winning paper corrects how the field measures selection headroom. To appear at the AKBC workshop, EMNLP 2026 (Budapest).</div>
+          <div class="led-note">1st place, 0.7060 macro F1 on the official test set. A 31B base model in completion mode, no training, no retrieval; the winning paper corrects how the field measures selection headroom. To appear at the AKBC workshop, EMNLP 2026 (Budapest).</div>
         </div>
         <div class="led-side">
           <span class="res-badge gold">1st Place</span>
@@ -860,7 +875,7 @@
           <div class="led-note">2nd place, Strict &amp; Open tracks (85.4 QWK on the blind test, score-tied with 1st on Strict). System paper submitted (BAREC Shared Task at ArabicNLP 2026 @ EMNLP 2026, Budapest).</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win-plain">2nd Place</span>
+          <span class="res-badge silver">2nd Place</span>
           <a class="solution-btn" href="projects/barec.html" target="_blank" rel="noopener" aria-label="Read the BAREC solution write-up">solution
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
           </a>
@@ -874,7 +889,7 @@
           <div class="led-note">2nd place, Track 1 (Open). In-car assistant agents judged on consistency and limit-awareness under ambiguous requests, domain policies and unavailable tools. Technical report published by the organizers.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win-plain">2nd Place</span>
+          <span class="res-badge silver">2nd Place</span>
           <a class="solution-btn" href="https://car-bench.github.io/car-bench/reports/track_1/team-28.pdf" target="_blank" rel="noopener" aria-label="Read the CAR-Bench technical report published by the organizers">report
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
           </a>
@@ -888,7 +903,7 @@
           <div class="led-note">1st place in the workshop challenge on trustworthy tool-using LLM agents. Paper accepted at the TCSAUC workshop, UbiComp/ISWC 2026; presenting in person in Shanghai on 12 October 2026, supported by a SIGMOBILE student travel grant.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win-plain">1st Place</span>
+          <span class="res-badge gold">1st Place</span>
           <a class="solution-btn" href="projects/medlongtrust.html" target="_blank" rel="noopener" aria-label="Read the MedLongTrust-EHR solution write-up">solution
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
           </a>
@@ -902,7 +917,7 @@
           <div class="led-note">1st place. Given one line of a job advert, name the skills it asks for by ranking all 13,891 skills in the EU's official catalogue, scored on how well the top of that ranking matches expert annotations. Built for TechWolf and hosted at the RecSys 2026 HR workshop.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win-plain">1st Place</span>
+          <span class="res-badge gold">1st Place</span>
           <a class="res-badge win glow" href="projects/workrb-skill-ranking.html" target="_blank" rel="noopener">Write-up &#8599;</a>
         </div>
       </div>
@@ -962,18 +977,6 @@
       </div>
 
       <div class="led-row">
-        <div class="led-date">Jun to Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">Stanford AIMS Foundations · Predictive AI Evaluation Challenge</div>
-          <div class="led-note">Finalist in Stanford's predictive-AI evaluation challenge (currently ongoing).</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Finalist</span>
-          <span class="res-badge win glow">Ongoing</span>
-        </div>
-      </div>
-
-      <div class="led-row">
         <div class="led-date">Jul 2026</div>
         <div class="led-main">
           <div class="led-title">BlueDot Impact's Technical AI Puzzle #1</div>
@@ -1004,7 +1007,7 @@
           <div class="led-note">1st place in the final AI Agent Competition.</div>
         </div>
         <div class="led-side">
-          <span class="res-badge win-plain">1st Place</span>
+          <span class="res-badge gold">1st Place</span>
           <button type="button" class="solution-btn lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">certificate
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
           </button>
@@ -1045,6 +1048,9 @@
         </div>
         <div class="led-side">
           <span class="res-badge win-plain">Submitted</span>
+          <a class="solution-btn" href="https://thylinao1.github.io/relay-page/" target="_blank" rel="noopener" aria-label="Open the RELAY submission site">website
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
         </div>
       </div>
 
@@ -1056,6 +1062,9 @@
         </div>
         <div class="led-side">
           <span class="res-badge win-plain">Submitted</span>
+          <a class="solution-btn" href="https://thylinao1.github.io/oneloop-site-k7q2/" target="_blank" rel="noopener" aria-label="Open the One Loop submission site">website
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
         </div>
       </div>
 
@@ -1102,7 +1111,7 @@
         </div>
         <div class="exp-body">
           <h3>National University of Singapore · Research Assistant</h3>
-          <p class="sub">Recommender-systems research with a smartphone-industry partner · NUS School of Computing · Singapore</p>
+          <p class="sub">HONOR x NUS Joint Research Project, Recommender Systems · Advisor: Prof. James Pang, NUS Business Analytics Centre · Singapore</p>
           <ul>
             <li>Research on sequential recommendation for OS-level, cross-app behaviour data, where the modelled sequence spans installs, uninstalls and app usage rather than activity inside a single app.</li>
             <li>Evaluating generative recommendation architectures against strong sequential baselines under strict inference-compute budgets, alongside work on recommendation diversity.</li>
@@ -1489,12 +1498,22 @@
         <div class="edu-body">
           <h3>National University of Singapore (NUS)</h3>
           <p class="role">MSc in NUS School of Computing (Business Analytics), Specialised in Statistics</p>
+
+          <div class="edu-ra">
+            <p class="edu-ra-head"><strong>HONOR x NUS Joint Research Project, Recommender Systems</strong><em class="edu-date">Aug 2026 to Present</em></p>
+            <p class="edu-ra-role">Research Assistant · Advisor: Prof. James Pang, NUS Business Analytics Centre</p>
+            <ul class="exchanges">
+              <li>Building generative retrieval (HSTU, TIGER semantic IDs) to replace a two-stage retrieve-then-rank recommender with a single model for an industry feed.</li>
+              <li>Designing a multi-objective MMoE ranker with a learned gate to balance click and swipe objectives instead of using a fixed 1:1 score weighting.</li>
+            </ul>
+          </div>
+
           <p style="margin-top:14px"><strong style="color:var(--ink)">Bootcamps:</strong></p>
-          <ul class="exchanges">
-            <li><strong>National University of Singapore (NUS)</strong> · bootcamp covering Probability &amp; Statistics, Calculus, Linear Algebra, Cloud Computing, and Data Analytics &amp; ML.</li>
-            <li><strong>University of Oxford</strong> · ML Representation Learning &amp; Generative AI Bootcamp 2026. Standout lectures from Tom Rainforth (intelligent data gathering) and Ricardo Silva (causal discovery and the extrapolation of causal effects).</li>
-            <li><strong>Beijing University of Posts &amp; Telecommunications (BUPT)</strong>, Agentic AI Bootcamp (Jun to Jul 2026) · Fully-Funded Scholarship · 1st Place, Final Project.</li>
-            <li><strong>Technical Alignment Research Accelerator (TARA)</strong>, Singapore Cohort, Round 2 2026 (Sep to Dec 2026) · part-time technical AI-safety programme.</li>
+          <ul class="exchanges bc-dated">
+            <li><span class="bc-main"><strong>Technical Alignment Research Accelerator (TARA)</strong>, Singapore Cohort, Round 2 2026 · part-time technical AI-safety programme.</span><em class="edu-date">Sep to Dec 2026</em></li>
+            <li><span class="bc-main"><strong>Beijing University of Posts &amp; Telecommunications (BUPT)</strong>, Agentic AI Bootcamp · Fully-Funded Scholarship · 1st Place, Final Project.</span><em class="edu-date">Jun to Jul 2026</em></li>
+            <li><span class="bc-main"><strong>University of Oxford</strong> · ML Representation Learning &amp; Generative AI Bootcamp. Standout lectures from Tom Rainforth (intelligent data gathering) and Ricardo Silva (causal discovery and the extrapolation of causal effects).</span><em class="edu-date">2026</em></li>
+            <li><span class="bc-main"><strong>National University of Singapore (NUS)</strong> · bootcamp covering Probability &amp; Statistics, Calculus, Linear Algebra, Cloud Computing, and Data Analytics &amp; ML.</span><em class="edu-date">2026</em></li>
           </ul>
         </div>
       </div>

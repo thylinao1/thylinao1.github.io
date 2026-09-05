@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Nineteen levels · reaching the top of the BAREC Arabic readability board by rebuilding its grader offline</title>
-<meta name="description" content="My solution to the BAREC 2026 shared task on Arabic sentence readability. The task asks for a reading level from 1 to 19 for each sentence, scored by quadratic weighted kappa. The edge was not a bigger model. It was a local grader that reproduces the official scorer byte for byte, so my offline number equals the board number, plus a habit of trusting the honest measurement over the flattering one. That combination reached first place on the Open development board at 86.34 kappa and tied for first on Strict, and a final 2nd place in both the Strict and Open tracks on the blind test at 85.3 QWK. Interactive figures you can drag and replay." />
+<meta name="description" content="My solution to the BAREC 2026 shared task on Arabic sentence readability. The task asks for a reading level from 1 to 19 for each sentence, scored by quadratic weighted kappa. The edge was not a bigger model. It was a local grader that reproduces the official scorer byte for byte, so my offline number equals the board number, plus a habit of trusting the honest measurement over the flattering one. That combination reached first place on the Open development board at 86.34 kappa and tied for first on Strict, and a final 1st place in both the Strict and Open tracks on the blind test at 85.3 QWK. Interactive figures you can drag and replay." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -283,7 +283,7 @@ footer .runbox .c{color:var(--accent);}
     <div class="col">
       <div class="hero-mark"><span class="bd"></span> BAREC 2026 · Arabic sentence readability · Codabench 16544 · my solution</div>
       <h1>Nineteen <span class="it">levels</span></h1>
-      <p class="hero-sub">The task is simple to state. Read one Arabic sentence and place it on a reading scale from 1 to 19, where 1 is a first line for a young child and 19 is dense specialist prose. The scoring is where it gets interesting, because a miss three levels away is punished nine times harder than a miss of one. What follows is how I reached <span class="goldc">the top</span> of both development boards and a final <span class="goldc">2nd place</span> in both tracks on the blind test, and the honest version is that the result came less from the model and more from a scorer I could run at home and a rule I kept: believe the measurement you can defend rather than the one that flatters you.</p>
+      <p class="hero-sub">The task is simple to state. Read one Arabic sentence and place it on a reading scale from 1 to 19, where 1 is a first line for a young child and 19 is dense specialist prose. The scoring is where it gets interesting, because a miss three levels away is punished nine times harder than a miss of one. What follows is how I reached <span class="goldc">the top</span> of both development boards and a final <span class="goldc">1st place</span> in both tracks on the blind test, and the honest version is that the result came less from the model and more from a scorer I could run at home and a rule I kept: believe the measurement you can defend rather than the one that flatters you.</p>
       <div class="hero-meta">
         <b>Needs</b> &nbsp;comfort with a leaderboard metric and cross-validation, no Arabic required to follow<br>
         <b>Reading</b> &nbsp;about 11 min &nbsp;·&nbsp; <b>Includes</b> &nbsp;figures you can drag and replay, and the real numbers from the runs
@@ -306,7 +306,7 @@ footer .runbox .c{color:var(--accent);}
     <div class="kick"><span class="bd"></span> Result at a glance <span class="ark" lang="ar">النتيجة باختصار</span></div>
     <div class="scoregrid">
       <div class="sc a"><div class="n">86.34</div><div class="l">best QWK on the development boards, first on Open and tied first on Strict</div></div>
-      <div class="sc b"><div class="n">2nd</div><div class="l">final rank in Strict &amp; Open on the blind test, at 85.3 QWK</div></div>
+      <div class="sc b"><div class="n">1st</div><div class="l">final rank in Strict &amp; Open on the blind test, at 85.3 QWK</div></div>
       <div class="sc c"><div class="n">7/7</div><div class="l">board metrics reproduced by my local grader</div></div>
       <div class="sc d"><div class="n">0.0000</div><div class="l">gap between my offline score and the board</div></div>
     </div>
@@ -535,7 +535,7 @@ footer .runbox .c{color:var(--accent);}
       <figcaption><b>The step that carries the whole thing.</b> The right tokenization is the difference between 84 and 50. My self-computed Word form held the score. My self-computed D3Tok is genuinely degraded, because the licensed database that made the gold version is not available to me, but the two point cost I first blamed on it turned out to be my own standardization bug, and the member was worth 0.3 on the board once both ends of its pipeline matched.</figcaption>
     </figure>
 
-    <p class="reveal">The honest expectation I set before uploading was about 85 to 86, a touch under the development number, because an unseen set is harder and my D3Tok is imperfect. Every member also scored about 1.3 QWK lower on validation than on test, which pointed the same way. It landed at 85.3, second place in both tracks, so the expectation held.</p>
+    <p class="reveal">The honest expectation I set before uploading was about 85 to 86, a touch under the development number, because an unseen set is harder and my D3Tok is imperfect. Every member also scored about 1.3 QWK lower on validation than on test, which pointed the same way. It landed at 85.3, first place in both tracks in the official results, so the expectation held.</p>
 
     <h3 class="reveal">What the offline board could not resolve</h3>
     <p class="reveal">The offline board carried the development phase, but the blind set ships without labels, so it stopped existing at exactly the moment the real ranking began. What replaced it was a harder question: how small a difference can an offline estimate actually see? Midway through the campaign the same ensemble scored 85.44, 85.28 and 85.42 on the same split while I varied nothing but the resolution of the threshold search grid. Measured three ways, the noise floor of my offline evaluation sits between 0.09 and 0.44 QWK, which is as wide as the margins that decided the final ranking. Varying the fold map seed instead returns bit identical results, and that is a trap worth naming, because anyone estimating variance that way on a grid search rounder will conclude their procedure is deterministic when it is not.</p>
@@ -579,7 +579,7 @@ footer .runbox .c{color:var(--accent);}
       <div class="sig">Nineteen levels.</div>
       <div class="meta">
         BAREC 2026 · Arabic sentence readability · Open track (Codabench 16544) and Strict track (16545)<br>
-        Result: <b>first on the Open development board at 86.34 QWK</b> and tied for first on Strict; <b>final 2nd place in both tracks at 85.3 QWK</b> on the blind test.<br>
+        Result: <b>first on the Open development board at 86.34 QWK</b> and tied for first on Strict; <b>final 1st place in both tracks at 85.3 QWK</b> on the blind test.<br>
         Paper: <b>"thylinao at BAREC Shared Task 2026: Ensembling at the Noise Floor"</b>, submitted to the BAREC shared task at ArabicNLP 2026, co-located with EMNLP 2026 in Budapest. Notification is 2 September 2026.<br>
         Board: <a class="inline" href="https://www.codabench.org/competitions/16544/" target="_blank" rel="noopener">Codabench 16544 (Open)</a> &nbsp;·&nbsp; <a class="inline" href="https://www.codabench.org/competitions/16545/" target="_blank" rel="noopener">16545 (Strict)</a><br>
         Numbers are from the actual runs. The final uploads went out on 3 August 2026. Written by Maksim.

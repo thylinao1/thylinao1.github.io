@@ -50,6 +50,7 @@ in between.
 | `powerco.html` | BCG X and Forage PowerCo SME churn, with a cost-sensitive decision threshold |
 | `skill-lift.html` | BenchFlow Agent Skill Lift entry: a static skill library and a skill generator for SkillsBench |
 | `sovereign.html` | Sovereign-default prediction across five models, plus a from-scratch PPO allocation agent |
+| `wmt26-qebreak.html` | QEbreak at WMT26: a pre-registered challenge set on omission and addition asymmetry in MT quality metrics, accepted as a poster |
 
 ## How the pages are put together
 

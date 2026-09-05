@@ -1,0 +1,3219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QEbreak at WMT26</title>
+<meta name="description" content="QEbreak, a pre-registered challenge set for the WMT26 Automated Translation Quality Evaluation task: 2,886 segments in 10 language directions, scored by the organizers with 31 metric systems, and the measurement of omission and addition asymmetry that came back.">
+<meta property="og:title" content="QEbreak at WMT26">
+<meta property="og:description" content="A pre-registered audit of omission and addition asymmetry in machine translation quality metrics. Accepted as a poster at WMT26, EMNLP 2026.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;0,9..144,600;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* QEbreak palette: warm paper, pale sand bands, indigo accent, deep indigo hero band.
+     The 2 edit directions carry their own hues throughout: rust for omission, indigo for addition. */
+  --bg:#fbfaf7; --bg-2:#f4f1ea; --bg-3:#e9e4d9; --band:#f3efe6;
+  --ink:#1f2530; --ink-2:#3e4655; --ink-3:#66707f; --ink-4:#8b94a3;
+  --rule:#e7e3da; --rule-strong:#d9d3c7;
+  --accent:#3d5a80; --accent-deep:#2b4364; --accent-soft:#b9c8dc; --accent-bright:#6f92bf;
+  --warm:#b5542e; --warm-deep:#8f3f1f; --warm-soft:#e6c2b2; --warm-bright:#d4744f;
+  --core:#3d5a80; --core-deep:#2b4364; --core-soft:#b9c8dc;
+  --violet:#7b5a9e; --olive:#6b7f4a; --ochre:#b48a2c; --grey:#7f8792;
+  --gold:#a8791c; --gold-soft:#e5cfa0;
+  --danger:#a94438; --warn:#a8791c;
+  --deep:#171c2c; --deep-2:#2c3a5c; --deep-ink:#eef0f5;
+  --font-display:"Fraunces","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-soft:cubic-bezier(.33,1,.68,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+  font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;overflow-wrap:break-word;
+}
+::selection{background:rgba(61,90,128,.20);color:var(--ink)}
+
+/* ---------- atmosphere ---------- */
+#field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.7}
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+#shell{position:relative;z-index:2}
+
+/* ---------- reading rail: scaleX so it stays on the compositor ---------- */
+#rail{position:fixed;left:0;top:0;height:3px;width:100%;z-index:60;background:transparent}
+#rail i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left center;
+  background:linear-gradient(90deg,var(--warm),var(--accent),var(--accent-bright));
+  box-shadow:0 0 14px rgba(61,90,128,.5)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.read{max-width:var(--read);margin-left:auto;margin-right:auto}
+main section{padding:104px 0;position:relative}
+main section + section{border-top:1px solid var(--rule)}
+main section.alt{background:var(--band);border-top-color:#e4ddcf}
+main section.alt + section{border-top-color:#e4ddcf}
+
+/* ---------- type ---------- */
+h1{font-family:var(--font-display);font-weight:380;font-size:clamp(33px,4.7vw,64px);
+  line-height:1.06;letter-spacing:-.022em;margin:0 0 24px;max-width:19ch}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(30px,3.9vw,46px);
+  line-height:1.13;letter-spacing:-.015em;margin:0 auto 26px;max-width:22ch;text-align:center;
+  position:relative;padding-bottom:16px}
+h2::after{content:"";position:absolute;left:50%;bottom:0;height:2px;width:0;
+  transform:translateX(-50%);border-radius:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  transition:width 1.4s var(--ease) .2s}
+h2.in::after{width:132px}
+h3{font-family:var(--font-display);font-weight:460;font-size:24px;line-height:1.28;
+  letter-spacing:-.01em;margin:44px 0 12px}
+h4{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin:30px 0 10px;font-weight:500}
+p{margin:0 0 20px}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 16px;text-align:center}
+.lede{font-size:22px;line-height:1.5;color:var(--ink-2);text-align:center;
+  max-width:720px;margin:0 auto 44px}
+.small{font-size:15px;line-height:1.55;color:var(--ink-3)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+b,strong{font-weight:600}
+em{font-style:italic}
+a{color:var(--accent-deep);text-decoration:none;border-bottom:1px solid var(--accent-soft);
+  transition:border-color .18s var(--ease),color .18s var(--ease)}
+a:hover{color:var(--accent);border-color:var(--accent)}
+ul.plain{margin:0 0 22px;padding:0;list-style:none}
+ul.plain li{position:relative;padding-left:26px;margin:0 0 14px;color:var(--ink-2)}
+ul.plain li::before{content:"";position:absolute;left:0;top:.68em;width:12px;height:2px;
+  border-radius:1px;background:var(--accent)}
+ul.plain li b{color:var(--ink)}
+.om{color:var(--warm-deep)}
+.ad{color:var(--accent-deep)}
+
+/* ---------- reveal + generic stagger, transform and opacity only ---------- */
+.reveal{opacity:0;transform:translateY(30px);
+  transition:opacity 1.07s var(--ease),transform 1.07s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.104s}.reveal.d2{transition-delay:.208s}
+.reveal.d3{transition-delay:.312s}.reveal.d4{transition-delay:.416s}
+.st{opacity:0;transform:translateY(16px);
+  transition:opacity .66s var(--ease),transform .66s var(--ease);
+  transition-delay:calc(var(--i,0) * 68ms)}
+.st.in{opacity:1;transform:none}
+tr.st{transform:translateY(10px)}
+@media (prefers-reduced-motion:reduce){
+  .reveal,.st{opacity:1;transform:none;transition:none}
+  h2::after{transition:none;width:132px}
+}
+
+/* ---------- figures ---------- */
+figure{margin:38px 0 34px;position:relative}
+.fig-head{font-family:var(--font-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-2);margin:0 0 11px;display:flex;align-items:center;
+  gap:11px;flex-wrap:wrap}
+.fig-head::before{content:"";width:20px;height:2px;background:var(--accent);flex:none;border-radius:1px}
+.fig-head span{color:var(--ink-4);letter-spacing:.08em}
+.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:4px;
+  background:#fff;border:1px solid var(--rule-strong)}
+.fig.tall{aspect-ratio:16/10}
+.fig.r7{aspect-ratio:16/7}
+.fig.r6{aspect-ratio:16/6}
+.fig.r12{aspect-ratio:16/12}
+.fig.r13{aspect-ratio:16/13}
+@media(max-width:900px){.fig{aspect-ratio:16/10}.fig.tall{aspect-ratio:16/12}
+  .fig.r7{aspect-ratio:16/9}.fig.r6{aspect-ratio:16/8}.fig.r12{aspect-ratio:16/14}.fig.r13{aspect-ratio:16/15}}
+/* narrow screens: each drawn figure needs its own room */
+@media(max-width:640px){
+  #cComp{aspect-ratio:3/4}
+  #cGate{aspect-ratio:1/1}
+  #cGap{aspect-ratio:1/1}
+  #cAsym{aspect-ratio:1/1}
+  #cFlip{aspect-ratio:4/5}
+  #cRho{aspect-ratio:2/3}
+  #cNum{aspect-ratio:2/3}
+  #cStrata{aspect-ratio:3/4}
+}
+figcaption{font-family:var(--font-mono);font-size:12.5px;line-height:1.55;color:var(--ink-3);
+  margin-top:12px;letter-spacing:.01em}
+figcaption b{color:var(--ink-2);font-weight:500}
+figure .scrub{position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--rule);
+  overflow:hidden;border-radius:1px}
+figure .scrub i{display:block;height:100%;width:100%;transform:scaleX(0);
+  transform-origin:left center;background:linear-gradient(90deg,var(--warm),var(--accent))}
+
+/* ---------- deep panels ---------- */
+.deep-panel{background:var(--deep);color:#cdd3e0;border-radius:5px;padding:38px 34px;
+  margin:44px 0;border:1px solid rgba(238,240,245,.12);position:relative;overflow:hidden}
+.deep-panel h3{color:#fff;margin-top:0}
+.deep-panel h4{color:rgba(238,240,245,.6)}
+.deep-panel p{color:#c3cad8}
+.deep-panel .small{color:#9ea8ba}
+.deep-panel b{color:#fff}
+.deep-panel::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 80% at 10% 0%,rgba(181,84,46,.16),transparent 58%),
+             radial-gradient(90% 70% at 94% 100%,rgba(61,90,128,.55),transparent 62%)}
+.deep-panel > *{position:relative;z-index:1}
+
+/* ---------- callouts ---------- */
+.note{border-left:2px solid var(--accent-soft);padding:2px 0 2px 20px;margin:30px 0;color:var(--ink-2)}
+.note.warn{border-color:var(--gold-soft)}
+.note.hot{border-color:var(--warm-soft)}
+.note p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;margin:26px 0;font-size:16px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule-strong);vertical-align:top}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-4);font-weight:400}
+td.num,th.num{font-family:var(--font-mono);font-size:14px;white-space:nowrap}
+td.rel{font-family:var(--font-mono);font-size:13.5px}
+td.txt{font-size:15px;line-height:1.5;color:var(--ink-2)}
+tbody tr{transition:background .2s var(--ease)}
+tbody tr:hover td{background:rgba(61,90,128,.07)}
+tr.best td{background:rgba(181,84,46,.08)}
+tr.best:hover td{background:rgba(181,84,46,.13)}
+tr.best td:first-child{box-shadow:inset 2px 0 0 var(--warm)}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+caption{caption-side:bottom;text-align:left;font-family:var(--font-mono);font-size:12.5px;
+  color:var(--ink-3);padding-top:12px;line-height:1.55}
+
+/* ---------- equation blocks ---------- */
+.eq{font-family:var(--font-mono);font-size:13px;line-height:1.85;background:var(--bg-2);
+  border:1px solid var(--rule-strong);border-radius:3px;padding:15px 18px;margin:24px 0;
+  overflow-x:auto;white-space:pre;position:relative}
+section.alt .eq{background:#fff}
+.eq b{color:var(--accent-deep);font-weight:500}
+.eq i{color:var(--warm-deep);font-style:normal}
+.eq::after{content:"";position:absolute;inset:0;background:var(--bg-2);
+  transform-origin:right center;transform:scaleX(1);transition:transform 1.2s var(--ease) .1s}
+section.alt .eq::after{background:#fff}
+.eq.in::after{transform:scaleX(0)}
+.eq-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px;margin:26px 0}
+.eq-pair div{background:var(--bg-2);border:1px solid var(--rule-strong);border-radius:3px;
+  padding:17px 19px;transition:border-color .3s var(--ease),transform .4s var(--ease)}
+section.alt .eq-pair div{background:#fff}
+.eq-pair div:hover{border-color:var(--accent-soft);transform:translateY(-2px)}
+.eq-pair .f{font-family:var(--font-mono);font-size:15px;color:var(--ink);display:block;margin-bottom:8px}
+.eq-pair .f b{color:var(--accent-deep);font-weight:500}
+.eq-pair .f i{color:var(--warm-deep);font-style:normal}
+.eq-pair .n{font-size:15px;line-height:1.5;color:var(--ink-3);display:block}
+
+/* ---------- term links ---------- */
+.term{appearance:none;-webkit-appearance:none;border:0;border-bottom:1px dotted var(--ink-4);
+  background:none;padding:0;margin:0;font:inherit;cursor:pointer;color:var(--ink);
+  transition:color .18s var(--ease),border-color .18s var(--ease)}
+.term:hover{color:var(--accent-deep);border-bottom-color:var(--accent-deep)}
+.term::after{content:"\00a0\25be";font-size:.72em;color:var(--ink-4);vertical-align:.12em}
+.term:focus-visible,.btn:focus-visible,#toc a:focus-visible,a:focus-visible,
+.modal-x:focus-visible,.pcell:focus-visible,.hbtn:focus-visible,.homebtn:focus-visible{
+  outline:2px solid var(--accent-deep);outline-offset:3px;border-radius:2px}
+
+.count{font-variant-numeric:tabular-nums}
+
+/* ---------- modal system ---------- */
+#scrim{position:fixed;inset:0;z-index:80;background:rgba(23,28,44,.55);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity .32s var(--ease)}
+#scrim.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;z-index:81;left:50%;top:50%;width:min(720px,calc(100vw - 36px));
+  max-height:min(84vh,860px);overflow-y:auto;transform:translate(-50%,-46%) scale(.97);
+  opacity:0;pointer-events:none;visibility:hidden;background:var(--bg);
+  border:1px solid var(--rule-strong);border-radius:6px;padding:36px 38px 34px;
+  box-shadow:0 40px 90px -30px rgba(23,28,44,.42);
+  transition:opacity .32s var(--ease),transform .44s var(--ease),visibility 0s linear .32s}
+.modal.on{opacity:1;pointer-events:auto;visibility:visible;
+  transform:translate(-50%,-50%) scale(1);transition-delay:0s,0s,0s}
+.modal h3{margin-top:0;font-size:27px}
+.modal .kicker{text-align:left}
+.modal p:last-child{margin-bottom:0}
+.modal-x{position:absolute;top:14px;right:16px;width:32px;height:32px;border:none;
+  background:none;cursor:pointer;color:var(--ink-4);font-size:22px;line-height:1;
+  border-radius:50%;transition:background .18s var(--ease),color .18s var(--ease)}
+.modal-x:hover{background:var(--bg-3);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.modal{transition:opacity .01s}}
+#defs{display:none}
+
+/* ---------- nav ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:50;
+  background:transparent;border-bottom:1px solid transparent;
+  transition:border-color .3s var(--ease),background .3s var(--ease),
+             backdrop-filter .3s var(--ease),opacity .3s var(--ease)}
+#topbar.stuck{border-bottom-color:var(--rule-strong);background:rgba(251,250,247,.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#topbar:not(.stuck){opacity:0;pointer-events:none}
+#topbar .wrap{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;
+  height:56px;gap:18px}
+#topbar .homebtn{justify-self:start;display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);text-decoration:none;white-space:nowrap;
+  padding:6px 13px 6px 11px;border:1px solid var(--rule-strong);border-radius:999px;
+  background:rgba(243,239,230,.6);
+  transition:color .22s var(--ease),border-color .22s var(--ease),
+             background .22s var(--ease),transform .22s var(--ease),box-shadow .22s var(--ease)}
+#topbar .homebtn svg{flex:none;transition:transform .26s var(--ease)}
+#topbar .homebtn:hover{color:var(--accent-deep);border-color:var(--accent-soft);
+  background:rgba(61,90,128,.12);transform:translateY(-1px);
+  box-shadow:0 6px 16px -10px rgba(23,28,44,.5)}
+#topbar .homebtn:hover svg{transform:translateX(-3px)}
+#topbar .brand{justify-self:start;white-space:nowrap;font-family:var(--font-mono);font-size:12.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:none}
+#topbar .brand:hover{color:var(--ink)}
+#topbar .rail-end{justify-self:end;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);white-space:nowrap}
+@media(max-width:1340px){#topbar .rail-end{display:none}
+  #topbar .wrap{grid-template-columns:auto auto minmax(0,1fr)}}
+@media(max-width:1150px){#topbar .brand{display:none}
+  #topbar .wrap{grid-template-columns:auto minmax(0,1fr)}}
+@media(max-width:860px){#topbar .wrap{grid-template-columns:auto;justify-content:start}}
+#toc{justify-self:stretch;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;
+  justify-content:center;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
+#toc::-webkit-scrollbar{display:none}
+#toc a{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-4);border:none;padding:6px 8px;border-radius:3px;white-space:nowrap;
+  transition:color .2s var(--ease),background .2s var(--ease)}
+@media(max-width:1260px){#toc a{font-size:11px;padding:6px 6px;letter-spacing:.04em}}
+#toc a:hover{color:var(--ink-2);background:var(--bg-2)}
+#toc a.active{color:var(--accent-deep);background:rgba(61,90,128,.14)}
+@media(max-width:860px){#toc{display:none}}
+
+/* ---------- hero ---------- */
+#hero{padding:0;position:relative;min-height:100svh;display:flex;align-items:center;
+  overflow:hidden;background:linear-gradient(135deg,#151a2a 0%,#2c3a5c 100%);
+  color:#fff;isolation:isolate}
+#hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),
+             radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),
+             linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+@media(min-width:901px){
+  #heroCanvas{
+    -webkit-mask-image:linear-gradient(90deg,transparent 14%,rgba(0,0,0,.32) 38%,#000 58%,#000 97%,transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 14%,rgba(0,0,0,.32) 38%,#000 58%,#000 97%,transparent 100%)}
+  #hero::after{background:
+    linear-gradient(100deg,rgba(14,18,32,.50) 0%,rgba(14,18,32,.20) 32%,transparent 54%),
+    linear-gradient(180deg,rgba(14,18,32,.40) 0%,rgba(14,18,32,.16) 28%,transparent 48%),
+    radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),
+    radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),
+    linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
+}
+@media(max-width:900px){
+  #heroCanvas{
+    -webkit-mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.45) 52%,#000 76%,#000 96%,transparent 100%);
+            mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.45) 52%,#000 76%,#000 96%,transparent 100%)}
+  #hero::after{background:
+    linear-gradient(180deg,rgba(14,18,32,.52) 0%,rgba(14,18,32,.26) 30%,transparent 56%),
+    radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),
+    radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),
+    linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
+}
+#hero .wrap{position:relative;z-index:3;padding-top:84px;padding-bottom:70px}
+@media(min-width:901px){
+  #hero h1{max-width:19ch}
+  #hero .sub{max-width:570px}
+}
+#hero .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-bright);margin:0 0 26px;line-height:1.5}
+#hero .tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--accent-bright);margin-right:11px;vertical-align:1px;
+  box-shadow:0 0 0 4px rgba(111,146,191,.20)}
+#hero h1{color:#fff;max-width:30ch}
+#hero .sub{font-size:21px;line-height:1.5;color:#c6cddc;max-width:600px;margin:0 0 6px}
+#hero .sub b{color:#fff;font-weight:600}
+#hero .status{color:#e9c9b7;font-weight:500}
+#hero .who{font-family:var(--font-mono);font-size:12.5px;color:#9ba7bd;margin:24px 0 0}
+#hero .who b{color:#fff;font-weight:500}
+.hbtns{display:flex;flex-wrap:wrap;gap:9px;margin:32px 0 0}
+.hbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;
+  letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.3);color:#fff;background:transparent;
+  transition:background .24s var(--ease),border-color .24s var(--ease),
+             transform .24s var(--ease),box-shadow .24s var(--ease)}
+.hbtn:hover{background:rgba(255,255,255,.1);border-color:#fff;color:#fff;transform:translateY(-2px);
+  box-shadow:0 10px 26px -14px rgba(0,0,0,.7)}
+.hbtn.solid{background:var(--accent-bright);border-color:var(--accent-bright);color:#0f1626;font-weight:600}
+.hbtn.solid:hover{background:#8fb0d8;border-color:#8fb0d8;color:#0f1626}
+.hbtn .arrow{transition:transform .24s var(--ease)}
+.hbtn:hover .arrow{transform:translateX(4px)}
+.hstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:44px 0 0;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.18);border-radius:4px;
+  overflow:hidden;max-width:660px}
+.hstats div{background:rgba(16,22,38,.5);padding:18px 20px;
+  transition:background .3s var(--ease)}
+.hstats div:hover{background:rgba(16,22,38,.72)}
+.hstats dt{font-family:var(--font-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:#93a2bb;margin:0 0 7px}
+.hstats dd{margin:0;font-family:var(--font-display);font-size:38px;line-height:1;color:#fff;
+  font-variant-numeric:tabular-nums;font-weight:380}
+.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:4;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:#93a2bb;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scrollcue span{display:block;width:1px;height:34px;
+  background:linear-gradient(#93a2bb,transparent);animation:cue 2.4s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}
+  55%{transform:scaleY(1);transform-origin:top}
+  56%{transform:scaleY(1);transform-origin:bottom}
+  100%{transform:scaleY(0);transform-origin:bottom}}
+@media (prefers-reduced-motion:reduce){.scrollcue span{animation:none}}
+@media(max-width:760px){
+  .hstats{grid-template-columns:1fr 1fr}
+  .hstats div:last-child{grid-column:1 / -1}
+  .hstats dd{font-size:32px}
+}
+
+/* ---------- controls, buttons, readouts ---------- */
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+.btnrow .sep{width:1px;background:var(--rule-strong);margin:4px 4px}
+.btn{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  padding:9px 16px;border:1px solid var(--rule-strong);background:#fff;color:var(--ink-2);
+  border-radius:3px;cursor:pointer;
+  transition:color .2s var(--ease),border-color .2s var(--ease),
+             background .2s var(--ease),transform .2s var(--ease)}
+.btn:hover{border-color:var(--accent);color:var(--accent-deep);background:rgba(61,90,128,.09);
+  transform:translateY(-1px)}
+.btn.on{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+.btn.warmish.on{background:var(--warm-deep);border-color:var(--warm-deep)}
+.btn[disabled]{opacity:.42;cursor:default}
+.btn[disabled]:hover{border-color:var(--rule-strong);color:var(--ink-2);background:#fff;transform:none}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:1px;
+  background:var(--rule-strong);border:1px solid var(--rule-strong);border-radius:3px;
+  margin:20px 0 0;overflow:hidden}
+.readout div{background:#fff;padding:14px 16px}
+.readout dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);margin:0 0 5px}
+.readout dd{margin:0;font-family:var(--font-mono);font-size:19px;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.readout dd.hot{color:var(--warm-deep)}
+.readout dd.cool{color:var(--core)}
+.readout dd.lock{color:var(--ink-2)}
+@keyframes tick{0%{transform:translateY(-3px);opacity:.45}100%{transform:none;opacity:1}}
+.readout dd.bump{animation:tick .34s var(--ease)}
+@media (prefers-reduced-motion:reduce){.readout dd.bump{animation:none}}
+
+/* ---------- the frozen prediction grid ---------- */
+.pred{margin:26px 0 0}
+.pred-grid{display:grid;grid-template-columns:minmax(118px,1.15fr) repeat(4,minmax(0,1fr));gap:6px}
+.pred-h{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-4);padding:6px 4px 8px;align-self:end;line-height:1.35}
+.pred-r{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);padding:12px 4px;
+  align-self:center;line-height:1.35}
+.pcell{appearance:none;-webkit-appearance:none;font:inherit;font-family:var(--font-mono);
+  font-size:12.5px;letter-spacing:.02em;color:var(--ink-2);background:#fff;
+  border:1px solid var(--rule-strong);border-radius:3px;padding:14px 8px;cursor:pointer;
+  text-align:center;position:relative;line-height:1.3;
+  transition:border-color .2s var(--ease),background .2s var(--ease),transform .2s var(--ease),
+             box-shadow .2s var(--ease)}
+.pcell:hover{border-color:var(--accent);transform:translateY(-2px);
+  box-shadow:0 12px 26px -20px rgba(23,28,44,.6)}
+.pcell.on{border-color:var(--accent-deep);background:rgba(61,90,128,.10)}
+.pcell.miss::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;
+  border-radius:50%;background:var(--warm)}
+.pcell.miss{border-color:var(--warm-soft)}
+.pcell.miss.on{border-color:var(--warm-deep);background:rgba(181,84,46,.10)}
+.pcell.head{font-weight:500;color:var(--ink)}
+.outcome{margin:14px 0 0;background:#fff;border:1px solid var(--rule-strong);border-radius:4px;
+  padding:18px 22px;min-height:118px;
+  transition:border-color .3s var(--ease)}
+.outcome.miss{border-color:var(--warm-soft)}
+.outcome .kicker{text-align:left;margin-bottom:8px}
+.outcome p.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-4);line-height:1.5}
+.outcome h4{margin:0 0 8px;font-family:var(--font-display);font-size:19px;letter-spacing:-.01em;
+  text-transform:none;color:var(--ink);font-weight:460}
+.outcome p{margin:0;font-size:16px;line-height:1.55;color:var(--ink-2)}
+.pred-legend{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11px;
+  color:var(--ink-4);margin:12px 0 0;letter-spacing:.04em}
+.pred-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warm);
+  margin-right:7px;vertical-align:1px}
+@media(max-width:640px){
+  .pred-grid{grid-template-columns:minmax(80px,1fr) repeat(4,minmax(0,1fr));gap:4px}
+  .pcell{padding:11px 3px;font-size:10.5px}
+  .pred-r{font-size:10.5px}
+  .pred-h{font-size:9.5px}
+}
+
+/* ---------- sticky scrollytelling ---------- */
+.scrolly{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,400px);
+  gap:48px;align-items:start;margin:40px 0 0}
+.scrolly-sticky{position:sticky;top:78px;z-index:1}
+.scrolly-steps{margin:0;padding:0;list-style:none}
+.scrolly-steps li{min-height:74vh;display:flex;align-items:center}
+.scrolly-steps li:first-child{min-height:50vh}
+.scrolly-steps li:last-child{min-height:60vh}
+.step-card{background:#fff;border:1px solid var(--rule-strong);border-radius:4px;
+  padding:20px 24px;box-shadow:0 20px 44px -34px rgba(23,28,44,.55);
+  opacity:.3;transform:translateY(14px) scale(.985);
+  transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.step-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--accent);border-radius:1px;transform:scaleY(0);transform-origin:top center;
+  transition:transform .55s var(--ease)}
+.step-card{position:relative}
+.scrolly-steps li.on .step-card{opacity:1;transform:none}
+.scrolly-steps li.on .step-card::before{transform:scaleY(1)}
+.step-card h4{margin:0 0 8px}
+.step-card p{margin:0;font-size:16.5px;line-height:1.52;color:var(--ink-2)}
+.step-card p + p{margin-top:10px}
+@media (prefers-reduced-motion:reduce){
+  .step-card{opacity:1;transform:none;transition:none}
+  .step-card::before{transform:scaleY(1);transition:none}
+}
+@media(max-width:960px){
+  .scrolly{grid-template-columns:minmax(0,1fr);gap:0}
+  .scrolly-sticky{top:58px;background:var(--band);padding:12px 0 14px;
+    box-shadow:0 14px 24px -20px rgba(23,28,44,.5)}
+  .scrolly-steps li{min-height:60vh}
+  .scrolly-steps li:first-child{min-height:32vh}
+}
+
+/* ---------- pipeline and timeline diagrams (SVG) ---------- */
+.pipe{width:100%;height:auto;display:block;margin:6px 0 0}
+.pipe .pbox{fill:var(--bg-2);stroke:var(--rule-strong);stroke-width:1}
+.pipe .pbox-a{fill:rgba(61,90,128,.10);stroke:var(--accent);stroke-width:1}
+.pipe .pbox-w{fill:rgba(181,84,46,.09);stroke:var(--warm);stroke-width:1}
+.pipe .pbox-c{fill:rgba(61,90,128,.05);stroke:var(--core-soft);stroke-width:1}
+.pipe .plab{font-family:var(--font-mono);font-size:9.6px;fill:var(--ink);letter-spacing:.02em}
+.pipe .plab-s{font-family:var(--font-mono);font-size:8.4px;fill:var(--ink-3)}
+.pipe .plab-w{fill:var(--warm-deep)}
+.pipe .plab-a{fill:var(--accent-deep)}
+.pipe .phead{font-family:var(--font-mono);font-size:8.6px;fill:var(--ink-4);letter-spacing:.12em}
+.pipe .parrow{stroke:var(--ink-4);stroke-width:1;fill:none}
+.pipe .pdash{stroke:var(--rule-strong);stroke-width:1;stroke-dasharray:3 3;fill:none}
+.pipe .pfreeze{stroke:var(--warm);stroke-width:1.2;stroke-dasharray:4 3;fill:none}
+.pipe .pdot{fill:var(--accent);stroke:#fff;stroke-width:1.4}
+.pipe .pdot-w{fill:var(--warm)}
+.pipe .pdot-o{fill:#fff;stroke:var(--ink-4);stroke-width:1.2}
+.pipe .pdraw{stroke-dasharray:var(--len,300);stroke-dashoffset:var(--len,300);
+  transition:stroke-dashoffset 1s var(--ease)}
+.pipe.in .pdraw{stroke-dashoffset:0}
+.pipe .pfade{opacity:0;transition:opacity .7s var(--ease);transition-delay:var(--d,0s)}
+.pipe.in .pfade{opacity:1}
+@media (prefers-reduced-motion:reduce){.pipe .pdraw{stroke-dashoffset:0;transition:none}
+  .pipe .pfade{opacity:1;transition:none}}
+
+/* ---------- ledger strips ---------- */
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:24px 0 0}
+.strip div{border:1px solid var(--rule-strong);border-top:2px solid var(--ink-4);border-radius:4px;
+  padding:14px 14px 15px;background:#fff;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.strip div:hover{transform:translateY(-3px);box-shadow:0 14px 30px -22px rgba(23,28,44,.6)}
+.strip div.bad{border-top-color:var(--danger)}
+.strip div.warnc{border-top-color:var(--warn)}
+.strip div.okc{border-top-color:var(--accent)}
+.strip dt{font-family:var(--font-mono);font-size:9.8px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 8px}
+.strip dd{margin:0;font-size:15px;line-height:1.42;color:var(--ink-2)}
+@media(max-width:700px){.strip{grid-template-columns:1fr}}
+
+/* ---------- key-figure band ---------- */
+.kf{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;
+  background:var(--rule-strong);border:1px solid var(--rule-strong);border-radius:4px;
+  overflow:hidden;margin:30px 0}
+.kf div{background:#fff;padding:20px 20px 19px;transition:background .3s var(--ease)}
+.kf div:hover{background:var(--band)}
+.kf dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 9px}
+.kf dd{margin:0;font-family:var(--font-display);font-size:34px;line-height:1.05;color:var(--ink);
+  font-variant-numeric:tabular-nums;font-weight:380}
+.kf dd small{display:block;font-family:var(--font-body);font-size:14px;color:var(--ink-3);
+  margin-top:8px;line-height:1.4;font-weight:400}
+.kf div.acc dd{color:var(--accent-deep)}
+.kf div.hot dd{color:var(--warm-deep)}
+
+/* ---------- footer ---------- */
+footer{padding:74px 0 92px;background:var(--deep);color:#c3cad8;position:relative;overflow:hidden}
+footer::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(90% 120% at 12% 0%,rgba(61,90,128,.22),transparent 60%)}
+#footCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.4) 52%,#000 68%,#000 98%,transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.4) 52%,#000 68%,#000 98%,transparent 100%)}
+@media(max-width:900px){
+  #footCanvas{
+    -webkit-mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.5) 46%,#000 72%,#000 100%);
+            mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.5) 46%,#000 72%,#000 100%)}
+}
+footer .wrap{position:relative;z-index:1}
+footer h3{margin-top:0;color:#fff}
+footer .small{color:#a9b3c6}
+footer a{color:#bfcde0;border-bottom-color:rgba(191,205,224,.4)}
+footer a:hover{color:#fff;border-bottom-color:#fff}
+.footlinks{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 0}
+.footlinks a{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);
+  font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:10px 17px;
+  border:1px solid rgba(255,255,255,.26);border-radius:999px;color:#dde5f0;
+  transition:border-color .22s var(--ease),color .22s var(--ease),
+             background .22s var(--ease),transform .22s var(--ease)}
+.footlinks a:hover{border-color:var(--accent-bright);color:#fff;
+  background:rgba(61,90,128,.28);transform:translateY(-2px)}
+.cite{font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#a9b3c6;
+  border-left:2px solid var(--accent);padding-left:20px;margin:24px 0}
+.cite b{color:#fff;font-weight:500}
+main .cite{color:var(--ink-3);border-left-color:var(--accent)}
+main .cite b{color:var(--ink)}
+
+/* ---------- responsive ---------- */
+@media(max-width:900px){
+  main section{padding:78px 0}
+}
+@media(max-width:720px){
+  body{font-size:17.5px}
+  .wrap{padding:0 20px}
+  main section{padding:68px 0}
+  .lede{font-size:19px}
+  .deep-panel{padding:28px 22px}
+  .modal{padding:28px 22px 24px}
+  #hero .wrap{padding-top:74px;padding-bottom:66px}
+  #hero .sub{font-size:19px}
+  .step-card p{font-size:15.5px}
+}
+@media(max-width:380px){
+  .wrap{padding:0 15px}
+  .hbtn{padding:10px 14px;font-size:10.5px}
+  .hstats dd{font-size:28px}
+}
+</style>
+<noscript><style>
+  /* every figure is drawn at runtime; with scripting off the prose and tables
+     carry the same numbers, so the empty frames go away */
+  .fig,.btnrow,.readout,.scrolly-sticky,#rail,#field,#grain,.scrollcue{display:none}
+  .fig-head span{display:none}
+  .reveal,.st{opacity:1;transform:none}
+  .step-card{opacity:1;transform:none}
+  .step-card::before{transform:scaleY(1)}
+  #topbar:not(.stuck){opacity:1;pointer-events:auto;background:rgba(251,250,247,.94)}
+  h2::after{width:132px}
+  .scrolly{display:block}
+  .scrolly-steps li{min-height:0;display:block;margin-bottom:16px}
+  .eq::after{display:none}
+  .pipe .pfade{opacity:1}
+  .pipe .pdraw{stroke-dashoffset:0}
+</style></noscript>
+</head>
+<body>
+<canvas id="field" aria-hidden="true"></canvas>
+<div id="grain" aria-hidden="true"></div>
+<div id="rail" aria-hidden="true"><i></i></div>
+
+<div id="topbar"><div class="wrap">
+  <a class="homebtn" href="../index.html"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.2 2 3.2 6l4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</a>
+  <a class="brand" href="#hero">QEbreak at WMT26</a>
+  <nav id="toc" aria-label="Sections of this page">
+    <a href="#task" data-sec="task">The task</a>
+    <a href="#set" data-sec="set">The set</a>
+    <a href="#plan" data-sec="plan">The plan</a>
+    <a href="#headline" data-sec="headline">Headline</a>
+    <a href="#flip" data-sec="flip">The flip</a>
+    <a href="#arms" data-sec="arms">Arms A and C</a>
+    <a href="#strata" data-sec="strata">Strata</a>
+    <a href="#limits" data-sec="limits">Limits</a>
+    <a href="#coda" data-sec="coda">Coda</a>
+  </nav>
+  <span class="rail-end" id="railPct">00%</span>
+</div></div>
+
+<div id="shell">
+
+<!-- ============================= HERO ============================= -->
+<section id="hero" aria-labelledby="hero-h">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <p class="tag">WMT26 &middot; Automated Translation Quality Evaluation &middot; Subtask 4, Challenge Sets &middot; EMNLP 2026, Budapest</p>
+    <h1 id="hero-h">QEbreak at WMT26: A Pre-Registered Audit of Omission and Addition Asymmetry in Machine Translation Quality Metrics</h1>
+    <p class="sub"><span class="status">Accepted as a poster</span> at WMT26. A pre-registered challenge set of
+      <b>2,886</b> segments in <b>10</b> language directions, scored by the organizers with <b>31</b> metric systems.</p>
+    <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore
+      &nbsp;&middot;&nbsp; solo participant</p>
+    <div class="hbtns">
+      <a class="hbtn solid" href="assets/wmt26-qebreak-paper.pdf" target="_blank" rel="noopener">Paper, PDF <span class="arrow">&rarr;</span></a>
+      <a class="hbtn" href="https://www2.statmt.org/wmt26/mteval-challenge_set.html" target="_blank" rel="noopener">Task page</a>
+    </div>
+    <dl class="hstats">
+      <div><dt>Segments</dt><dd><span class="count" data-final="2,886" data-dec="0">2,886</span></dd></div>
+      <div><dt>Language directions</dt><dd><span class="count" data-final="10" data-dec="0">10</span></dd></div>
+      <div><dt>Systems scored</dt><dd><span class="count" data-final="31" data-dec="0">31</span></dd></div>
+    </dl>
+  </div>
+  <div class="scrollcue" aria-hidden="true"><span></span>Scroll</div>
+</section>
+
+<main>
+<!-- ============================= TASK ============================= -->
+<section id="task" aria-labelledby="task-h">
+  <div class="wrap">
+    <p class="kicker reveal">01 &nbsp;/&nbsp; The task</p>
+    <h2 class="reveal" id="task-h">A challenge set is scored by everyone else's metric</h2>
+    <p class="lede reveal d1">In this subtask the participant does not submit a metric. The participant submits
+      the segments that every submitted metric is then asked to score, and receives the scores back.</p>
+
+    <div class="read">
+      <p class="reveal">The WMT26 Automated Translation Quality Evaluation task collects metric systems that
+        assign a quality score to a machine translation. Its 4th subtask invites challenge sets: collections
+        of source sentences, hypotheses and references built to test 1 specific weakness. The organizers score
+        every submitted segment with every submitted metric system and return the scores to the builder. There
+        is no leaderboard for a challenge set. The deliverable is the analysis, published as a system paper
+        alongside the organizers' findings.</p>
+
+      <p class="reveal">3 constraints shape the design. A cap of 1 million tokens, counted over source,
+        hypothesis and reference together. 7 published fields per row, and nothing else. Scoring at the
+        segment level, 1 score per row, higher is better. The format carries 1 hypothesis per row, so a
+        correct and a corrupted translation of the same source have to travel as separate rows, and the
+        pairing has to be rebuilt after the scores come back.</p>
+
+      <h3 class="reveal">The weakness under test</h3>
+      <p class="reveal">A <button type="button" class="term" data-modal="m-qe">reference-free quality
+        estimation metric</button> reads only the source and the hypothesis. A reference-based metric can
+        notice that translated content is missing because the reference still contains it. A reference-free
+        metric sees a hypothesis that is shorter, fluent and internally consistent, with nothing in it to
+        flag. The registered concern was that such a metric penalizes omission less than it penalizes a
+        comparable amount of added content, and that a best-of-<i>n</i> reranker built on it will therefore
+        sometimes prefer the incomplete translation.</p>
+
+      <p class="reveal">3 hypotheses were registered.</p>
+      <ul class="plain reveal">
+        <li><b>H<sub>B</sub>, the headline.</b> Reference-free QE metrics under-penalize meaning omission
+          relative to fluent addition, while reference-based metrics penalize the 2 edit directions roughly
+          symmetrically.</li>
+        <li><b>H<sub>A</sub>, secondary.</b> Reference-free QE scores do not decrease, or even increase, as
+          fluent, fact-free, source-unsupported material is appended to a realistic base translation.</li>
+        <li><b>H<sub>C</sub>, a positive control.</b> The reference-based neural frontier catches a single
+          load-bearing numeric contradiction while surface and reference-free metrics diverge. This proves
+          the harness can detect a break at all.</li>
+      </ul>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">The shipped set, 2,886 segments <span>interactive, pick an arm</span></p>
+      <canvas class="fig r7" id="cComp" data-fig="comp"
+        aria-label="10 horizontal bars, 1 per language direction, each split into the segments of Arm A, Arm B and Arm C. en-de is largest at 894 segments; zh-ja is smallest at 20. Arm A ships on 2 directions, Arm B on 6, Arm C on all 10."></canvas>
+      <div class="btnrow" role="group" aria-label="Choose an arm to isolate">
+        <button type="button" class="btn on" data-arm="all">All arms</button>
+        <button type="button" class="btn" data-arm="A">Arm A</button>
+        <button type="button" class="btn warmish" data-arm="B">Arm B</button>
+        <button type="button" class="btn" data-arm="C">Arm C</button>
+      </div>
+      <dl class="readout">
+        <div><dt>Segments</dt><dd id="oSeg">2,886</dd></div>
+        <div><dt>Directions</dt><dd id="oDir" class="cool">10</dd></div>
+        <div><dt id="oGlab">Groups</dt><dd id="oGrp" class="hot">1,137</dd></div>
+        <div><dt>Rows per group</dt><dd id="oRpg" class="lock">6, 3 or 2</dd></div>
+      </dl>
+      <figcaption><b>Figure 1, interactive.</b> Each bar is 1 language direction, split by arm, with widths
+        taken from the shipped counts. Arm A ships on 2 directions as 76 series of 6 rows, Arm B on 6 directions
+        as 308 triples, Arm C on all 10 as 753 pairs. The readout figures are the counts in the paper's
+        composition table, not simulation output.</figcaption>
+    </figure>
+
+    <div class="read">
+      <div class="note reveal">
+        <p><b>How this page is organised.</b> Sections 02 and 03 describe what was built and what was frozen
+          before any score existed. Sections 04 to 07 report what came back. Section 08 lists what was not
+          done. Every number is quoted from the camera-ready paper at the precision it was recorded at.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= THE SET ============================= -->
+<section id="set" class="alt" aria-labelledby="set-h">
+  <div class="wrap">
+    <p class="kicker reveal">02 &nbsp;/&nbsp; The challenge set</p>
+    <h2 class="reveal" id="set-h">3 arms, with 1 matched triple at the centre</h2>
+    <p class="lede reveal d1">Every headline item holds the source fixed and changes the hypothesis by exactly
+      1 information unit, in 1 of 2 directions.</p>
+
+    <div class="read">
+      <h3 class="reveal">Arm B, the headline: matched omission and addition triples</h3>
+      <p class="reveal">308 triples on 6 directions, 924 segments. Each triple pairs a base translation with an
+        <span class="om">omission</span> member that removes 1
+        <button type="button" class="term" data-modal="m-unit">information unit</button> and an
+        <span class="ad">addition</span> member that appends 1 fact-free, source-unsupported unit. The 3 members
+        travel as separate rows, paired by opaque group identifiers, which is the design the organizers
+        endorsed. The triple supports both primary endpoints of section 03: the signed interaction and the
+        preference-flip rate.</p>
+
+      <p class="reveal">The 2 directions are matched on information units, not on edit size. Additions change
+        a median of 2.0x as many characters as omissions remove, counted in whitespace-stripped characters
+        (1.4x in the LLM-generated stratum, 2.0x and 2.5x in the 2 deterministic strata), and 79% of triples
+        add more characters than they remove. A length-controlled refit therefore accompanies the primary
+        interaction in section 04.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">1 source, 1 triple, 3 separate rows <span>static diagram</span></p>
+      <div class="tbl-scroll">
+      <svg class="pipe" viewBox="0 0 980 330" role="img" style="min-width:620px"
+        aria-label="Diagram. A source sentence and its reference produce a base translation. From the base, 2 edits are made: an omission that removes 1 information unit, and an addition that appends 1 fact-free unit. All 3 hypotheses pass validity gates built on natural language inference, named-entity recognition and length caps; failures are dropped, not repaired. The survivors ship as 3 separate blind rows with opaque identifiers, are scored by 31 systems, and a private keymap restores the pairing.">
+        <text class="phead" x="8" y="16">INPUT</text>
+        <text class="phead" x="178" y="16">BASE</text>
+        <text class="phead" x="374" y="16">2 EDIT DIRECTIONS</text>
+        <text class="phead" x="608" y="16">VALIDITY GATES</text>
+        <text class="phead" x="802" y="16">SHIPPED</text>
+
+        <rect class="pbox" x="8" y="128" width="140" height="74" rx="3"></rect>
+        <text class="plab" x="20" y="152">source sentence</text>
+        <text class="plab-s" x="20" y="170">FLORES-200 anchor pair</text>
+        <text class="plab-s" x="20" y="186">with its reference</text>
+
+        <path class="parrow" d="M148 165 H 176"></path>
+        <path class="parrow" d="M168 160 l8 5 -8 5"></path>
+
+        <rect class="pbox-c" x="178" y="128" width="160" height="74" rx="3"></rect>
+        <text class="plab" x="190" y="152">base translation</text>
+        <text class="plab-s" x="190" y="170">real WMT24 output (S1, S2)</text>
+        <text class="plab-s" x="190" y="186">or the reference (S3)</text>
+
+        <path class="parrow" d="M338 165 H 356 M356 165 V 85 M356 165 V 245"></path>
+        <path class="parrow" d="M356 85 H 372 M356 245 H 372"></path>
+        <path class="pdash" d="M356 165 H 372"></path>
+        <path class="parrow" d="M364 80 l8 5 -8 5 M364 240 l8 5 -8 5"></path>
+
+        <rect class="pbox-w" x="374" y="52" width="196" height="66" rx="3"></rect>
+        <text class="plab plab-w" x="386" y="74">omission</text>
+        <text class="plab-s" x="386" y="91">1 information unit removed</text>
+        <text class="plab-s" x="386" y="106">not entailed by what remains</text>
+
+        <rect class="pbox-c" x="374" y="140" width="196" height="50" rx="3" style="stroke-dasharray:3 3"></rect>
+        <text class="plab" x="386" y="162">base, unchanged</text>
+        <text class="plab-s" x="386" y="178">ships as its own row</text>
+
+        <rect class="pbox-a" x="374" y="212" width="196" height="66" rx="3"></rect>
+        <text class="plab plab-a" x="386" y="234">addition</text>
+        <text class="plab-s" x="386" y="251">1 fact-free unit appended</text>
+        <text class="plab-s" x="386" y="266">neutral against source and base</text>
+
+        <path class="parrow" d="M570 85 H 590 M570 165 H 590 M570 245 H 590 M590 85 V 245"></path>
+        <path class="parrow" d="M590 165 H 606"></path>
+        <path class="parrow" d="M598 160 l8 5 -8 5"></path>
+
+        <rect class="pbox" x="608" y="112" width="164" height="106" rx="3"></rect>
+        <text class="plab" x="620" y="134">gates, deterministic</text>
+        <text class="plab-s" x="620" y="152">NLI entailment, mDeBERTa</text>
+        <text class="plab-s" x="620" y="167">NER: no digit, date, entity</text>
+        <text class="plab-s" x="620" y="182">length caps, 25% of base</text>
+        <text class="plab-s" x="620" y="197">no gate reads any score</text>
+        <text class="plab-s plab-w" x="620" y="212">dropped, never repaired</text>
+
+        <path class="parrow" d="M772 165 H 800"></path>
+        <path class="parrow" d="M792 160 l8 5 -8 5"></path>
+
+        <rect class="pbox-a" x="802" y="98" width="172" height="134" rx="3"></rect>
+        <text class="plab" x="814" y="120">3 separate blind rows</text>
+        <text class="plab-s" x="814" y="138">7 published fields only</text>
+        <text class="plab-s" x="814" y="153">opaque ids, no label, no dose</text>
+        <text class="plab-s" x="814" y="168">row order de-correlated</text>
+        <text class="plab-s" x="814" y="188">each row scored by 31 systems</text>
+        <text class="plab-s plab-a" x="814" y="208">private keymap, not uploaded,</text>
+        <text class="plab-s plab-a" x="814" y="222">restores the pairing after</text>
+
+        <text class="phead" x="8" y="316">EVERY ARM B ITEM IS 1 SOURCE, 3 ROWS, 1 UNIT OF DIFFERENCE BETWEEN NEIGHBOURS</text>
+      </svg>
+      </div>
+      <figcaption><b>Figure 2.</b> The path of 1 Arm B triple from source to scored rows. Everything left of
+        the gates is construction. The gates see no metric score. Everything right of them is the organizers'
+        scoring and the private join back to the triple.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">Arm A, secondary: a verbosity dose ladder</h3>
+      <p class="reveal">76 series on en-de and en-ru, 456 segments. Each series appends 1 to 5 fluent,
+        fact-free filler units to a base translation, giving 6 segments per series including the dose-0 base.
+        Fillers are screened to contain no digits, dates or named entities, and to be entailment-neutral
+        against both the source and the base, so the ladder isolates pure unsupported length. At the maximum
+        dose the hypothesis is a median of 6.4x the base length.</p>
+
+      <h3 class="reveal">Arm C, the positive control: numeric minimal pairs</h3>
+      <p class="reveal">753 pairs on all 10 directions, 1,506 segments. Each pair contrasts a correct
+        hypothesis with a copy whose single load-bearing numeral is corrupted: digit substitution in 440
+        pairs, transposition in 213, a magnitude shift in 100. Numeral selection follows a scoring rule frozen
+        in the registration, with units and separators weighted up and years penalized, so the corrupted
+        numeral is never a researcher degree of freedom. The arm exists to prove the harness has teeth. If the
+        reference-based frontier missed a flat numeric contradiction, the harness would be under suspicion
+        rather than the metrics.</p>
+
+      <h3 class="reveal">Validity gates</h3>
+      <p class="reveal">Every generated item passes deterministic gates before it can ship, and items that fail
+        are dropped rather than repaired. The omission gate requires the base hypothesis to
+        <button type="button" class="term" data-modal="m-nli">entail</button> the omitted-member hypothesis
+        while the dropped unit stays un-entailed by the remaining text, which blocks omissions that merely
+        rephrase. The addition gate requires the appended unit to carry no digit, date or named entity, and to
+        be entailment-neutral against both source and base: neutral at or above 0.70, entailment and
+        contradiction at or below 0.15 each. Subtle LLM-generated triples obey symmetric length caps of 25% of
+        the base's characters in either direction; the realized worst cases are 22.9% and 24.4%. No gate reads
+        any metric score.</p>
+
+      <p class="reveal">Gate survival is low by design. In the LLM-generation runs, 1,042 raw candidates were
+        drawn, 861 parsed into complete triples, and the gates admitted 89 of those: 10.3% overall, between
+        3.2% on en-ja and 20.0% on en-ru.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Gate survival in the LLM-generation runs <span>animated</span></p>
+      <canvas class="fig r7" id="cGate" data-fig="gate"
+        aria-label="6 language directions, each with 3 nested bars: raw candidates drawn, candidates that parsed into complete triples, and triples admitted by the gates. cs-uk admitted 40 of 334 complete triples, en-zh 17 of 222, en-de 11 of 69, en-cs 11 of 81, en-ru 6 of 30, en-ja 4 of 125. Overall, 89 of 861 complete triples were admitted, 10.3%."></canvas>
+      <figcaption><b>Figure 3.</b> For each of the 6 directions with LLM-generated triples, the outer bar is
+        the raw candidates drawn, the middle bar the candidates that parsed into complete triples, and the
+        filled bar the triples the gates admitted. The survival rate printed at the right is admitted over
+        complete. These 89 triples form stratum S1.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">3 provenance strata</h3>
+      <p class="reveal">Arm B ships in 3 strata, defined only from metadata written at generation time.
+        <b>S1</b>, 89 triples: subtle perturbations generated by Llama-3.1-8B on real WMT24 system outputs
+        under the length caps, where the omission typically drops a single detail such as a street number.
+        <b>S2</b>, 100 triples: deterministic whole-unit edits on real WMT24 system-output bases. <b>S3</b>,
+        119 triples: deterministic edits on reference-verbatim bases. Real-MT bases come from the
+        median-ranked WMT24 system per direction. The registered secondary prediction is a gradient for the
+        reference-free family: a deeper asymmetry and a higher flip rate in S1 than in S2 and S3 pooled, with
+        no prediction between S2 and S3, and no stratified test in the confirmatory family.</p>
+
+      <h3 class="reveal">Blind submission</h3>
+      <p class="reveal">The uploaded rows carry exactly the 7 published fields under a
+        <button type="button" class="term" data-modal="m-blind">blind protocol</button>. All internal metadata
+        was stripped, identifiers are opaque hashes with no label, phenomenon or dose token, and row order was
+        de-correlated so that the base member sits at no fixed position: base-first fell from 100% to 44.0%,
+        against a 43.3% chance level. A private keymap, never uploaded, restores the pairing when scores
+        return. The structure that a contrastive set cannot remove, such as pair members sharing a source, is
+        stated in section 08.</p>
+
+      <div class="kf reveal">
+        <div class="hot"><dt>Arm B, headline</dt><dd>308<small>matched triples on 6 directions, 924 rows</small></dd></div>
+        <div><dt>Arm A, secondary</dt><dd>76<small>verbosity series on 2 directions, 456 rows</small></dd></div>
+        <div class="acc"><dt>Arm C, control</dt><dd>753<small>numeric pairs on 10 directions, 1,506 rows</small></dd></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= THE PLAN ============================= -->
+<section id="plan" aria-labelledby="plan-h">
+  <div class="wrap">
+    <p class="kicker reveal">03 &nbsp;/&nbsp; Pre-registration</p>
+    <h2 class="reveal" id="plan-h">Everything that could be frozen was frozen before the first score</h2>
+    <p class="lede reveal d1">The hypotheses, endpoints, equivalence margin, multiplicity rule, strata and
+      orientation manifest were committed to a timestamped git history before the upload. Whatever the scores
+      said, the reported outcome would be the registered one.</p>
+
+    <figure class="reveal d1">
+      <p class="fig-head">What was committed, and when <span>static diagram</span></p>
+      <div class="tbl-scroll">
+      <svg class="pipe" viewBox="0 0 980 250" role="img" style="min-width:640px"
+        aria-label="Timeline from 9 July to 11 September 2026. The registration commit and its erratum on 9 July; the scope-and-anchor amendment and a clarification on 11 July; the upload and the code freeze on 15 July, a day before the 16 July deadline; receipt confirmed on 22 July; scores returned on 6 August, followed 27 minutes later by the single post-return commit and the same day by the system paper submission; a second return on 11 August that changed nothing; acceptance as a poster on 4 September; camera-ready finished on 5 September, ahead of the 11 September deadline.">
+        <text class="phead pfade" x="40" y="22" style="--d:.1s">FROZEN BEFORE ANY SCORE EXISTED</text>
+        <text class="phead pfade" x="534" y="22" style="--d:.5s">AFTER THE RETURN</text>
+
+        <rect class="pfade" x="260" y="100" width="260" height="40" rx="2" fill="rgba(61,90,128,0.06)" style="--d:.3s"></rect>
+        <text class="plab-s pfade" x="390" y="96" text-anchor="middle" style="--d:.35s">no commit between the upload and the return</text>
+
+        <path class="parrow" d="M40 120 H 940"></path>
+        <path class="parrow" d="M442 127 l6 -14 M450 127 l6 -14 M732 127 l6 -14 M740 127 l6 -14"></path>
+        <path class="pfreeze" d="M520 40 V 236"></path>
+
+        <circle class="pdot pfade" cx="40" cy="120" r="4.5" style="--d:.1s"></circle>
+        <circle class="pdot pfade" cx="52" cy="120" r="4.5" style="--d:.12s"></circle>
+        <circle class="pdot pfade" cx="150" cy="120" r="4.5" style="--d:.18s"></circle>
+        <circle class="pdot pfade" cx="162" cy="120" r="4.5" style="--d:.2s"></circle>
+        <circle class="pdot pfade" cx="260" cy="120" r="4.5" style="--d:.25s"></circle>
+        <circle class="pdot-o pfade" cx="290" cy="120" r="4" style="--d:.28s"></circle>
+        <circle class="pdot-o pfade" cx="370" cy="120" r="4" style="--d:.32s"></circle>
+        <circle class="pdot pdot-w pfade" cx="520" cy="120" r="5" style="--d:.4s"></circle>
+        <circle class="pdot-o pfade" cx="650" cy="120" r="4" style="--d:.5s"></circle>
+        <circle class="pdot-o pfade" cx="830" cy="120" r="4" style="--d:.6s"></circle>
+        <circle class="pdot pfade" cx="858" cy="120" r="4.5" style="--d:.65s"></circle>
+        <circle class="pdot-o pfade" cx="940" cy="120" r="4" style="--d:.7s"></circle>
+
+        <g class="pfade" style="--d:.1s">
+          <text class="plab" x="40" y="48">9 Jul</text>
+          <text class="plab-s" x="40" y="63">registration frozen, 6febc4b</text>
+          <text class="plab-s" x="40" y="77">sign-gloss erratum, b8e78f3</text>
+        </g>
+        <g class="pfade" style="--d:.2s">
+          <text class="plab" x="150" y="160">11 Jul</text>
+          <text class="plab-s" x="150" y="175">amendment, 91c19c1</text>
+          <text class="plab-s" x="150" y="189">clarification, 98bf78c</text>
+        </g>
+        <g class="pfade" style="--d:.25s">
+          <text class="plab" x="260" y="48">15 Jul</text>
+          <text class="plab-s" x="260" y="63">set uploaded, 2,886 rows</text>
+          <text class="plab-s" x="260" y="77">analysis code frozen, 28e1706</text>
+        </g>
+        <g class="pfade" style="--d:.3s">
+          <text class="plab-s" x="290" y="160">16 Jul, deadline</text>
+          <text class="plab-s" x="370" y="175">22 Jul, receipt confirmed</text>
+        </g>
+        <g class="pfade" style="--d:.45s">
+          <text class="plab plab-w" x="528" y="48">6 Aug, 00:25</text>
+          <text class="plab-s" x="528" y="63">scores back, 31 systems</text>
+          <text class="plab-s" x="528" y="160">00:52, the 1 post-return commit, f539810</text>
+          <text class="plab-s" x="528" y="175">orientation patterns added, 3 deviations reported</text>
+          <text class="plab-s" x="528" y="189">same day: system paper submitted, #54</text>
+        </g>
+        <g class="pfade" style="--d:.55s">
+          <text class="plab-s" x="650" y="48">11 Aug, 2nd return</text>
+          <text class="plab-s" x="650" y="63">roster dedup, no change</text>
+        </g>
+        <g class="pfade" style="--d:.65s">
+          <text class="plab" x="830" y="160">4 Sep, accepted</text>
+          <text class="plab-s" x="830" y="175">poster, 2 reviews, both 5</text>
+        </g>
+        <g class="pfade" style="--d:.7s">
+          <text class="plab" x="858" y="48">5 Sep</text>
+          <text class="plab-s" x="858" y="63">camera-ready finished</text>
+          <text class="plab-s" x="940" y="212" text-anchor="end">11 Sep, camera-ready deadline</text>
+        </g>
+      </svg>
+      </div>
+      <figcaption><b>Figure 4.</b> Filled markers are commits; open markers are organizer events. The
+        registration and its 3 pre-score amendments predate the 15 July upload, and the analysis code was
+        frozen at the upload. The 1 post-return commit was made 27 minutes after the scores arrived and before
+        any score value was analysed. It made the permitted orientation additions and 3 changes the
+        registration did not anticipate, which the paper reports as deviations under the registration's own
+        rule. The axis is not to scale.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">The 2 primary endpoints</h3>
+      <p class="reveal"><b>N1, the signed interaction.</b> For each perturbed Arm B member, the signed drop is
+        the base score minus the member score, so a positive value means the metric penalized the edit. Within
+        each metric the drops are replaced by their
+        <button type="button" class="term" data-modal="m-pct">within-metric percentile</button>, which makes
+        the response invariant to any monotone rescaling of a metric. The registered 3-way design reduces to
+        an identifiable model, because every shipped Arm B edit carries exactly 1 information unit:</p>
+
+      <div class="eq reveal">y = &beta;<sub>0</sub> + &beta;<sub>1</sub>&middot;<i>D</i><sub>add</sub> + &beta;<sub>2</sub>&middot;<i>R</i> + <b>&beta;&middot;(<i>D</i><sub>add</sub> &middot; <i>R</i>)</b> + &epsilon;
+
+<i>D</i><sub>add</sub> = 1 for an addition member, 0 for an omission
+<i>R</i> = 1 when the metric reads the reference, set by the manifest, not by family</div>
+
+      <p class="reveal">The reported quantity is &beta;, the coefficient on the product. Because the response is
+        a percentile, &beta; has a plain reading: the addition-minus-omission gap in mean percentile drop for
+        reference-reading metrics, minus the same gap for reference-free metrics, in percentile points. The
+        registered prediction is &beta; &lt; 0. The point estimate is ordinary least squares on 10,220
+        observations, from 6 reference-free metrics with 3,444 observations and 11 reference-reading metrics
+        with 6,776. Every interval and p-value comes from a
+        <button type="button" class="term" data-modal="m-boot">source-clustered bootstrap</button> over the
+        268 distinct source sentences, 2,000 replicates. The 12 returned systems whose reference usage no
+        public source documents sit out of this 1 design, since <i>R</i> is undefined for them.</p>
+
+      <p class="reveal"><b>N2, the preference flip.</b> <i>P</i><sub>flip</sub> is the share of matched
+        {base, omission} pairs in which a reference-free metric scores the omission at or above its own base.
+        That is the contest a best-of-<i>n</i>
+        <button type="button" class="term" data-modal="m-flip">reranker</button> adjudicates. The registered
+        prediction was a high rate for reference-free QE and a rate near 0 for reference-based and LLM-judge
+        metrics.</p>
+
+      <h3 class="reveal">The anchor</h3>
+      <p class="reveal">H<sub>B</sub> is a contrast, so it needs the reference-based family to be symmetric in
+        fact. For metric <i>m</i>, <i>b</i><sub>om,<i>m</i></sub> is the mean raw oriented drop over its
+        omission members and <i>b</i><sub>add,<i>m</i></sub> the same over its addition members, both in the
+        metric's own units. The scale-free relative asymmetry is</p>
+
+      <div class="eq reveal"><b>A<sub>m</sub></b> = ( |<i>b</i><sub>om,m</sub>| &minus; |<i>b</i><sub>add,m</sub>| ) / ( (|<i>b</i><sub>om,m</sub>| + |<i>b</i><sub>add,m</sub>|) / 2 )
+
+bounded in [&minus;2, 2]; negative means omission is penalized less than addition
+family A = unweighted mean of A<sub>m</sub> over the family's returned metrics</div>
+
+      <p class="reveal">The registered
+        <button type="button" class="term" data-modal="m-margin">equivalence margin</button> is &plusmn;0.30,
+        tested by 2 one-sided tests at &alpha; = 0.05, with a
+        <button type="button" class="term" data-modal="m-teeth">teeth precondition</button>: the family's
+        pooled raw drop, in its native units, must be positive for the family to anchor anything. The
+        refutation leg fires when the reference-based family's 95% CI lies entirely below &minus;0.30. In that
+        case the claim that the missing reference is what produces the asymmetry is refuted, whatever the
+        reference-free family does.</p>
+
+      <h3 class="reveal">Multiplicity, orientation, anti-circularity</h3>
+      <p class="reveal">1 test per metric on Arm A (28 metrics) and on Arm C (31), plus the single pooled Arm
+        B &beta;, make 60 confirmatory tests under
+        <button type="button" class="term" data-modal="m-bh">Benjamini-Hochberg</button> control at
+        <i>q</i> = 0.05, applied once, with the family size fixed by the returned roster before any score value
+        is inspected. The harness fails closed on any returned metric name that matches no manifest pattern.
+        Everything outside that family, the strata and the sensitivity refits included, is secondary or
+        exploratory and is never reported as a break.</p>
+
+      <p class="reveal">A local CometKiwi pre-filter, a stand-in for the audit-target family, labeled every row
+        with a break prediction but never gated selection, and there was no selection step for it to
+        influence. The packager ran with no per-direction cap, and the set came in at 231,582 tokens against
+        the 1M budget, so every item that passed the validity gates shipped, apart from 1 deterministic triple
+        dropped by a metric-free rule that keeps the LLM triple when both were built on the same source. The
+        label split of the shipped set: Arm B, 4 of 308 triples predicted to break; Arm A, 0 of 76 series; Arm
+        C, 89 of 753 pairs. H<sub>B</sub> is reported as confirmed only if the effect also holds in the 304
+        Arm B triples predicted not to break and on the 189 triples whose bases are real WMT24 outputs.</p>
+    </div>
+
+    <div class="wrap" style="padding:0">
+      <div class="tbl-scroll reveal">
+      <table>
+        <caption>The registered plan at a glance, with the outcome column filled in from the returned
+          scores. Arm B bootstraps resample the 268 distinct source sentences with replacement; Arm A and Arm
+          C resample their own sources.</caption>
+        <thead>
+        <tr><th>Quantity</th><th>Registered prediction</th><th>Decision rule</th><th>Outcome</th></tr>
+        </thead>
+        <tbody>
+        <tr class="best"><td class="rel">N1 &beta;, Arm B, primary</td>
+          <td class="txt">&beta; &lt; 0</td>
+          <td class="txt">OLS point estimate; source-clustered bootstrap 95% CI; 1 test in the confirmatory family</td>
+          <td class="txt">&minus;0.069 [&minus;0.081, &minus;0.057], confirmed</td></tr>
+        <tr class="best"><td class="rel">N2 <i>P</i><sub>flip</sub>, Arm B, primary</td>
+          <td class="txt">high for reference-free QE; near 0 for reference-based and LLM judges</td>
+          <td class="txt">clustered bootstrap CI; descriptive</td>
+          <td class="txt">0.013 to 0.195 for reference-free QE; not near 0 elsewhere</td></tr>
+        <tr><td class="rel">Anchor A, reference-based</td>
+          <td class="txt">inside [&minus;0.30, 0.30]; reference-free A &lt; 0</td>
+          <td class="txt">established if the 90% CI sits inside the margin and the teeth precondition holds; refutes the mechanism if the 95% CI lies below &minus;0.30</td>
+          <td class="txt">&minus;0.42 [&minus;0.49, &minus;0.35]: refutation leg fires; reference-free &minus;0.51</td></tr>
+        <tr><td class="rel">Strata gradient, secondary</td>
+          <td class="txt">A(S1) &lt; A(S2+S3); <i>P</i><sub>flip</sub>(S1) &gt; <i>P</i><sub>flip</sub>(S2+S3)</td>
+          <td class="txt">ordering of point estimates, CIs reported; never in the confirmatory family</td>
+          <td class="txt">holds as an ordering</td></tr>
+        <tr><td class="rel">Anti-circularity strata</td>
+          <td class="txt">effect persists on the 304 triples predicted not to break and on the 189 real-MT triples</td>
+          <td class="txt">confirmation of H<sub>B</sub> requires both</td>
+          <td class="txt">both hold</td></tr>
+        <tr><td class="rel">Arm A &rho;</td>
+          <td class="txt">&rho; &ge; 0 for reference-free QE (H<sub>A</sub>)</td>
+          <td class="txt">one-sided clustered bootstrap test of H<sub>0</sub>: &rho; &ge; 0, in the confirmatory family</td>
+          <td class="txt">&rho; from &minus;0.37 to &minus;1.00 for all 28 metrics: H<sub>A</sub> refuted</td></tr>
+        <tr><td class="rel">Arm C &tau;<sub>b</sub></td>
+          <td class="txt">reference-based frontier catches, reference-free trails (H<sub>C</sub>)</td>
+          <td class="txt">one-sided test of H<sub>0</sub>: &tau;<sub>b</sub> &le; 0, in the confirmatory family</td>
+          <td class="txt">holds; 2 MQM-LLM variants invert</td></tr>
+        <tr><td class="rel">Multiplicity</td>
+          <td class="txt">28 Arm A tests, 31 Arm C tests, 1 Arm B test</td>
+          <td class="txt">Benjamini-Hochberg at <i>q</i> = 0.05, applied once</td>
+          <td class="txt">60 tests; 58 reject at <i>q</i> &lt; 0.001</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="read">
+      <h3 class="reveal">The frozen prediction table</h3>
+      <p class="reveal">The registration also fixed a verdict for every arm-by-family cell before any score
+        existed. 4 of the 16 cells were contradicted by the data, and the paper marks them rather than
+        reframing them. Select a cell to read the registered verdict and what the return showed.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Registered verdicts, 4 arms by 4 families <span>interactive, select a cell</span></p>
+      <div class="pred" id="pred">
+        <div class="pred-grid" role="grid" aria-label="Registered verdict for each arm and metric family">
+          <div class="pred-h"></div>
+          <div class="pred-h">Surface</div>
+          <div class="pred-h">Reference-based neural</div>
+          <div class="pred-h">Reference-free QE</div>
+          <div class="pred-h">LLM judge</div>
+
+          <div class="pred-r">B, omission</div>
+          <button type="button" class="pcell miss" data-p="bo-surf">break</button>
+          <button type="button" class="pcell miss" data-p="bo-ref">hold</button>
+          <button type="button" class="pcell head on" data-p="bo-qe">break-hard</button>
+          <button type="button" class="pcell" data-p="bo-llm">partial</button>
+
+          <div class="pred-r">B, addition</div>
+          <button type="button" class="pcell" data-p="ba-surf">hold</button>
+          <button type="button" class="pcell" data-p="ba-ref">partial / hold</button>
+          <button type="button" class="pcell" data-p="ba-qe">hold / partial</button>
+          <button type="button" class="pcell" data-p="ba-llm">hold</button>
+
+          <div class="pred-r">A, verbosity</div>
+          <button type="button" class="pcell" data-p="a-surf">hold</button>
+          <button type="button" class="pcell" data-p="a-ref">partial</button>
+          <button type="button" class="pcell miss" data-p="a-qe">break</button>
+          <button type="button" class="pcell" data-p="a-llm">hold</button>
+
+          <div class="pred-r">C, numeric</div>
+          <button type="button" class="pcell miss" data-p="c-surf">break</button>
+          <button type="button" class="pcell" data-p="c-ref">hold</button>
+          <button type="button" class="pcell" data-p="c-qe">break / partial</button>
+          <button type="button" class="pcell" data-p="c-llm">hold</button>
+        </div>
+        <div class="pred-legend"><span><i></i>contradicted by the return</span><span>slashed cells were registered as either-or</span></div>
+        <div class="outcome" id="outcome" aria-live="polite">
+          <p class="kicker">Arm B omission &middot; reference-free QE &middot; registered: break-hard</p>
+          <h4>Confirmed in direction, refuted as a mechanism</h4>
+          <p>The family under-penalizes omission (A = &minus;0.51) and the interaction is significant, so the
+            predicted break appears. The registration attributed it to the missing reference, and the anchor cell
+            for the reference-based family refuted that attribution.</p>
+        </div>
+      </div>
+      <figcaption><b>Figure 5, interactive.</b> The verdict labels are reproduced verbatim from the
+        registration. A break means the family was predicted to score the perturbed member at or near its base.
+        The 4 marked cells are the ones the data contradicted: 3 are predicted breaks that did not happen, and
+        the 4th is the anchor cell, which the registration built so that it could refute the mechanism claim,
+        and which did.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================= HEADLINE ============================= -->
+<section id="headline" class="alt" aria-labelledby="headline-h">
+  <div class="wrap">
+    <p class="kicker reveal">04 &nbsp;/&nbsp; Results, Arm B</p>
+    <h2 class="reveal" id="headline-h">The interaction is significant, and the anchor refutes the mechanism</h2>
+    <p class="lede reveal d1">The organizers returned segment scores from 31 systems on 6 August 2026. 58 of
+      the 60 confirmatory tests reject at <i>q</i> &lt; 0.001. The 2 exceptions are on Arm C.</p>
+
+    <div class="read">
+      <p class="reveal">28 systems cover all 2,886 segments. cuni-v14-regression covers 3 directions, and the
+        2 Lexicala QE ensembles cover 3 of the 4 directions that carry Arm C only. The roster is a superset:
+        some teams submitted more than the permitted 2 systems, and the organizers had not designated main
+        submissions by the camera-ready deadline, so the family of 60 tests stands on the returned roster. 12
+        systems carry opaque names whose reference usage no public source documents. They enter every
+        per-metric endpoint but sit out the reference-availability axis. All ingestion checks passed: every
+        returned identifier matched the private keymap, and per-system counts matched the organizers'
+        coverage table exactly.</p>
+
+      <h3 class="reveal">N1: &beta; = &minus;0.069</h3>
+      <p class="reveal">The signed interaction is significant in the predicted direction: &beta; =
+        <b>&minus;0.069</b>, source-clustered bootstrap 95% CI [&minus;0.081, &minus;0.057], <i>q</i> &lt;
+        0.001 in the confirmatory family. On its own scale the coefficient reads as follows. For reference-free
+        metrics, an <span class="ad">addition</span> sits on average at the 56.1st percentile of that metric's
+        drops and an <span class="om">omission</span> at the 43.9th, a gap of 12.2 points. For
+        reference-reading metrics the gap is 5.2 points, 52.6 against 47.4. &beta; is the difference of the 2
+        gaps before rounding: 5.24 &minus; 12.17 = &minus;6.9 points. Per family, the gap is 18.3 points for
+        reference-free QE, 13.7 for reference-based neural, 3.4 for LLM judges, and &minus;8.6 for surface
+        metrics, which penalize omission more.</p>
+
+      <p class="reveal">The sensitivity refits leave the interaction intact. Under the registered z-score
+        transform it is &minus;0.24 standard deviations [&minus;0.29, &minus;0.20]. With edit magnitude as a
+        covariate it is &beta; = &minus;0.073 [&minus;0.084, &minus;0.061], so the 2.0x character imbalance of
+        section 02 does not explain it. The registration's mixed-effects form, refitted with source nested in
+        language pair, returns &minus;0.069 [&minus;0.086, &minus;0.052], and adding random slopes gives
+        &minus;0.070 [&minus;0.086, &minus;0.054]. Nothing turns on the estimator.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="scrolly" id="scrolly">
+      <div class="scrolly-sticky">
+        <p class="fig-head">Reading &beta; on its own scale <span>scroll driven</span></p>
+        <canvas class="fig r7" id="cGap" data-fig="gap"
+          aria-label="A within-metric percentile axis from 0 to 100. For reference-free metrics, additions sit at the 56.1st percentile and omissions at the 43.9th, a gap of 12.2 points. For reference-reading metrics the marks sit at 52.6 and 47.4, a gap of 5.2 points. The difference between the 2 gaps, 6.9 points, is the interaction coefficient. A final stage shows the per-family gaps of 18.3, 13.7, 3.4 and minus 8.6 points."></canvas>
+        <p class="small" style="margin-top:11px"><b>Figure 6, scroll driven.</b> Every value shown is a
+          cell mean from the fitted model. The stages are staged for reading, not derived on the fly.</p>
+      </div>
+      <ol class="scrolly-steps">
+        <li data-step="0"><div class="step-card">
+          <h4>Stage 1 &nbsp;/&nbsp; reference-free metrics</h4>
+          <p>Within each metric, every drop is replaced by its percentile among that metric's drops, so 50 is
+            the median penalty. For the 6 reference-free metrics, additions land on average at the
+            <b>56.1st</b> percentile and omissions at the <b>43.9th</b>.</p>
+        </div></li>
+        <li data-step="1"><div class="step-card">
+          <h4>Stage 2 &nbsp;/&nbsp; the reference-free gap</h4>
+          <p>The distance between the 2 marks is <b>12.2</b> percentile points. An omission is, on average, a
+            noticeably smaller penalty than an addition for a metric that cannot see the reference.</p>
+        </div></li>
+        <li data-step="2"><div class="step-card">
+          <h4>Stage 3 &nbsp;/&nbsp; reference-reading metrics</h4>
+          <p>For the 11 metrics that read a reference, additions sit at <b>52.6</b> and omissions at
+            <b>47.4</b>: a gap of <b>5.2</b> points, in the same direction, less than half the size.</p>
+        </div></li>
+        <li data-step="3"><div class="step-card">
+          <h4>Stage 4 &nbsp;/&nbsp; the coefficient</h4>
+          <p>&beta; is the reference-reading gap minus the reference-free gap: 5.24 &minus; 12.17 =
+            <b>&minus;6.9</b> points. The gap is 6.9 percentile points wider without a reference, and the
+            bootstrap interval, [&minus;8.1, &minus;5.7] in the same units, excludes 0.</p>
+        </div></li>
+        <li data-step="4"><div class="step-card">
+          <h4>Stage 5 &nbsp;/&nbsp; per family</h4>
+          <p>Split the reference-reading pool by family and the gap is <b>18.3</b> points for reference-free
+            QE, <b>13.7</b> for reference-based neural metrics, <b>3.4</b> for LLM judges, and
+            <b>&minus;8.6</b> for surface metrics, which penalize omission more than addition.</p>
+        </div></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="read">
+      <h3 class="reveal">The anchor</h3>
+      <p class="reveal">The family asymmetries carry the larger result. Reference-free QE: A =
+        <b>&minus;0.510</b> [&minus;0.573, &minus;0.442], with per-metric values of &minus;1.28 for
+        xCOMET-XL-QE, &minus;0.59 for xCOMET-XXL-QE, &minus;0.22 for cuni-v14-regression and +0.05 for
+        COMETKiwi22. Reference-based neural: A = <b>&minus;0.422</b> [&minus;0.494, &minus;0.346]. LLM judges:
+        &minus;0.135 [&minus;0.207, &minus;0.067]. The 12 unidentified systems: &minus;0.323 [&minus;0.395,
+        &minus;0.250]. Surface metrics alone over-penalize omission, at +0.362 [+0.297, +0.435], since n-gram
+        precision plus a brevity penalty charges missing content twice.</p>
+
+      <p class="reveal">The teeth precondition holds. The pooled reference-based drop, in the family's native
+        units and dominated by the 2 xCOMET scales from 0 to 100, has 95% CI [+11.5, +13.4], and every
+        member's mean drop is positive in both edit directions. But the reference-based 90% and 95% intervals
+        lie entirely below the &minus;0.30 margin, so the registered refutation leg fires. The claim that the
+        missing reference is what produces the asymmetry is refuted: the asymmetry appears in every learned
+        family. Reference access reduces it, which is the significant interaction, and surface overlap inverts
+        it.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Relative asymmetry A by family, with the registered margin <span>interactive, show the per-metric values</span></p>
+      <canvas class="fig r7" id="cAsym" data-fig="asym"
+        aria-label="5 horizontal intervals on an axis of relative asymmetry A. A shaded band marks the registered equivalence margin from minus 0.30 to plus 0.30. Reference-free QE sits at minus 0.510, reference-based neural at minus 0.422, the 12 unidentified systems at minus 0.323, LLM judges at minus 0.135, and surface metrics at plus 0.362. Only the LLM-judge interval overlaps the margin; the reference-based interval lies entirely below it."></canvas>
+      <div class="btnrow" role="group" aria-label="Choose what the figure shows">
+        <button type="button" class="btn on" data-asym="fam">Family means with 95% CIs</button>
+        <button type="button" class="btn" data-asym="met">Add every metric's A<sub>m</sub></button>
+      </div>
+      <figcaption><b>Figure 7, interactive.</b> Points are family means of A<sub>m</sub>, bars are clustered
+        bootstrap 95% CIs, and the shaded band is the &plusmn;0.30 equivalence margin registered for the
+        reference-based anchor. The 2nd view adds each returned metric's own A<sub>m</sub> as a small mark and
+        widens the axis to hold them; the 2 xCOMET baselines and the 2 FACET systems sit far to the
+        left.</figcaption>
+    </figure>
+
+    <div class="read">
+      <div class="note reveal">
+        <p><b>What this page does not take up.</b> The finding that the asymmetry belongs to learned metrics
+          as a class, rather than to reference-freeness, is reported here as the pre-registered outcome and
+          nothing more. Why learned metrics behave this way is a separate question. It is outside the scope of
+          the paper, and it is not discussed on this page.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= THE FLIP ============================= -->
+<section id="flip" aria-labelledby="flip-h">
+  <div class="wrap">
+    <p class="kicker reveal">05 &nbsp;/&nbsp; Results, N2</p>
+    <h2 class="reveal" id="flip-h">The flip rate reaches 1 contest in 5 for a current baseline</h2>
+    <p class="lede reveal d1"><i>P</i><sub>flip</sub> is the deployment-relevant number: the rate at which a
+      reference-free metric scores the omission at or above its own base, which is exactly the contest a
+      best-of-<i>n</i> reranker adjudicates.</p>
+
+    <div class="read">
+      <p class="reveal">Over 308 matched pairs, or 182 for the partial-coverage CUNI system: xCOMET-XL-QE
+        <b>0.195</b> [0.154, 0.235], xCOMET-XXL-QE <b>0.114</b> [0.079, 0.152], cuni-v14-regression
+        <b>0.093</b> [0.055, 0.137], COMETKiwi22 <b>0.013</b> [0.003, 0.027]. Part of the first 3 rates is exact
+        ties, mostly at the scale ceiling. Strictly above the base, the rates are 0.143, 0.071, 0.044 and
+        0.013. A reranker guided by xCOMET-XL-QE rates the translation that silently dropped content at least
+        as high as its base in 1 matched contest in 5, and strictly higher in 1 in 7. COMETKiwi22 almost never
+        flips and is also the family's most symmetric member. The failure is graded inside the family, and
+        the deep asymmetry is carried by the xCOMET QE baselines.</p>
+
+      <p class="reveal">The registration expected the rate to be near 0 for reference-based and LLM-judge
+        metrics. Computed the same way for every metric, as an exploratory reading, it is not. The family
+        means are 0.088 for reference-based neural, where xCOMET-XL-ref reaches 0.208; 0.130 for LLM judges,
+        where gemba-poly reaches 0.325; 0.074 for surface metrics; and 0.218 for the unidentified systems,
+        against 0.104 for reference-free QE. The flip, like the asymmetry, is shared by learned metrics as a
+        class.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">308 matched contests, 1 metric at a time <span>interactive, pick a metric and a rule</span></p>
+      <canvas class="fig r7" id="cFlip" data-fig="flip"
+        aria-label="A grid of cells, 1 per matched base and omission pair. Filled cells are contests the selected metric scores for the omission. For xCOMET-XL-QE, 60 of 308 cells are filled under the at-or-above rule, of which 16 are exact ties, and 44 under the strictly-above rule."></canvas>
+      <div class="btnrow" role="group" aria-label="Choose a metric">
+        <button type="button" class="btn warmish on" data-fm="xl">xCOMET-XL-QE</button>
+        <button type="button" class="btn warmish" data-fm="xxl">xCOMET-XXL-QE</button>
+        <button type="button" class="btn warmish" data-fm="cuni">cuni-v14-regression</button>
+        <button type="button" class="btn warmish" data-fm="kiwi">COMETKiwi22</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" class="btn" data-fm="xlref">xCOMET-XL-ref, exploratory</button>
+        <button type="button" class="btn" data-fm="gemba">gemba-poly, exploratory</button>
+      </div>
+      <div class="btnrow" role="group" aria-label="Choose the flip rule">
+        <button type="button" class="btn on" data-frule="ge">Omission scored at or above the base</button>
+        <button type="button" class="btn" data-frule="gt">Strictly above the base</button>
+      </div>
+      <dl class="readout" aria-live="polite">
+        <div><dt>Matched contests</dt><dd id="oFn">308</dd></div>
+        <div><dt>Flipped</dt><dd id="oFk" class="hot">60</dd></div>
+        <div><dt>Rate</dt><dd id="oFr" class="hot">0.195</dd></div>
+        <div><dt id="oFclab">95% CI</dt><dd id="oFc" class="lock">[0.154, 0.235]</dd></div>
+      </dl>
+      <figcaption><b>Figure 8, interactive.</b> Each cell is 1 matched {base, omission} pair. Filled cells
+        are the contests the selected metric scores for the omission; the lighter fill marks exact ties, which
+        count under the at-or-above rule and not under the strictly-above rule. The counts and rates are the
+        measured ones. The positions of the filled cells are deterministic placeholders, since the page does
+        not carry the per-pair scores.</figcaption>
+    </figure>
+
+    <div class="wrap" style="padding:0">
+      <div class="tbl-scroll reveal">
+      <table>
+        <caption>The 4 reference-free QE metrics that scored Arm B. Drops are mean raw oriented drops in each
+          metric's own units, positive when the metric penalized the edit. The gap is the addition-minus-omission
+          difference in within-metric percentile points. A<sub>m</sub> compares the raw drops; the 2 agree when
+          their signs are opposite.</caption>
+        <thead>
+        <tr><th>Metric</th><th class="num">Pairs</th><th class="num">Omission drop</th>
+          <th class="num">Addition drop</th><th class="num">A<sub>m</sub></th><th class="num">Gap, pts</th>
+          <th class="num"><i>P</i><sub>flip</sub></th><th class="num">Strictly above</th></tr>
+        </thead>
+        <tbody>
+        <tr class="best"><td class="rel">xCOMET-XL-QE</td><td class="num">308</td>
+          <td class="num">+10.2</td><td class="num">+46.1</td><td class="num">&minus;1.28</td>
+          <td class="num">+38.1</td><td class="num">0.195</td><td class="num">0.143</td></tr>
+        <tr><td class="rel">xCOMET-XXL-QE</td><td class="num">308</td>
+          <td class="num">+28.9</td><td class="num">+52.9</td><td class="num">&minus;0.59</td>
+          <td class="num">+22.8</td><td class="num">0.114</td><td class="num">0.071</td></tr>
+        <tr><td class="rel">cuni-v14-regression</td><td class="num">182</td>
+          <td class="num">+15.9</td><td class="num">+19.9</td><td class="num">&minus;0.22</td>
+          <td class="num">+7.7</td><td class="num">0.093</td><td class="num">0.044</td></tr>
+        <tr><td class="rel">COMETKiwi22</td><td class="num">308</td>
+          <td class="num">+0.185</td><td class="num">+0.177</td><td class="num">+0.05</td>
+          <td class="num">+0.2</td><td class="num">0.013</td><td class="num">0.013</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= ARMS A AND C ============================= -->
+<section id="arms" class="alt" aria-labelledby="arms-h">
+  <div class="wrap">
+    <p class="kicker reveal">06 &nbsp;/&nbsp; Results, Arms A and C</p>
+    <h2 class="reveal" id="arms-h">The length hypothesis is refuted, and the control holds</h2>
+    <p class="lede reveal d1">Every returned metric penalizes fluent, fact-free filler. The reference-based
+      frontier catches a single corrupted numeral. 2 participant systems score the corrupted member above the
+      correct one.</p>
+
+    <div class="read">
+      <h3 class="reveal">Arm A: no returned metric rewards pure length</h3>
+      <p class="reveal">H<sub>A</sub> is refuted outright, and the registered negative is reported as such.
+        Every returned metric penalizes filler. The within-source Spearman &rho;, the mean over series of the
+        per-series correlation between dose and oriented score, runs from <b>&minus;0.37</b> for
+        fluency2-gemini35-esa to <b>&minus;1.00</b> for BLEU, chrF, spBLEU and YiSi-1, all at <i>q</i> &lt;
+        0.001 against H<sub>0</sub>: &rho; &ge; 0. COMETKiwi22 reaches &rho; = &minus;0.86 [&minus;0.89,
+        &minus;0.83]; xCOMET-XL-QE and xCOMET-XXL-QE reach &minus;0.65 and &minus;0.70. The length-gaming
+        attack this arm operationalizes does not work on the modern roster. Reference-based curves are
+        exploratory context on this arm, since reference-verbatim bases inflate the dose-0 intercept, and the
+        conclusion is scoped to en-de and en-ru as registered.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Within-source Spearman &rho; against filler dose, 28 metrics <span>animated</span></p>
+      <canvas class="fig r13" id="cRho" data-fig="rho"
+        aria-label="28 metrics sorted by their Spearman correlation between filler dose and score, each drawn as a point with a 95% confidence interval on an axis from minus 1 to 0. Every point is negative. The 4 surface and lexical metrics sit at exactly minus 1. The least negative is fluency2-gemini35-esa at minus 0.37."></canvas>
+      <figcaption><b>Figure 9.</b> 1 row per metric, sorted. The point is the mean per-series &rho; and the
+        bar is the clustered bootstrap 95% CI; colour is the metric's family. The shaded region at the right is
+        the registered null, &rho; &ge; 0, which no interval reaches. The 3 systems that did not score Arm A
+        are absent.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3 class="reveal">Arm C: the harness has teeth, and 2 systems invert the control</h3>
+      <p class="reveal">The reference-based neural frontier catches the single corrupted numeral: COMET22,
+        BERTScore and YiSi-1 at &tau;<sub>b</sub> = <b>+1.00</b>, xCOMET-XXL-ref at +0.95. Surface metrics
+        detect the token change deterministically, at +1.00. The reference-free baselines trail visibly:
+        COMETKiwi22 +0.77, xCOMET-XL-QE +0.77, xCOMET-XXL-QE +0.79. That is the registered pattern. 1 cell of
+        the frozen prediction table was wrong here: surface metrics were predicted to break on this arm and
+        instead held perfectly. Contrastive accuracy counts metric ties as half credit; tie rates stay at or
+        below 0.19 and are highest for span-derived scorers.</p>
+
+      <p class="reveal">2 participant systems invert the control. MQM-LLM, at &tau;<sub>b</sub> =
+        <b>&minus;0.21</b> and contrastive accuracy 0.397, and MQM-LLM Confidence Aware, at &minus;0.12 and
+        0.439, score the corrupted member above the correct one more often than not. They are the only 2
+        confirmatory non-rejections on the board. The orientation cross-check flags both, and their strongly
+        negative Arm A slopes confirm that the declared orientation is right, so this is a system-level
+        failure on load-bearing numerals rather than a sign error in the manifest.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Numeric-contradiction contrastive accuracy, 31 systems <span>animated</span></p>
+      <canvas class="fig r13" id="cNum" data-fig="num"
+        aria-label="31 systems sorted by contrastive accuracy on the numeric pairs, drawn as horizontal bars with Kendall tau-b printed at the end of each bar. 8 systems reach 1.000. The 2 MQM-LLM variants sit at the bottom at 0.397 and 0.439, below the 0.5 chance line."></canvas>
+      <figcaption><b>Figure 10.</b> Bars are contrastive accuracy on the 753 pairs, with ties counted as
+        half credit; the label at the end of each bar is Kendall &tau;<sub>b</sub> on the same pairs. The
+        dashed line is chance. The 2 hatched bars are the systems that invert the control. The 3 systems with
+        partial coverage are scored on the pairs they returned.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================= STRATA ============================= -->
+<section id="strata" aria-labelledby="strata-h">
+  <div class="wrap">
+    <p class="kicker reveal">07 &nbsp;/&nbsp; Where the effect lives</p>
+    <h2 class="reveal" id="strata-h">Subtle edits on real system output cut deepest</h2>
+    <p class="lede reveal d1">The pre-declared gradient holds as an ordering, and both anti-circularity strata
+      hold.</p>
+
+    <div class="read">
+      <p class="reveal">In S1, the 89 triples with subtle LLM perturbations on real system outputs, the
+        reference-free asymmetry deepens to A = <b>&minus;0.604</b> [&minus;0.747, &minus;0.462] and mean
+        <i>P</i><sub>flip</sub> rises to <b>0.154</b> [0.107, 0.203], against &minus;0.474 [&minus;0.590,
+        &minus;0.359] and 0.104 [0.074, 0.135] in S2 and &minus;0.538 [&minus;0.634, &minus;0.449] and 0.058
+        [0.035, 0.085] in S3. Pooled, S2 and S3 give &minus;0.510 and 0.079. The interaction strengthens to
+        &beta; = &minus;0.117 [&minus;0.151, &minus;0.082] inside S1. The registered prediction is an
+        ordering, and it holds on both axes. The A intervals overlap, so the gradient is a direction rather
+        than a separated effect.</p>
+
+      <p class="reveal">Both anti-circularity confirmation strata hold as well. In the 304 triples the local
+        CometKiwi pre-filter predicted would not break: &beta; = &minus;0.069 [&minus;0.081, &minus;0.057],
+        reference-free A = &minus;0.503, mean <i>P</i><sub>flip</sub> = 0.094. On the 189 triples with real
+        WMT24 system-output bases: &beta; = &minus;0.078 [&minus;0.094, &minus;0.061], A = &minus;0.487, mean
+        <i>P</i><sub>flip</sub> = 0.129. The measured deficit is not an artifact of pre-filter-guided
+        construction, and it is present on real MT output.</p>
+    </div>
+
+    <figure class="reveal d1">
+      <p class="fig-head">Reference-free QE by stratum <span>animated</span></p>
+      <canvas class="fig r7" id="cStrata" data-fig="strata"
+        aria-label="2 panels. Left: relative asymmetry A for reference-free QE in strata S1, S2 and S3 with 95% intervals, and for the 2 confirmation strata as points. Right: mean preference-flip rate for the same 5 rows. S1 is the most negative on the left and the highest on the right."></canvas>
+      <figcaption><b>Figure 11.</b> Left: reference-free A per stratum. Right: mean
+        <i>P</i><sub>flip</sub> over the 4 reference-free metrics. S1, S2 and S3 carry clustered bootstrap
+        95% CIs. The 2 confirmation strata below the rule are drawn as points only, as the paper reports
+        them.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================= LIMITS ============================= -->
+<section id="limits" class="alt" aria-labelledby="limits-h">
+  <div class="wrap">
+    <p class="kicker reveal">08 &nbsp;/&nbsp; Limitations</p>
+    <h2 class="reveal" id="limits-h">What was not done, and what the set cannot certify</h2>
+
+    <div class="read">
+      <h3 class="reveal">Item validity rests on machine gates</h3>
+      <p class="reveal">A blind human validation study was built before submission: a 270-item
+        single-annotation sheet plus a 60-item double-annotated overlap, sampled with a guaranteed minimum of
+        S1 items and sealed so annotators see only an identifier, the source and the hypothesis. The protocol
+        targets per-direction item precision of at least 95% and reports Cohen's &kappa; and Krippendorff's
+        &alpha; on the overlap. The annotation had not been carried out by the camera-ready deadline, so the
+        paper reports the protocol and no human precision number. The machine gates certify entailment
+        relations and the absence of entities, digits and dates. They cannot certify that a dropped unit is
+        one a human reader would miss, or that an appended unit reads as natural, and every per-item claim
+        inherits that limit.</p>
+
+      <dl class="strip reveal">
+        <div class="warnc"><dt>Coverage and stratum size</dt><dd>Arm B covers 6 of the 10 directions. S1 is
+          small on en-ja, 4 triples, and en-ru, 6. Any stratum below 20 matched pairs gets point estimates
+          only, and per-direction readings are exploratory. Numeric pairs use Latin and Cyrillic digit contexts
+          only.</dd></div>
+        <div class="warnc"><dt>Edit size and dose</dt><dd>Additions change a median of 2.0x the characters
+          omissions remove. If a metric responds to raw edit magnitude, this pushes A in the predicted
+          direction, which is why the magnitude refit sits beside the primary interaction. Every Arm B edit
+          carries 1 unit, so no dose-interaction claim is made.</dd></div>
+        <div class="bad"><dt>Circularity disclosed, not eliminated</dt><dd>CometKiwi labeled, never gated, the
+          Arm A and B items. Members of a pair share a source, group size correlates with arm, and control
+          members are reference-verbatim. An honest metric scores each row independently; a deliberately
+          adversarial scorer could exploit these properties.</dd></div>
+      </dl>
+
+      <div class="deep-panel reveal" style="margin-top:34px">
+        <h3>The reviews, and what changed for the camera-ready</h3>
+        <p>2 reviewers, both with recommendation 5 of 5. The 1st asked for the notation to be defined before
+          use, for the specification of the model behind &beta; and its scale, and for every figure to be cited
+          from the body. The 2nd asked for the anti-circularity counts to appear in the plan section, and for a
+          shorter paper.</p>
+        <p>The revision answered each request, and it also corrected statements in the submitted version that
+          the author's own verification passes found: the gate-survival range, the description of the
+          estimator, the premise of the omission gate, and the record of the post-return commit. Every number
+          in the camera-ready has a script and an output file beside it in the repository.</p>
+        <p class="small" style="margin-bottom:0">The submitted version is preserved alongside the camera-ready,
+          so the 2 can be compared line by line.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= CODA ============================= -->
+<section id="coda" aria-labelledby="coda-h">
+  <div class="wrap">
+    <p class="kicker reveal">09 &nbsp;/&nbsp; Coda</p>
+    <h2 class="reveal" id="coda-h">What transfers past this task</h2>
+
+    <div class="read">
+      <p class="reveal">The measurement is specific to WMT26's roster. The discipline that produced it is
+        not.</p>
+
+      <ul class="plain reveal">
+        <li><b>A blind protocol with a private keymap.</b> The rows carry no label, phenomenon or dose token,
+          and the pairing lives in a file that is never uploaded. A metric can only be scored on what it was
+          given.</li>
+        <li><b>A fail-closed orientation manifest.</b> The harness raises on any returned metric name it
+          cannot place, so the family size and every sign are fixed by the roster before a score value is
+          read.</li>
+        <li><b>An equivalence anchor with a teeth precondition.</b> The contrast that the headline hypothesis
+          needed was itself a registered, falsifiable claim, and the registration said in advance what would
+          count as its refutation.</li>
+        <li><b>A positive control arm.</b> Arm C exists so that a null result elsewhere cannot be blamed on a
+          harness that detects nothing.</li>
+      </ul>
+
+      <p class="reveal">Together these let a registered mechanism claim be refuted in public while the
+        measurement that refuted it stands. The paper is to appear in the WMT26 proceedings, and the poster
+        will be presented at WMT26, at EMNLP 2026 in Budapest, October 2026.</p>
+
+      <p class="cite reveal">Silchenko, <b>QEbreak at WMT26: A Pre-Registered Audit of Omission and Addition
+        Asymmetry in Machine Translation Quality Metrics</b>. Proceedings of the 11th Conference on Machine
+        Translation (WMT26), challenge-set submission to the Automated Translation Quality Evaluation task.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <canvas id="footCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="read">
+      <h3>Notes on this page</h3>
+      <p class="small">Written by Maksim Silchenko, a solo participant. The challenge set described here was
+        submitted to the WMT26 Automated Translation Quality Evaluation task, Subtask 4, and the system paper
+        was accepted as a poster on 4 September 2026. This page is a public summary of the camera-ready
+        paper.</p>
+      <p class="small">Every number on this page is a task figure, an organizer figure, or a measurement from
+        the returned scores, quoted at the precision the paper records. Figures 1, 3, 7, 9, 10 and 11 display
+        those measurements; figures 2 and 4 are diagrams; figure 5 reproduces the registered prediction table;
+        figure 6 is drawn to scale from the fitted cell means. Figure 8 places the flipped contests at
+        deterministic positions, since the page does not carry per-pair scores; its counts and rates are the
+        measured ones, and its caption says so.</p>
+      <p class="small">Large language models were used in this project as assistance, for the subtle
+        perturbations of stratum S1, for code, and for drafting, including this page. Every quantitative claim
+        traces to a recorded measurement or an organizer figure rather than to a model's summary of one.</p>
+      <p class="small">The build pipeline, the analysis code with its timestamped history, the labeled
+        challenge set, the private keymap and the sealed validation sheet are available from the author on
+        request. Corrections are welcome. If something here misstates the task, the return, or another team's
+        system, tell me and I will fix it.</p>
+
+      <div class="footlinks">
+        <a href="assets/wmt26-qebreak-paper.pdf" target="_blank" rel="noopener">Paper, PDF</a>
+        <a href="https://www2.statmt.org/wmt26/mteval-challenge_set.html" target="_blank" rel="noopener">Task page</a>
+      </div>
+    </div>
+  </div>
+</footer>
+</div>
+
+<div id="scrim" hidden></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+  <button class="modal-x" type="button" id="modalX" aria-label="Close">&times;</button>
+  <div id="modal-body"></div>
+</div>
+
+<div id="defs" aria-hidden="true">
+
+<div id="m-qe"><p class="kicker">Definition</p>
+<h3>Reference-free quality estimation</h3>
+<p>A quality estimation (QE) metric scores a translation from the source sentence and the hypothesis alone,
+with no human reference translation in view. A reference-based metric receives the reference as well and can
+compare the hypothesis against it.</p>
+<p>The difference matters for omission. When a hypothesis silently drops part of the source, a reference-based
+metric still holds a version of the missing content and can register its absence. A reference-free metric holds
+only a hypothesis that is shorter, fluent and internally consistent, with nothing in it that signals a loss.</p>
+<p class="small" style="margin-bottom:0">Reference-free QE is the natural reward signal for reranking, since it
+is cheap and needs no reference. That is why its blind spot was the audit's target, and why the 2nd primary
+endpoint measures the reranking contest directly.</p></div>
+
+<div id="m-unit"><p class="kicker">Definition</p>
+<h3>Information unit</h3>
+<p>1 span removed or added whole, verified by the validity gates. In the deterministic strata it is a trailing
+sentence or clause for an omission, and for an addition 1 reference segment of another source in the same
+language direction, appended whole and gate-verified fact-free. In the LLM-generated stratum it is 1 small
+factual detail for an omission, such as a modifier, name, number, date or short phrase, and 1 short generic
+clause or sentence for an addition.</p>
+<p>Matching the 2 edit directions on units rather than on characters is what makes the triple a like-for-like
+contrast in meaning. It also means the 2 directions are not matched in edit size: additions change a median of
+2.0x as many whitespace-stripped characters as omissions remove.</p>
+<p class="small" style="margin-bottom:0">Because every shipped edit carries exactly 1 unit, the registered dose
+axis collapses, which is why the fitted model has 3 terms rather than the registered 3-way design.</p></div>
+
+<div id="m-nli"><p class="kicker">Method</p>
+<h3>The entailment gate</h3>
+<p>Natural language inference (NLI) is a classifier that reads a premise and a hypothesis and returns
+probabilities for entailment, neutrality and contradiction. The gates use mDeBERTa-v3-base-xnli.</p>
+<p>The omission gate asks the base hypothesis, the stem the omission was cut from, to entail the omitted-member
+hypothesis, and asks that the dropped unit is not entailed by what remains. Together the 2 conditions block
+omissions that only rephrase and admit only those that remove meaning.</p>
+<p>The addition gate asks the appended unit to be neutral against both the source and the base, with neutrality
+at or above 0.70 and entailment and contradiction at or below 0.15 each, and a named-entity recognizer confirms
+it carries no digit, date or entity. Fluent, fact-free, unsupported: nothing in it is checkable.</p>
+<p class="small" style="margin-bottom:0">The gates read hypotheses only. No gate reads a metric score, which is
+the property the anti-circularity argument in section 03 rests on.</p></div>
+
+<div id="m-blind"><p class="kicker">Practice</p>
+<h3>Blind protocol</h3>
+<p>The organizers receive rows that carry exactly the 7 published fields. Every internal field is stripped.
+Identifiers are opaque hashes that encode no label, phenomenon, direction or dose. Row order is de-correlated so
+that the base member of a group sits at no fixed position.</p>
+<p>The pairing between members of a triple, series or pair lives in a private keymap that is never uploaded.
+When the scores return, the keymap restores the groups and the analysis runs on the reconstructed set. On this
+return, every returned identifier matched the keymap and per-system counts matched the organizers' coverage
+table exactly.</p>
+<p class="small" style="margin-bottom:0">The protocol removes the tells that can be removed. What a contrastive
+set cannot remove, such as pair members sharing a source, is stated as a limitation rather than left
+implicit.</p></div>
+
+<div id="m-pct"><p class="kicker">Method</p>
+<h3>Within-metric percentile</h3>
+<p>Metrics live on different scales: 0 to 1 for COMETKiwi22, 0 to 100 for the xCOMET baselines, unbounded for
+some LLM judges. To pool them in 1 model, each metric's signed drops are replaced by their average rank among
+that metric's own drops, scaled to the open interval from 0 to 1.</p>
+<p>The response is then a percentile: 0.5 is the median penalty that metric hands out, and a value of 0.561
+means the edit was penalized more than 56.1% of that metric's edits. The transform is invariant to any monotone
+rescaling of a metric, so a metric cannot dominate the fit by having a wide scale.</p>
+<p class="small" style="margin-bottom:0">Rank normalization is the registered primary transform. A z-score
+transform is the registered sensitivity analysis, and it returns the same sign and a comparable size.</p></div>
+
+<div id="m-boot"><p class="kicker">Statistics</p>
+<h3>Source-clustered bootstrap</h3>
+<p>The observations in the Arm B model are not independent: every member of a triple shares a source
+sentence, and 36 sources carry more than 1 triple. A standard error that ignores this would be too small.</p>
+<p>The registered inference resamples the 268 distinct source sentences with replacement, 2,000 times, and
+refits the model on each replicate. The spread of the refitted coefficients gives the interval. Because whole
+sources move together, the interval carries whatever heterogeneity exists between sources, in intercepts and
+slopes alike.</p>
+<p class="small" style="margin-bottom:0">The clustered bootstrap is the sole load-bearing inference in the
+plan. The mixed-effects refits in section 04 are a check on the estimator, and they agree with it.</p></div>
+
+<div id="m-margin"><p class="kicker">Statistics</p>
+<h3>Equivalence margin</h3>
+<p>Showing that a family is symmetric is not the same as failing to show that it is asymmetric. An equivalence
+test asks whether the family's asymmetry lies inside a margin declared in advance, here &plusmn;0.30 on the
+relative asymmetry scale, which is bounded in [&minus;2, 2].</p>
+<p>The test is 2 one-sided tests at &alpha; = 0.05: 1 against the lower edge and 1 against the upper. Both
+reject exactly when the 90% confidence interval sits inside the margin, which is the form the plan table
+states.</p>
+<p>The registration also declared the opposite outcome. If the reference-based family's 95% interval lies
+entirely below &minus;0.30, the family is not an anchor, and the claim that the missing reference causes the
+asymmetry is refuted. On this return the interval is [&minus;0.494, &minus;0.346], and that leg fired.</p>
+<p class="small" style="margin-bottom:0">A 3rd outcome, neither established nor refuted, was reserved for an
+interval that straddles the margin. It did not occur.</p></div>
+
+<div id="m-teeth"><p class="kicker">Statistics</p>
+<h3>Teeth precondition</h3>
+<p>A family can look symmetric for a trivial reason: if it barely penalizes either edit, the 2 drops are both
+near 0 and their relative difference is meaningless. The teeth precondition rules that case out before the
+equivalence test is read.</p>
+<p>The statistic is the mean raw drop pooled over both edit directions, in the family's native units. It must
+be positive, with its 95% CI above 0, for the family to anchor anything. For the reference-based family the
+interval is [+11.5, +13.4], dominated by the 2 xCOMET scales from 0 to 100, and every member's own mean drop is
+positive in both directions.</p>
+<p class="small" style="margin-bottom:0">The precondition held, so the refutation that followed was a
+refutation by a family that detects the edits, not by a family that ignores them.</p></div>
+
+<div id="m-bh"><p class="kicker">Statistics</p>
+<h3>Benjamini-Hochberg control</h3>
+<p>60 confirmatory tests were registered: 1 per metric on Arm A, 1 per metric on Arm C, and the single pooled
+Arm B interaction. Running 60 tests at &alpha; = 0.05 would produce false rejections by chance, so the
+p-values are adjusted to control the false discovery rate at <i>q</i> = 0.05.</p>
+<p>The family size is fixed by the returned roster before any score value is inspected. Every returned metric
+with a declared orientation enters mechanically. That is what keeps the count from being a researcher degree of
+freedom.</p>
+<p class="small" style="margin-bottom:0">58 of the 60 tests reject at <i>q</i> &lt; 0.001. The 2 that do not
+are the Arm C tests of the 2 MQM-LLM variants, which invert the control.</p></div>
+
+<div id="m-flip"><p class="kicker">Definition</p>
+<h3>Best-of-<i>n</i> reranking and the preference flip</h3>
+<p>A common way to use a quality metric at deployment is to generate several candidate translations and keep
+the 1 the metric scores highest. In that setting the metric is a reward model, and the contest that matters is
+pairwise: given 2 candidates, which does the metric prefer?</p>
+<p>The preference flip rate is that contest measured directly. For every matched pair, does the metric score
+the omission at or above the base it was cut from? If it does, a reranker guided by that metric would keep the
+translation with content missing. No reinforcement learning is run; the rate is computed from the returned
+scores alone.</p>
+<p class="small" style="margin-bottom:0">Ties count under the at-or-above rule, which is why the paper also
+reports the strictly-above rate. For xCOMET-XL-QE the 2 rates are 0.195 and 0.143.</p></div>
+
+<div id="m-family"><p class="kicker">Definition</p>
+<h3>Metric families</h3>
+<p>The unit of analysis is the family, never a single named metric. The registered taxonomy has 4 families:
+surface metrics such as BLEU and chrF; reference-based neural metrics such as COMET22 and the reference-based
+xCOMET baselines; reference-free QE such as COMETKiwi22 and the reference-free xCOMET baselines; and LLM judges
+in the GEMBA line.</p>
+<p>12 returned systems carry opaque submission names whose reference usage no public source documents. They
+were declared as a 5th family with orientation only, so they enter every per-metric endpoint but sit out the
+reference-availability axis, which is undefined for them.</p></div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+var mqReduce = matchMedia("(prefers-reduced-motion: reduce)");
+var reduce = mqReduce.matches;
+if(mqReduce.addEventListener) mqReduce.addEventListener("change", function(e){ reduce = e.matches; });
+
+/* ---------------- palette, mirrored from the CSS custom properties ---------------- */
+var INK="#1f2530", INK2="#3e4655", INK3="#66707f", INK4="#8b94a3",
+    RULE="rgba(31,37,48,0.10)", RULE2="rgba(31,37,48,0.22)",
+    ACC="#3d5a80", ACCD="#2b4364", ACCS="#b9c8dc",
+    WARM="#b5542e", WARMD="#8f3f1f",
+    GOLD="#a8791c", BG2="#ffffff";
+var T_ACC=[61,90,128], T_WARM=[181,84,46], T_INK=[31,37,48], T_GOLD=[168,121,28],
+    T_VIO=[123,90,158], T_GREY=[127,135,146], T_OCHRE=[180,138,44];
+/* family colours: reference-free QE is the audit target and takes the warm hue */
+var FAM = {
+  ref_free_qe:      {t:T_WARM,  l:"reference-free QE"},
+  ref_based_neural: {t:T_ACC,   l:"reference-based neural"},
+  llm_judge:        {t:T_VIO,   l:"LLM judge"},
+  surface:          {t:T_GREY,  l:"surface"},
+  unknown:          {t:T_OCHRE, l:"unidentified"}
+};
+function rgba(t,a){ return "rgba("+t[0]+","+t[1]+","+t[2]+","+a+")"; }
+
+/* ---------------- canvas helpers ---------------- */
+var _hd = new WeakMap();
+function hidpi(c, ratio){
+  var dpr = Math.min(devicePixelRatio || 1, 2);
+  var r = c.getBoundingClientRect();
+  var w = Math.max(1, Math.round(r.width));
+  var h = Math.max(1, Math.round(r.height || w * (ratio||0.5)));
+  var k = _hd.get(c);
+  if(k && k.w===w && k.h===h && k.dpr===dpr){ k.x.clearRect(0,0,w,h); return k; }
+  c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
+  var x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
+  var rec = {x:x, w:w, h:h, dpr:dpr};
+  _hd.set(c, rec); return rec;
+}
+function rr(x,a,b,c,d,r){
+  var rad = Math.min(r, Math.abs(c)/2, Math.abs(d)/2);
+  x.beginPath();x.moveTo(a+rad,b);x.arcTo(a+c,b,a+c,b+d,rad);
+  x.arcTo(a+c,b+d,a,b+d,rad);x.arcTo(a,b+d,a,b,rad);x.arcTo(a,b,a+c,b,rad);x.closePath();
+}
+function mono(x,size,weight){ x.font=(weight?weight+" ":"")+(size||11)+"px 'IBM Plex Mono',ui-monospace,monospace"; }
+function lab(x,t,px,py,col,size,ls){
+  x.save();x.fillStyle=col||INK4;mono(x,size||11);
+  if(ls){var s=String(t),cx=px;for(var i=0;i<s.length;i++){x.fillText(s[i],cx,py);
+    cx+=x.measureText(s[i]).width+ls;}}else x.fillText(t,px,py);x.restore();
+}
+function labR(x,t,px,py,col,size){ x.save(); mono(x,size||11);
+  x.fillStyle=col||INK4; x.fillText(t, px - x.measureText(t).width, py); x.restore(); }
+function labC(x,t,px,py,col,size){ x.save(); mono(x,size||11);
+  x.fillStyle=col||INK4; x.fillText(t, px - x.measureText(t).width/2, py); x.restore(); }
+function labCP(x,t,px,py,col,size){
+  x.save(); mono(x,size||11);
+  var ww=x.measureText(t).width;
+  x.fillStyle="#ffffff"; x.fillRect(px-ww/2-7, py-(size||11)-2, ww+14, (size||11)+9);
+  x.fillStyle=col||INK4; x.fillText(t, px-ww/2, py); x.restore();
+}
+function tw(x,s,size){ x.save(); mono(x,size); var v=x.measureText(s).width; x.restore(); return v; }
+function lerp(a,b,t){return a+(b-a)*t}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function ease(t){return t<0?0:t>1?1:1-Math.pow(1-t,3)}
+function easeIO(t){t=clamp(t,0,1);return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function fmtN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+/* ---------------- deterministic rng ---------------- */
+function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;
+  var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return((t^t>>>14)>>>0)/4294967296;}}
+
+/* ---------------- animation registry, visibility gated ---------------- */
+var ticks = [];
+function register(el, fn, ratio){
+  var rec = {el:el, fn:fn, on:false, t:0, ratio:ratio||0.5};
+  ticks.push(rec);
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ rec.on = e.isIntersecting; });
+  }, {rootMargin:"160px 0px 160px 0px", threshold:0});
+  io.observe(el);
+  return rec;
+}
+var last = 0;
+function loop(now){
+  var dt = Math.min(0.05, (now - last)/1000) || 0.016; last = now;
+  for(var i=0;i<ticks.length;i++){
+    var r = ticks[i];
+    if(!r.on) continue;
+    r.t += dt;
+    try{ r.fn(r.t, dt); }catch(e){}
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(function(n){ last=n; loop(n); });
+var _rsz = null;
+addEventListener("resize", function(){
+  if(_rsz) clearTimeout(_rsz);
+  _rsz = setTimeout(function(){
+    for(var i=0;i<ticks.length;i++){
+      if(!ticks[i].on) continue;
+      try{ ticks[i].fn(ticks[i].t, 0); }catch(e){}
+    }
+  }, 120);
+}, {passive:true});
+
+/* ---------------- reveal ---------------- */
+var revObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -6% 0px", threshold:0.04});
+document.querySelectorAll(".reveal").forEach(function(el){ revObs.observe(el); });
+
+var inObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); inObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -10% 0px", threshold:0.12});
+document.querySelectorAll("h2, .eq, .pipe").forEach(function(el){ inObs.observe(el); });
+
+/* staggered entrance for repeating elements */
+(function(){
+  var GROUPS = ["ul.plain", ".kf", ".strip", ".eq-pair", ".readout", ".footlinks",
+                ".hbtns", ".tbl-scroll tbody", ".pred-grid"];
+  var stObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add("in");
+      stObs.unobserve(e.target);
+    });
+  }, {rootMargin:"0px 0px -7% 0px", threshold:0.06});
+  GROUPS.forEach(function(sel){
+    document.querySelectorAll(sel).forEach(function(g){
+      var kids = [].slice.call(g.children), n = 0;
+      kids.forEach(function(kid){
+        kid.classList.add("st");
+        kid.style.setProperty("--i", String(Math.min(n, 9)));
+        n++;
+        stObs.observe(kid);
+      });
+    });
+  });
+  /* the diagrams draw their own connectors */
+  document.querySelectorAll(".pipe .parrow, .pipe .pdash, .pipe .pfreeze").forEach(function(pth){
+    try{
+      var len = pth.getTotalLength();
+      if(!isFinite(len) || len <= 0) return;
+      pth.classList.add("pdraw");
+      pth.style.setProperty("--len", Math.ceil(len));
+      pth.style.transitionDelay = (0.1 + Math.min(len/900, 0.5)).toFixed(2)+"s";
+    }catch(err){}
+  });
+})();
+
+/* the hero headline arrives word by word */
+(function(){
+  var h1 = document.querySelector("#hero h1"); if(!h1) return;
+  var words = h1.textContent.trim().split(/\s+/);
+  h1.textContent = "";
+  words.forEach(function(wd,i){
+    var sp = document.createElement("span");
+    sp.className = "w"; sp.textContent = wd;
+    sp.style.display = "inline-block";
+    sp.style.opacity = "0";
+    sp.style.transform = "translateY(0.44em) rotate(1.1deg)";
+    if(!reduce){
+      var dl = (0.08 + i*0.034).toFixed(3);
+      sp.style.transition = "opacity .78s cubic-bezier(.16,1,.3,1) "+dl+
+                            "s, transform .78s cubic-bezier(.16,1,.3,1) "+dl+"s";
+    }
+    h1.appendChild(sp);
+    if(i < words.length-1) h1.appendChild(document.createTextNode(" "));
+  });
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    h1.querySelectorAll("span").forEach(function(sp){ sp.style.opacity="1"; sp.style.transform="none"; });
+  }); });
+})();
+
+/* ---------------- counters ---------------- */
+(function(){
+  var nObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el = e.target;
+      nObs.unobserve(el);
+      var txt = el.getAttribute("data-final");
+      var dec = parseInt(el.getAttribute("data-dec")||"0", 10);
+      var suf = el.getAttribute("data-suffix")||"";
+      var target = parseFloat(txt.replace(/,/g,""));
+      if(!isFinite(target) || reduce){ el.textContent = txt + suf; return; }
+      var grouped = txt.indexOf(",") >= 0, t0 = null;
+      function fmt(v){
+        var s = v.toFixed(dec);
+        if(grouped) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return s + suf;
+      }
+      function step(ts){
+        if(t0===null) t0 = ts;
+        var kk = clamp((ts-t0)/950, 0, 1);
+        el.textContent = fmt(target*ease(kk));
+        if(kk < 1) requestAnimationFrame(step); else el.textContent = txt + suf;
+      }
+      requestAnimationFrame(step);
+    });
+  }, {threshold:0.45});
+  document.querySelectorAll("[data-final]").forEach(function(el){ nObs.observe(el); });
+})();
+
+/* ---------------- rail, topbar, scrollspy ---------------- */
+var railI = document.querySelector("#rail i"), topbar = document.getElementById("topbar");
+var railPct = document.getElementById("railPct");
+var railQ = false;
+function paintRail(){
+  railQ = false;
+  var h = document.documentElement.scrollHeight - innerHeight;
+  var p = h > 0 ? clamp(scrollY / h, 0, 1) : 0;
+  if(railI) railI.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  if(railPct) railPct.textContent = String(Math.round(p*100)).padStart(2,"0") + "%";
+  if(topbar) topbar.classList.toggle("stuck", scrollY > innerHeight*0.55);
+}
+function onScroll(){ if(!railQ){ railQ = true; requestAnimationFrame(paintRail); } }
+addEventListener("scroll", onScroll, {passive:true});
+addEventListener("resize", onScroll, {passive:true});
+paintRail();
+
+(function(){
+  var links = [].slice.call(document.querySelectorAll("#toc a")), map = {};
+  links.forEach(function(a){ map[a.dataset.sec] = a; });
+  var spy = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove("active"); });
+        var a = map[e.target.id]; if(a) a.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-42% 0px -50% 0px"});
+  document.querySelectorAll("main section").forEach(function(s){ spy.observe(s); });
+})();
+
+/* ---------------- figure scrub rules ---------------- */
+(function(){
+  var figs = [].slice.call(document.querySelectorAll("main figure"));
+  figs.forEach(function(f){
+    var d = document.createElement("div"); d.className = "scrub";
+    d.setAttribute("aria-hidden","true");
+    d.innerHTML = "<i></i>"; f.insertBefore(d, f.firstChild);
+  });
+  var q = false;
+  function paint(){
+    q = false;
+    for(var i=0;i<figs.length;i++){
+      var r = figs[i].getBoundingClientRect();
+      if(r.bottom < -80 || r.top > innerHeight + 80) continue;
+      var pr = clamp((innerHeight*0.86 - r.top) / (r.height*0.82), 0, 1);
+      var bar = figs[i].querySelector(".scrub i");
+      if(bar) bar.style.transform = "scaleX(" + pr.toFixed(4) + ")";
+    }
+  }
+  function upd(){ if(!q){ q = true; requestAnimationFrame(paint); } }
+  addEventListener("scroll", upd, {passive:true}); addEventListener("resize", upd, {passive:true});
+  paint();
+})();
+
+/* ---------------- modal system ---------------- */
+(function(){
+  var scrim = document.getElementById("scrim"), modal = document.getElementById("modal");
+  var body = document.getElementById("modal-body"), closeBtn = document.getElementById("modalX");
+  var defs = document.getElementById("defs"), lastFocus = null;
+  if(!scrim || !modal) return;
+  function open(id){
+    var src = defs.querySelector("#"+id); if(!src) return;
+    lastFocus = document.activeElement;
+    body.innerHTML = src.innerHTML;
+    var h = body.querySelector("h3");
+    if(h){ h.id = "modal-title"; }
+    scrim.hidden = false; modal.hidden = false;
+    requestAnimationFrame(function(){ scrim.classList.add("on"); modal.classList.add("on"); });
+    closeBtn.focus();
+  }
+  function close(){
+    scrim.classList.remove("on"); modal.classList.remove("on");
+    setTimeout(function(){ scrim.hidden = true; modal.hidden = true; body.innerHTML = ""; }, 340);
+    if(lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.querySelectorAll(".term").forEach(function(b){
+    b.addEventListener("click", function(){ open(b.dataset.modal); });
+  });
+  closeBtn.addEventListener("click", close);
+  scrim.addEventListener("click", close);
+  addEventListener("keydown", function(e){ if(e.key === "Escape" && modal.classList.contains("on")) close(); });
+  modal.addEventListener("keydown", function(e){
+    if(e.key !== "Tab") return;
+    var f = modal.querySelectorAll("button, a[href]");
+    if(!f.length) return;
+    var first = f[0], lastEl = f[f.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); lastEl.focus(); }
+    else if(!e.shiftKey && document.activeElement === lastEl){ e.preventDefault(); first.focus(); }
+  });
+})();
+
+/* ---------------- background field ---------------- */
+(function(){
+  var c = document.getElementById("field"); if(!c) return;
+  var PAL = [
+    {id:"hero",     rgb:T_INK,   a:0.10,  mode:"cloud"},
+    {id:"task",     rgb:T_ACC,   a:0.085, mode:"grid"},
+    {id:"set",      rgb:T_WARM,  a:0.080, mode:"pairs"},
+    {id:"plan",     rgb:T_ACC,   a:0.075, mode:"cells"},
+    {id:"headline", rgb:T_WARM,  a:0.095, mode:"rings"},
+    {id:"flip",     rgb:T_WARM,  a:0.085, mode:"bars"},
+    {id:"arms",     rgb:T_ACC,   a:0.080, mode:"rays"},
+    {id:"strata",   rgb:T_ACC,   a:0.085, mode:"pairs"},
+    {id:"limits",   rgb:T_GOLD,  a:0.078, mode:"rays"},
+    {id:"coda",     rgb:T_ACC,   a:0.080, mode:"cloud"}
+  ];
+  var TOPS = [], palPos = 0, lastDrawn = -99, lastT = -99;
+  function measure(){
+    TOPS = PAL.map(function(pp){
+      var el = document.getElementById(pp.id);
+      return el ? el.getBoundingClientRect().top + scrollY : 0;
+    });
+  }
+  measure();
+  addEventListener("resize", measure, {passive:true});
+  addEventListener("load", measure);
+  function target(){
+    var y = scrollY + innerHeight*0.42, best = 0;
+    for(var i=0;i<TOPS.length;i++){ if(TOPS[i] <= y) best = i; }
+    return best;
+  }
+  function texture(x,w,h,mode,rgb,alpha,t,ph){
+    if(alpha <= 0.002) return;
+    var col = rgba(rgb, alpha.toFixed(4));
+    x.save(); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 1;
+    var cx = w*0.68, cy = h*0.38, R = Math.max(w,h);
+    var i,j,k;
+    if(mode === "rings"){
+      for(i=1;i<=15;i++){
+        var rad = (i/15)*R*0.76 + 13*Math.sin(t*0.14 + i*0.5 + ph);
+        x.beginPath(); x.arc(cx,cy,Math.abs(rad),0,6.283); x.stroke();
+      }
+    } else if(mode === "rays"){
+      for(j=0;j<36;j++){
+        var a2 = (j/36)*6.283 + t*0.015 + ph;
+        x.beginPath(); x.moveTo(cx + Math.cos(a2)*R*0.10, cy + Math.sin(a2)*R*0.10);
+        x.lineTo(cx + Math.cos(a2)*R*0.92, cy + Math.sin(a2)*R*0.92); x.stroke();
+      }
+    } else if(mode === "bars"){
+      var n = 30, bw = w/n;
+      for(k=0;k<n;k++){
+        var hh = h*(0.14 + 0.40*Math.abs(Math.sin(k*0.7 + t*0.09 + ph)));
+        x.fillRect(k*bw + bw*0.24, h-hh, bw*0.52, hh);
+      }
+    } else if(mode === "grid"){
+      var gp = 48;
+      for(var gx=0; gx<w+gp; gx+=gp) for(var gy=0; gy<h+gp; gy+=gp){
+        var d = 1.3 + 1.4*Math.sin((gx+gy)*0.012 + t*0.16 + ph);
+        x.beginPath(); x.arc(gx, gy, Math.abs(d), 0, 6.283); x.fill();
+      }
+    } else if(mode === "cells"){
+      var cs = 86;
+      for(var ax=0; ax<w+cs; ax+=cs) for(var ay=0; ay<h+cs; ay+=cs){
+        var o = 9*Math.sin(ax*0.01 + ay*0.013 + t*0.12 + ph);
+        var sz = cs*0.5 + o;
+        x.beginPath(); x.rect(ax + (cs-sz)/2, ay + (cs-sz)/2, Math.abs(sz), Math.abs(sz)); x.stroke();
+      }
+    } else if(mode === "pairs"){
+      /* matched pairs: 2 short rules, 1 a little shorter than the other, on a loose grid */
+      var pg = 74;
+      x.lineWidth = 1.2;
+      for(var px2=pg*0.5; px2<w+pg; px2+=pg) for(var py2=pg*0.5; py2<h+pg; py2+=pg){
+        var ln = 18 + 6*Math.sin(px2*0.02 + t*0.1 + ph);
+        var sh = 10 + 4*Math.cos(py2*0.017 + t*0.13 + ph);
+        x.beginPath(); x.moveTo(px2-ln/2, py2-4); x.lineTo(px2+ln/2, py2-4);
+        x.moveTo(px2-ln/2, py2+4); x.lineTo(px2-ln/2+sh, py2+4); x.stroke();
+      }
+    } else {
+      var NN = 26, pts = [];
+      for(var q=0;q<NN;q++){
+        var s1 = Math.sin(q*12.9898 + ph)*43758.5453; s1 -= Math.floor(s1);
+        var s2 = Math.sin(q*78.233 + ph)*43758.5453;  s2 -= Math.floor(s2);
+        pts.push([ (s1*1.2-0.1)*w + 24*Math.sin(t*0.08 + q),
+                   (s2*1.2-0.1)*h + 20*Math.cos(t*0.07 + q*1.3) ]);
+      }
+      for(var m1=0;m1<NN;m1++){
+        for(var m2=m1+1;m2<NN;m2++){
+          var dx = pts[m1][0]-pts[m2][0], dy = pts[m1][1]-pts[m2][1];
+          if(dx*dx + dy*dy < (w*0.20)*(w*0.20)){
+            x.beginPath(); x.moveTo(pts[m1][0],pts[m1][1]); x.lineTo(pts[m2][0],pts[m2][1]); x.stroke();
+          }
+        }
+        x.beginPath(); x.arc(pts[m1][0],pts[m1][1],2,0,6.283); x.fill();
+      }
+    }
+    x.restore();
+  }
+  function draw(t){
+    var want = target();
+    palPos += (want - palPos) * 0.045;
+    if(Math.abs(want - palPos) < 0.002) palPos = want;
+    if(Math.abs(palPos - lastDrawn) < 0.0025 && (t - lastT) < 0.06) return;
+    lastDrawn = palPos; lastT = t;
+    var k = hidpi(c, 1), x = k.x, w = k.w, h = k.h;
+    x.clearRect(0,0,w,h);
+    var i0 = Math.max(0, Math.min(PAL.length-1, Math.floor(palPos)));
+    var i1 = Math.min(PAL.length-1, i0+1);
+    var f  = palPos - i0;
+    var A = PAL[i0], B = PAL[i1];
+    var cr = Math.round(lerp(A.rgb[0],B.rgb[0],f)),
+        cg = Math.round(lerp(A.rgb[1],B.rgb[1],f)),
+        cb = Math.round(lerp(A.rgb[2],B.rgb[2],f)),
+        aa = lerp(A.a,B.a,f);
+    var g = x.createRadialGradient(w*0.66,h*0.32,0,w*0.66,h*0.32,Math.max(w,h)*0.95);
+    g.addColorStop(0, "rgba("+cr+","+cg+","+cb+","+(aa*1.3).toFixed(3)+")");
+    g.addColorStop(0.55,"rgba("+cr+","+cg+","+cb+","+(aa*0.72).toFixed(3)+")");
+    g.addColorStop(1, "rgba("+cr+","+cg+","+cb+",0)");
+    x.fillStyle = g; x.fillRect(0,0,w,h);
+    texture(x,w,h,A.mode,A.rgb,A.a*(1-f)*0.18,t,i0*1.7);
+    if(i1 !== i0) texture(x,w,h,B.mode,B.rgb,B.a*f*0.18,t,i1*1.7);
+  }
+  ticks.push({el:document.body, fn:draw, on:true, t:0});
+  addEventListener("scroll", function(){ lastDrawn = -99; }, {passive:true});
+  draw(0);
+})();
+
+/* ================= shared 3D: a balance beam, built from boxes and discs =================
+   One hand-rolled perspective pipeline, no libraries. The object is a 2-pan balance: a
+   plinth, a pillar, a beam pivoting on the pillar, and 2 pans hung from the beam ends by
+   wires. The omission pan carries the lighter load and the addition pan the heavier one,
+   so the beam settles tilted toward the addition side. Every face is an opaque polygon
+   with a normal; faces are culled against the camera, depth sorted, and shaded by a
+   light that orbits the object. The same geometry draws the hero (lit) and the footer
+   (wireframe). */
+var Balance = (function(){
+  var faces = [];       /* {p:[[x,y,z]...], n:[nx,ny,nz], k:ramp id} */
+  var lines = [];       /* {a:[x,y,z], b:[x,y,z], k:line kind} */
+  var edges = [];       /* wireframe edges {a,b,k} */
+  function box(cx,cy,cz,w,h,d,rz,k){
+    /* an axis-aligned box, optionally rotated about its own z axis by rz */
+    var hx=w/2, hy=h/2, hz=d/2, c=Math.cos(rz||0), s=Math.sin(rz||0);
+    function P(x,y,z){ return [cx + x*c - y*s, cy + x*s + y*c, cz + z]; }
+    function N(x,y,z){ return [x*c - y*s, x*s + y*c, z]; }
+    var v = [P(-hx,-hy,-hz),P(hx,-hy,-hz),P(hx,hy,-hz),P(-hx,hy,-hz),
+             P(-hx,-hy, hz),P(hx,-hy, hz),P(hx,hy, hz),P(-hx,hy, hz)];
+    var F = [[[4,5,6,7],N(0,0,1)],[[1,0,3,2],N(0,0,-1)],[[5,1,2,6],N(1,0,0)],
+             [[0,4,7,3],N(-1,0,0)],[[7,6,2,3],N(0,1,0)],[[0,1,5,4],N(0,-1,0)]];
+    F.forEach(function(f){ faces.push({p:[v[f[0][0]],v[f[0][1]],v[f[0][2]],v[f[0][3]]], n:f[1], k:k}); });
+    var E = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    E.forEach(function(e){ edges.push({a:v[e[0]], b:v[e[1]], k:k}); });
+  }
+  function disc(cx,cy,cz,r,h,n,k){
+    var top=[], bot=[], i;
+    for(i=0;i<n;i++){
+      var a=i/n*6.283, x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r;
+      top.push([x,cy+h/2,z]); bot.push([x,cy-h/2,z]);
+    }
+    faces.push({p:top, n:[0,1,0], k:k});
+    faces.push({p:bot.slice().reverse(), n:[0,-1,0], k:k});
+    for(i=0;i<n;i++){
+      var j=(i+1)%n, am=(i+0.5)/n*6.283;
+      faces.push({p:[bot[i],bot[j],top[j],top[i]], n:[Math.cos(am),0,Math.sin(am)], k:k});
+      edges.push({a:top[i], b:top[j], k:k}); edges.push({a:bot[i], b:bot[j], k:k});
+    }
+  }
+  var PIV = [0, 1.27, 0], ARM = 1.22, DROP = 0.64, PANR = 0.34;
+  function build(theta, sway){
+    faces.length = 0; lines.length = 0; edges.length = 0;
+    box(0, 0.06, 0, 0.96, 0.12, 0.54, 0, 0);            /* plinth */
+    box(0, 0.68, 0, 0.11, 1.12, 0.11, 0, 0);            /* pillar */
+    box(0, 1.27, 0, 0.20, 0.09, 0.16, 0, 0);            /* pivot block */
+    box(PIV[0], PIV[1], PIV[2], 2*ARM+0.08, 0.07, 0.07, -theta, 0);   /* beam, tilted */
+    var c=Math.cos(theta), s=Math.sin(theta);
+    var ends = [[-ARM*c, PIV[1]+ARM*s], [ARM*c, PIV[1]-ARM*s]];     /* omission left, addition right */
+    for(var side=0; side<2; side++){
+      var ex=ends[side][0], ey=ends[side][1];
+      var cx=ex + sway*0.9, cy=ey - DROP, k = side===0 ? 1 : 2;
+      /* the hanger: a small knob on the beam end and 3 wires to the rim */
+      box(ex, ey, 0, 0.09, 0.11, 0.09, -theta, 0);
+      for(var w=0; w<3; w++){
+        var a=w/3*6.283 + 0.52;
+        lines.push({a:[ex, ey-0.05, 0], b:[cx+Math.cos(a)*PANR*0.92, cy+0.02, Math.sin(a)*PANR*0.92], k:k});
+      }
+      disc(cx, cy, 0, PANR, 0.035, 18, 0);
+      /* the load: slabs stacked on the pan, 2 on the omission side, 4 on the addition side */
+      var nSlab = side===0 ? 2 : 4, y0 = cy + 0.0175;
+      var widths = [0.44, 0.36, 0.42, 0.30];
+      for(var q=0;q<nSlab;q++){
+        var sh=0.05, gap=0.012;
+        box(cx + (q%2 ? 0.02 : -0.015), y0 + sh/2 + q*(sh+gap), (q%2 ? -0.02 : 0.015), widths[q], sh, 0.28, 0, k);
+      }
+    }
+    return {faces:faces, lines:lines, edges:edges};
+  }
+  return {build:build};
+})();
+
+/* ================= HERO: the lit balance ================= */
+(function(){
+  var c = document.getElementById("heroCanvas"); if(!c) return;
+  var heroEl = document.getElementById("hero");
+  var i, j;
+
+  /* ---------- colour: shade crossed with distance, 3 ramps built once ---------- */
+  var SH = 40, FG = 14;
+  function seg3(t, SHADOW, MID, HI){
+    var o=[0,0,0], u2, q;
+    if(t < 0.55){ u2 = t/0.55; for(q=0;q<3;q++) o[q] = SHADOW[q] + (MID[q]-SHADOW[q])*u2; }
+    else { u2 = (t-0.55)/0.45; for(q=0;q<3;q++) o[q] = MID[q] + (HI[q]-MID[q])*u2; }
+    return o;
+  }
+  var HAZE=[24,30,50];
+  function ramp3(SHADOW, MID, HI){
+    var out = new Array(SH*FG);
+    for(var a=0;a<SH;a++){
+      var base = seg3(a/(SH-1), SHADOW, MID, HI);
+      for(var b=0;b<FG;b++){
+        var near = 0.26 + 0.74*(b/(FG-1));
+        out[a*FG+b] = "rgb(" + Math.round(HAZE[0] + (base[0]-HAZE[0])*near) + ","
+                              + Math.round(HAZE[1] + (base[1]-HAZE[1])*near) + ","
+                              + Math.round(HAZE[2] + (base[2]-HAZE[2])*near) + ")";
+      }
+    }
+    return out;
+  }
+  var RAMPS = [
+    ramp3([12,17,32],  [44,60,96],   [152,180,216]),   /* 0: steel, the balance itself */
+    ramp3([40,20,14],  [126,60,38],  [230,156,122]),   /* 1: rust, the omission load */
+    ramp3([12,22,44],  [52,84,136],  [166,200,244])    /* 2: indigo, the addition load */
+  ];
+  function ramp(r,g,b,a0,a1,n){
+    var o = new Array(n);
+    for(var q=0;q<n;q++) o[q] = "rgba("+r+","+g+","+b+","+(a0+(a1-a0)*(q/(n-1))).toFixed(3)+")";
+    return o;
+  }
+  var K_RIM  = ramp(196,212,236,0.04,0.42,FG),
+      K_WIRE = ramp(206,220,240,0.06,0.46,FG),
+      K_WARM = ramp(230,156,122,0.05,0.60,FG),
+      K_COOL = ramp(166,200,244,0.05,0.55,FG),
+      K_DOT  = ramp(120,150,196,0.03,0.22,FG);
+
+  /* ---------- pointer parallax, damped so nothing snaps ---------- */
+  var pxWant = 0, pyWant = 0, pxNow = 0, pyNow = 0;
+  if(heroEl){
+    heroEl.addEventListener("pointermove", function(e){
+      var r = heroEl.getBoundingClientRect();
+      pxWant = clamp((e.clientX - r.left)/r.width  - 0.5, -0.5, 0.5);
+      pyWant = clamp((e.clientY - r.top )/r.height - 0.5, -0.5, 0.5);
+    }, {passive:true});
+    heroEl.addEventListener("pointerleave", function(){ pxWant = 0; pyWant = 0; }, {passive:true});
+  }
+
+  /* ---------- cached gradients ---------- */
+  var gW=-1, gH=-1, gA=null, gB=null, gVig=null, gRA=0, gRB=0;
+  function ensureGrads(x,w,h){
+    if(w===gW && h===gH) return;
+    gW=w; gH=h;
+    var big=Math.max(w,h);
+    gRA = big*0.50;
+    gA = x.createRadialGradient(0,0,gRA*0.05,0,0,gRA);
+    gA.addColorStop(0,   "rgba(111,146,191,0.16)");
+    gA.addColorStop(0.45,"rgba(80,110,160,0.05)");
+    gA.addColorStop(1,   "rgba(111,146,191,0)");
+    gRB = big*0.24;
+    gB = x.createRadialGradient(0,0,gRB*0.05,0,0,gRB);
+    gB.addColorStop(0,"rgba(212,116,79,0.11)");
+    gB.addColorStop(1,"rgba(212,116,79,0)");
+    gVig = x.createRadialGradient(w*0.64,h*0.50,big*0.30,w*0.64,h*0.50,big*0.92);
+    gVig.addColorStop(0,"rgba(12,16,28,0)");
+    gVig.addColorStop(1,"rgba(12,16,28,0.44)");
+  }
+
+  var f = 3.0, THETA = 0.20, YMID = 1.02;
+  var order = [], depthOf = [];
+
+  function draw(t, dt){
+    var kk = hidpi(c,1), x = kk.x, w = kk.w, h = kk.h;
+    x.clearRect(0,0,w,h);
+    var mob = w < 900;
+    var lag = reduce ? 1 : Math.min(1,(dt||0.016)*2.6);
+    pxNow += (pxWant - pxNow)*lag;
+    pyNow += (pyWant - pyNow)*lag;
+    ensureGrads(x,w,h);
+
+    /* ---- 1. two soft depth glows ---- */
+    x.save();
+    x.translate(w*(mob?0.54:0.76) + pxNow*w*0.022, h*(mob?0.60:0.50) + pyNow*h*0.02);
+    x.fillStyle = gA; x.fillRect(-gRA,-gRA,gRA*2,gRA*2);
+    x.restore();
+    x.save();
+    x.translate(w*(mob?0.36:0.64) + pxNow*w*0.05, h*(mob?0.50:0.40) + pyNow*h*0.04);
+    x.fillStyle = gB; x.fillRect(-gRB,-gRB,gRB*2,gRB*2);
+    x.restore();
+
+    /* ---- 2. the pose: the beam arrives level and settles into its tilt ---- */
+    var s = reduce ? 1 : clamp(t/2.8, 0, 1);
+    var arrive = 1 - Math.pow(1-s, 3);
+    var wob = reduce ? 0 : 0.055*Math.sin(t*2.4)*Math.exp(-t*0.5) + 0.012*Math.sin(t*0.8);
+    var theta = THETA*arrive + wob*arrive;
+    var sway = reduce ? 0 : 0.014*Math.sin(t*1.5);
+    var G = Balance.build(theta, sway);
+
+    var ry   = (reduce ? -0.40 : -0.40 - 0.24*Math.sin(t*0.06)) + pxNow*0.42;
+    var tilt = 0.36 + (reduce ? 0 : 0.03*Math.sin(t*0.09)) + pyNow*0.18;
+    var cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
+    var ox = (mob ? w*0.50 : w*0.74) + pxNow*w*0.035;
+    var oy = (mob ? h*0.66 : h*0.53) + pyNow*h*0.03;
+    var scale = Math.min(w,h) * (mob ? 0.30 : 0.215);
+
+    /* project one object-space point; returns [px,py,q,Z2] or null */
+    function proj(p){
+      var X1 = p[0]*cs + p[2]*sn, Z1 = -p[0]*sn + p[2]*cs;
+      var yy = p[1]-YMID;
+      var Y1 = yy*ct - Z1*st, Z2 = yy*st + Z1*ct;
+      var dd = f - Z2;
+      if(dd < 0.5) return null;
+      var qz = f/dd;
+      return [ox + X1*scale*qz, oy - Y1*scale*qz, qz, Z2, X1, Y1];
+    }
+    /* rotate a direction into camera space */
+    function rot(n){
+      var X1 = n[0]*cs + n[2]*sn, Z1 = -n[0]*sn + n[2]*cs;
+      return [X1, n[1]*ct - Z1*st, n[1]*st + Z1*ct];
+    }
+    /* the light orbits the object; it is expressed in camera space directly */
+    var la = reduce ? 2.15 : 2.15 + 0.62*Math.sin(t*0.075);
+    var lx = Math.cos(la)*0.94, ly = 0.42, lz = Math.sin(la)*0.94;
+    var ll = Math.sqrt(lx*lx+ly*ly+lz*lz); lx/=ll; ly/=ll; lz/=ll;
+
+    /* ---- 3. the floor: a dotted plane under the object, in true perspective ---- */
+    var dotR = mob ? 1.1 : 1.3;
+    for(i=-6;i<=6;i++) for(j=-4;j<=4;j++){
+      var fp = proj([i*0.36, 0, j*0.36]);
+      if(!fp) continue;
+      var fg0 = clamp((fp[2]-0.72)/0.90, 0, 1);
+      x.fillStyle = K_DOT[(fg0*(FG-1))|0];
+      x.beginPath(); x.arc(fp[0], fp[1], dotR*fp[2], 0, 6.283); x.fill();
+    }
+    /* contact shadow: 4 stacked ellipses of the plinth's footprint */
+    for(i=4;i>=1;i--){
+      var rad = 0.36 + i*0.11, ring = [], ok = true;
+      for(j=0;j<20;j++){
+        var a=j/20*6.283, pp=proj([Math.cos(a)*rad*1.35, 0.002, Math.sin(a)*rad*0.9]);
+        if(!pp){ ok=false; break; } ring.push(pp);
+      }
+      if(!ok) continue;
+      x.fillStyle = "rgba(8,12,22,"+(0.05 + 0.05*(5-i)).toFixed(3)+")";
+      x.beginPath(); x.moveTo(ring[0][0],ring[0][1]);
+      for(j=1;j<20;j++) x.lineTo(ring[j][0],ring[j][1]);
+      x.closePath(); x.fill();
+    }
+
+    /* ---- 4. faces and wires: project, cull, sort, paint ---- */
+    var F = G.faces, L = G.lines, nItem = F.length + L.length;
+    if(order.length < nItem){ order = new Array(nItem); depthOf = new Array(nItem); }
+    var live = 0, pf = new Array(F.length);
+    for(i=0;i<F.length;i++){
+      var fc = F[i], pts = new Array(fc.p.length), okf = true, zsum = 0, cxs=0, cys=0, czs=0;
+      for(j=0;j<fc.p.length;j++){
+        var pr = proj(fc.p[j]);
+        if(!pr){ okf=false; break; }
+        pts[j]=pr; zsum += pr[3]; cxs += pr[4]; cys += pr[5]; czs += pr[3];
+      }
+      if(!okf){ pf[i]=null; continue; }
+      var nn = rot(fc.n), m = fc.p.length;
+      /* visible when the face normal points toward the camera at (0,0,f) */
+      var vx = cxs/m, vy = cys/m, vz = czs/m - f;
+      if(nn[0]*vx + nn[1]*vy + nn[2]*vz > 0){ pf[i]=null; continue; }
+      var lam = nn[0]*lx + nn[1]*ly + nn[2]*lz;
+      if(lam < 0) lam = -lam*0.30;
+      pf[i] = {pts:pts, lam:lam, q:pts[0][2]};
+      depthOf[live] = zsum/m; order[live] = i; live++;
+    }
+    var pl = new Array(L.length);
+    for(i=0;i<L.length;i++){
+      var pa = proj(L[i].a), pb = proj(L[i].b);
+      if(!pa || !pb){ pl[i]=null; continue; }
+      pl[i] = [pa, pb];
+      depthOf[live] = (pa[3]+pb[3])/2; order[live] = F.length + i; live++;
+    }
+    /* painter's order: far first (smaller Z2 is farther from the camera at Z2 = f) */
+    var idx = new Array(live);
+    for(i=0;i<live;i++) idx[i]=i;
+    idx.sort(function(a,b){ return depthOf[a]-depthOf[b]; });
+
+    x.lineWidth = 1;
+    for(var m2=0;m2<live;m2++){
+      var it = order[idx[m2]];
+      if(it >= F.length){
+        var ln = pl[it - F.length]; if(!ln) continue;
+        var fgw = clamp(((ln[0][2]+ln[1][2])/2-0.72)/0.90, 0, 1);
+        x.strokeStyle = K_WIRE[(fgw*(FG-1))|0];
+        x.beginPath(); x.moveTo(ln[0][0],ln[0][1]); x.lineTo(ln[1][0],ln[1][1]); x.stroke();
+        continue;
+      }
+      var face = pf[it]; if(!face) continue;
+      var fk = F[it].k;
+      var sh = (clamp(0.16 + 0.98*face.lam*face.lam, 0, 1)*(SH-1))|0;
+      var fg = (clamp((face.q-0.72)/0.90, 0, 1)*(FG-1))|0;
+      var col = RAMPS[fk][sh*FG + fg];
+      x.fillStyle = col; x.strokeStyle = col;
+      x.beginPath(); x.moveTo(face.pts[0][0], face.pts[0][1]);
+      for(j=1;j<face.pts.length;j++) x.lineTo(face.pts[j][0], face.pts[j][1]);
+      x.closePath(); x.fill(); x.stroke();
+      /* a lit rim on the top faces, coloured by what the face belongs to */
+      if(F[it].n[1] > 0.9){
+        x.strokeStyle = fk===1 ? K_WARM[fg] : fk===2 ? K_COOL[fg] : K_RIM[fg];
+        x.beginPath(); x.moveTo(face.pts[0][0], face.pts[0][1]);
+        for(j=1;j<face.pts.length;j++) x.lineTo(face.pts[j][0], face.pts[j][1]);
+        x.closePath(); x.stroke();
+      }
+    }
+
+    /* ---- 5. vignette ---- */
+    x.fillStyle = gVig; x.fillRect(0,0,w,h);
+  }
+
+  if(reduce){
+    draw(3, 0);
+    var rq = null;
+    addEventListener("resize", function(){
+      if(rq) clearTimeout(rq);
+      rq = setTimeout(function(){ draw(3, 0); }, 140);
+    }, {passive:true});
+  } else {
+    register(c, draw, 1);
+    draw(0, 0.016);
+  }
+})();
+
+/* ================= FOOTER: the same balance as a wireframe, thinned right out ================= */
+(function(){
+  var c = document.getElementById("footCanvas"); if(!c) return;
+  var i;
+  var FG = 10;
+  function ramp(r,g,b,a0,a1,n){
+    var o = new Array(n);
+    for(var q=0;q<n;q++) o[q] = "rgba("+r+","+g+","+b+","+(a0+(a1-a0)*(q/(n-1))).toFixed(3)+")";
+    return o;
+  }
+  var F_LINE = ramp(120,150,196,0.03,0.24,FG), F_WARM = ramp(230,156,122,0.04,0.34,FG),
+      F_COOL = ramp(166,200,244,0.04,0.32,FG);
+  var gW=-1, gH=-1, glow=null, gR=0;
+  function ensureGrads(x,w,h){
+    if(w===gW && h===gH) return;
+    gW=w; gH=h; gR=Math.max(w,h)*0.55;
+    glow = x.createRadialGradient(0,0,gR*0.06,0,0,gR);
+    glow.addColorStop(0,"rgba(61,90,128,0.10)");
+    glow.addColorStop(1,"rgba(61,90,128,0)");
+  }
+  var f = 3.0, YMID = 1.02;
+  function draw(t){
+    var kk = hidpi(c,0.4), x = kk.x, w = kk.w, h = kk.h;
+    x.clearRect(0,0,w,h);
+    var mob = w < 900;
+    ensureGrads(x,w,h);
+    x.save();
+    x.translate(w*(mob?0.5:0.80), h*0.44);
+    x.fillStyle = glow; x.fillRect(-gR,-gR,gR*2,gR*2);
+    x.restore();
+
+    var G = Balance.build(0.20, 0);
+    var ry = reduce ? -0.55 : -0.55 - 0.22*Math.sin(t*0.03), tilt = 0.34;
+    var cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
+    var ox = mob ? w*0.58 : w*0.82, oy = h*0.50, scale = Math.min(w,h)*(mob?0.26:0.27);
+    function proj(p){
+      var X1 = p[0]*cs + p[2]*sn, Z1 = -p[0]*sn + p[2]*cs;
+      var yy = p[1]-YMID;
+      var Y1 = yy*ct - Z1*st, Z2 = yy*st + Z1*ct;
+      var dd = f - Z2; if(dd < 0.5) return null;
+      var qz = f/dd;
+      return [ox + X1*scale*qz, oy - Y1*scale*qz, qz];
+    }
+    x.lineWidth = 1;
+    var E = G.edges, L = G.lines;
+    for(i=0;i<E.length;i++){
+      var a=proj(E[i].a), b=proj(E[i].b); if(!a||!b) continue;
+      var fg = (clamp(((a[2]+b[2])/2-0.72)/0.90,0,1)*(FG-1))|0;
+      x.strokeStyle = E[i].k===1 ? F_WARM[fg] : E[i].k===2 ? F_COOL[fg] : F_LINE[fg];
+      x.beginPath(); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.stroke();
+    }
+    for(i=0;i<L.length;i++){
+      var la=proj(L[i].a), lb=proj(L[i].b); if(!la||!lb) continue;
+      var fg2 = (clamp(((la[2]+lb[2])/2-0.72)/0.90,0,1)*(FG-1))|0;
+      x.strokeStyle = F_LINE[fg2];
+      x.beginPath(); x.moveTo(la[0],la[1]); x.lineTo(lb[0],lb[1]); x.stroke();
+    }
+  }
+  if(reduce){
+    draw(1.2);
+    var rq = null;
+    addEventListener("resize", function(){
+      if(rq) clearTimeout(rq);
+      rq = setTimeout(function(){ draw(1.2); }, 140);
+    }, {passive:true});
+  } else {
+    register(c, draw, 0.4);
+    draw(0);
+  }
+})();
+
+/* ================= FIG 1: the shipped set, by direction and arm ================= */
+(function(){
+  var c=document.getElementById("cComp"); if(!c) return;
+  var D=[
+    {d:"en-de",A:330,B:300,C:264},{d:"en-cs",A:0,B:219,C:210},{d:"cs-uk",A:0,B:261,C:156},
+    {d:"en-ru",A:126,B:45,C:192},{d:"en-zh",A:0,B:66,C:188},{d:"cs-de",A:0,B:0,C:216},
+    {d:"en-ar",A:0,B:0,C:176},{d:"en-ko",A:0,B:0,C:66},{d:"en-ja",A:0,B:33,C:18},{d:"zh-ja",A:0,B:0,C:20}
+  ];
+  var mode="all", rec=null, MAX=900;
+  var COL={A:rgba(T_ACC,0.55), B:rgba(T_WARM,0.85), C:rgba(T_INK,0.16)};
+  function draw(t){
+    var k=hidpi(c,0.625), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560, fs=narrow?9.5:10.5;
+    var m={l:narrow?52:64, r:narrow?54:96, t:34, b:62};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    function X(v){ return m.l + v/MAX*pw; }
+    var i, gy=m.t+ph;
+    x.strokeStyle=RULE2; x.lineWidth=1;
+    x.beginPath(); x.moveTo(m.l,gy); x.lineTo(m.l+pw,gy); x.stroke();
+    for(i=0;i<=3;i++){
+      var tx=X(i*300);
+      x.beginPath(); x.moveTo(tx,gy); x.lineTo(tx,gy+5); x.stroke();
+      labC(x,String(i*300),tx,gy+18,INK4,9.5);
+      x.strokeStyle=rgba(T_INK,0.05); x.beginPath(); x.moveTo(tx,m.t); x.lineTo(tx,gy); x.stroke();
+      x.strokeStyle=RULE2;
+    }
+    labC(x,"segments per direction",m.l+pw/2,h-9,INK3,10);
+    var rowH=ph/D.length, bh=Math.min(20, rowH*0.58);
+    for(i=0;i<D.length;i++){
+      var d=D[i], yy=m.t+rowH*(i+0.5);
+      var a=reduce?1:easeIO(clamp((t-0.1-i*0.09)/0.7,0,1));
+      labR(x,d.d,m.l-10,yy+3.5,INK2,fs);
+      var run=0, arms=["A","B","C"], shown=0;
+      for(var q=0;q<3;q++){
+        var ar=arms[q], v=d[ar]; if(!v) continue;
+        var on = mode==="all" || mode===ar;
+        x.fillStyle = on ? COL[ar] : rgba(T_INK,0.05);
+        x.fillRect(X(run), yy-bh/2, (X(run+v)-X(run))*a, bh);
+        if(ar==="C"){ x.strokeStyle=rgba(T_INK, on?0.35:0.10); x.strokeRect(X(run)+0.5, yy-bh/2+0.5, Math.max(0.5,(X(run+v)-X(run))*a-1), bh-1); }
+        if(on) shown += v;
+        run += v;
+      }
+      if(a>0.95){
+        var tot = mode==="all" ? d.A+d.B+d.C : d[mode];
+        lab(x, tot ? fmtN(tot) : "0", X(run)+9, yy+3.5, tot?INK2:INK4, 10.5);
+      }
+    }
+    /* legend */
+    var ly=h-30, lx=m.l;
+    var leg=narrow ? [["Arm A",COL.A],["Arm B",COL.B],["Arm C",COL.C]]
+                   : [["Arm A, verbosity",COL.A],["Arm B, triples",COL.B],["Arm C, numeric",COL.C]];
+    x.save(); mono(x,9.5);
+    for(i=0;i<leg.length;i++){
+      x.fillStyle=leg[i][1]; x.fillRect(lx,ly-9,9,9);
+      if(i===2){ x.strokeStyle=rgba(T_INK,0.35); x.strokeRect(lx+0.5,ly-8.5,8,8); }
+      x.fillStyle=INK3; x.fillText(leg[i][0], lx+14, ly);
+      lx += 14 + x.measureText(leg[i][0]).width + 20;
+    }
+    x.restore();
+  }
+  rec=register(c,draw,0.625); draw(0);
+  var RO={
+    all:{seg:"2,886",dir:"10",glab:"Groups",grp:"1,137",rpg:"6, 3 or 2"},
+    A:{seg:"456",dir:"2",glab:"Series",grp:"76",rpg:"6"},
+    B:{seg:"924",dir:"6",glab:"Triples",grp:"308",rpg:"3"},
+    C:{seg:"1,506",dir:"10",glab:"Pairs",grp:"753",rpg:"2"}
+  };
+  function setRO(mm){
+    var d=RO[mm];
+    [["oSeg",d.seg],["oDir",d.dir],["oGlab",d.glab],["oGrp",d.grp],["oRpg",d.rpg]].forEach(function(p){
+      var el=document.getElementById(p[0]); if(!el) return;
+      el.textContent=p[1];
+      if(el.tagName==="DD"){ el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+    });
+  }
+  document.querySelectorAll("[data-arm]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("[data-arm]").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on"); mode=b.dataset.arm;
+      if(rec) rec.t=0.6; setRO(mode); draw(rec?rec.t:1);
+    });
+  });
+})();
+
+/* ================= FIG 3: gate survival per direction ================= */
+(function(){
+  var c=document.getElementById("cGate"); if(!c) return;
+  var G=[{d:"cs-uk",raw:402,comp:334,adm:40},{d:"en-zh",raw:248,comp:222,adm:17},
+         {d:"en-de",raw:98,comp:69,adm:11},{d:"en-cs",raw:99,comp:81,adm:11},
+         {d:"en-ru",raw:41,comp:30,adm:6},{d:"en-ja",raw:154,comp:125,adm:4}];
+  var MAX=420;
+  function draw(t){
+    var k=hidpi(c,0.625), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560, fs=narrow?9.5:10.5;
+    var m={l:narrow?50:62, r:narrow?96:150, t:36, b:74};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    function X(v){ return m.l + v/MAX*pw; }
+    var i, gy=m.t+ph;
+    x.strokeStyle=RULE2; x.lineWidth=1;
+    x.beginPath(); x.moveTo(m.l,gy); x.lineTo(m.l+pw,gy); x.stroke();
+    for(i=0;i<=4;i++){
+      var tx=X(i*100);
+      x.beginPath(); x.moveTo(tx,gy); x.lineTo(tx,gy+5); x.stroke();
+      labC(x,String(i*100),tx,gy+18,INK4,9.5);
+      x.strokeStyle=rgba(T_INK,0.05); x.beginPath(); x.moveTo(tx,m.t); x.lineTo(tx,gy); x.stroke();
+      x.strokeStyle=RULE2;
+    }
+    labC(x,"LLM-generated candidate triples",m.l+pw/2,gy+36,INK3,10);
+    var rowH=ph/G.length, bh=Math.min(26, rowH*0.62);
+    for(i=0;i<G.length;i++){
+      var d=G[i], yy=m.t+rowH*(i+0.5);
+      var a1=reduce?1:easeIO(clamp((t-0.1-i*0.12)/0.7,0,1));
+      var a2=reduce?1:easeIO(clamp((t-0.5-i*0.12)/0.7,0,1));
+      var a3=reduce?1:easeIO(clamp((t-0.9-i*0.12)/0.7,0,1));
+      labR(x,d.d,m.l-10,yy+3.5,INK2,fs);
+      x.strokeStyle=rgba(T_INK,0.30); x.lineWidth=1;
+      x.strokeRect(X(0)+0.5, yy-bh/2+0.5, Math.max(1,(X(d.raw)-X(0))*a1), bh-1);
+      x.fillStyle=rgba(T_INK,0.10);
+      x.fillRect(X(0), yy-bh/2+3, (X(d.comp)-X(0))*a2, bh-6);
+      x.fillStyle=rgba(T_WARM,0.88);
+      x.fillRect(X(0), yy-bh/2+3, (X(d.adm)-X(0))*a3, bh-6);
+      if(a3>0.95){
+        var pct=(100*d.adm/d.comp).toFixed(1)+"%";
+        var s1 = narrow ? (d.adm+" of "+d.comp) : (d.adm+" of "+d.comp+" complete");
+        lab(x, s1, X(d.raw)+9, yy+ (narrow?0:-2)+3.5, INK2, fs);
+        if(narrow) lab(x, pct, X(d.raw)+9, yy+15, WARMD, fs);
+        else lab(x, pct+" admitted", X(d.raw)+9, yy+12, WARMD, fs);
+      }
+    }
+    /* legend and the total */
+    var ly=h-12, lx=m.l;
+    x.save(); mono(x,9.5);
+    x.strokeStyle=rgba(T_INK,0.35); x.strokeRect(lx+0.5,ly-8.5,9,9); x.fillStyle=INK3; x.fillText("raw candidates", lx+14, ly);
+    lx += 14 + x.measureText("raw candidates").width + 18;
+    x.fillStyle=rgba(T_INK,0.12); x.fillRect(lx,ly-9,9,9); x.fillStyle=INK3; x.fillText("complete triples", lx+14, ly);
+    lx += 14 + x.measureText("complete triples").width + 18;
+    x.fillStyle=rgba(T_WARM,0.88); x.fillRect(lx,ly-9,9,9); x.fillStyle=INK3; x.fillText("admitted by the gates", lx+14, ly);
+    x.restore();
+    var a4=reduce?1:clamp((t-1.9)/0.6,0,1);
+    if(a4>0){
+      x.globalAlpha=a4;
+      labR(x, narrow ? "89 of 861, 10.3%" : "overall: 1,042 raw, 861 complete, 89 admitted, 10.3%", m.l+pw+(narrow?96:150)-6, m.t-14, WARMD, narrow?9.5:10.5);
+      x.globalAlpha=1;
+    }
+  }
+  register(c,draw,0.625); draw(0);
+})();
+
+/* ================= FIG 5: the frozen prediction grid ================= */
+(function(){
+  var grid=document.getElementById("pred"); if(!grid) return;
+  var out=document.getElementById("outcome");
+  var T={
+    "bo-surf":["Arm B omission","surface","break",true,"Held, against the registered break",
+      "Surface metrics over-penalize omission: A = +0.362 [+0.297, +0.435]. N-gram precision plus a brevity penalty charges missing content twice, so the predicted break did not occur."],
+    "bo-ref":["Arm B omission","reference-based neural","hold",true,"The anchor cell, and the refutation",
+      "The family was registered as near symmetric, inside the &plusmn;0.30 margin. It measured A = &minus;0.422 [&minus;0.494, &minus;0.346], entirely below the margin, so the refutation leg fired and the claim that the missing reference produces the asymmetry was refuted."],
+    "bo-qe":["Arm B omission","reference-free QE","break-hard",false,"Confirmed in direction, refuted as a mechanism",
+      "The family under-penalizes omission (A = &minus;0.510) and the interaction is significant, so the predicted break appears. The registration attributed it to the missing reference, and the anchor cell for the reference-based family refuted that attribution."],
+    "bo-llm":["Arm B omission","LLM judge","partial",false,"Partial, as registered",
+      "LLM judges show a modest asymmetry, A = &minus;0.135 [&minus;0.207, &minus;0.067], and a percentile gap of 3.4 points. Within the family, gemba-poly carries the largest flip rate at 0.325."],
+    "ba-surf":["Arm B addition","surface","hold",false,"Held",
+      "Every surface metric penalizes the appended unit: mean raw drops of +25.1 for BLEU, +9.4 for chrF and +25.1 for spBLEU, in their own units."],
+    "ba-ref":["Arm B addition","reference-based neural","partial / hold",false,"Held",
+      "Every reference-based neural member penalizes the addition, with mean raw drops from +0.025 for YiSi-1 to +49.6 for xCOMET-XXL-ref in their own units. The family's addition drop is larger than its omission drop."],
+    "ba-qe":["Arm B addition","reference-free QE","hold / partial",false,"Held",
+      "All 4 reference-free QE metrics penalize the addition: mean raw drops of +0.177 for COMETKiwi22, +19.9 for cuni-v14-regression, +46.1 for xCOMET-XL-QE and +52.9 for xCOMET-XXL-QE. The family penalizes addition far more than omission, which is the asymmetry itself."],
+    "ba-llm":["Arm B addition","LLM judge","hold",false,"Held",
+      "The 5 LLM judges penalize the addition, with mean raw drops from +23.7 for gemba-poly to +46.0 for the reference-based Gemma 4 baseline, in their own units."],
+    "a-surf":["Arm A verbosity","surface","hold",false,"Held",
+      "BLEU, chrF and spBLEU reach &rho; = &minus;1.00: every added filler unit lowers the score in every series."],
+    "a-ref":["Arm A verbosity","reference-based neural","partial",false,"Held, more strongly than the registered partial",
+      "Reference-based neural metrics run from &rho; = &minus;0.74 for xCOMET-XL-ref to &minus;1.00 for YiSi-1, with BERTScore at &minus;0.99, COMET22 at &minus;0.94 and xCOMET-XXL-ref at &minus;0.80. The registered verdict allowed a partial break, and none occurred."],
+    "a-qe":["Arm A verbosity","reference-free QE","break",true,"Contradicted: the family penalizes pure length",
+      "COMETKiwi22 reaches &rho; = &minus;0.86 [&minus;0.89, &minus;0.83], xCOMET-XL-QE &minus;0.65 and xCOMET-XXL-QE &minus;0.70, all at q &lt; 0.001. The length-gaming attack does not work on this roster, and H<sub>A</sub> is refuted."],
+    "a-llm":["Arm A verbosity","LLM judge","hold",false,"Held",
+      "LLM judges penalize filler, from &rho; = &minus;0.70 for gemba-poly to &minus;0.91 for the reference-based Gemma 4 baseline."],
+    "c-surf":["Arm C numeric","surface","break",true,"Contradicted: the token change is caught deterministically",
+      "&tau;<sub>b</sub> = +1.00 for BLEU, chrF and spBLEU, with no ties. The registration expected a break here, and the paper reports the miss rather than reframing it."],
+    "c-ref":["Arm C numeric","reference-based neural","hold",false,"Held: the harness has teeth",
+      "COMET22, BERTScore and YiSi-1 reach &tau;<sub>b</sub> = +1.00; xCOMET-XXL-ref +0.95, xCOMET-XL-ref +0.84. The reference-based frontier catches the single corrupted numeral."],
+    "c-qe":["Arm C numeric","reference-free QE","break / partial",false,"Partial, within the registered either-or",
+      "The reference-free baselines trail the frontier: COMETKiwi22 &tau;<sub>b</sub> = +0.77, xCOMET-XL-QE +0.77, xCOMET-XXL-QE +0.79; cuni-v14-regression +0.87 on its 277 pairs; the 2 Lexicala ensembles +0.92 and +0.84 on 206."],
+    "c-llm":["Arm C numeric","LLM judge","hold",false,"Held",
+      "The 5 LLM judges catch the corrupted numeral, from &tau;<sub>b</sub> = +0.69 for gemba-poly to +0.95 for Gemma 4. The 2 systems that invert the control, MQM-LLM and its confidence-aware variant, are unidentified systems and do not belong to this family."]
+  };
+  grid.querySelectorAll(".pcell").forEach(function(b){
+    b.addEventListener("click", function(){
+      var d=T[b.dataset.p]; if(!d) return;
+      grid.querySelectorAll(".pcell").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on");
+      out.classList.toggle("miss", d[3]);
+      out.innerHTML = '<p class="kicker">'+d[0]+' &middot; '+d[1]+' &middot; registered: '+d[2]+
+        (d[3] ? ' &middot; contradicted' : '')+'</p><h4>'+d[4]+'</h4><p>'+d[5]+'</p>';
+    });
+  });
+})();
+
+/* ================= FIG 6: reading beta on its own scale, scroll driven ================= */
+(function(){
+  var c=document.getElementById("cGap"); if(!c) return;
+  var lis=[].slice.call(document.querySelectorAll("#scrolly .scrolly-steps li"));
+  var stage=0, lastOn=-1;
+  function wantStage(){
+    if(!lis.length) return 0;
+    var mid=innerHeight*0.46;
+    var first=lis[0].getBoundingClientRect(), lastR=lis[lis.length-1].getBoundingClientRect();
+    var y0=first.top + first.height/2, y1=lastR.top + lastR.height/2;
+    if(y1 === y0) return 0;
+    return clamp((mid - y0) / (y1 - y0), 0, 1) * (lis.length - 1);
+  }
+  var FAMG=[["reference-free QE",18.3,T_WARM],["reference-based neural",13.7,T_ACC],
+            ["LLM judges",3.4,T_VIO],["surface",-8.6,T_GREY]];
+  function draw(t, dt){
+    var want=wantStage();
+    if(reduce) stage=want;
+    else stage += (want-stage)*Math.min(1,(dt||0.016)*6.2);
+    var onIdx=Math.round(stage);
+    if(onIdx !== lastOn){
+      for(var q=0;q<lis.length;q++) lis[q].classList.toggle("on", q===onIdx);
+      lastOn = onIdx;
+    }
+    var k=hidpi(c,0.375), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560;
+    var m={l:narrow?22:34, r:narrow?22:34, t:30, b:26};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    var a1=clamp(stage,0,1), a2=clamp(stage-1,0,1), a3=clamp(stage-2,0,1), a4=clamp(stage-3,0,1);
+    /* the upper block: 2 rows on 1 percentile axis. It slides up as the family strip arrives. */
+    var y1=m.t+ph*(0.36-0.12*a4), y2=y1+ph*0.28;
+    function X(v){ return m.l + v/100*pw; }
+    var i, fs=narrow?9:10.5;
+    /* axis ticks as faint verticals across both rows */
+    for(i=0;i<=4;i++){
+      var tx=X(i*25);
+      x.strokeStyle=rgba(T_INK, i===2?0.22:0.07); x.lineWidth=1;
+      if(i===2) x.setLineDash([3,3]);
+      x.beginPath(); x.moveTo(tx,y1-34); x.lineTo(tx,y2+22); x.stroke();
+      x.setLineDash([]);
+      labC(x, i===2?"50, median penalty":String(i*25), tx, y2+34, i===2?INK2:INK4, 9.5);
+    }
+    lab(x,"WITHIN-METRIC PERCENTILE OF THE DROP",m.l,m.t-12,INK4,9.5,1.1);
+    function row(yy, label, om, ad, gap, alpha, alphaGap){
+      if(alpha<=0.005) return;
+      x.globalAlpha=alpha;
+      x.strokeStyle=rgba(T_INK,0.18); x.lineWidth=1;
+      x.beginPath(); x.moveTo(X(0),yy); x.lineTo(X(100),yy); x.stroke();
+      lab(x,label,X(0),yy-32,INK3,fs);
+      /* omission mark, then addition mark */
+      x.fillStyle=rgba(T_WARM,0.95); x.beginPath(); x.arc(X(om),yy,5.5,0,6.283); x.fill();
+      x.fillStyle=rgba(T_ACC,0.95);  x.beginPath(); x.arc(X(ad),yy,5.5,0,6.283); x.fill();
+      labR(x,(narrow?"om ":"omission ")+om.toFixed(1), X(om)-9, yy+18, WARMD, fs);
+      lab(x,(narrow?"add ":"addition ")+ad.toFixed(1), X(ad)+9, yy+18, ACCD, fs);
+      /* the gap bracket above the row */
+      if(alphaGap>0.005){
+        x.globalAlpha=alpha*alphaGap;
+        var by=yy-10;
+        x.strokeStyle=INK2; x.lineWidth=1.2;
+        x.beginPath(); x.moveTo(X(om),by); x.lineTo(X(om),by-6); x.moveTo(X(ad),by); x.lineTo(X(ad),by-6);
+        x.moveTo(X(om),by-6); x.lineTo(X(om)+(X(ad)-X(om))*alphaGap,by-6); x.stroke();
+        labC(x,"gap "+gap+" pts",(X(om)+X(ad))/2, by-11, INK, fs);
+        x.globalAlpha=alpha;
+      }
+      x.globalAlpha=1;
+    }
+    row(y1, narrow?"reference-free, 6 metrics":"reference-free pool, 6 metrics, 3,444 observations", 43.9, 56.1, "12.2", 1, a1);
+    row(y2, narrow?"reference-reading, 11 metrics":"reference-reading pool, 11 metrics, 6,776 observations", 47.4, 52.6, "5.2", a2, a2);
+    /* the coefficient, between the rows and to the right */
+    if(a3>0.005){
+      x.globalAlpha=a3;
+      var cy=(y1+y2)/2+4;
+      var msg = narrow ? "β = 5.24 − 12.17 = −6.9 pts" : "β = 5.24 − 12.17 = −6.9 points [−8.1, −5.7]";
+      var mfs = narrow?9.5:11, mw = tw(x,msg,mfs);
+      x.fillStyle="#fff"; x.fillRect(X(100)-mw-8, cy-mfs-3, mw+12, mfs+9);
+      labR(x, msg, X(100), cy, ACCD, mfs);
+      x.globalAlpha=1;
+    }
+    /* the family strip */
+    if(a4>0.005){
+      x.globalAlpha=a4;
+      var sy=m.t+ph*0.74, sh=ph*0.22;
+      lab(x,"ADDITION-MINUS-OMISSION GAP, BY FAMILY, PERCENTILE POINTS",m.l,sy-8,INK4,9,1.1);
+      var lw = narrow?96:170, x0=m.l+lw, xw=pw-lw-40;
+      function XG(v){ return x0 + (v+10)/32*xw; }
+      var bh2=Math.min(11, sh/4-3);
+      x.strokeStyle=rgba(T_INK,0.25); x.beginPath(); x.moveTo(XG(0),sy); x.lineTo(XG(0),sy+sh); x.stroke();
+      for(i=0;i<FAMG.length;i++){
+        var yy2=sy+(i+0.5)*(sh/4), v=FAMG[i][1];
+        labR(x,FAMG[i][0],x0-8,yy2+3.5,INK2,narrow?8.5:9.5);
+        x.fillStyle=rgba(FAMG[i][2],0.80);
+        var bx0=XG(Math.min(0,v)), bx1=XG(Math.max(0,v));
+        x.fillRect(bx0, yy2-bh2/2, (bx1-bx0)*a4, bh2);
+        lab(x,(v>0?"+":"−")+Math.abs(v).toFixed(1), (v>0?bx1:XG(0))+6, yy2+3.5, INK2, 9.5);
+      }
+      x.globalAlpha=1;
+    }
+  }
+  register(c, draw, 0.375); draw(0,1);
+})();
+
+/* ================= FIG 7: relative asymmetry by family, with the margin ================= */
+(function(){
+  var c=document.getElementById("cAsym"); if(!c) return;
+  var mode="fam", rec=null;
+  var F=[
+    {l:"reference-free QE", s:"ref-free QE", m:4, v:-0.510, lo:-0.573, hi:-0.442, t:T_WARM, pts:[0.05,-0.22,-1.28,-0.59]},
+    {l:"reference-based neural", s:"ref-based", m:5, v:-0.422, lo:-0.494, hi:-0.346, t:T_ACC, pts:[-0.25,-0.27,-1.36,-0.64,0.41]},
+    {l:"unidentified systems", s:"unidentified", m:12, v:-0.323, lo:-0.395, hi:-0.250, t:T_OCHRE, pts:[-0.11,-0.29,-0.29,0.13,-1.84,-1.78,-0.03,0.18,0.00,-0.26,0.56,-0.15]},
+    {l:"LLM judges", s:"LLM judges", m:5, v:-0.135, lo:-0.207, hi:-0.067, t:T_VIO, pts:[-0.54,-0.12,-0.15,0.08,0.07]},
+    {l:"surface", s:"surface", m:3, v:0.362, lo:0.297, hi:0.435, t:T_GREY, pts:[0.12,0.85,0.12]}
+  ];
+  function draw(t){
+    var k=hidpi(c,0.625), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560, fs=narrow?9.5:10.5;
+    var V0 = mode==="fam" ? -0.75 : -1.95, V1 = mode==="fam" ? 0.55 : 0.95;
+    var m={l:narrow?92:170, r:narrow?24:160, t:50, b:64};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    function X(v){ return m.l + (v-V0)/(V1-V0)*pw; }
+    var i, gy=m.t+ph;
+    /* the margin band, then the zero line */
+    x.fillStyle=rgba(T_GOLD,0.10); x.fillRect(X(-0.30), m.t-10, X(0.30)-X(-0.30), ph+10);
+    x.strokeStyle=rgba(T_GOLD,0.55); x.lineWidth=1; x.setLineDash([3,3]);
+    x.beginPath(); x.moveTo(X(-0.30),m.t-10); x.lineTo(X(-0.30),gy); x.moveTo(X(0.30),m.t-10); x.lineTo(X(0.30),gy); x.stroke();
+    x.setLineDash([]);
+    labC(x, narrow?"±0.30 margin":"registered equivalence margin, ±0.30", X(0), m.t-18, GOLD, narrow?9:10);
+    x.strokeStyle=rgba(T_INK,0.35); x.beginPath(); x.moveTo(X(0),m.t-10); x.lineTo(X(0),gy); x.stroke();
+    x.strokeStyle=RULE2;
+    x.beginPath(); x.moveTo(m.l,gy); x.lineTo(m.l+pw,gy); x.stroke();
+    var ticksV = mode==="fam" ? [-0.6,-0.4,-0.2,0,0.2,0.4] : [-1.5,-1.0,-0.5,0,0.5];
+    for(i=0;i<ticksV.length;i++){
+      var tx=X(ticksV[i]);
+      x.beginPath(); x.moveTo(tx,gy); x.lineTo(tx,gy+5); x.stroke();
+      labC(x,(ticksV[i]>0?"+":"")+ticksV[i].toFixed(1),tx,gy+18,INK4,9.5);
+    }
+    labC(x,"relative asymmetry A, negative means omission is penalized less",m.l+pw/2,h-10,INK3,narrow?9:10);
+    var rowH=ph/F.length;
+    for(i=0;i<F.length;i++){
+      var d=F[i], yy=m.t+rowH*(i+0.5);
+      var a=reduce?1:easeIO(clamp((t-0.15-i*0.14)/0.8,0,1));
+      labR(x, narrow?d.s:d.l, m.l-12, yy+3.5, INK2, fs);
+      if(!narrow) labR(x, d.m+" metrics", m.l-12, yy+16, INK4, 9);
+      x.strokeStyle=rgba(T_INK,0.06); x.lineWidth=1;
+      x.beginPath(); x.moveTo(m.l,yy); x.lineTo(m.l+pw,yy); x.stroke();
+      if(mode==="met"){
+        x.fillStyle=rgba(d.t,0.30*a);
+        for(var q=0;q<d.pts.length;q++){
+          var pv=d.pts[q];
+          x.fillRect(X(pv)-1.5, yy-12, 3, 8);
+        }
+      }
+      var lo=d.v+(d.lo-d.v)*a, hi=d.v+(d.hi-d.v)*a;
+      x.strokeStyle=rgba(d.t,0.85); x.lineWidth=2.4;
+      x.beginPath(); x.moveTo(X(lo),yy); x.lineTo(X(hi),yy); x.stroke();
+      x.lineWidth=1.4;
+      x.beginPath(); x.moveTo(X(lo),yy-5); x.lineTo(X(lo),yy+5); x.moveTo(X(hi),yy-5); x.lineTo(X(hi),yy+5); x.stroke();
+      x.fillStyle=rgba(d.t,1); x.beginPath(); x.arc(X(d.v),yy,5,0,6.283); x.fill();
+      x.strokeStyle="#fff"; x.lineWidth=1.5; x.stroke();
+      if(a>0.95 && !narrow){
+        var vs=(d.v>0?"+":"−")+Math.abs(d.v).toFixed(3)+"  ["+(d.lo>0?"+":"−")+Math.abs(d.lo).toFixed(3)+", "+(d.hi>0?"+":"−")+Math.abs(d.hi).toFixed(3)+"]";
+        lab(x, vs, m.l+pw+12, yy+3.5, INK2, 9.5);
+      } else if(a>0.95){
+        lab(x,(d.v>0?"+":"−")+Math.abs(d.v).toFixed(2), X(d.hi)+8, yy+3.5, INK2, 9);
+      }
+    }
+    if(mode==="met"){
+      labR(x, narrow?"marks: each metric's Aₘ":"small marks: every returned metric's own Aₘ; the 2 xCOMET baselines and the 2 FACET systems sit far left", m.l+pw, m.t-4, INK3, narrow?8.5:9.5);
+    }
+  }
+  rec=register(c,draw,0.625); draw(0);
+  document.querySelectorAll("[data-asym]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("[data-asym]").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on"); mode=b.dataset.asym;
+      if(rec) rec.t=0; draw(0);
+    });
+  });
+})();
+
+/* ================= FIG 8: 308 matched contests, 1 metric at a time ================= */
+(function(){
+  var c=document.getElementById("cFlip"); if(!c) return;
+  var FM={
+    xl:   {l:"xCOMET-XL-QE",        n:308, ge:60,  gt:44, rGe:"0.195", rGt:"0.143", ci:"[0.154, 0.235]", reg:true,  seed:11},
+    xxl:  {l:"xCOMET-XXL-QE",       n:308, ge:35,  gt:22, rGe:"0.114", rGt:"0.071", ci:"[0.079, 0.152]", reg:true,  seed:23},
+    cuni: {l:"cuni-v14-regression", n:182, ge:17,  gt:8,  rGe:"0.093", rGt:"0.044", ci:"[0.055, 0.137]", reg:true,  seed:37},
+    kiwi: {l:"COMETKiwi22",         n:308, ge:4,   gt:4,  rGe:"0.013", rGt:"0.013", ci:"[0.003, 0.027]", reg:true,  seed:41},
+    xlref:{l:"xCOMET-XL-ref",       n:308, ge:64,  gt:46, rGe:"0.208", rGt:"0.149", ci:"exploratory",    reg:false, seed:53},
+    gemba:{l:"gemba-poly",          n:308, ge:100, gt:48, rGe:"0.325", rGt:"0.156", ci:"exploratory",    reg:false, seed:67}
+  };
+  var metric="xl", rule="ge", rec=null, PERM={};
+  function perm(key){
+    if(PERM[key]) return PERM[key];
+    var d=FM[key], rnd=mulberry(d.seed), o=[], i;
+    for(i=0;i<d.n;i++) o.push(i);
+    for(i=d.n-1;i>0;i--){ var j=Math.floor(rnd()*(i+1)), tm=o[i]; o[i]=o[j]; o[j]=tm; }
+    var st=new Array(d.n); for(i=0;i<d.n;i++) st[i]=0;
+    for(i=0;i<d.ge;i++) st[o[i]] = i<d.gt ? 2 : 1;   /* 2 strict flip, 1 tie */
+    PERM[key]=st; return st;
+  }
+  function draw(t){
+    var k=hidpi(c,0.625), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var d=FM[metric], st=perm(metric), narrow=w<560;
+    var COLS = d.n===308 ? (narrow?14:28) : (narrow?13:26), ROWS=Math.ceil(d.n/COLS);
+    var m={l:22,r:22,t:34,b:narrow?54:44};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    var cs=Math.min(pw/COLS, ph/ROWS), gw=cs*COLS, gh=cs*ROWS;
+    var ox=m.l+(pw-gw)/2, oy=m.t+(ph-gh)/2;
+    var p=reduce?1:clamp(t/1.1,0,1), shown=Math.floor(p*d.n), i;
+    lab(x, narrow ? (d.n+" PAIRS, "+d.l.toUpperCase()) : (d.n+" MATCHED {BASE, OMISSION} PAIRS, "+d.l.toUpperCase()), ox, oy-11, INK4, narrow?8.5:9.5, 1.1);
+    var flips=0;
+    for(i=0;i<d.n;i++){
+      var col=i%COLS, row=(i/COLS)|0, bx=ox+col*cs, by=oy+row*cs;
+      if(i>=shown) continue;
+      var s=st[i];
+      var on = s===2 || (s===1 && rule==="ge");
+      if(on){
+        x.fillStyle = s===2 ? rgba(T_WARM,0.88) : rgba(T_WARM,0.42);
+        x.fillRect(bx+0.9,by+0.9,cs-1.8,cs-1.8); flips++;
+      } else if(s===1){
+        x.strokeStyle=rgba(T_WARM,0.55); x.lineWidth=1;
+        x.strokeRect(bx+1.4,by+1.4,cs-2.8,cs-2.8);
+      } else {
+        x.fillStyle=rgba(T_INK,0.07); x.fillRect(bx+0.9,by+0.9,cs-1.8,cs-1.8);
+      }
+    }
+    x.strokeStyle=RULE; x.lineWidth=1; x.strokeRect(ox-1,oy-1,gw+2,gh+2);
+    /* legend */
+    var ly=oy+gh+22, lx=ox, fs=narrow?9:10;
+    x.save(); mono(x,fs);
+    var L=[["omission scored strictly above the base",rgba(T_WARM,0.88),0],
+           [rule==="ge"?"exact tie, counts under this rule":"exact tie, excluded under this rule", rule==="ge"?rgba(T_WARM,0.42):null, rule==="ge"?0:1],
+           ["base scored higher",rgba(T_INK,0.07),0]];
+    for(i=0;i<L.length;i++){
+      if(narrow && i>0){ ly+=14; lx=ox; }
+      if(L[i][2]){ x.strokeStyle=rgba(T_WARM,0.55); x.strokeRect(lx+0.5,ly-8.5,8,8); }
+      else { x.fillStyle=L[i][1]; x.fillRect(lx,ly-9,9,9); }
+      x.fillStyle=INK3; x.fillText(L[i][0], lx+14, ly);
+      lx += 14 + x.measureText(L[i][0]).width + 18;
+    }
+    x.restore();
+  }
+  rec=register(c,draw,0.625); draw(0);
+  function setTxt(id,v){ var el=document.getElementById(id); if(!el||el.textContent===v) return;
+    el.textContent=v; if(el.tagName==="DD"){ el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); } }
+  function sync(){
+    var d=FM[metric];
+    setTxt("oFn", String(d.n));
+    setTxt("oFk", String(rule==="ge"?d.ge:d.gt));
+    setTxt("oFr", rule==="ge"?d.rGe:d.rGt);
+    setTxt("oFclab", d.reg ? (rule==="ge" ? "95% CI" : "Status") : "Status");
+    setTxt("oFc", d.reg ? (rule==="ge" ? d.ci : "strict rate, no CI reported") : "exploratory, outside the registered family");
+  }
+  document.querySelectorAll("[data-fm]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("[data-fm]").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on"); metric=b.dataset.fm; if(rec) rec.t=0; sync(); draw(0);
+    });
+  });
+  document.querySelectorAll("[data-frule]").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("[data-frule]").forEach(function(o){ o.classList.remove("on"); });
+      b.classList.add("on"); rule=b.dataset.frule; if(rec) rec.t=0.7; sync(); draw(rec?rec.t:1);
+    });
+  });
+  sync();
+})();
+
+/* ================= FIG 9: Arm A, Spearman rho per metric ================= */
+(function(){
+  var c=document.getElementById("cRho"); if(!c) return;
+  var D=[
+    ["BLEU",-1.000,-1.000,-1.000,"surface"],["chrF",-1.000,-1.000,-1.000,"surface"],
+    ["spBLEU",-1.000,-1.000,-1.000,"surface"],["YiSi-1",-1.000,-1.000,-1.000,"ref_based_neural"],
+    ["BERTScore",-0.989,-0.996,-0.982,"ref_based_neural"],["AEGIS",-0.971,-0.987,-0.949,"unknown"],
+    ["FACET_869543",-0.944,-0.976,-0.905,"unknown"],["FACET_869546",-0.944,-0.976,-0.905,"unknown"],
+    ["COMET22",-0.943,-0.969,-0.912,"ref_based_neural"],["Gemma 4, reference-based",-0.910,-0.924,-0.895,"llm_judge"],
+    ["bytepop_pro10",-0.898,-0.924,-0.867,"unknown"],["bytepop_pro9",-0.898,-0.924,-0.867,"unknown"],
+    ["Gemma 4",-0.895,-0.911,-0.878,"llm_judge"],["COMETKiwi22",-0.858,-0.889,-0.825,"ref_free_qe"],
+    ["Cohere CAT+ ensemble",-0.844,-0.883,-0.798,"unknown"],["Qwen 3.6, reference-based",-0.834,-0.870,-0.798,"llm_judge"],
+    ["xCOMET-XXL-ref",-0.801,-0.863,-0.732,"ref_based_neural"],["Qwen 3.6",-0.799,-0.832,-0.766,"llm_judge"],
+    ["Vertical_870554",-0.796,-0.840,-0.745,"unknown"],["Gemini-3.6-Flash",-0.781,-0.830,-0.732,"unknown"],
+    ["xCOMET-XL-ref",-0.740,-0.801,-0.676,"ref_based_neural"],["gemba-poly",-0.698,-0.763,-0.629,"llm_judge"],
+    ["xCOMET-XXL-QE",-0.695,-0.774,-0.614,"ref_free_qe"],["Vertical_870257",-0.678,-0.734,-0.623,"unknown"],
+    ["xCOMET-XL-QE",-0.649,-0.714,-0.580,"ref_free_qe"],["MQM-LLM Confidence Aware",-0.561,-0.622,-0.498,"unknown"],
+    ["MQM-LLM",-0.474,-0.553,-0.397,"unknown"],["fluency2-gemini35-esa",-0.367,-0.453,-0.280,"unknown"]
+  ];
+  var V0=-1.06, V1=0.16;
+  function draw(t){
+    var k=hidpi(c,0.8125), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560, fs=narrow?8.5:10;
+    var maxlab=0, i;
+    for(i=0;i<D.length;i++) maxlab=Math.max(maxlab, tw(x,D[i][0],fs));
+    var m={l:Math.min(maxlab+20, w*0.42), r:narrow?44:64, t:44, b:narrow?82:66};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    function X(v){ return m.l + (v-V0)/(V1-V0)*pw; }
+    var gy=m.t+ph;
+    /* the registered null region */
+    x.fillStyle=rgba(T_INK,0.05); x.fillRect(X(0), m.t-8, X(V1)-X(0), ph+8);
+    labC(x, narrow?"H₀: ρ ≥ 0":"registered null, ρ ≥ 0", (X(0)+X(V1))/2, m.t-14, INK3, narrow?8.5:9.5);
+    x.strokeStyle=RULE2; x.lineWidth=1;
+    x.beginPath(); x.moveTo(m.l,gy); x.lineTo(m.l+pw,gy); x.stroke();
+    var tk=[-1,-0.8,-0.6,-0.4,-0.2,0];
+    for(i=0;i<tk.length;i++){
+      var tx=X(tk[i]);
+      x.beginPath(); x.moveTo(tx,gy); x.lineTo(tx,gy+5); x.stroke();
+      labC(x,(tk[i]<0?"−":"")+Math.abs(tk[i]).toFixed(1),tx,gy+18,INK4,9.5);
+      x.strokeStyle=rgba(T_INK,0.05); x.beginPath(); x.moveTo(tx,m.t-8); x.lineTo(tx,gy); x.stroke();
+      x.strokeStyle=RULE2;
+    }
+    labC(x, narrow?"Spearman ρ, dose against score":"within-source Spearman ρ, dose against oriented score",m.l+pw/2,gy+36,INK3,narrow?9:10);
+    var rowH=ph/D.length;
+    for(i=0;i<D.length;i++){
+      var d=D[i], yy=m.t+rowH*(i+0.5), tcol=FAM[d[4]].t;
+      var a=reduce?1:easeIO(clamp((t-0.1-i*0.05)/0.7,0,1));
+      labR(x,d[0],m.l-9,yy+3,d[4]==="ref_free_qe"?WARMD:INK2,fs);
+      if(a<=0) continue;
+      x.globalAlpha=a;
+      var lo=d[1]+(d[2]-d[1])*a, hi=d[1]+(d[3]-d[1])*a;
+      x.strokeStyle=rgba(tcol,0.75); x.lineWidth=narrow?1.4:2;
+      x.beginPath(); x.moveTo(X(lo),yy); x.lineTo(X(hi),yy); x.stroke();
+      x.fillStyle=rgba(tcol,1); x.beginPath(); x.arc(X(d[1]),yy,narrow?2.6:3.4,0,6.283); x.fill();
+      if(a>0.95) lab(x,"−"+Math.abs(d[1]).toFixed(2), X(d[3])+7, yy+3, INK3, narrow?8:9);
+      x.globalAlpha=1;
+    }
+    /* family legend */
+    var ly=h-(narrow?26:12), lx=m.l, keys=["ref_free_qe","ref_based_neural","llm_judge","surface","unknown"];
+    x.save(); mono(x,narrow?8.5:9.5);
+    for(i=0;i<keys.length;i++){
+      var ww=x.measureText(FAM[keys[i]].l).width;
+      if(lx+14+ww > w-10 && lx>m.l){ lx=m.l; ly+=14; }
+      x.fillStyle=rgba(FAM[keys[i]].t,0.9); x.fillRect(lx,ly-9,9,9);
+      x.fillStyle=INK3; x.fillText(FAM[keys[i]].l, lx+14, ly);
+      lx += 14 + ww + 16;
+    }
+    x.restore();
+  }
+  register(c,draw,0.8125); draw(0);
+})();
+
+/* ================= FIG 10: Arm C, contrastive accuracy per system ================= */
+(function(){
+  var c=document.getElementById("cNum"); if(!c) return;
+  var D=[
+    ["BERTScore",1.000,1.000,"ref_based_neural"],["BLEU",1.000,1.000,"surface"],
+    ["COMET22",1.000,1.000,"ref_based_neural"],["YiSi-1",1.000,1.000,"ref_based_neural"],
+    ["chrF",1.000,1.000,"surface"],["spBLEU",1.000,1.000,"surface"],
+    ["bytepop_pro10",0.992,0.984,"unknown"],["bytepop_pro9",0.989,0.979,"unknown"],
+    ["AEGIS",0.973,0.947,"unknown"],["xCOMET-XXL-ref",0.973,0.950,"ref_based_neural"],
+    ["Gemma 4",0.963,0.946,"llm_judge"],["Lexicala, majority vote, 206 pairs",0.961,0.922,"ref_free_qe"],
+    ["Gemma 4, reference-based",0.951,0.916,"llm_judge"],["cuni-v14-regression, 277 pairs",0.935,0.870,"ref_free_qe"],
+    ["Cohere CAT+ ensemble",0.932,0.911,"unknown"],["Vertical_870554",0.929,0.874,"unknown"],
+    ["Qwen 3.6",0.922,0.895,"llm_judge"],["Lexicala, STAPLE, 206 pairs",0.917,0.835,"ref_free_qe"],
+    ["Gemini-3.6-Flash",0.906,0.844,"unknown"],["Qwen 3.6, reference-based",0.906,0.842,"llm_judge"],
+    ["xCOMET-XL-ref",0.905,0.838,"ref_based_neural"],["FACET_869543",0.897,0.839,"unknown"],
+    ["Vertical_870257",0.884,0.798,"unknown"],["COMETKiwi22",0.880,0.766,"ref_free_qe"],
+    ["xCOMET-XXL-QE",0.875,0.789,"ref_free_qe"],["xCOMET-XL-QE",0.865,0.772,"ref_free_qe"],
+    ["gemba-poly",0.823,0.693,"llm_judge"],["FACET_869546",0.809,0.659,"unknown"],
+    ["fluency2-gemini35-esa",0.626,0.280,"unknown"],
+    ["MQM-LLM Confidence Aware",0.439,-0.124,"unknown",true],["MQM-LLM",0.397,-0.212,"unknown",true]
+  ];
+  function draw(t){
+    var k=hidpi(c,0.8125), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560, fs=narrow?8.5:10;
+    var maxlab=0, i;
+    for(i=0;i<D.length;i++) maxlab=Math.max(maxlab, tw(x,D[i][0],fs));
+    var m={l:Math.min(maxlab+20, w*0.44), r:narrow?46:70, t:36, b:narrow?82:66};
+    var pw=w-m.l-m.r, ph=h-m.t-m.b;
+    function X(v){ return m.l + v*pw; }
+    var gy=m.t+ph;
+    x.strokeStyle=RULE2; x.lineWidth=1;
+    x.beginPath(); x.moveTo(m.l,gy); x.lineTo(m.l+pw,gy); x.stroke();
+    for(i=0;i<=4;i++){
+      var tx=X(i/4);
+      x.beginPath(); x.moveTo(tx,gy); x.lineTo(tx,gy+5); x.stroke();
+      labC(x,(i/4).toFixed(2),tx,gy+18,INK4,9.5);
+      x.strokeStyle=rgba(T_INK,0.05); x.beginPath(); x.moveTo(tx,m.t-8); x.lineTo(tx,gy); x.stroke();
+      x.strokeStyle=RULE2;
+    }
+    x.strokeStyle=rgba(T_INK,0.40); x.setLineDash([3,3]);
+    x.beginPath(); x.moveTo(X(0.5),m.t-8); x.lineTo(X(0.5),gy); x.stroke(); x.setLineDash([]);
+    labC(x,"chance",X(0.5),m.t-14,INK3,9.5);
+    labC(x, narrow?"contrastive accuracy; labels are Kendall τb":"contrastive accuracy on the numeric pairs, ties as half credit; labels are Kendall τb",m.l+pw/2,gy+36,INK3,narrow?8.5:10);
+    var rowH=ph/D.length, bh=Math.min(narrow?9:14, rowH*0.66);
+    for(i=0;i<D.length;i++){
+      var d=D[i], yy=m.t+rowH*(i+0.5), tcol=d[4]?[169,68,56]:FAM[d[3]].t;
+      var a=reduce?1:easeIO(clamp((t-0.1-i*0.045)/0.7,0,1));
+      labR(x,d[0],m.l-9,yy+3,d[4]?"#a94438":(d[3]==="ref_free_qe"?WARMD:INK2),fs);
+      if(a<=0) continue;
+      var bw=(X(d[1])-X(0))*a;
+      x.fillStyle=rgba(tcol, d[4]?0.35:0.72);
+      x.fillRect(X(0), yy-bh/2, bw, bh);
+      if(d[4]){
+        /* hatch the 2 inverting systems */
+        x.save(); x.beginPath(); x.rect(X(0), yy-bh/2, bw, bh); x.clip();
+        x.strokeStyle=rgba(tcol,0.9); x.lineWidth=1;
+        for(var hx=X(0)-bh; hx<X(0)+bw+bh; hx+=5){ x.beginPath(); x.moveTo(hx,yy+bh/2); x.lineTo(hx+bh,yy-bh/2); x.stroke(); }
+        x.restore();
+      }
+      if(a>0.95) lab(x,(d[2]<0?"−":"+")+Math.abs(d[2]).toFixed(2), X(d[1])+7, yy+3, d[4]?"#a94438":INK3, narrow?8:9);
+    }
+    var ly=h-(narrow?26:12), lx=m.l, keys=["ref_free_qe","ref_based_neural","llm_judge","surface","unknown"];
+    x.save(); mono(x,narrow?8.5:9.5);
+    for(i=0;i<keys.length;i++){
+      var ww=x.measureText(FAM[keys[i]].l).width;
+      if(lx+14+ww > w-10 && lx>m.l){ lx=m.l; ly+=14; }
+      x.fillStyle=rgba(FAM[keys[i]].t,0.9); x.fillRect(lx,ly-9,9,9);
+      x.fillStyle=INK3; x.fillText(FAM[keys[i]].l, lx+14, ly);
+      lx += 14 + ww + 16;
+    }
+    x.restore();
+  }
+  register(c,draw,0.8125); draw(0);
+})();
+
+/* ================= FIG 11: reference-free QE by stratum ================= */
+(function(){
+  var c=document.getElementById("cStrata"); if(!c) return;
+  var R=[
+    {l:"S1, subtle LLM edits, 89",      s:"S1, 89",  A:-0.604, Alo:-0.747, Ahi:-0.462, P:0.154, Plo:0.107, Phi:0.203},
+    {l:"S2, deterministic, real MT, 100", s:"S2, 100", A:-0.474, Alo:-0.590, Ahi:-0.359, P:0.104, Plo:0.074, Phi:0.135},
+    {l:"S3, deterministic, reference, 119", s:"S3, 119", A:-0.538, Alo:-0.634, Ahi:-0.449, P:0.058, Plo:0.035, Phi:0.085},
+    {l:"predicted not to break, 304",   s:"not predicted, 304", A:-0.503, P:0.094, pt:true},
+    {l:"real WMT24 bases, 189",         s:"real MT, 189", A:-0.487, P:0.129, pt:true}
+  ];
+  function panel(x, t, x0, x1, y0, y1, key, V0, V1, ticks, title, pooled, fmt, narrow){
+    var lw = narrow ? 92 : 190;
+    var m={l:x0+lw, r:x1-(narrow?40:56), t:y0+40, b:y1-40};
+    var pw=m.r-m.l, ph=m.b-m.t;
+    function X(v){ return m.l + (v-V0)/(V1-V0)*pw; }
+    var i;
+    lab(x,title,x0,y0+16,INK4,9.5,1.1);
+    x.strokeStyle=RULE2; x.lineWidth=1;
+    x.beginPath(); x.moveTo(m.l,m.b); x.lineTo(m.r,m.b); x.stroke();
+    for(i=0;i<ticks.length;i++){
+      var tx=X(ticks[i]);
+      x.beginPath(); x.moveTo(tx,m.b); x.lineTo(tx,m.b+5); x.stroke();
+      labC(x,fmt(ticks[i]),tx,m.b+17,INK4,9);
+      x.strokeStyle=rgba(T_INK,0.05); x.beginPath(); x.moveTo(tx,m.t); x.lineTo(tx,m.b); x.stroke();
+      x.strokeStyle=RULE2;
+    }
+    /* pooled S2+S3 reference */
+    x.strokeStyle=rgba(T_INK,0.35); x.setLineDash([3,3]);
+    x.beginPath(); x.moveTo(X(pooled),m.t-6); x.lineTo(X(pooled),m.b); x.stroke(); x.setLineDash([]);
+    labC(x, narrow?"S2+S3 "+fmt(pooled):"S2+S3 pooled "+fmt(pooled), X(pooled), m.t-10, INK3, 8.5);
+    var rowH=ph/R.length;
+    for(i=0;i<R.length;i++){
+      var d=R[i], yy=m.t+rowH*(i+0.5);
+      var a=reduce?1:easeIO(clamp((t-0.15-i*0.14)/0.8,0,1));
+      labR(x, narrow?d.s:d.l, m.l-10, yy+3.5, INK2, narrow?8.5:9.5);
+      if(i===3){ x.strokeStyle=RULE2; x.beginPath(); x.moveTo(x0,yy-rowH/2); x.lineTo(m.r,yy-rowH/2); x.stroke(); }
+      x.globalAlpha=a;
+      var v=d[key];
+      if(!d.pt){
+        var lo=d[key+"lo"], hi=d[key+"hi"];
+        var l2=v+(lo-v)*a, h2=v+(hi-v)*a;
+        x.strokeStyle=rgba(T_WARM,0.85); x.lineWidth=2.2;
+        x.beginPath(); x.moveTo(X(l2),yy); x.lineTo(X(h2),yy); x.stroke();
+        x.lineWidth=1.2;
+        x.beginPath(); x.moveTo(X(l2),yy-4); x.lineTo(X(l2),yy+4); x.moveTo(X(h2),yy-4); x.lineTo(X(h2),yy+4); x.stroke();
+      }
+      x.fillStyle=rgba(T_WARM,1); x.beginPath(); x.arc(X(v),yy,d.pt?3.6:4.6,0,6.283); x.fill();
+      x.strokeStyle="#fff"; x.lineWidth=1.4; x.stroke();
+      if(a>0.95) lab(x, fmt(v), (d.pt?X(v):X(d[key+"hi"]))+8, yy+3.5, INK2, 9);
+      x.globalAlpha=1;
+    }
+  }
+  function draw(t){
+    var k=hidpi(c,0.625), x=k.x, w=k.w, h=k.h;
+    x.fillStyle="#fff"; x.fillRect(0,0,w,h);
+    var narrow=w<560;
+    var fA=function(v){ return (v<0?"−":"")+Math.abs(v).toFixed(2); };
+    var fP=function(v){ return v.toFixed(2); };
+    if(narrow){
+      panel(x,t,16,w-6,8,h*0.5-6,"A",-0.80,-0.30,[-0.8,-0.6,-0.4],"A, REFERENCE-FREE QE",-0.510,fA,true);
+      panel(x,t,16,w-6,h*0.5+6,h-8,"P",0.0,0.22,[0,0.05,0.10,0.15,0.20],"MEAN P FLIP",0.079,fP,true);
+    } else {
+      panel(x,t,18,w*0.5-8,10,h-6,"A",-0.80,-0.30,[-0.8,-0.7,-0.6,-0.5,-0.4,-0.3],"RELATIVE ASYMMETRY A, REFERENCE-FREE QE",-0.510,fA,false);
+      panel(x,t,w*0.5+8,w-6,10,h-6,"P",0.0,0.22,[0,0.05,0.10,0.15,0.20],"MEAN P FLIP OVER THE 4 REFERENCE-FREE METRICS",0.079,fP,false);
+    }
+  }
+  register(c,draw,0.625); draw(0);
+})();
+
+})();
+</script>
+</body>
+</html>

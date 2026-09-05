@@ -38,7 +38,7 @@ in between.
 | File | What it covers |
 | --- | --- |
 | `abguardrail.html` | ab-guardrail, a command-line A/B-test guardrail: SRM detection, metric tests, BH-FDR, propensity matching |
-| `barec.html` | BAREC 2026 Arabic sentence readability shared task, 2nd place in the Strict and Open tracks at 85.3 QWK |
+| `barec.html` | BAREC 2026 Arabic sentence readability shared task, 1st place in the Strict and Open tracks at 85.3 QWK |
 | `bluedot-fold.html` | BlueDot Technical AI Safety Puzzle #1: a feature stored as a magnitude behind a ReLU absolute-value fold |
 | `hidden-markov-models.html` | Essay: a geometric reading of hidden Markov models, EM, forward-backward, and Viterbi |
 | `jpmc.html` | JPMorgan Chase and Forage quantitative research: credit-risk thresholding, FICO bucketing, gas-storage Q-learning |

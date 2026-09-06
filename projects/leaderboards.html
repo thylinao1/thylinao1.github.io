@@ -407,20 +407,22 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 
 /* ---------- hero ---------- */
 #hero{padding:0;position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;background:linear-gradient(180deg,#0b0f25 0%,#171b3a 60%,#221f3a 100%);color:#fff;isolation:isolate}
-#hero::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+#hero::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
   background:radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
-#heroGL,#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
-#heroCanvas{z-index:1}
+#heroPoster,#heroGL,#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+#heroPoster img{width:100%;height:100%;object-fit:cover;display:block}
+#heroGL{z-index:1;opacity:0;transition:opacity .7s ease}
+#heroCanvas{z-index:2}
 @media(min-width:901px){
-  #heroGL,#heroCanvas{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.8) 30%,#000 52%);mask-image:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.8) 30%,#000 52%)}
+  #heroPoster,#heroGL,#heroCanvas{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.8) 30%,#000 52%);mask-image:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.8) 30%,#000 52%)}
   #hero::after{background:linear-gradient(100deg,rgba(14,18,32,.50) 0%,rgba(14,18,32,.20) 32%,transparent 54%),linear-gradient(180deg,rgba(14,18,32,.40) 0%,rgba(14,18,32,.16) 28%,transparent 48%),radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
 }
 @media(max-width:900px){
-  #heroGL,#heroCanvas{top:auto;bottom:0;height:58svh;-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 52%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 52%)}
+  #heroPoster,#heroGL,#heroCanvas{top:auto;bottom:0;height:58svh;-webkit-mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 52%);mask-image:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 30%,#000 52%)}
   #hero .wrap{padding-bottom:46svh}
   #hero::after{background:linear-gradient(180deg,rgba(14,18,32,.52) 0%,rgba(14,18,32,.26) 30%,transparent 56%),radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
 }
-#hero .wrap{position:relative;z-index:3;padding-top:84px;padding-bottom:70px}
+#hero .wrap{position:relative;z-index:4;padding-top:84px;padding-bottom:70px}
 @media(min-width:901px){#hero h1{max-width:24ch}#hero .sub{max-width:800px}}
 #hero .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-bright);margin:0 0 26px;line-height:1.5}
 #hero .tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent-bright);margin-right:11px;vertical-align:1px;box-shadow:0 0 0 4px rgba(111,146,191,.20)}
@@ -447,7 +449,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 .hero-legend{position:absolute;right:34px;bottom:34px;z-index:4;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#93a2bb;display:flex;gap:16px}
 .hero-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:-1px}
 @media(max-width:900px){.hero-legend{display:none}}
-.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:4;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#93a2bb;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:5;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#93a2bb;display:flex;flex-direction:column;align-items:center;gap:8px}
 .scrollcue span{display:block;width:1px;height:34px;background:linear-gradient(#93a2bb,transparent);animation:cue 2.4s var(--ease) infinite}
 @keyframes cue{0%{transform:scaleY(.2);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 @media (prefers-reduced-motion:reduce){.scrollcue span{animation:none}}
@@ -592,6 +594,10 @@ details.srcbox ol.sources{margin-top:12px}
 
 <!-- ============================= HERO ============================= -->
 <section id="hero" aria-labelledby="hero-h">
+  <picture id="heroPoster" aria-hidden="true">
+    <source media="(max-width:900px)" srcset="assets/leaderboards/hero-poster-mobile.jpg">
+    <img src="assets/leaderboards/hero-poster.jpg" alt="" width="1440" height="810" loading="eager" fetchpriority="high">
+  </picture>
   <canvas id="heroGL" aria-hidden="true"></canvas>
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="wrap">
@@ -2768,6 +2774,7 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
 (function(){
   var c = document.getElementById("heroGL"), ov = document.getElementById("heroCanvas"); if(!c||!ov) return;
   var heroEl = document.getElementById("hero"), T = Terrain;
+  var POSTER = /[?&]poster=1/.test(location.search);   /* capture mode: no scanning band, for the still that stands in until the first frame */
   var gl = null;
   try{ gl = c.getContext("webgl2", {alpha:false, antialias:true, depth:true, stencil:false, premultipliedAlpha:false, powerPreference:"high-performance"}); }catch(e){}
   if(!gl){ c.style.display = "none"; return; }   /* the CSS sky gradient stays */
@@ -3064,7 +3071,7 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
     gl.drawElements(gl.TRIANGLE_STRIP, NI, gl.UNSIGNED_INT, 0);
     /* the scanning band and its base line, depth-tested against the surface */
     var i;
-    if(rise > 0.9){
+    if(rise > 0.9 && !POSTER){
       var z, hh, ob = 0, ol = 0;
       for(i=0;i<NW;i++){ z = Z0 + (i/(NW-1))*WZ; hh = T.h(sx, z)*rise;
         WB[ob++]=sx; WB[ob++]=hh; WB[ob++]=z; WB[ob++]=1; WB[ob++]=sx; WB[ob++]=hh+0.9; WB[ob++]=z; WB[ob++]=0;
@@ -3091,6 +3098,7 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
       for(i=1;i<tops.length;i++) x.lineTo(tops[i][0],tops[i][1]);
       if(tops.length===3) x.closePath(); x.stroke(); x.setLineDash([]);
     }
+    if(lastPaint < 0) c.style.opacity = "1";   /* the live frame fades in over the poster */
     lastPaint = t;
   }
   register(heroEl, draw, 1);

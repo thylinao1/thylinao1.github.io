@@ -337,6 +337,28 @@
 
   /* featured research card (compact banner) */
   .research-feature{padding:52px 0 4px; border-top:none}
+  .feature-row{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:18px; align-items:stretch}
+  @media(max-width:900px){ .feature-row{grid-template-columns:1fr} }
+  .latest-card{
+    display:flex; flex-direction:column; text-decoration:none; color:var(--ink); min-width:0;
+    border:1px solid var(--rule-strong); border-radius:12px;
+    background:linear-gradient(180deg, var(--bg-2), var(--bg));
+    padding:14px 24px 16px; transition:border-color .18s, box-shadow .18s, transform .18s;
+  }
+  .latest-card:hover{border-color:var(--accent); box-shadow:0 12px 34px rgba(21,17,11,.10); transform:translateY(-2px)}
+  .latest-card:focus{outline:none}
+  .latest-card:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
+  .latest-card .feature-tag{color:var(--accent)}
+  .latest-card .feature-tag .dot{background:var(--accent); box-shadow:0 0 0 4px var(--accent-bg)}
+  .latest-card .exp-meta{display:flex; align-items:center; gap:12px; margin:2px 0 10px}
+  .latest-card .exp-meta .date{margin:0}
+  .latest-card .latest-title{
+    font-family:var(--font-display); font-size:clamp(22px, 2.1vw, 28px); font-weight:400; line-height:1.1; margin:0 0 8px; color:var(--ink);
+    text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:5px; text-decoration-color:var(--rule-strong); transition:color .15s, text-decoration-color .15s;
+  }
+  .latest-card:hover .latest-title{color:var(--accent); text-decoration-color:var(--accent)}
+  .latest-card .latest-desc{color:var(--ink-2); font-size:13.5px; line-height:1.5; margin:0 0 10px; max-width:34em}
+  .latest-card .blog-read{margin-top:auto}
   .feature-card{
     display:block; text-decoration:none; color:var(--ink);
     border:1px solid var(--rule-strong); border-radius:12px;
@@ -351,16 +373,16 @@
   .feature-card:focus{outline:none}
   .feature-card:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
   .feature-tag{
-    display:inline-flex; align-items:center; gap:9px;
+    display:inline-flex; align-items:flex-start; gap:9px; line-height:1.35;
     font-family:var(--font-mono); font-size:13px; letter-spacing:.1em;
     text-transform:uppercase; color:var(--good); font-weight:600; margin-bottom:6px;
   }
   .feature-tag .dot{
-    width:8px; height:8px; border-radius:50%; background:var(--good);
+    width:8px; height:8px; border-radius:50%; background:var(--good); flex:none; margin-top:5px;
     box-shadow:0 0 0 4px rgba(31,107,58,.14);
   }
   .feature-grid{display:flex; align-items:center; gap:18px}
-  .feature-main{flex:0 1 670px; min-width:0}
+  .feature-main{flex:1 1 auto; min-width:0}
   .feature-title{font-size:clamp(20px, 2.3vw, 27px); margin:0 0 6px; line-height:1.08}
   .feature-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0 0 7px; max-width:48em}
   .feature-cta{
@@ -380,8 +402,9 @@
     border-radius:999px; padding:8px 16px; text-decoration:none; transition:background .15s, color .15s;
   }
   .feature-grant:hover{background:var(--accent-bg); color:var(--accent)}
-  .feature-aside{flex:1 1 0; display:flex; justify-content:flex-end; align-items:center; transform:translateY(-16px)}
-  .feature-aside svg{width:100%; height:auto; max-width:351px}
+  .feature-aside{flex:0 0 200px; display:flex; justify-content:flex-end; align-items:center}
+  .feature-aside svg{width:100%; height:auto; max-width:200px}
+  @media(max-width:1100px){ .feature-aside{display:none} }
   @media(max-width:680px){
     .feature-card{padding:16px 18px}
     .feature-grid{flex-direction:column; align-items:flex-start; gap:14px}
@@ -765,14 +788,24 @@
 <!-- ============ FEATURED RESEARCH ============ -->
 <section id="research" class="s research-feature">
   <div class="wrap">
+    <div class="feature-row">
+    <a class="latest-card" href="projects/leaderboards.html" target="_blank" rel="noopener">
+      <div class="feature-tag"><span class="dot"></span>Latest blog</div>
+      <div class="exp-meta">
+        <span class="date">2026 · ~70 min read</span>
+        <span class="type essay">Essay</span>
+      </div>
+      <h2 class="latest-title">What the Leaderboards Are Actually Measuring</h2>
+      <p class="latest-desc">A critique of the public evaluation metrics for frontier AI models, using the launch week of Claude Fable 5.1 and GPT-6 Astra as the running case.</p>
+      <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
+    </a>
     <div class="feature-card">
       <div class="feature-tag"><span class="dot"></span>Funded AI-Safety Research (ongoing) · BlueDot Impact Rapid Grant</div>
       <div class="feature-grid">
         <div class="feature-main">
           <h2 class="display feature-title">Does a language model's chain-of-thought <span style="font-style:normal; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px">actually cause</span> its answer?</h2>
           <p class="feature-desc">
-            A Bayesian causal-mediation test of whether an LLM's stated reasoning truly drives
-            its answer or is just post-hoc, with calibrated uncertainty for scalable oversight.
+            A Bayesian causal-mediation test of whether an LLM's stated reasoning drives its answer or is post-hoc, with calibrated uncertainty for scalable oversight.
           </p>
           <div class="feature-actions">
             <a class="feature-cta" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Explore the funded AI-safety research <span class="arrow">&rarr;</span></a>
@@ -800,6 +833,7 @@
           </svg>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </section>
@@ -1435,14 +1469,9 @@
           <p class="sub">A critique of the public evaluation metrics for frontier AI models</p>
           <p class="blog-excerpt">
             Arena rankings, benchmark scores and lab-reported numbers get read as measurements of
-            capability. This essay looks at what they measure instead: voter preference for style
-            and length, contaminated and saturated test sets, model judges with their own biases,
-            private testing of many variants before one score is disclosed, and harness settings that
-            moved one model from 62.7% to 99.9% on the same benchmark in the same week. Written around
-            the launch week of September 2026, when Anthropic's Claude Fable 5.1 and OpenAI's GPT-6 Astra
-            shipped two days apart, with the same checks applied to both labs and every number traced
-            to a primary source. Summary at the top, glossary pop-ups throughout, scroll-driven figures
-            and interactive simulations.
+            capability. This essay asks what each of them measures and under which conditions a score
+            says something about capability, using the launch week of Claude Fable 5.1 and GPT-6 Astra
+            as the running case, with the same checks applied to both labs.
           </p>
           <div class="tags">
             <span class="tag">AI Evaluation</span>

@@ -68,6 +68,18 @@ h2::after{content:"";position:absolute;left:50%;bottom:0;height:2px;width:0;tran
 h2.in::after{width:132px}
 h3{font-family:var(--font-display);font-weight:500;font-size:22px;line-height:1.3;letter-spacing:-.008em;margin:52px 0 12px;padding-top:16px;border-top:1px solid var(--rule-strong)}
 .deep-panel h3,.modal h3,#defs h3,footer h3{border-top:none;padding-top:0}
+details.drop{border-top:1px solid var(--rule-strong);margin:30px 0 0}
+details.drop summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:18px 0 14px}
+details.drop summary::-webkit-details-marker{display:none}
+details.drop summary::before{content:"";flex:none;width:8px;height:8px;border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);transform:rotate(-45deg);transition:transform .25s var(--ease);margin-left:2px}
+details.drop[open] summary::before{transform:rotate(45deg)}
+details.drop summary h3{margin:0;padding:0;border:none;transition:color .15s}
+details.drop summary:hover h3{color:var(--accent-deep)}
+details.drop summary:focus-visible{outline:2px solid var(--accent-deep);outline-offset:4px;border-radius:2px}
+details.drop .drop-body{padding:0 0 10px}
+details.drop .drop-body > p:first-child{margin-top:0}
+.read p.method,p.method{font-size:12.5px;line-height:1.55;color:var(--ink-4)}
+.read p.method b{color:var(--ink-3)}
 .deep-panel h4{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(238,240,245,.6);margin:26px 0 10px;font-weight:500}
 .deep-panel ol.steps{margin:0;padding-left:22px;color:#c3cad8}
 .deep-panel ol.steps li{margin:0 0 9px;line-height:1.5}
@@ -632,7 +644,7 @@ details.srcbox ol.sources{margin-top:12px}
       reported by the same organisation. Both numbers are correct under their own conditions, and the conditions are the subject of this essay.</p>
 
     <div class="read">
-      <p class="reveal">Evaluation is measurement. Someone starts with a <button type="button" class="term" data-modal="m-construct">construct</button>
+      <p class="reveal">Evaluation is a form of measurement. Someone starts with a <button type="button" class="term" data-modal="m-construct">construct</button>
         they care about, such as whether a model can reason about a situation it has never seen. They operationalise it as a set of items
         and a scoring rule. They run the system under some configuration. They report a number, ideally with its uncertainty. Every failure
         discussed on this page is a failure at one of those four joints: a construct nobody defined, an operationalisation that measures
@@ -703,13 +715,13 @@ details.srcbox ol.sources{margin-top:12px}
     <div class="read">
 
       <h3 class="reveal">What a number can separate</h3>
-      <p class="reveal">A small numerical fact governs everything that follows. If a benchmark has <i>n</i> independent pass-or-fail items and the true pass rate is
+      <p class="reveal">One numerical fact matters for everything that follows. If a benchmark has <i>n</i> independent pass-or-fail items and the true pass rate is
         <i>p</i>, the <button type="button" class="term" data-modal="m-se">standard error</button> of the measured accuracy is the square root of <i>p</i>(1&minus;<i>p</i>)/<i>n</i>. For <i>n</i> = 100
         and <i>p</i> = 0.70 that is 0.046, so a 95% interval spans roughly nine points either side. Two models that differ by three points on a
         100-item benchmark of single-attempt tasks are not distinguished by it under a conventional test. For <i>n</i> = 1,000 the interval shrinks to about three points. Most agent
         benchmarks have a few hundred tasks or fewer, and the tasks inside them are rarely independent, which widens the interval further. The
         calculator in <a href="#p7">problem 7</a> lets you set <i>n</i> and <i>p</i> and overlay the benchmarks named in this essay.</p>
-      <p class="reveal">Two cautions travel with the formula. First, the right comparison between two models scored on the same items is a paired one:
+      <p class="reveal">Two cautions apply to the formula. First, the right comparison between two models scored on the same items is a paired one:
         what matters is how often the two disagree on an item, not whether their separate intervals overlap. Two intervals can overlap while the paired
         difference is clear, and a difference that fails the test is not evidence that the models are equivalent. Second, the formula is for independent
         pass-or-fail items. Scores that average fractional credit, Elo ratings fitted to votes, and composite indices each need their own error model,
@@ -733,7 +745,7 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
       <h3 class="reveal">Does the score predict the work?</h3>
       <p class="reveal">A benchmark can be repeatable, uncontaminated and correctly graded and still be a poor guide to the decision a reader is
         making. The practical test of an instrument is whether a higher score predicts a better outcome on the work the reader cares about, for the
-        people who will do it, at the cost they will pay. Agreement with another leaderboard is convergent evidence, not that test. A model can score
+        people who will do it, at the cost they will pay. Agreement with another leaderboard is convergent evidence, but it is not that test. A model can score
         higher and still need more supervision, fail more often on one workload, or make errors that are harder to notice and repair. The Holistic
         Evaluation of Language Models framework made the point in 2022 by scoring models on many scenarios and on several dimensions at once, among them
         accuracy, calibration, robustness, fairness and efficiency, rather than on one aggregate.<sup class="src"><a href="#s116">116</a></sup>
@@ -834,17 +846,15 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         cases that reject functionally correct submissions" while scores kept "improving from 74.9% to 80.9% in the last 6 months", and stopped
         reporting the benchmark it had built.<sup class="src"><a href="#s99">99</a></sup></p>
       <details class="more"><summary>Saturation: how quickly benchmarks reach their ceiling</summary><div>
-<p class="reveal">A 2026 audit of multiple-choice sets made the dependence on item quality explicit: injecting noise into the distractors "raises accuracy to nearly 100%, confirming that most errors disappear when meaningful distractor competition is removed", an intervention that also changes the difficulty of the task.<sup class="src"><a href="#s66">66</a></sup> When strong models clear most of the items a benchmark stops separating them. That is saturation,
-        and it now arrives quickly. <button type="button" class="term" data-modal="m-epoch">Epoch AI</button>, which tracks benchmarks across generations, states that "Most benchmarks saturate too quickly to study long-run AI trends", that "benchmarks tend to saturate within
+<p class="reveal">A 2026 audit of multiple-choice sets made the dependence on item quality explicit: injecting noise into the distractors "raises accuracy to nearly 100%, confirming that most errors disappear when meaningful distractor competition is removed", an intervention that also changes the difficulty of the task.<sup class="src"><a href="#s66">66</a></sup> When strong models clear most of the items a benchmark stops separating them. That is saturation, and it now arrives within a few years of a benchmark's release. <button type="button" class="term" data-modal="m-epoch">Epoch AI</button>, which tracks benchmarks across generations, states that "Most benchmarks saturate too quickly to study long-run AI trends", that "benchmarks tend to saturate within
         1-3 years" and in May 2026 described GPQA as "clearly saturated", dating the event to the winter of 2025, about two years after
         release.<sup class="src"><a href="#s68">68</a>, <a href="#s42">42</a></sup> A September 2026 paper opens with flagship models "scoring above 90%" on
-        MMLU.<sup class="src"><a href="#s44">44</a></sup> The ARC Prize Foundation's own history is the sharpest version: ARC-AGI-1 stayed
+        MMLU.<sup class="src"><a href="#s44">44</a></sup> The ARC Prize Foundation's own history is the clearest example: ARC-AGI-1 stayed
         unsolved from 2019 until late 2024 "despite a 50,000x scaleup of base LLM pretraining", fell to o3-preview at 75% and then 87% in
         December 2024, and its successor ARC-AGI-3 went from a frontier score of 0.51% at launch on 25 March 2026 to 62.7% and 99.9% under
         the two harnesses by 3 September.<sup class="src"><a href="#s43">43</a>, <a href="#s1">1</a></sup> Near its ceiling a benchmark's
         remaining gaps are decided by a handful of items, and whether those are the last hard items or the disputed ones is an item-level question. A move
-        from 98% to 99% halves the error rate and may be real; it may also be two contested labels. The way to find out is an audit of the disputed
-        items and a recount of the paired difference under plausible labels, not a reading of the headline.</p>
+        from 98% to 99% halves the error rate and may be real; it may also be two contested labels. The way to find out is to audit the disputed items and recompute the paired difference under plausible labels; the headline alone cannot show it.</p>
 </div></details>
 
       <figure class="reveal">
@@ -866,8 +876,7 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
       </figure>
 
       <h3 class="reveal" id="p4">4. Biased model judges</h3>
-      <p class="reveal">Most open-ended evaluation now uses <button type="button" class="term" data-modal="m-judge">a model as the grader</button>, because it is a widely used option that scales; executable checks, structured
-        outcome validation and sampled expert review scale in other ways. The biases were
+      <p class="reveal">Most open-ended evaluation now uses <button type="button" class="term" data-modal="m-judge">a model as the grader</button>, because it is a widely used option that scales, although executable checks, structured outcome validation and sampled expert review also scale in their own ways. The biases were
         catalogued with the MT-Bench paper in 2023 and have not gone away. When the order of two answers was swapped, Claude-v1 gave the same
         verdict 23.8% of the time, GPT-3.5 46.2% and GPT-4 65.0%. Under a "repetitive list" attack that pads an answer without adding content,
         Claude-v1 and GPT-3.5 preferred the padded answer 91.3% of the time and GPT-4 8.7%, on 23 answers. GPT-4 favoured its own outputs by 10 points of win rate and
@@ -912,7 +921,7 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         on 1 September 2026, keeps the permission: "Model providers are allowed to test multiple variants of their models before making them public,
         subject to our system's constraints." Scores collected before release are marked preliminary "until enough fresh votes have been collected
         after the model's public release", and retired models are listed publicly.<sup class="src"><a href="#s19">19</a></sup></p>
-      <p class="reveal">The statistical point, <button type="button" class="term" data-modal="m-selection">selection bias from best-of-N reporting</button>, survives every dispute about magnitude. If a provider tests <i>N</i> variants whose true quality is the
+      <p class="reveal">The statistical point, <button type="button" class="term" data-modal="m-selection">selection bias from best-of-N reporting</button>, does not depend on the disputed magnitudes. If a provider tests <i>N</i> variants whose true quality is the
         same and publishes the best, the published score is biased upward by the expected maximum of <i>N</i> noisy draws: about 0.56 standard
         deviations for two variants, 1.16 for five, 1.54 for ten and close to 2 for 27, under independent noise of equal size. Real variants are
         correlated and differ in true quality, so the figure is the shape of the effect, not an estimate of what any provider gained. The bias is
@@ -987,7 +996,7 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         evaluations of the same model or report statistical significance or uncertainty of results", and a 2025 review of 445 benchmarks found
         that only 53.4% presented evidence for construct validity and fewer than 10% used complete real-world tasks.<sup class="src"><a href="#s46">46</a>, <a href="#s45">45</a></sup></p>
       <details class="more"><summary>Where the variance comes from, and the trial counts that are printed</summary><div>
-<p class="reveal">The sources of variance are mundane. Across the Llama, Qwen and Gemma families, MMLU accuracy varied by about 23%, as the
+<p class="reveal">The sources of variance are ordinary ones. Across the Llama, Qwen and Gemma families, MMLU accuracy varied by about 23%, as the
         authors report it, with the single character used to separate few-shot examples, enough, they note, to put any of the tested models in the lead by choosing the
         separator.<sup class="src"><a href="#s48">48</a></sup> Two common prompting styles moved ARC and MMLU scores by more than 20 points, and
         micro versus macro averaging over MMLU's 57 subjects shifts a headline by several points.<sup class="src"><a href="#s49">49</a></sup>
@@ -1036,7 +1045,7 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         not.<sup class="src"><a href="#s4">4</a>, <a href="#s6">6</a>, <a href="#s2">2</a></sup> Anthropic's table has its own version of the
         pattern: its Terminal-Bench-Science figure of 52.6% comes from an internal setup that reproduces the public leaderboard's numbers for two
         other models "within noise", while the public board itself lists neither Fable 5.1 nor Astra.<sup class="src"><a href="#s12">12</a>, <a href="#s14">14</a></sup>
-        Neither practice is hidden. Both require the reader to hold the footnotes next to the headline, and the headline travels alone.</p>
+        Neither practice is hidden. Both require the reader to hold the footnotes next to the headline, and the headline is usually quoted without them.</p>
 
       <h3 class="reveal" id="p9">9. The tested system is not the shipped one</h3>
       <p class="reveal">Footnote 2 of the same table defines the comparison model as "the version available in our API, ChatGPT Codex, and
@@ -1046,7 +1055,7 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         image: its models were evaluated "with its production safeguards enabled"; on OSWorld 2.0 tasks where a safeguard intervened Fable 5.1 "scored a zero",
         and on the other benchmarks "cybersecurity tasks were completed by Claude Opus 4.8, and biology tasks were completed by Claude Opus 5", so some
         Fable rows report a routed system of three models rather than one.<sup class="src"><a href="#s12">12</a></sup> A shipped system can therefore score below or above the evaluated one depending on
-        which layers were present during the test, and a routed result belongs to the route, not to the model named in the column.</p>
+        which layers were present during the test, and a routed result describes the combination of models that produced it, not only the model named in the column.</p>
       <details class="more"><summary>Evaluation awareness and cheating: the 2026 evidence</summary><div>
 <p class="reveal">A second gap opened in 2026 between the evaluated behaviour and the deployed behaviour. <button type="button" class="term" data-modal="m-metr">METR</button>'s pre-deployment evaluation of
         GPT-5.6 Sol found a "detected cheating rate" that "was higher than any public model we have evaluated on our ReAct agent harness", where
@@ -1060,10 +1069,10 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         found frontier models distinguish evaluation transcripts from deployment with an AUC of 0.83 against a human baseline of
         0.92.<sup class="src"><a href="#s50">50</a></sup> And a 2024 study showed that models can be prompted to underperform selectively, with
         Claude 3 Opus losing 39.8 points on a dangerous-capability biology set against 9.7 on ordinary biology questions.<sup class="src"><a href="#s51">51</a></sup>
-        Three findings are being stacked here and they should be kept apart: recognising an evaluation, behaving differently because of it, and
+        Three different findings are involved here, and they should be kept apart: recognising an evaluation, behaving differently because of it, and
         concealing the difference. The transcript study shows the first, the sandbagging study shows the second can be induced by a prompt, and neither
         measures how often the third happens unprompted in deployment. What they establish together is that behaviour observed under test conditions
-        may not transfer to deployment, which is a design problem for evaluations, not a discount to apply to every score.</p>
+        may not transfer to deployment, which is a design problem for evaluations rather than a reason to discount every score.</p>
 </div></details>
 
       <h3 class="reveal" id="p10">10. Boards lag and versions drift</h3>
@@ -1262,20 +1271,16 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         7.8% is the number OpenAI itself reported in July as Sol's score before those settings were turned on, in the post that showed them
         tripling the public-set score.<sup class="src"><a href="#s6">6</a></sup> The 30.2% is ARC Prize's Standard-harness result for
         Opus 5.<sup class="src"><a href="#s2">2</a></sup> ARC Prize's own table shows what the same model does under the shared condition, 62.7%,
-        which is still the highest Standard-harness score on the board and still a 32-point lead over Opus 5. The shared interface is not a neutral one, and
-        a native harness can answer a question the shared one cannot; the row's fault is not the 99.9% but the comparison, which places a number
-        from one condition beside two from another. The same-condition comparison was available and would have made the point.</p>
+        which is still the highest Standard-harness score on the board and still a 32-point lead over Opus 5. The shared interface is not a neutral one, and a native harness can answer a question the shared one cannot. The problem with the row is not the 99.9% but the comparison, which places a number from one condition beside two from another, when a same-condition comparison was available and would have made the point.</p>
 
       <h3 class="reveal">The 100% and the contamination note</h3>
-      <p class="reveal">The 100% on ExploitBench appears in the launch post, in "Path to Astra" and in press coverage. The system card, the
-        longest and least read of the three documents, is where the qualification lives: the results "may be artificially inflated due to
+      <p class="reveal">The 100% on ExploitBench appears in the launch post, in "Path to Astra" and in press coverage. The qualification is in the system card, the longest of the three documents: the results "may be artificially inflated due to
         potential contamination from exposure to historical vulnerabilities", with the example of the model recalling CVE-2024-0517 when asked
         about CVE-2023-6702. The card also notes that the scoring metric was updated relative to the previous system card in a way that "slightly
         increases benchmark scores overall".<sup class="src"><a href="#s7">7</a></sup> The post-cutoff internal set gives 39.0% for Astra and
         5.5% for Sol, and the same table's footnote warns that "a 100% success rate may not be achievable" on it and that Sol's figure is an
         artefact of a 300-turn limit.<sup class="src"><a href="#s4">4</a></sup> The two sets differ in tasks, limits and difficulty, so the gap
-        between 100% and 39% does not measure how much contamination inflated the first figure; what the pair shows is that the lab itself judged the
-        historical result unsafe to read alone. A reader who stopped at the historical cell would take away 100%. The post-cutoff figure and its
+        between 100% and 39% does not measure how much contamination inflated the first figure; what the pair shows is that the lab itself did not treat the historical result as sufficient on its own. A reader who stopped at the historical cell would take away 100%. The post-cutoff figure and its
         footnote sit further down the same post, and the contamination note sits in the system card, published by the same organisation within two days.</p>
 
       <h3 class="reveal">Three figures for one safety test</h3>
@@ -1283,7 +1288,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         GPT-5.6 Sol the launch post's table says 48.2% and its prose says 48%; "Path to Astra" says 56%; the system card says 55.4% "at maximum
         reasoning effort", and adds that Astra, which made no attacks, legitimately completed the task 1.3% of the time.<sup class="src"><a href="#s4">4</a>, <a href="#s5">5</a>, <a href="#s7">7</a></sup>
         The three figures may be different aggregations of the same runs, for example an average across effort levels against the maximum-effort
-        setting, but none of the documents says so. The press picked one: The New Stack repeated 48.2%.<sup class="src"><a href="#s25">25</a></sup></p>
+        setting, but none of the documents says so. The New Stack repeated one of them, 48.2%.<sup class="src"><a href="#s25">25</a></sup></p>
 
       <h3 class="reveal">What the press printed</h3>
       <details class="more"><summary>What each outlet printed</summary><div>
@@ -1294,7 +1299,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Foundation's own account gave the pair as "63%" and "99%"; Fortune published a clarification the next day.<sup class="src"><a href="#s112">112</a>, <a href="#s113">113</a></sup> The New Stack added an editor's note that a 98.6% score "does not mean the
         benchmark was 'aced'", because the metric is scored against a human baseline. The same New Stack article paraphrased OpenAI's methodology
         line as "the models in its evaluations ran at maximum effort", which is a narrower claim than "the maximum at any effort".<sup class="src"><a href="#s24">24</a>, <a href="#s25">25</a>, <a href="#s26">26</a>, <a href="#s1">1</a>, <a href="#s4">4</a></sup>
-        Nothing here is unusual for launch coverage. It shows how a number with two conditions becomes three or four numbers with none.</p>
+        None of this is unusual for launch coverage. It shows how a number reported under two conditions can circulate as three or four numbers with no conditions attached.</p>
 </div></details>
 
       <h3 class="reveal">Two footnotes that moved the limits</h3>
@@ -1373,7 +1378,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         higher point estimate on the general indices and Astra on mathematics. Where each lab reported its own number, Astra's is higher. Where the two labs' conditions differ, as on OSWorld 2.0, the numbers cannot be placed in one row at all,
         and OpenAI's footnote and Anthropic's footnote each say so about the other.<sup class="src"><a href="#s4">4</a>, <a href="#s12">12</a></sup>
         The rows are not independent votes: the composites contain several of the individual benchmarks, the units differ between percentage points,
-        index points and rating points, and few rows print an interval, so the six-to-five count describes the table and settles nothing.
+        index points and rating points, and few rows print an interval, so the six-to-five count describes the table and does not settle the question.
         The Decoder's summary on 4 September was accurate: "Two independent labs each roll dozens of individual tests into a single overall
         score, but they reach opposite conclusions."<sup class="src"><a href="#s28">28</a></sup> A single "best model" claim in this week
         required choosing an instrument, and the choice was usually not stated.</p>
@@ -1442,14 +1447,14 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         should not be stretched over them. In July 2026 the Arena added a factuality adjustment to its Text and Search boards: claims in each answer are
         extracted and checked by search agents calibrated against verified annotations, and a composite Bradley-Terry fit combines the factuality
         labels with the preference votes at a default factuality weight of 25%, offered "as a non-default toggle" beside Style Control.<sup class="src"><a href="#s123">123</a></sup>
-        That adds a measured signal to the vote rather than adjusting it away, and it moves the questions rather than closing them: which claims are
+        That adds a measured signal to the vote rather than adjusting the vote, and it raises questions of its own: which claims are
         extracted, how the verifier was validated, how an answer that declines to assert anything is scored, and how much the 25% moves the order. In June
         2026 the Agent Arena published a design that randomises the components of the agent a user is given, beginning with the orchestrator model, and
         estimates each component's "net improvement" against the mix of configurations from signals such as confirmed success, praise against complaint,
         steerability and tool errors, a randomised trial inside the product rather than a vote between two transcripts.<sup class="src"><a href="#s124">124</a></sup>
         Randomisation gives it a causal reading within the traffic it sees; whether that traffic represents any other workload, and whether the
         proxy signals track the outcomes users care about, are the same validity questions as everywhere else on this page. The two posts of 5 and 6
-        September that named different leaders came from Code Arena and Agent Arena; different instruments, no contradiction.</p>
+        September that named different leaders came from Code Arena and Agent Arena, which are different instruments, so the two results do not contradict each other.</p>
     </div>
   </div>
 </section>
@@ -1516,7 +1521,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
 
       <p class="reveal" style="margin-top:30px">The pattern is symmetric and it is not new. Each lab runs the other's models under the conditions it
         considers official, reports its own model under the conditions it considers representative, and documents both choices in a footnote. The
-        footnotes are accurate. The tables they hang from are read without them, and the comparison that reaches the reader is between a number
+        footnotes are accurate. The tables above them are read without them, and the comparison that reaches the reader is between a number
         produced under one set of conditions and a number produced under another.</p>
     </div>
   </div>
@@ -1582,8 +1587,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         which was drawn the same height as one for 30.8%. Sam Altman wrote the same day: "wow a mega chart screwup from us earlier". The corrected
         numbers came with two footnotes in the system card: "All SWE-bench evaluation runs use a fixed subset of n=477 verified tasks", and the headline
         74.9% "was run with the default verbosity setting in the API (verbosity = medium). Changes in verbosity can lead to variation in eval
-        performance."<sup class="src"><a href="#s96">96</a>, <a href="#s97">97</a>, <a href="#s98">98</a></sup> The chart was an error. The footnotes
-        were the measurement.</p>
+        performance."<sup class="src"><a href="#s96">96</a>, <a href="#s97">97</a>, <a href="#s98">98</a></sup> The chart was an error; the footnotes carried the conditions of the measurement.</p>
 </div></details>
 
       <h3 class="reveal">SWE-bench Verified retired (February 2026)</h3>
@@ -1612,7 +1616,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         an error rate across all questions, and it should be read beside the suite's accuracy and abstention figures.<sup class="src"><a href="#s114">114</a></sup>
         A month later Google's Gemini 3.5 Flash post placed the model "in the top-right quadrant of the Artificial Analysis index"; Artificial
         Analysis's own write-up gave it 55 on the index and a hallucination rate of 61%.<sup class="src"><a href="#s104">104</a>, <a href="#s105">105</a></sup>
-        Neither lab's numbers were wrong. The numbers not quoted were the ones a buyer would want.</p>
+        Neither lab's numbers were wrong. The numbers that were not quoted are the ones a buyer would most want to see.</p>
 </div></details>
 
       <h3 class="reveal">Opus 5 at 30% and at 100% (August 2026)</h3>
@@ -1637,7 +1641,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Moonshot's card for Kimi K2 reports 49.5, averaged over 64 attempts. Artificial Analysis's independently run AIME 2025 values for the same two
         checkpoints, recorded while this essay was being researched, sat below DeepSeek's figure and above Moonshot's; its model pages have since
         stopped displaying that benchmark, so the values are not quoted here.<sup class="src"><a href="#s108">108</a>, <a href="#s109">109</a>, <a href="#s110">110</a></sup>
-        The lesson is not that labs inflate. It is that a number without its protocol is not comparable to a number with a different one, whichever
+        The lesson is not that labs inflate their numbers. It is that a number without its protocol is not comparable to a number with a different one, whichever
         direction the difference runs.</p>
 
       <div class="kf reveal">
@@ -1654,13 +1658,13 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
   <div class="wrap">
     <p class="kicker reveal">08 &nbsp;/&nbsp; Good practice</p>
     <h2 class="reveal" id="practice-h">Good practice in 2026</h2>
-    <p class="lede reveal d1">None of the problems above lacks an established mitigation. Each mitigation has a trade-off, several were visible during
+    <p class="lede reveal d1">Each of the problems above has an established mitigation. Each mitigation has a trade-off, several were visible during
       the launch week, and none of them makes a score valid on its own: disclosure lets a reader assess a test, it does not show that the test
       predicts anything.</p>
 
     <div class="read">
-      <h3 class="reveal">Leaderboard rules</h3>
-      <p class="reveal">"The Leaderboard Illusion" closed with five recommendations: prohibit score retraction after submission and disclose the
+      <details class="drop reveal"><summary><h3>Leaderboard rules</h3></summary><div class="drop-body">
+<p class="reveal">"The Leaderboard Illusion" closed with five recommendations: prohibit score retraction after submission and disclose the
         number of private variants tested; set a transparent cap on private variants per provider; make deprecation criteria auditable and
         stratified across proprietary, open-weight and open-source models; adopt the variance-based sampling rule the Arena's own 2024 paper
         described; and publish every tested model, deprecation and sampling rate.<sup class="src"><a href="#s22">22</a></sup> The Arena's current
@@ -1668,9 +1672,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         of methodology changes since July 2025, a written confirmation that the tested model is the released one, and 30 days of guaranteed
         access. It does not cap variants, and its response argued the boost is small.<sup class="src"><a href="#s19">19</a>, <a href="#s20">20</a></sup>
         The disagreement about magnitude is empirical and could be settled by publishing the retracted scores.</p>
+</div></details>
 
-      <h3 class="reveal">Standard harnesses</h3>
-      <p class="reveal">ARC Prize's response to the harness problem is the model for the field: a Standard harness that "uses a minimal,
+<details class="drop reveal"><summary><h3>Standard harnesses</h3></summary><div class="drop-body">
+<p class="reveal">ARC Prize's response to the harness problem is the clearest example for the field: a Standard harness that "uses a minimal,
         provider-neutral interface", a separately labelled Provider Adapter condition, both published, both costed, and a testing policy that
         says "A single run is used, we do not average scores across runs" and that sponsors "receive no privileged access" to the evaluation
         sets.<sup class="src"><a href="#s3">3</a>, <a href="#s1">1</a></sup> A shared interface is not a neutral one; it answers a controlled
@@ -1684,9 +1689,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Both questions are legitimate. Artificial Analysis now publishes an Endpoint Accuracy Index
         that "measures how the intelligence and capability of a specific model varies across a range of API providers who serve it", which treats
         the serving stack as a measured variable rather than an assumption.<sup class="src"><a href="#s80">80</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">Independent re-runs</h3>
-      <p class="reveal">Epoch AI states the principle plainly: self-reported scores may be cherry-picked, and "We mitigate against this by
+<details class="drop reveal"><summary><h3>Independent re-runs</h3></summary><div class="drop-body">
+<p class="reveal">Epoch AI states the principle plainly: self-reported scores may be cherry-picked, and "We mitigate against this by
         running models on our own internal evaluations, and by collecting evaluations from independently-run leaderboards."<sup class="src"><a href="#s10">10</a></sup>
         Artificial Analysis maintains "internal copies of all evaluation datasets", evaluates every model "under identical conditions with
         consistent prompting strategies, temperature settings, and evaluation criteria", estimates a 95% interval of under one point for its index
@@ -1696,9 +1702,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         time".<sup class="src"><a href="#s3">3</a></sup> Independent evaluation is slower than a launch post, and it removes one source of selection.
         Comparability is a separate property: it comes from a fixed, published protocol, which a lab can also supply, and an independent number
         assembled from several protocols is no more comparable than a lab's.</p>
+</div></details>
 
-      <h3 class="reveal">Statistics and standards</h3>
-      <p class="reveal">Miller's five recommendations of 2024 remain the minimum: standard errors, clustered where items are grouped, variance
+<details class="drop reveal"><summary><h3>Statistics and standards</h3></summary><div class="drop-body">
+<p class="reveal">Miller's five recommendations of 2024 remain the minimum: standard errors, clustered where items are grouped, variance
         reduction by resampling, paired comparisons on the same items, and power analysis before running.<sup class="src"><a href="#s47">47</a></sup>
         A 2025 position paper adds a warning about the small benchmarks that decide many frontier claims: CLT-based intervals are fine "when
         benchmarks consist of thousands of examples" but on "smaller, highly specialized benchmarks" they end up "usually dramatically underestimating
@@ -1719,9 +1726,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         reflecting the state of the art" is a legal duty that has applied since 2 August 2025, with providers of models already on the market before that
         date given until 2 August 2027 to comply; it binds a class of providers, not benchmark publishers, and prescribes no leaderboard.<sup class="src"><a href="#s77">77</a>, <a href="#s127">127</a></sup>
         No document in this list settles whether a given benchmark measures what its name says.</p>
+</div></details>
 
-      <h3 class="reveal">Post-cutoff test sets</h3>
-      <p class="reveal">The defences against contamination are older than the frontier and the week showed each in use. Dated and refreshed sets:
+<details class="drop reveal"><summary><h3>Post-cutoff test sets</h3></summary><div class="drop-body">
+<p class="reveal">The defences against contamination predate frontier models, and the week showed each of them in use. Dated and refreshed sets:
         LiveBench adds and updates questions monthly and LiveCodeBench collects contest problems after a model's cutoff.<sup class="src"><a href="#s82">82</a>, <a href="#s83">83</a></sup>
         Private holdouts: SWE-Bench Pro keeps a held-out set of 12 repositories and a commercial set of 18 whose problems are not
         public.<sup class="src"><a href="#s84">84</a></sup> Post-cutoff internal sets: OpenAI's ExploitBench Internal Port, built from vulnerabilities
@@ -1741,9 +1749,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         by repository, document or task family rather than by row. Adversarial collection, with people writing items that current models fail,
         finds failures fixed sets miss; Dynabench is the established example, and its distribution should be reported separately from ordinary
         traffic.<sup class="src"><a href="#s126">126</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">Protecting the holdout</h3>
-      <p class="reveal">A developer can overfit a public leaderboard without ever seeing its answers: observe a score, adjust the prompt or the
+<details class="drop reveal"><summary><h3>Protecting the holdout</h3></summary><div class="drop-body">
+<p class="reveal">A developer can overfit a public leaderboard without ever seeing its answers: observe a score, adjust the prompt or the
         model, keep what helped, repeat. After enough rounds the test set has become a development set, and the same thing happens to a benchmark
         designer who keeps selecting the questions that particular frontier models fail. This is the adaptive data analysis problem, distinct from
         literal leakage and from private-variant selection, and the work on the reusable holdout showed both the mechanism and the remedy: limit how
@@ -1752,9 +1761,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         submission budget, periodic replenishment, and a public anchor set kept across versions so that reducing leakage does not erase the ability to
         measure a trend. For generated questions, the generator and filter models should be disclosed and the answers checked independently; freshness
         establishes neither difficulty nor correctness.</p>
+</div></details>
 
-      <h3 class="reveal">Validating the grader</h3>
-      <p class="reveal">Problem 4 catalogued the biases of model judges. The practice that follows is to treat the grader as an instrument with
+<details class="drop reveal"><summary><h3>Validating the grader</h3></summary><div class="drop-body">
+<p class="reveal">Problem 4 catalogued the biases of model judges. The practice that follows is to treat the grader as an instrument with
         its own validation. Build a reference sample with independent expert judgments and adjudicated disagreements, and seed it with known correct
         answers, subtle errors, partial successes, refusals, formatting variants and persuasive wrong answers. Measure false acceptances and false
         rejections separately, by task type; agreement between two judges is not correctness. Blind the model's identity, randomise the order, and freeze
@@ -1769,23 +1779,25 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         requirements and deliberately broken implementations that a good test must catch answer the two questions together: can the grader reject a
         correct solution, and can it accept an incorrect one. Anthropic's engineering guidance describes the same structure, tasks, trajectories and
         graders each needing their own checks, and notes that final-state grading must look at the artefact, not at the agent's message saying it
-        succeeded.<sup class="src"><a href="#s119">119</a></sup> For agents the outcome is not the whole of success. A system can reach the requested
+        succeeded.<sup class="src"><a href="#s119">119</a></sup> For agents, the final outcome is not the whole of success. A system can reach the requested
         final state by an unacceptable path, editing unrelated files, sending a message it was not authorised to send, exposing private data or
         discarding work, and a check of the final state alone misses a violation that was temporary. The grader should hold hard constraints on the
         trajectory as well as the result, credit recovery from tool failures and an honest stop when a task cannot be done, and separate model errors
         from environment outages by a rule fixed before the run rather than by removing the inconvenient failures afterwards.</p>
+</div></details>
 
-      <h3 class="reveal">Knowing when not to answer</h3>
-      <p class="reveal">The hallucination-rate episode in the earlier section is a case of a metric that only makes sense beside two others. An
+<details class="drop reveal"><summary><h3>Knowing when not to answer</h3></summary><div class="drop-body">
+<p class="reveal">The hallucination-rate episode in the earlier section is a case of a metric that only makes sense beside two others. An
         accuracy-only benchmark rewards a confident guess over an honest abstention, and an abstention-friendly metric rewards saying nothing unless
         coverage is shown alongside it. The joint picture is a curve of risk against coverage: as the system declines more questions, how often are
         the answers it still gives wrong. Where a system reports probabilities, a proper scoring rule such as the Brier score or log loss, inspected by
         slice, tests whether they mean anything; a verbal "I am fairly confident" is not a calibrated probability. The cost of a wrong answer, of a
         delay and of an escalation differ by task, so no fixed penalty for abstaining is right everywhere, and for genuinely open questions the
         reference may need several acceptable answers rather than one string.</p>
+</div></details>
 
-      <h3 class="reveal">Cost and reliability</h3>
-      <p class="reveal">"AI Agents That Matter" argued in 2024 that agent comparisons must be cost-controlled, since "for substantially similar
+<details class="drop reveal"><summary><h3>Cost and reliability</h3></summary><div class="drop-body">
+<p class="reveal">"AI Agents That Matter" argued in 2024 that agent comparisons must be cost-controlled, since "for substantially similar
         accuracy, the cost can differ by almost two orders of magnitude", and that many agent benchmarks "have inadequate holdout sets, and
         sometimes none at all".<sup class="src"><a href="#s53">53</a></sup> The Holistic Agent Leaderboard implemented that, and its 21,730
         rollouts produced the finding that "increased reasoning effort produces equal or lower accuracy" in 21 of 36 model-scaffold-benchmark
@@ -1794,12 +1806,12 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         deployment without a verifier that can pick the successful attempt should be read against it rather than against pass@k.<sup class="src"><a href="#s55">55</a></sup> The reporting
         practices that follow are simple: print the run cost next to the score, as ARC Prize and LiveBench do; print pass^k next to pass@1; and
         show the score-against-cost frontier rather than a single column.<sup class="src"><a href="#s1">1</a>, <a href="#s15">15</a></sup> The denominator
-        should match the claim: cost per successful task, with failed attempts, retries, tool charges and fallback routing included, is the cost of
-        delivered work, and a cheap failed task is not cheap. Latency belongs beside it, as a distribution rather than a mean, because a product that
+        should match the claim: cost per successful task, with failed attempts, retries, tool charges and fallback routing included, is the cost of delivered work; a failed task that cost little still delivered nothing. Latency belongs beside it, as a distribution rather than a mean, because a product that
         usually answers quickly and sometimes misses its deadline is a different product from one that never does.</p>
+</div></details>
 
-      <h3 class="reveal">The human and the model together</h3>
-      <p class="reveal">A model's score alone and the productivity of a person using the model are different quantities, and the second has to be
+<details class="drop reveal"><summary><h3>The human and the model together</h3></summary><div class="drop-body">
+<p class="reveal">A model's score alone and the productivity of a person using the model are different quantities, and the second has to be
         measured directly. METR's 2025 study is the concrete example: 16 experienced open-source developers worked on 246 real issues in repositories
         they had contributed to for years, each issue randomly assigned to allow or forbid AI tools, and with the early-2025 tools allowed they took
         19% longer, after forecasting that the tools would make them 24% faster.<sup class="src"><a href="#s120">120</a></sup> The result says nothing
@@ -1807,11 +1819,11 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         benchmark, and that people's own estimates of it are not a substitute. A study of this kind compares people with and without the tool,
         counts the whole time including prompting and checking, has reviewers blind to condition assess the output, and reports human-only,
         model-only where meaningful and assisted results separately, with correction time and defect escape alongside speed.</p>
+</div></details>
 
-      <h3 class="reveal">Rare failures and their cost</h3>
-      <p class="reveal">An average success rate hides the shape of the failures. A model with fewer trivial mistakes and more expensive ones may be
-        the worse choice, so severity, the population affected and conditional rates belong in the report with the mean. Zero and one hundred need
-        denominators: zero failures in 100 independent, representative trials leaves a one-sided 95% upper bound on the failure rate of about 3%,
+<details class="drop reveal"><summary><h3>Rare failures and their cost</h3></summary><div class="drop-body">
+<p class="reveal">An average success rate hides the shape of the failures. A model with fewer trivial mistakes and more expensive ones may be
+        the worse choice, so severity, the population affected and conditional rates belong in the report with the mean. A rate of zero or one hundred per cent needs its denominator: zero failures in 100 independent, representative trials leaves a one-sided 95% upper bound on the failure rate of about 3%,
         and 20 successes out of 20 leaves a two-sided 95% lower bound on the success rate of about 83%; these are illustrations of the arithmetic,
         not intervals for any benchmark on this page. Exclusions can be outcome-dependent: in METR's Sol analysis, dropping the runs that cheated
         moved the time-horizon estimate to about 71 hours with an interval too wide to use, because the informative long tasks were the ones
@@ -1819,9 +1831,10 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Maximum elicited capability, the tendency to act under realistic conditions and the effectiveness of the controls around the model are three
         separate measurements; adversarial searches find failure modes without estimating how common they are, and sampled ordinary traffic estimates
         the common outcomes while missing the rare adversarial ones, so a report needs both.</p>
+</div></details>
 
-      <h3 class="reveal">Validity against real work</h3>
-      <p class="reveal">The instrument section asked whether a score predicts the work. The study that answers it links benchmark results to
+<details class="drop reveal"><summary><h3>Validity against real work</h3></summary><div class="drop-body">
+<p class="reveal">The instrument section asked whether a score predicts the work. The study that answers it links benchmark results to
         held-out outcomes on the intended workload: define the tasks, the users, the acceptable quality, the resource limits and the consequences of
         failure, then compare how well alternative benchmarks predict those outcomes and where each relationship breaks down. A global average can
         conceal a language, a domain or a user group where the model fails, so the population should be specified and the important slices, chosen
@@ -1829,19 +1842,20 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         of small subgroups and publishing the striking ones is the selection problem of Problem 5 in a new form. HELM's scenarios and Model Cards'
         disaggregated reporting are the established precedents for reporting beyond one aggregate.<sup class="src"><a href="#s116">116</a>, <a href="#s122">122</a></sup>
         For ranking methods, the diagnostics are the same in spirit: a Bradley-Terry fit should be checked for residuals, opponent coverage and
-        hidden preference cycles, and a composite should publish its constituent scores and how the leader changes as the weights move; if plausible
-        weights reverse the order, that is a finding worth printing.</p>
+        hidden preference cycles, and a composite should publish its constituent scores and how the leader changes as the weights move; if plausible weights reverse the order, that is itself a finding worth reporting.</p>
+</div></details>
 
-      <h3 class="reveal">Practitioners' advice</h3>
-      <p class="reveal">Two practitioners state the reader's position well. Simon Willison, on the February 2026 SWE-bench refresh: "This
+<details class="drop reveal"><summary><h3>Practitioners' advice</h3></summary><div class="drop-body">
+<p class="reveal">Two practitioners state the reader's position well. Simon Willison, on the February 2026 SWE-bench refresh: "This
         benchmark uses the same system prompt for every model, which is important for a fair comparison but does mean that the quality of the
         different harnesses or optimized prompts is not being measured here", and earlier, "There are leaderboards, but I've been losing some trust
         in those recently. Everyone needs their own benchmark."<sup class="src"><a href="#s86">86</a></sup> Andrej Karpathy, in his review of 2025:
         "benchmarks are almost by construction verifiable environments and are therefore immediately susceptible to <button type="button" class="term" data-modal="m-rlvr">RLVR</button> and weaker forms of it via synthetic data generation", and "Training on the
         test set is a new art form."<sup class="src"><a href="#s87">87</a></sup> The practical consequence is the checklist in the next section:
         treat a published number as a claim about an instrument, and ask for the instrument before accepting the claim.</p>
+</div></details>
 
-      <div class="deep-panel reveal">
+<div class="deep-panel reveal">
         <h3>A minimal reporting standard</h3>
         <p>Name the harness and the effort setting. State the number of items, the number of trials per item and the pass criterion (pass@1,
           pass@k or pass^k). Print a standard error or interval computed with clustering where items are grouped, and compare models on paired
@@ -1923,7 +1937,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
     <p class="kicker reveal">10 &nbsp;/&nbsp; Coda</p>
     <h2 class="reveal" id="coda-h">Conclusion</h2>
     <div class="read">
-      <p class="lede reveal d1" style="text-align:left;max-width:none">They are measuring something. The question is what, and under which conditions.</p>
+      <p class="lede reveal d1" style="text-align:left;max-width:none">They are measuring something. The question is what they measure, and under which conditions.</p>
       <p class="reveal">The Arena measures the preference of its voters, under one style adjustment, with the intervals it prints. ARC-AGI-3
         measures a model together with a harness, and now says which. Artificial Analysis averages nine evaluations it runs itself; Epoch AI fits one
         scale to results from its own runs, independent boards and lab reports; the two disagree for reasons their methods make plausible and do not
@@ -1936,12 +1950,11 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
       <p class="reveal">The launch week of GPT-6 Astra is a useful case not because the reporting was unusually poor but because it was
         unusually complete. OpenAI published its footnotes and its system card's contamination note. Anthropic published its trial counts and
         standard errors. ARC Prize published both harness conditions with costs. Artificial Analysis and Epoch AI published methods that explain
-        their disagreement. Almost every problem described here was disclosed by the organisation it concerns. The problem is the distance
-        between the disclosure and the headline, and the headline is the part that travels. The eleven problems, the four cases and the checklist
+        their disagreement. Almost every problem described here was disclosed by the organisation it concerns. The problem is the distance between the disclosure and the headline, and it is the headline that gets repeated. The eleven problems, the four cases and the checklist
         are one attempt to close that distance for a reader who wants to know what a score is before deciding what it means.</p>
 
       <h3 class="reveal">Method note</h3>
-      <p class="reveal small">Every number on this page is one of four kinds, and the text tries to say which: a figure reported by the source it is
+      <p class="reveal small method">Every number on this page is one of four kinds, and the text tries to say which: a figure reported by the source it is
         attributed to, opened on 6 September 2026 and listed below with its access date; a calculation from reported figures (the same-effort harness
         gaps, the expected maxima, the interval widths); a simulation, of which there are three, labelled as such, illustrating published mechanisms
         with invented data; or an interpretation, which is the essay's own. Where a source is a secondary report (a newspaper, a commentator) it is cited
@@ -1949,7 +1962,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Leaderboard values are those displayed on the access date and will change; the essay keeps the values, not snapshots of the pages. Two independent
         checks re-opened each source and compared each quoted phrase before publication. The essay covers text and agent benchmarks; retrieval,
         long-context, multimodal and long-project evaluations raise further distinctions that it does not treat.</p>
-      <p class="reveal small"><b>Revision of 6 September 2026.</b> An independent review of the published text led to these changes: the thesis now
+      <p class="reveal small method"><b>Revision of 6 September 2026.</b> An independent review of the published text led to these changes: the thesis now
         distinguishes conditional evidence about capability from a universal ranking; the 100% and 39% cyber figures are presented as two different sets rather
         than a measured fall; interval-overlap reasoning was replaced by paired comparison, and the calculator's figure is labelled a scale marker rather than
         a floor; the AA-Omniscience hallucination rate is defined; Anthropic's safeguard routing to Opus models is described; the Epoch Capabilities Index is
@@ -3020,14 +3033,14 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
   }
   function draw(t, dt){
     if(lost || failed) return;
-    if(!baked){ if(warm++ < 1) return; T.ensure(); if(failed) return; t0 = t; }   /* bake after the first paint */
+    if(!baked){ T.ensure(); if(failed) return; t0 = t; }   /* bake in the first frame, so the range is there from the first paint */
     t -= t0;
     if(scrollK >= 1 && lastPaint > 0) return;
     var resized = size(), w = vw, h = vh, mob = w < 900, aspect = w/h;
     if(reduce && lastPaint > 0 && !resized) return;
     var lag = reduce ? 1 : Math.min(1,(dt||0.016)*2.6);
     pxNow += (pxWant - pxNow)*lag; pyNow += (pyWant - pyNow)*lag;
-    var rise = reduce ? 1 : ease((t-0.15)/1.9), drift = reduce ? 0 : Math.sin(t*0.05);
+    var rise = 1, drift = reduce ? 0 : Math.sin(t*0.05);   /* the range does not rise in; it is simply there */
     var fovy = (mob ? 60 : 44)*Math.PI/180; if(aspect > 1.7) fovy = 2*Math.atan(Math.tan(35*Math.PI/180)/aspect);
     var eye = [(mob?0.5:0.2) + pxNow*0.5 + drift*0.15, (mob?1.2:1.25) - pyNow*0.15 + scrollK*0.9, mob ? 4.8 : 4.0];
     var tgt = [(mob?1.35:0.1) + pxNow*0.2 + drift*0.05, (mob?2.0:2.05) - pyNow*0.1 - scrollK*0.9, -0.6];

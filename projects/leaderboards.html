@@ -583,7 +583,7 @@ details.srcbox ol.sources{margin-top:12px}
   <canvas id="heroGL" aria-hidden="true"></canvas>
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="wrap">
-    <p class="tag">Essay &middot; 6 September 2026 &middot; about 45 minutes</p>
+    <p class="tag">Essay &middot; 6 September 2026 &middot; about 70 minutes</p>
     <h1 id="hero-h">What the Leaderboards Are Actually Measuring</h1>
     <p class="sub">A critique of the public evaluation metrics for frontier AI models. Arena rankings, benchmark scores
       and lab-reported numbers get read as measurements of <b>capability</b>. This essay asks what each of them measures, and under
@@ -1331,8 +1331,9 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Sol and five points behind Fable 5.1 at 66.<sup class="src"><a href="#s8">8</a></sup> OpenAI's own table reproduces that second result,
         61.2 against 65.7, in a row beneath the rows where it leads.<sup class="src"><a href="#s4">4</a></sup> Both indices publish
         their construction, and the constructions make a disagreement expected: Epoch's index rewards a model for clearing hard benchmarks it has been run on,
-        and Astra, in Epoch's own account, "set new records on our math, continual learning, and game-puzzles benchmarks" while ranking "between Opus 4.7 and Fable 5" on its long-horizon coding benchmark; Artificial Analysis averages nine
-        evaluations it runs itself with category weights set out in its published methodology, and several of them moved against Astra.<sup class="src"><a href="#s62">62</a>, <a href="#s8">8</a></sup>
+        and Astra, in Epoch's own account, "set new records on our math, continual learning, and game-puzzles benchmarks" while ranking "between Opus 4.7 and Fable 5" on its long-horizon coding benchmark; Artificial Analysis averages the
+        evaluations it runs itself, nine in the methodology it publishes for the current version of the index, with category weights set out there, and several of them moved against Astra;
+        the page describes v4.2, so the exact composition of the v4.1.1 figure quoted here is what the 3 September article states, not what the current page shows.<sup class="src"><a href="#s62">62</a>, <a href="#s8">8</a></sup>
         Different inputs, fitted difficulties, domain coverage and missing scores are plausible reasons for the gap; none of them has been shown to
         account for this reversal, which would take a common-input or weight-sensitivity analysis that neither organisation has published. Artificial Analysis labels
         its Fable 5.1 run "max with fallback", a configuration label the article does not define; Anthropic's own table notes that on some benchmarks
@@ -1606,9 +1607,9 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
 <p class="reveal">GPT-5.5 took the top of the Artificial Analysis Intelligence Index by three points. The same suite's knowledge test recorded
         a hallucination rate of 86% for the model, against 36% for Claude Opus 4.7 and 50% for Gemini 3.1 Pro.<sup class="src"><a href="#s102">102</a>, <a href="#s103">103</a></sup>
         The rate has a definition that the headline drops: it is the share of questions the model did not get right on which it gave an answer
-        rather than declining, incorrect over incorrect plus partial plus not attempted, so 86% means that when the model did not know, it guessed
-        86% of the time; it is not an error rate across all questions, and it should be read beside the suite's accuracy and abstention
-        figures.<sup class="src"><a href="#s114">114</a></sup>
+        rather than declining, incorrect over incorrect plus partial plus not attempted, so 86% means that on the questions it did not get right the model
+        gave an answer rather than declining 86% of the time. The grader observes an answer category, not what the model knew; the figure is not
+        an error rate across all questions, and it should be read beside the suite's accuracy and abstention figures.<sup class="src"><a href="#s114">114</a></sup>
         A month later Google's Gemini 3.5 Flash post placed the model "in the top-right quadrant of the Artificial Analysis index"; Artificial
         Analysis's own write-up gave it 55 on the index and a hallucination rate of 61%.<sup class="src"><a href="#s104">104</a>, <a href="#s105">105</a></sup>
         Neither lab's numbers were wrong. The numbers not quoted were the ones a buyer would want.</p>
@@ -1768,7 +1769,20 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         requirements and deliberately broken implementations that a good test must catch answer the two questions together: can the grader reject a
         correct solution, and can it accept an incorrect one. Anthropic's engineering guidance describes the same structure, tasks, trajectories and
         graders each needing their own checks, and notes that final-state grading must look at the artefact, not at the agent's message saying it
-        succeeded.<sup class="src"><a href="#s119">119</a></sup></p>
+        succeeded.<sup class="src"><a href="#s119">119</a></sup> For agents the outcome is not the whole of success. A system can reach the requested
+        final state by an unacceptable path, editing unrelated files, sending a message it was not authorised to send, exposing private data or
+        discarding work, and a check of the final state alone misses a violation that was temporary. The grader should hold hard constraints on the
+        trajectory as well as the result, credit recovery from tool failures and an honest stop when a task cannot be done, and separate model errors
+        from environment outages by a rule fixed before the run rather than by removing the inconvenient failures afterwards.</p>
+
+      <h3 class="reveal">Knowing when not to answer</h3>
+      <p class="reveal">The hallucination-rate episode in the earlier section is a case of a metric that only makes sense beside two others. An
+        accuracy-only benchmark rewards a confident guess over an honest abstention, and an abstention-friendly metric rewards saying nothing unless
+        coverage is shown alongside it. The joint picture is a curve of risk against coverage: as the system declines more questions, how often are
+        the answers it still gives wrong. Where a system reports probabilities, a proper scoring rule such as the Brier score or log loss, inspected by
+        slice, tests whether they mean anything; a verbal "I am fairly confident" is not a calibrated probability. The cost of a wrong answer, of a
+        delay and of an escalation differ by task, so no fixed penalty for abstaining is right everywhere, and for genuinely open questions the
+        reference may need several acceptable answers rather than one string.</p>
 
       <h3 class="reveal">Cost and reliability</h3>
       <p class="reveal">"AI Agents That Matter" argued in 2024 that agent comparisons must be cost-controlled, since "for substantially similar
@@ -1933,7 +1947,8 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         with invented data; or an interpretation, which is the essay's own. Where a source is a secondary report (a newspaper, a commentator) it is cited
         as such. Claims that could not be traced to a primary page were left out, including several figures that circulated in coverage of the launch.
         Leaderboard values are those displayed on the access date and will change; the essay keeps the values, not snapshots of the pages. Two independent
-        checks re-opened each source and compared each quoted phrase before publication.</p>
+        checks re-opened each source and compared each quoted phrase before publication. The essay covers text and agent benchmarks; retrieval,
+        long-context, multimodal and long-project evaluations raise further distinctions that it does not treat.</p>
       <p class="reveal small"><b>Revision of 6 September 2026.</b> An independent review of the published text led to these changes: the thesis now
         distinguishes conditional evidence about capability from a universal ranking; the 100% and 39% cyber figures are presented as two different sets rather
         than a measured fall; interval-overlap reasoning was replaced by paired comparison, and the calculator's figure is labelled a scale marker rather than

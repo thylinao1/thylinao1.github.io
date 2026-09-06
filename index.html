@@ -335,81 +335,95 @@
     .award, .award:nth-child(3n){border-right:none}
   }
 
-  /* featured research card (compact banner) */
+  /* featured band: latest essay + funded research (two cards, one skeleton) */
   .research-feature{padding:52px 0 4px; border-top:none}
   .feature-row{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:18px; align-items:stretch}
-  @media(max-width:900px){ .feature-row{grid-template-columns:1fr} }
-  .latest-card{
-    display:flex; flex-direction:column; text-decoration:none; color:var(--ink); min-width:0;
+  .fcard{
+    --fcard-px:24px; --fcard-py:18px;
+    position:relative; display:flex; flex-direction:column; min-width:0;
     border:1px solid var(--rule-strong); border-radius:12px;
     background:linear-gradient(180deg, var(--bg-2), var(--bg));
-    padding:14px 24px 16px; transition:border-color .18s, box-shadow .18s, transform .18s;
-  }
-  .latest-card:hover{border-color:var(--accent); box-shadow:0 12px 34px rgba(21,17,11,.10); transform:translateY(-2px)}
-  .latest-card:focus{outline:none}
-  .latest-card:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
-  .latest-card .feature-tag{color:var(--accent)}
-  .latest-card .feature-tag .dot{background:var(--accent); box-shadow:0 0 0 4px var(--accent-bg)}
-  .latest-card .exp-meta{display:flex; align-items:center; gap:12px; margin:2px 0 10px}
-  .latest-card .exp-meta .date{margin:0}
-  .latest-card .latest-title{
-    font-family:var(--font-display); font-size:clamp(22px, 2.1vw, 28px); font-weight:400; line-height:1.1; margin:0 0 8px; color:var(--ink);
-    text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:5px; text-decoration-color:var(--rule-strong); transition:color .15s, text-decoration-color .15s;
-  }
-  .latest-card:hover .latest-title{color:var(--accent); text-decoration-color:var(--accent)}
-  .latest-card .latest-desc{color:var(--ink-2); font-size:13.5px; line-height:1.5; margin:0 0 10px; max-width:34em}
-  .latest-card .blog-read{margin-top:auto}
-  .feature-card{
-    display:block; text-decoration:none; color:var(--ink);
-    border:1px solid var(--rule-strong); border-radius:12px;
-    background:linear-gradient(180deg, var(--bg-2), var(--bg));
-    padding:12px 26px; position:relative; overflow:hidden;
     transition:border-color .18s, box-shadow .18s, transform .18s;
   }
-  .feature-card:hover{
-    border-color:var(--accent); color:var(--ink);
-    box-shadow:0 12px 34px rgba(21,17,11,.10); transform:translateY(-2px);
+  .fcard:hover{box-shadow:0 12px 34px rgba(21,17,11,.10); transform:translateY(-2px)}
+  .fcard--essay:hover{border-color:var(--accent)}
+  .fcard--research{border-color:rgba(31,107,58,.38); container:fcard / inline-size}
+  .fcard--research:hover{border-color:var(--good)}
+  .fcard-link{
+    flex:1 1 auto; display:flex; flex-direction:column; min-width:0;
+    padding:var(--fcard-py) var(--fcard-px); color:var(--ink); text-decoration:none; border-radius:12px;
   }
-  .feature-card:focus{outline:none}
-  .feature-card:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
+  .fcard-link:focus{outline:none}
+  .fcard-link:focus-visible{outline:2px solid var(--accent); outline-offset:-1px}
+  .fcard-head{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px 16px; margin-bottom:12px}
   .feature-tag{
-    display:inline-flex; align-items:flex-start; gap:9px; line-height:1.35;
-    font-family:var(--font-mono); font-size:13px; letter-spacing:.1em;
-    text-transform:uppercase; color:var(--good); font-weight:600; margin-bottom:6px;
+    display:inline-flex; align-items:center; gap:9px; line-height:1.3;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.12em;
+    text-transform:uppercase; font-weight:600; color:var(--accent); white-space:nowrap;
   }
-  .feature-tag .dot{
-    width:8px; height:8px; border-radius:50%; background:var(--good); flex:none; margin-top:5px;
-    box-shadow:0 0 0 4px rgba(31,107,58,.14);
+  .feature-tag .dot{position:relative; width:8px; height:8px; border-radius:50%; background:currentColor; flex:none; box-shadow:0 0 0 4px var(--accent-bg)}
+  .feature-tag.live{color:var(--good)}
+  .feature-tag.live .dot{box-shadow:0 0 0 4px rgba(31,107,58,.14)}
+  .feature-tag.live .dot::after{
+    content:""; position:absolute; inset:-4px; border-radius:50%;
+    border:1.5px solid var(--good); opacity:0; animation:fcard-ring 2.6s ease-out infinite;
   }
-  .feature-grid{display:flex; align-items:center; gap:18px}
-  .feature-main{flex:1 1 auto; min-width:0}
-  .feature-title{font-size:clamp(20px, 2.3vw, 27px); margin:0 0 6px; line-height:1.08}
-  .feature-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0 0 7px; max-width:48em}
-  .feature-cta{
-    display:inline-flex; align-items:center; gap:8px;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
-    color:var(--accent); font-weight:600; text-decoration:none;
+  @keyframes fcard-ring{0%{transform:scale(.55); opacity:.75} 100%{transform:scale(1.7); opacity:0}}
+  .fcard-meta{display:inline-flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink-3); white-space:nowrap}
+  .fcard-meta .type{
+    display:inline-block; padding:3px 9px; border-radius:999px; border:1px solid var(--rule-strong);
+    font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2);
   }
-  .feature-cta:hover{color:#a8341a}
-  .feature-cta .arrow{transition:transform .18s}
-  .feature-card:hover .feature-cta .arrow,
-  .feature-cta:hover .arrow{transform:translateX(4px)}
-  .feature-actions{display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:2px}
+  .fcard-body{display:flex; align-items:center; gap:22px; margin-bottom:16px}
+  .fcard-text{flex:1 1 auto; min-width:0}
+  .fcard-title{
+    font-family:var(--font-display); font-weight:400; font-size:clamp(23px, 1.95vw, 28px);
+    line-height:1.1; letter-spacing:-.005em; margin:0 0 8px; color:var(--ink);
+    transition:color .15s, text-decoration-color .15s;
+  }
+  .fcard--essay .fcard-title{text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:5px; text-decoration-color:var(--rule-strong)}
+  .fcard-link:hover .fcard-title{color:var(--accent); text-decoration-color:var(--accent)}
+  .fcard-title .u{text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px}
+  .fcard-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0}
+  .fcard-figure{flex:0 0 clamp(150px, 34cqw, 220px); display:flex; justify-content:flex-end}
+  .fcard-figure svg{width:100%; height:auto; display:block}
+  .fcard-foot{
+    margin-top:auto; padding-top:12px; border-top:1px solid var(--rule);
+    display:flex; align-items:center; justify-content:space-between; gap:8px 12px; flex-wrap:wrap;
+  }
+  .fcard-cta{
+    display:inline-flex; align-items:center; gap:8px; min-height:32px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; color:var(--accent); font-weight:600;
+  }
+  .fcard-cta .arrow{transition:transform .18s}
+  .fcard-link:hover .fcard-cta .arrow{transform:translateX(4px)}
+  .fcard-note{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink-3); white-space:nowrap}
+  .fcard--research .fcard-foot{padding-right:200px}
   .feature-grant{
+    position:absolute; right:calc(var(--fcard-px) - 1px); bottom:var(--fcard-py);
     display:inline-flex; align-items:center; gap:7px;
     font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; font-weight:600;
     color:var(--accent); background:transparent; border:1px solid var(--accent);
-    border-radius:999px; padding:8px 16px; text-decoration:none; transition:background .15s, color .15s;
+    border-radius:999px; padding:7px 15px; text-decoration:none; transition:background .15s, color .15s;
   }
   .feature-grant:hover{background:var(--accent-bg); color:var(--accent)}
-  .feature-aside{flex:0 0 200px; display:flex; justify-content:flex-end; align-items:center}
-  .feature-aside svg{width:100%; height:auto; max-width:200px}
-  @media(max-width:1100px){ .feature-aside{display:none} }
-  @media(max-width:680px){
-    .feature-card{padding:16px 18px}
-    .feature-grid{flex-direction:column; align-items:flex-start; gap:14px}
-    .feature-aside{display:none}
+  .feature-grant:focus{outline:none}
+  .feature-grant:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+  /* narrow research card: figure drops under the text, grant pill flows below the link */
+  @container fcard (max-width:479px){
+    .fcard--research .fcard-body{flex-direction:column; align-items:flex-start; gap:16px}
+    .fcard--research .fcard-figure{flex:none; width:min(100%, 250px); justify-content:flex-start}
+    .fcard--research .fcard-foot{padding-right:0}
+    .fcard--research .fcard-link{padding-bottom:12px}
+    .fcard--research .feature-grant{position:static; align-self:flex-start; margin:0 var(--fcard-px) var(--fcard-py)}
   }
+  @media(prefers-reduced-motion:reduce){
+    .fcard, .fcard-cta .arrow{transition:none}
+    .fcard:hover{transform:none}
+    .feature-tag.live .dot::after{animation:none; opacity:.35; transform:none}
+  }
+  @media(max-width:900px){ .feature-row{grid-template-columns:1fr} }
+  @media(max-width:680px){ .fcard{--fcard-px:18px; --fcard-py:16px} }
 
   /* blog */
   .blog-list{display:flex; flex-direction:column}
@@ -785,55 +799,67 @@
   </div>
 </section>
 
-<!-- ============ FEATURED RESEARCH ============ -->
+<!-- ============ FEATURED BAND: latest essay + funded research ============ -->
 <section id="research" class="s research-feature">
   <div class="wrap">
     <div class="feature-row">
-    <a class="latest-card" href="projects/leaderboards.html" target="_blank" rel="noopener">
-      <div class="feature-tag"><span class="dot"></span>Latest blog</div>
-      <div class="exp-meta">
-        <span class="date">2026 · ~70 min read</span>
-        <span class="type essay">Essay</span>
-      </div>
-      <h2 class="latest-title">What the Leaderboards Are Actually Measuring</h2>
-      <p class="latest-desc">A critique of the public evaluation metrics for frontier AI models, using the launch week of Claude Fable 5.1 and GPT-6 Astra as the running case.</p>
-      <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
-    </a>
-    <div class="feature-card">
-      <div class="feature-tag"><span class="dot"></span>Funded AI-Safety Research (ongoing) · BlueDot Impact Rapid Grant</div>
-      <div class="feature-grid">
-        <div class="feature-main">
-          <h2 class="display feature-title">Does a language model's chain-of-thought <span style="font-style:normal; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px">actually cause</span> its answer?</h2>
-          <p class="feature-desc">
-            A Bayesian causal-mediation test of whether an LLM's stated reasoning drives its answer or is post-hoc, with calibrated uncertainty for scalable oversight.
-          </p>
-          <div class="feature-actions">
-            <a class="feature-cta" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Explore the funded AI-safety research <span class="arrow">&rarr;</span></a>
-            <a class="feature-grant" href="https://app.grantmaking.ai/projects/efb4131f-820a-41ed-a4a7-88e7ec14c98d" target="_blank" rel="noopener">Ongoing fundraising &#8599;</a>
+      <div class="fcard fcard--essay">
+        <a class="fcard-link" href="projects/leaderboards.html" target="_blank" rel="noopener">
+          <div class="fcard-head">
+            <span class="feature-tag"><span class="dot"></span>Latest blog</span>
+            <span class="fcard-meta"><span>2026 &middot; ~70 min read</span><span class="type">Essay</span></span>
           </div>
-        </div>
-        <div class="feature-aside">
-          <svg viewBox="0 0 380 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
-            <defs>
-              <marker id="ah-acc" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
-              <marker id="ah-mut" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
-            </defs>
-            <path d="M52 104 Q190 130 328 104" fill="none" stroke="#968d77" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#ah-mut)"/>
-            <path d="M51 86 L166 56" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
-            <path d="M214 56 L329 86" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
-            <circle cx="30" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
-            <circle cx="190" cy="46" r="22" fill="#c8421f"/>
-            <circle cx="350" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
-            <text x="30" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
-            <text x="190" y="53" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
-            <text x="350" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
-            <text x="30" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">PROMPT</text>
-            <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">CoT</text>
-            <text x="350" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">ANSWER</text>
-          </svg>
-        </div>
+          <div class="fcard-body">
+            <div class="fcard-text">
+              <h2 class="fcard-title">What the Leaderboards Are Actually Measuring</h2>
+              <p class="fcard-desc">A critique of the public evaluation metrics for frontier AI models, using the launch week of Claude Fable 5.1 and GPT-6 Astra as the running case.</p>
+            </div>
+          </div>
+          <div class="fcard-foot">
+            <span class="fcard-cta">Read the essay <span class="arrow">&rarr;</span></span>
+            <span class="fcard-note">Also as a podcast &middot; 22 or 53 min</span>
+          </div>
+        </a>
       </div>
-    </div>
+
+      <div class="fcard fcard--research">
+        <a class="fcard-link" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">
+          <div class="fcard-head">
+            <span class="feature-tag live"><span class="dot"></span>Funded AI-safety research</span>
+            <span class="fcard-meta"><span>Ongoing</span><span class="type">BlueDot Impact Rapid Grant</span></span>
+          </div>
+          <div class="fcard-body">
+            <div class="fcard-text">
+              <h2 class="fcard-title">Does a language model's chain-of-thought <span class="u">actually cause</span> its answer?</h2>
+              <p class="fcard-desc">A Bayesian causal-mediation test of whether an LLM's stated reasoning drives its answer or is post-hoc, with calibrated uncertainty for scalable oversight.</p>
+            </div>
+            <div class="fcard-figure">
+              <svg viewBox="0 0 300 122" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: the prompt X influences the answer Y through the chain-of-thought mediator M, with a faint direct path from X to Y that bypasses it">
+                <defs>
+                  <marker id="fm-acc" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
+                  <marker id="fm-mut" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
+                </defs>
+                <path d="M44 92 Q150 120 256 92" fill="none" stroke="#968d77" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#fm-mut)"/>
+                <path d="M46.8 77.2 L127.4 48.1" fill="none" stroke="#c8421f" stroke-width="2.4" marker-end="url(#fm-acc)"/>
+                <path d="M172.6 48.1 L253.2 77.2" fill="none" stroke="#c8421f" stroke-width="2.4" marker-end="url(#fm-acc)"/>
+                <circle cx="28" cy="84" r="18" fill="#f4efe6" stroke="#15110b" stroke-width="1.6"/>
+                <circle cx="150" cy="40" r="20" fill="#c8421f"/>
+                <circle cx="272" cy="84" r="18" fill="#f4efe6" stroke="#15110b" stroke-width="1.6"/>
+                <text x="28" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
+                <text x="150" y="46.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
+                <text x="272" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
+                <text x="28" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#6b6452">PROMPT</text>
+                <text x="150" y="12" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#6b6452">CoT</text>
+                <text x="272" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#6b6452">ANSWER</text>
+              </svg>
+            </div>
+          </div>
+          <div class="fcard-foot">
+            <span class="fcard-cta">Explore the research <span class="arrow">&rarr;</span></span>
+          </div>
+        </a>
+        <a class="feature-grant" href="https://app.grantmaking.ai/projects/efb4131f-820a-41ed-a4a7-88e7ec14c98d" target="_blank" rel="noopener">Ongoing fundraising &#8599;</a>
+      </div>
     </div>
   </div>
 </section>

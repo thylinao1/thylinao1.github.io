@@ -433,7 +433,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 #hero .who{font-family:var(--font-mono);font-size:12.5px;color:#9ba7bd;margin:24px 0 0}
 #hero .who b{color:#fff;font-weight:500}
 /* ---------- podcast pills in the hero ---------- */
-.pods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:-6px 0 30px;max-width:900px}
+.pods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:26px 0 0;max-width:900px}
 .pod{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 16px 10px 10px;border-radius:999px;
   border:1px solid rgba(255,196,160,.42);color:#fff;min-width:0;
   background:linear-gradient(90deg,rgba(212,116,79,.22),rgba(26,32,64,.62) 58%,rgba(212,116,79,.10));
@@ -484,9 +484,9 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 .pod-rate:hover{border-color:#fff}
 .pod-rate:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.pod{animation:none}.pod.playing .peq i{animation:none;transform:scaleY(.6)}}
-@media(max-width:760px){.pods{grid-template-columns:1fr;gap:10px;margin-bottom:24px}}
+@media(max-width:760px){.pods{grid-template-columns:1fr;gap:10px;margin-top:22px}}
 @media(max-width:480px){.pod{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:9px 14px 9px 9px;border-radius:34px}.pod-side{display:none}.pod-t b{font-size:14.5px;white-space:normal}}
-.hbtns{display:flex;flex-wrap:wrap;gap:9px;margin:32px 0 0}
+.hbtns{display:flex;flex-wrap:wrap;gap:9px;margin:22px 0 0}
 .hbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.3);color:#fff;background:transparent;
   transition:background .24s var(--ease),border-color .24s var(--ease),transform .24s var(--ease),box-shadow .24s var(--ease)}
 .hbtn:hover{background:rgba(255,255,255,.1);border-color:#fff;color:#fff;transform:translateY(-2px);box-shadow:0 10px 26px -14px rgba(0,0,0,.7)}
@@ -656,6 +656,14 @@ details.srcbox ol.sources{margin-top:12px}
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="wrap">
     <p class="tag">Essay &middot; 6 September 2026 &middot; about 70 minutes</p>
+    <h1 id="hero-h">What the Leaderboards Are Actually Measuring</h1>
+    <p class="sub">A critique of the public evaluation metrics for frontier AI models. Arena rankings, benchmark scores
+      and lab-reported numbers get read as measurements of <b>capability</b>. This essay asks what each of them measures, and under
+      which conditions a score says something about capability.
+      The running case is the launch week of 1 to 6 September 2026, when Anthropic's Claude Fable 5.1 and OpenAI's GPT-6 Astra
+      were released two days apart. The same checks are applied to both labs, and to Google, xAI, Meta, DeepSeek and Moonshot
+      in the earlier episodes.</p>
+    <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore</p>
     <div class="pods" role="group" aria-label="Listen to this essay as a podcast">
       <div class="pod" data-src="assets/leaderboards/podcast-long.m4a" data-len="3176" data-title="the long episode, How AI Labs Game Their Benchmarks">
         <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the long episode, How AI Labs Game Their Benchmarks, 53 minutes"><svg class="pod-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="20"/><circle class="prog" cx="22" cy="22" r="20"/></svg><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M12.2 9.2v13.6L23.4 16 12.2 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
@@ -682,14 +690,6 @@ details.srcbox ol.sources{margin-top:12px}
         </div>
       </div>
     </div>
-    <h1 id="hero-h">What the Leaderboards Are Actually Measuring</h1>
-    <p class="sub">A critique of the public evaluation metrics for frontier AI models. Arena rankings, benchmark scores
-      and lab-reported numbers get read as measurements of <b>capability</b>. This essay asks what each of them measures, and under
-      which conditions a score says something about capability.
-      The running case is the launch week of 1 to 6 September 2026, when Anthropic's Claude Fable 5.1 and OpenAI's GPT-6 Astra
-      were released two days apart. The same checks are applied to both labs, and to Google, xAI, Meta, DeepSeek and Moonshot
-      in the earlier episodes.</p>
-    <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore</p>
     <div class="hbtns">
       <a class="hbtn solid" href="#tldr">Summary <span class="arrow">&rarr;</span></a>
       <a class="hbtn" href="#claim">Start reading</a>

@@ -680,6 +680,8 @@
   @media(prefers-reduced-motion:reduce){.lb-link{animation:none}}
   /* ledger trailing note (e.g. ongoing paper submission) */
   .led-tail{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--good)}
+  /* ledger group break: a gap and a stronger rule before and after the puzzles */
+  .led-break{border-top:1px solid var(--rule-strong); margin-top:22px; padding-top:6px}
   /* puzzles: one entry per line */
   .led-inline .pz{display:block}
   .led-inline .pz + .pz{margin-top:7px}
@@ -873,7 +875,7 @@
       <div class="award">
         <div class="ord">01</div>
         <h4><span class="gold-1st">1st place</span> in 4 research competitions in 2026</h4>
-        <p>Knowledge base completion from LLMs (<a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">AKBC Shared Task</a> at EMNLP 2026), trust assessment over patient health records (<a href="projects/medlongtrust.html" target="_blank" rel="noopener">UbiComp 2026</a>, perfect score), Arabic readability (<a href="projects/barec.html" target="_blank" rel="noopener">BAREC</a> at EMNLP 2026, both tracks) and skill-to-job ranking (<a href="projects/workrb-skill-ranking.html" target="_blank" rel="noopener">RecSys-HR 2026</a>), each with a system paper. Also 2nd of 21 teams at <a href="https://car-bench.github.io/car-bench/reports/track_1/team-28.pdf" target="_blank" rel="noopener">CAR-Bench</a>, IJCAI-ECAI 2026.</p>
+        <p>Knowledge base completion from LLMs (<a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">AKBC Shared Task</a> @ EMNLP 2026), trust assessment over patient health records (<a href="projects/medlongtrust.html" target="_blank" rel="noopener">UbiComp 2026</a>), Arabic readability (<a href="projects/barec.html" target="_blank" rel="noopener">BAREC</a> @ EMNLP 2026, 2 tracks) and skill-to-job ranking (<a href="projects/workrb-skill-ranking.html" target="_blank" rel="noopener">RecSys-HR 2026</a>), each with a system paper.</p>
       </div>
       <div class="award">
         <div class="ord">02</div>
@@ -885,8 +887,8 @@
       </div>
       <div class="award">
         <div class="ord">03</div>
-        <h4>2 papers at EMNLP 2026 on where evaluations break</h4>
-        <p><a href="projects/wmt26-qebreak.html" target="_blank" rel="noopener">QEbreak</a> (WMT 2026), a pre-registered challenge set run by the organizers over 31 metric systems: reference-free translation quality metrics penalize a dropped fact less than an added one. <a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">Coverage Is Not Knowledge</a> (AKBC 2026), the winning system paper: closed-book knowledge base scores are limited by what the model knows, not by how it selects answers.</p>
+        <h4>3 papers @ EMNLP 2026 on where evaluations break</h4>
+        <p><a href="projects/wmt26-qebreak.html" target="_blank" rel="noopener">QEbreak</a> (WMT): reference-free translation metrics penalize a dropped fact less than an added one. <a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">Coverage Is Not Knowledge</a> (AKBC): closed-book knowledge base scores are bounded by what the model knows, not how it selects answers. <a href="projects/barec.html" target="_blank" rel="noopener">Ensembling at the Noise Floor</a> (BAREC): late gains on the readability board sit inside the evaluation's own noise.</p>
       </div>
       <div class="award">
         <div class="ord">04</div>
@@ -1010,6 +1012,32 @@
       </div>
 
       <div class="led-row">
+        <div class="led-date">Jun to Jul 2026</div>
+        <div class="led-main">
+          <div class="led-title">Beijing Agentic AI Bootcamp · Final Competition</div>
+          <div class="led-note">1st place in the final AI Agent Competition.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge gold">1st Place</span>
+          <button type="button" class="solution-btn lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">certificate
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="led-row">
+        <div class="led-date">Aug 2026</div>
+        <div class="led-main">
+          <div class="led-title">ARC White-Box Estimation Challenge &middot; Estimating a Random Network</div>
+          <div class="led-note">Predicting the expected activations of a random 32-layer ReLU MLP under a compute budget 15,000x smaller than the one that produced the answer key. Quasi-Monte Carlo sampler on 6 scrambled Sobol nets. Top 7 on the public leaderboard.</div>
+        </div>
+        <div class="led-side">
+          <span class="res-badge win-plain">Top 7</span>
+          <a class="res-badge win glow" href="projects/white-box-estimation.html" target="_blank" rel="noopener">Write-up &#8599;</a>
+        </div>
+      </div>
+
+      <div class="led-row">
         <div class="led-date">Jul to Aug 2026</div>
         <div class="led-main">
           <div class="led-title">AlphaNova Quant Competition 5 · Alpha-Signal Research</div>
@@ -1022,6 +1050,9 @@
           </a>
         </div>
       </div>
+
+      <div class="led-break" aria-hidden="true"></div>
+
 
       <div class="led-row">
         <div class="led-date">2026</div>
@@ -1073,31 +1104,8 @@
         </div>
       </div>
 
-      <div class="led-row">
-        <div class="led-date">Jun to Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">Beijing Agentic AI Bootcamp · Final Competition</div>
-          <div class="led-note">1st place in the final AI Agent Competition.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <button type="button" class="solution-btn lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">certificate
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-      </div>
+      <div class="led-break" aria-hidden="true"></div>
 
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">ARC White-Box Estimation Challenge &middot; Estimating a Random Network</div>
-          <div class="led-note">Predicting the expected activations of a random 32-layer ReLU MLP under a compute budget 15,000x smaller than the one that produced the answer key. Quasi-Monte Carlo sampler on 6 scrambled Sobol nets.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Phase 1</span>
-          <a class="res-badge win glow" href="projects/white-box-estimation.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
 
       <div class="led-row">
         <div class="led-date">Aug to Sep 2026</div>
@@ -1108,20 +1116,6 @@
         <div class="led-side">
           <span class="res-badge win-plain">Submitted</span>
           <a class="solution-btn" href="https://thylinao1.github.io/shadowcommit-site-zff3/" target="_blank" rel="noopener" aria-label="Open the Shadow Commit showcase site">showcase
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">PSA Code Sprint 2026 &middot; RELAY</div>
-          <div class="led-note">An exception layer for container-terminal transhipment: after a disruption it identifies the connections about to be missed, re-plans a shift's limited budget against a digital twin with CP-SAT, and routes every action through a priced, reversible, human-approved decision on a tamper-evident record.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Submitted</span>
-          <a class="solution-btn" href="https://thylinao1.github.io/relay-page/" target="_blank" rel="noopener" aria-label="Open the RELAY submission site">website
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
           </a>
         </div>

@@ -869,12 +869,12 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
 
       <details class="more"><summary>The six properties of language models that make measurement harder</summary><div>
 <p class="reveal">Six properties of language models make the four joints harder than they are in classical machine learning. Outputs are
-        open-ended, so a score depends on a grader, and graders have properties of their own. Sampling is stochastic, so a single run is one
+        open-ended, so a score depends on a grader, and graders have properties of their own. Sampling is stochastic, and even at temperature zero the arithmetic underneath is not exactly repeatable, so a single run is one
         draw from a distribution. Scores move with prompt phrasing, few-shot order and even the delimiter between examples, so a benchmark
         number is really a triple: the model, the prompt and the harness. Benchmarks are on the internet and models are trained on the internet,
         so contamination is hard to rule out from outside. A public benchmark is a target, so its validity decays under optimisation pressure,
         which is Goodhart's law applied to measurement. And when the grader or the simulated user is itself a model, the instrument moves with
-        every version change. Stanford's AI Measurement Science lab describes the result as "a measurement crisis characterized by benchmark saturation, inconsistent measurement practices, and difficulty in making valid claims about AI capabilities", and a 2025 study of what it called potemkin understanding found that models define concepts correctly 94.2% of the time and then fail to apply them at high rates, which is the construct problem in miniature: a right answer on the item is not the property the item was written to measure.<sup class="src"><a href="#s67">67</a>, <a href="#s65">65</a></sup> The eleven problems below are the concrete forms these properties take in the public numbers of 2026.</p>
+        every version change, so one moving object is being measured with another. Stanford's AI Measurement Science lab describes the result as "a measurement crisis characterized by benchmark saturation, inconsistent measurement practices, and difficulty in making valid claims about AI capabilities", and a 2025 study of what it called potemkin understanding found that models define concepts correctly 94.2% of the time and then fail to apply them at high rates, which is the construct problem in miniature: a right answer on the item is not the property the item was written to measure.<sup class="src"><a href="#s67">67</a>, <a href="#s65">65</a></sup> The eleven problems below are the concrete forms these properties take in the public numbers of 2026.</p>
 </div></details>
 
       <h3 class="reveal">Does the score predict the work?</h3>
@@ -1131,7 +1131,18 @@ n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</
         evaluations of the same model or report statistical significance or uncertainty of results", and a 2025 review of 445 benchmarks found
         that only 53.4% presented evidence for construct validity and fewer than 10% used complete real-world tasks.<sup class="src"><a href="#s46">46</a>, <a href="#s45">45</a></sup></p>
       <details class="more"><summary>Where the variance comes from, and the trial counts that are printed</summary><div>
-<p class="reveal">The sources of variance are ordinary ones. Across the Llama, Qwen and Gemma families, MMLU accuracy varied by about 23%, as the
+<p class="reveal">One source of variance sits inside the arithmetic. The same prompt sent to the same model at temperature zero, a setting that is meant to remove sampling altogether,
+        does not always return the same text. Thinking Machines Lab sent one prompt, "Tell me about Richard Feynman", to a 235-billion-parameter Qwen3 model a thousand times
+        at temperature zero and received 80 different completions. All thousand were identical for the first 102 tokens. At the 103rd, 992 of them continued "Queens, New York"
+        and 8 continued "New York City", and from that token on the texts diverged.<sup class="src"><a href="#s128">128</a></sup> The reason is that floating-point addition is not
+        associative: adding the same numbers in a different order gives a result that differs in the last digit, and a forward pass is billions of additions. The common explanation,
+        that whichever GPU core finishes first is summed first, is not what happens in a language model, where the same calculation on the same data is repeatable from one run to
+        the next. What changes is the batch. A serving system groups the requests that arrive together, its kernels split a large sum differently depending on how many requests are in
+        the group, and the group size depends on how busy the server is, which the sender cannot see. A change in the last digit of a score is enough to flip the choice between two
+        near-tied next tokens, and once one token differs the continuations part ways. With kernels rewritten to add in an order that does not depend on the batch, all thousand
+        completions came out identical.<sup class="src"><a href="#s128">128</a></sup> Temperature zero therefore narrows the spread of a model's answers but does not close it, and one run
+        remains one draw.</p>
+<p class="reveal">The other sources of variance are in the prompt and the harness. Across the Llama, Qwen and Gemma families, MMLU accuracy varied by about 23%, as the
         authors report it, with the single character used to separate few-shot examples, enough, they note, to put any of the tested models in the lead by choosing the
         separator.<sup class="src"><a href="#s48">48</a></sup> Two common prompting styles moved ARC and MMLU scores by more than 20 points, and
         micro versus macro averaging over MMLU's 57 subjects shifts a headline by several points.<sup class="src"><a href="#s49">49</a></sup>
@@ -2109,7 +2120,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         Five arXiv identifiers the reviewer could not retrieve were re-opened and resolve to the cited titles. Corrections are welcome by email to <a href="mailto:e1506804@u.nus.edu">e1506804@u.nus.edu</a>.</p>
 
       <h3 class="reveal" id="sources">Sources</h3>
-      <p class="small reveal">127 primary and secondary sources, each with the date it was opened; sources 114 to 127 were added in the revision of 6 September. The list is collapsed; a numbered superscript anywhere on the page opens it at the entry.</p>
+      <p class="small reveal">128 primary and secondary sources, each with the date it was opened; sources 114 to 128 were added in the revision of 6 September. The list is collapsed; a numbered superscript anywhere on the page opens it at the entry.</p>
       <details class="srcbox" id="srcbox"><summary>Show the source list</summary><div>
       <ol class="sources">
         <li id="s1">ARC Prize Foundation, G. Kamradt, "OpenAI's GPT-6 Astra on ARC-AGI-3", 3 September 2026. <a href="https://arcprize.org/blog/astra" target="_blank" rel="noopener">arcprize.org/blog/astra</a> <span class="acc">accessed 6 Sep 2026</span></li>
@@ -2239,6 +2250,7 @@ It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken,
         <li id="s125">M. T. Ribeiro, T. Wu, C. Guestrin and S. Singh, "Beyond Accuracy: Behavioral Testing of NLP Models with CheckList", ACL 2020. <a href="https://aclanthology.org/2020.acl-main.442/" target="_blank" rel="noopener">aclanthology.org/2020.acl-main.442</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s126">D. Kiela et al., "Dynabench: Rethinking Benchmarking in NLP", NAACL 2021. <a href="https://aclanthology.org/2021.naacl-main.324/" target="_blank" rel="noopener">aclanthology.org/2021.naacl-main.324</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s127">Regulation (EU) 2024/1689 (AI Act), Article 111(3), transitional provision for general-purpose AI models placed on the market before 2 August 2025. <a href="https://artificialintelligenceact.eu/article/111/" target="_blank" rel="noopener">artificialintelligenceact.eu/article/111</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s128">H. He and Thinking Machines Lab, "Defeating Nondeterminism in LLM Inference", Thinking Machines Lab: Connectionism, September 2025. <a href="https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/" target="_blank" rel="noopener">thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference</a> <span class="acc">accessed 6 Sep 2026</span></li>
       </ol>
       </div></details>
     </div>

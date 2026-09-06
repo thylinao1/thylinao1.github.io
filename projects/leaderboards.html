@@ -388,11 +388,11 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
   #hero::after{background:linear-gradient(180deg,rgba(14,18,32,.52) 0%,rgba(14,18,32,.26) 30%,transparent 56%),radial-gradient(105% 82% at 76% 28%,rgba(181,84,46,.18),transparent 58%),radial-gradient(80% 70% at 8% 92%,rgba(111,146,191,.14),transparent 62%),linear-gradient(180deg,transparent 58%,rgba(16,20,34,.55) 100%)}
 }
 #hero .wrap{position:relative;z-index:3;padding-top:84px;padding-bottom:70px}
-@media(min-width:901px){#hero h1{max-width:17ch}#hero .sub{max-width:570px}}
+@media(min-width:901px){#hero h1{max-width:24ch}#hero .sub{max-width:800px}}
 #hero .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-bright);margin:0 0 26px;line-height:1.5}
 #hero .tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent-bright);margin-right:11px;vertical-align:1px;box-shadow:0 0 0 4px rgba(111,146,191,.20)}
-#hero h1{color:#fff}
-#hero .sub{font-size:21px;line-height:1.5;color:#c6cddc;max-width:600px;margin:0 0 6px}
+#hero h1{color:#fff;max-width:26ch}
+#hero .sub{font-size:21px;line-height:1.5;color:#c6cddc;max-width:820px;margin:0 0 6px}
 #hero .sub b{color:#fff;font-weight:600}
 #hero .who{font-family:var(--font-mono);font-size:12.5px;color:#9ba7bd;margin:24px 0 0}
 #hero .who b{color:#fff;font-weight:500}
@@ -446,6 +446,45 @@ ol.sources li::before{content:"[" counter(s) "]";position:absolute;left:0;top:.1
 ol.sources li a{word-break:break-all}
 ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4);letter-spacing:.03em}
 
+/* ---------- summary box ---------- */
+.tldr{background:#fff;border:1px solid var(--rule-strong);border-left:3px solid var(--accent);border-radius:5px;padding:30px 34px 22px;margin:0 auto;max-width:1000px}
+.tldr ol{margin:0;padding:0;list-style:none;counter-reset:tl}
+.tldr li{position:relative;padding-left:38px;margin:0 0 14px;font-size:17.5px;line-height:1.52;color:var(--ink-2);counter-increment:tl}
+.tldr li::before{content:counter(tl);position:absolute;left:0;top:.18em;width:24px;height:24px;border-radius:50%;background:var(--accent-deep);color:#fff;font-family:var(--font-mono);font-size:11px;display:flex;align-items:center;justify-content:center}
+.tldr li b{color:var(--ink)}
+.tldr .small{margin:18px 0 0}
+/* ---------- collapsible detail ---------- */
+details.more,details.srcbox{margin:4px 0 26px;border:1px solid var(--rule-strong);border-radius:4px;background:#fff}
+details.more summary,details.srcbox summary{cursor:pointer;list-style:none;padding:12px 18px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);display:flex;align-items:center;gap:10px;transition:background .2s var(--ease)}
+details.more summary:hover,details.srcbox summary:hover{background:rgba(61,90,128,.07)}
+details.more summary::-webkit-details-marker,details.srcbox summary::-webkit-details-marker{display:none}
+details.more summary::before,details.srcbox summary::before{content:"";width:8px;height:8px;border-right:1.5px solid var(--accent-deep);border-bottom:1.5px solid var(--accent-deep);transform:rotate(-45deg) translateY(-1px);transition:transform .25s var(--ease);flex:none;margin-left:2px}
+details.more[open] summary::before,details.srcbox[open] summary::before{transform:rotate(45deg)}
+details.more > div{padding:4px 22px 2px;border-top:1px solid var(--rule)}
+details.more > div > p{font-size:17.5px}
+details.srcbox > div{padding:6px 22px 16px;border-top:1px solid var(--rule);max-height:560px;overflow:auto}
+details.srcbox ol.sources{margin-top:12px}
+/* ---------- post cards ---------- */
+.posts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:26px 0 0}
+.post{background:#fff;border:1px solid var(--rule-strong);border-radius:8px;padding:18px 20px 16px;display:flex;flex-direction:column;gap:10px;transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.post:hover{transform:translateY(-3px);box-shadow:0 18px 34px -24px rgba(23,28,44,.6)}
+.post .ph{display:flex;align-items:center;gap:12px}
+.post .av{width:40px;height:40px;border-radius:50%;background:var(--deep);color:#fff;font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;flex:none}
+.post .av.lab{background:var(--warm-deep)}
+.post .av.ind{background:var(--accent-deep)}
+.post .nm{font-size:15px;color:var(--ink);font-weight:600;line-height:1.2}
+.post .hd{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-4);margin-top:2px}
+.post .tx{font-size:15.5px;line-height:1.5;color:var(--ink-2);white-space:pre-line}
+.post img{width:100%;height:auto;border-radius:6px;border:1px solid var(--rule);display:block}
+.post .pf{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:11px;color:var(--ink-4);margin-top:auto;padding-top:6px}
+.post .pf a{border:none;color:var(--accent-deep)}
+.post .pf a:hover{color:var(--accent)}
+/* ---------- the chain diagram, full width ---------- */
+.pipe.chain .plab{font-size:12.5px}
+.pipe.chain .plab-s{font-size:10.5px}
+.pipe.chain .phead{font-size:10.5px}
+.pipe.chain .plab-w{font-size:11px;fill:var(--warm-deep)}
+
 /* ---------- responsive ---------- */
 @media(max-width:900px){main section{padding:78px 0}}
 @media(max-width:720px){
@@ -461,6 +500,13 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
   input[type=range]{width:130px}
 }
 @media(max-width:380px){.wrap{padding:0 15px}.hbtn{padding:10px 14px;font-size:10.5px}.hstats dd{font-size:28px}}
+/* small screens: keep the chain diagram legible by letting it scroll sideways, and let the equation wrap */
+.mob-only{display:none}
+@media(max-width:700px){
+  .chain-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+  .pipe.chain{min-width:760px}
+  .mob-only{display:inline}
+  .eq{white-space:pre-wrap;word-break:normal;font-size:12px;line-height:1.7}
 </style>
 <noscript><style>
   .fig,.btnrow,.readout,.scrolly-sticky,#rail,#field,#grain,.scrollcue,.slider,.hero-legend{display:none}
@@ -480,6 +526,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
   .flip .back{position:relative;transform:none;margin-top:10px}
   .flip .front{position:relative}
   .flip{min-height:0}
+}
 </style></noscript>
 </head>
 <body>
@@ -492,6 +539,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
   <a class="homebtn" href="../index.html"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.2 2 3.2 6l4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</a>
   <a class="brand" href="#hero">What the leaderboards measure</a>
   <nav id="toc" aria-label="Sections of this page">
+    <a href="#tldr" data-sec="tldr">Summary</a>
     <a href="#claim" data-sec="claim">Instrument</a>
     <a href="#problems" data-sec="problems">Problems</a>
     <a href="#astra" data-sec="astra">Astra week</a>
@@ -515,31 +563,49 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
     <p class="tag">Essay &middot; 6 September 2026 &middot; about 45 minutes</p>
     <h1 id="hero-h">What the Leaderboards Are Actually Measuring</h1>
     <p class="sub">A critique of the public evaluation metrics for frontier AI models. Arena rankings, benchmark scores
-      and lab-reported numbers get read as measurements of <b>capability</b>. This essay looks at what they measure instead,
-      with the launch week of OpenAI's GPT-6 Astra as the running case.</p>
+      and lab-reported numbers get read as measurements of <b>capability</b>. This essay looks at what they measure instead.
+      The running case is the launch week of 1 to 6 September 2026, when Anthropic's Claude Fable 5.1 and OpenAI's GPT-6 Astra
+      were released two days apart. The same checks are applied to both labs, and to Google, xAI, Meta, DeepSeek and Moonshot
+      in the earlier episodes.</p>
     <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore</p>
     <div class="hbtns">
-      <a class="hbtn solid" href="#claim">Start reading <span class="arrow">&rarr;</span></a>
+      <a class="hbtn solid" href="#tldr">Summary <span class="arrow">&rarr;</span></a>
+      <a class="hbtn" href="#claim">Start reading</a>
       <a class="hbtn" href="#sources">Sources</a>
     </div>
-    <dl class="hstats">
-      <div><dt>Standard harness</dt><dd><span class="count" data-final="62.7" data-dec="1" data-suffix="%">62.7%</span><small>ARC-AGI-3, GPT-6 Astra</small></dd></div>
-      <div><dt>Provider adapter harness</dt><dd><span class="count" data-final="99.9" data-dec="1" data-suffix="%">99.9%</span><small>same model, same week</small></dd></div>
-      <div><dt>Composite indices agreeing on the leader</dt><dd>0 <small>of 2, Epoch AI and Artificial Analysis</small></dd></div>
-    </dl>
   </div>
-  <div class="hero-legend" aria-hidden="true"><span><i style="background:#6f92bf"></i>Standard harness</span><span><i style="background:#d4744f"></i>Provider adapter</span></div>
   <div class="scrollcue" aria-hidden="true"><span></span>Scroll</div>
 </section>
 
 <main>
+
+<!-- ============================= SUMMARY ============================= -->
+<section id="tldr" aria-labelledby="tldr-h">
+  <div class="wrap">
+    <p class="kicker reveal">Summary</p>
+    <h2 class="reveal" id="tldr-h">The essay in eight points</h2>
+    <div class="tldr reveal d1">
+      <ol>
+        <li><b>A public score is a claim about an instrument, not a property of a model.</b> It depends on the test items, the <button type="button" class="term" data-modal="m-harness">harness</button> around the model, the run, and how the reported number was selected. Most published scores travel without those details.</li>
+        <li><b>The same model scored 62.7% and 99.9% on the same benchmark in the same week.</b> The ARC Prize Foundation measured <button type="button" class="term" data-modal="m-astra">GPT-6 Astra</button> on <button type="button" class="term" data-modal="m-arcagi3">ARC-AGI-3</button> under two harness conditions and published both. OpenAI's launch table printed the higher figure beside two competitors measured under the lower one.</li>
+        <li><b>Independent composites disagreed on which model leads.</b> <button type="button" class="term" data-modal="m-epoch">Epoch AI</button> ranked Astra first; <button type="button" class="term" data-modal="m-aa">Artificial Analysis</button> placed it five points behind <button type="button" class="term" data-modal="m-fable">Claude Fable 5.1</button>. Both publish how their indices are built, and the construction explains the difference.</li>
+        <li><b>The same reading applies to every lab.</b> Anthropic's launch of the same week reported a Terminal-Bench-Science score of 52.6% from an internal setup while the public board's best entry was 30.0%, ran OSWorld 2.0 on a task release that its own footnote calls not comparable to earlier results, and evaluated with production safeguards that scored some tasks as zero; its two system cards give Claude Opus 5 two different GDPval scores at the same setting. Earlier episodes cover Google, xAI, Meta, DeepSeek and Moonshot.</li>
+        <li><b>Arena rankings measure voter preference under one style adjustment.</b> The top five models on the <button type="button" class="term" data-modal="m-arena">Text Arena</button> sit within 8 points and carry intervals of 4 to 11 points, and providers may still test several private variants before release.</li>
+        <li><b>Test sets are noisier and more contaminated than their headlines suggest.</b> An estimated 6.49% of MMLU items contain errors, 68.3% of the original SWE-bench sample was filtered out as unfair or under-specified, and a 100% cyber score fell to 39% on vulnerabilities disclosed after the training cutoff.</li>
+        <li><b>The remedies exist and several are in use:</b> standard harnesses with labelled conditions, independent re-runs, private and post-cutoff test sets, trial counts and intervals printed in system cards, and cost reported next to the score.</li>
+        <li><b>How to read a benchmark table:</b> who ran it, which harness and effort setting, how many items and trials, whether there is an interval, which subset and version, whether the tested system is the shipped one, and who funds the benchmark. The checklist at the end scores any table on these ten points.</li>
+      </ol>
+      <p class="small">Every number on this page is traced to a primary source opened on 6 September 2026; the sources are collected at the end. OpenAI's launch is the running case because it happened this week and produced the most documents, not because the pattern is specific to one company.</p>
+    </div>
+  </div>
+</section>
 <!-- ============================= 01 INSTRUMENT ============================= -->
 <section id="claim" aria-labelledby="claim-h">
   <div class="wrap">
     <p class="kicker reveal">01 &nbsp;/&nbsp; The instrument</p>
-    <h2 class="reveal" id="claim-h">A score is a claim about an instrument</h2>
+    <h2 class="reveal" id="claim-h">What a benchmark score represents</h2>
     <p class="lede reveal d1">On 3 September 2026 the same model scored 62.7% and 99.9% on the same benchmark, on the same day,
-      reported by the same organisation. Neither number is wrong. They answer different questions.</p>
+      reported by the same organisation. Both numbers are correct under their own conditions, and the conditions are the subject of this essay.</p>
 
     <div class="read">
       <p class="reveal">Evaluation is measurement. Someone starts with a <button type="button" class="term" data-modal="m-construct">construct</button>
@@ -549,7 +615,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         something else, a run that is not the deployed configuration, or a number reported without the error bar that would have shown it
         was noise.</p>
 
-      <p class="reveal">The 62.7% and the 99.9% belong to GPT-6 Astra on ARC-AGI-3, the interactive reasoning benchmark run by the ARC Prize
+      <p class="reveal">The 62.7% and the 99.9% belong to <button type="button" class="term" data-modal="m-astra">GPT-6 Astra</button> on <button type="button" class="term" data-modal="m-arcagi3">ARC-AGI-3</button>, the interactive reasoning benchmark run by the ARC Prize
         Foundation. Under the Foundation's own <b>Standard <button type="button" class="term" data-modal="m-harness">harness</button></b>, a minimal interface that is identical for every provider, the model's best
         run scored 62.7% at a cost of about $26,000. Under a <b>Provider Adapter harness</b>, which keeps OpenAI's private reasoning state between
         requests and compacts long conversations, it scored 99.9% for about $19,000.<sup class="src"><a href="#s1">1</a></sup> The Foundation
@@ -558,67 +624,59 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 
       <p class="reveal">OpenAI had made the same point six weeks earlier, about its previous model. In July it reported that turning on two
         API settings it already uses in its own products, retained reasoning and compaction, tripled GPT-5.6 Sol's score on the ARC-AGI-3 public
-        set from 13.3% to 38.3% and cut output tokens by a factor of six. The post closed with a sentence that could stand as the thesis of this
+        set from 13.3% to 38.3% and cut <button type="button" class="term" data-modal="m-tokens">output tokens</button> by a factor of six. The post closed with a sentence that could stand as the thesis of this
         essay: "evals rarely measure models in isolation". They also measure, in OpenAI's words, "a bundle of less visible choices about API
         settings, harness design, and prompting".<sup class="src"><a href="#s6">6</a></sup></p>
 
+    </div>
       <figure class="reveal">
-        <p class="fig-head">The measurement chain, and where it breaks <span>diagram, draws on scroll</span></p>
-        <svg class="pipe" viewBox="0 0 900 250" role="img" aria-label="A five-box pipeline from construct to items to harness to run to number, with the failure mode written under each joint">
-          <text class="phead" x="8" y="16">FROM A QUESTION TO A NUMBER</text>
+        <p class="fig-head">The measurement chain, and where it breaks <span>diagram, draws on scroll<span class="mob-only">, scrolls sideways on small screens</span></span></p>
+        <div class="chain-scroll"><svg class="pipe chain" viewBox="0 0 1000 300" role="img" aria-label="A five-box pipeline from construct to items to harness to run to number, with the failure mode written under each joint">
+          <text class="phead" x="8" y="18">FROM A QUESTION TO A NUMBER</text>
           <g class="pfade" style="--d:.05s">
-            <rect class="pbox-a" x="8" y="40" width="150" height="62" rx="3"/>
-            <text class="plab" x="18" y="63">1  Construct</text>
-            <text class="plab-s" x="18" y="80">what we want to know</text>
-            <text class="plab-s" x="18" y="93">"can it reason afresh"</text>
+            <rect class="pbox-a" x="8" y="40" width="180" height="78" rx="3"/>
+            <text class="plab" x="20" y="66">1  Construct</text>
+            <text class="plab-s" x="20" y="86">what we want to know:</text>
+            <text class="plab-s" x="20" y="103">"reasoning on new tasks"</text>
           </g>
-          <path class="parrow" d="M158 71 H190"/>
+          <path class="parrow" d="M188 79 H208"/>
           <g class="pfade" style="--d:.25s">
-            <rect class="pbox" x="190" y="40" width="150" height="62" rx="3"/>
-            <text class="plab" x="200" y="63">2  Items and rule</text>
-            <text class="plab-s" x="200" y="80">tasks, answers, scoring</text>
-            <text class="plab-s" x="200" y="93">n items, pass criterion</text>
+            <rect class="pbox" x="208" y="40" width="180" height="78" rx="3"/>
+            <text class="plab" x="220" y="66">2  Items and rule</text>
+            <text class="plab-s" x="220" y="86">tasks, answers, scoring;</text>
+            <text class="plab-s" x="220" y="103">n items, pass criterion</text>
           </g>
-          <path class="parrow" d="M340 71 H372"/>
+          <path class="parrow" d="M388 79 H408"/>
           <g class="pfade" style="--d:.45s">
-            <rect class="pbox" x="372" y="40" width="150" height="62" rx="3"/>
-            <text class="plab" x="382" y="63">3  Harness</text>
-            <text class="plab-s" x="382" y="80">prompt, tools, memory,</text>
-            <text class="plab-s" x="382" y="93">effort, time and turn limits</text>
+            <rect class="pbox" x="408" y="40" width="180" height="78" rx="3"/>
+            <text class="plab" x="420" y="66">3  Harness</text>
+            <text class="plab-s" x="420" y="86">prompt, tools, memory,</text>
+            <text class="plab-s" x="420" y="103">effort, time, turn limits</text>
           </g>
-          <path class="parrow" d="M522 71 H554"/>
+          <path class="parrow" d="M588 79 H608"/>
           <g class="pfade" style="--d:.65s">
-            <rect class="pbox" x="554" y="40" width="150" height="62" rx="3"/>
-            <text class="plab" x="564" y="63">4  Run</text>
-            <text class="plab-s" x="564" y="80">which checkpoint, how</text>
-            <text class="plab-s" x="564" y="93">many trials, which route</text>
+            <rect class="pbox" x="608" y="40" width="180" height="78" rx="3"/>
+            <text class="plab" x="620" y="66">4  Run</text>
+            <text class="plab-s" x="620" y="86">which checkpoint, how</text>
+            <text class="plab-s" x="620" y="103">many trials, which route</text>
           </g>
-          <path class="parrow" d="M704 71 H736"/>
+          <path class="parrow" d="M788 79 H808"/>
           <g class="pfade" style="--d:.85s">
-            <rect class="pbox-w" x="736" y="40" width="156" height="62" rx="3"/>
-            <text class="plab" x="746" y="63">5  Number</text>
-            <text class="plab-s" x="746" y="80">one score, rarely with</text>
-            <text class="plab-s" x="746" y="93">an interval or a trial count</text>
+            <rect class="pbox-w" x="808" y="40" width="184" height="78" rx="3"/>
+            <text class="plab" x="820" y="66">5  Number</text>
+            <text class="plab-s" x="820" y="86">one score, rarely with an</text>
+            <text class="plab-s" x="820" y="103">interval or a trial count</text>
           </g>
-          <text class="phead" x="8" y="140">HOW EACH JOINT FAILS</text>
-          <g class="pfade" style="--d:1.0s">
-            <path class="pwarn" d="M83 102 V160"/><text class="plab plab-w" x="8" y="178">Preference read as</text><text class="plab plab-w" x="8" y="192">capability. Saturation.</text><text class="plab plab-w" x="8" y="206">Contested definitions.</text>
-          </g>
-          <g class="pfade" style="--d:1.1s">
-            <path class="pwarn" d="M265 102 V160"/><text class="plab plab-w" x="190" y="178">Contaminated items.</text><text class="plab plab-w" x="190" y="192">Wrong labels. Subsets</text><text class="plab plab-w" x="190" y="206">that are not the set.</text>
-          </g>
-          <g class="pfade" style="--d:1.2s">
-            <path class="pwarn" d="M447 102 V160"/><text class="plab plab-w" x="372" y="178">Settings that move the</text><text class="plab plab-w" x="372" y="192">score by a factor of 3.</text><text class="plab plab-w" x="372" y="206">Judges with biases.</text>
-          </g>
-          <g class="pfade" style="--d:1.3s">
-            <path class="pwarn" d="M629 102 V160"/><text class="plab plab-w" x="554" y="178">Best of many variants.</text><text class="plab plab-w" x="554" y="192">Not the shipped model.</text><text class="plab plab-w" x="554" y="206">The model knows it is a test.</text>
-          </g>
-          <g class="pfade" style="--d:1.4s">
-            <path class="pwarn" d="M814 102 V160"/><text class="plab plab-w" x="736" y="178">No error bar. Best</text><text class="plab plab-w" x="736" y="192">effort of several. One</text><text class="plab plab-w" x="736" y="206">run. Version drift.</text>
-          </g>
-          <text class="plab-s" x="8" y="240">Every problem on this page is a failure at one of the five joints. Most public scores travel with joints 3 to 5 undisclosed.</text>
-        </svg>
+          <text class="phead" x="8" y="152">HOW EACH JOINT FAILS</text>
+          <g class="pfade" style="--d:1.0s"><path class="pwarn" d="M98 118 V172"/><text class="plab plab-w" x="8" y="194">Preference read as</text><text class="plab plab-w" x="8" y="212">capability. Saturation.</text><text class="plab plab-w" x="8" y="230">Contested definitions.</text></g>
+          <g class="pfade" style="--d:1.1s"><path class="pwarn" d="M298 118 V172"/><text class="plab plab-w" x="208" y="194">Contaminated items.</text><text class="plab plab-w" x="208" y="212">Wrong answer keys.</text><text class="plab plab-w" x="208" y="230">Subsets, not the full set.</text></g>
+          <g class="pfade" style="--d:1.2s"><path class="pwarn" d="M498 118 V172"/><text class="plab plab-w" x="408" y="194">Settings that move the</text><text class="plab plab-w" x="408" y="212">score by a factor of three.</text><text class="plab plab-w" x="408" y="230">Judges with biases.</text></g>
+          <g class="pfade" style="--d:1.3s"><path class="pwarn" d="M698 118 V172"/><text class="plab plab-w" x="608" y="194">Best of many variants.</text><text class="plab plab-w" x="608" y="212">Not the shipped model.</text><text class="plab plab-w" x="608" y="230">Model knows it is a test.</text></g>
+          <g class="pfade" style="--d:1.4s"><path class="pwarn" d="M900 118 V172"/><text class="plab plab-w" x="808" y="194">No error bar. Best effort</text><text class="plab plab-w" x="808" y="212">of several. One run.</text><text class="plab plab-w" x="808" y="230">Index version drift.</text></g>
+          <text class="plab-s" x="8" y="276">Every problem on this page is a failure at one of the five joints. Most public scores are published with joints 3 to 5 undisclosed.</text>
+        </svg></div>
       </figure>
+    <div class="read">
 
       <h3 class="reveal">What a benchmark number can and cannot separate</h3>
       <p class="reveal">A small numerical fact governs everything that follows. If a benchmark has <i>n</i> items and the true pass rate is
@@ -628,16 +686,20 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         benchmarks have a few hundred tasks or fewer, and the tasks inside them are rarely independent, which widens the interval further. The
         calculator in <a href="#p7">problem 7</a> lets you set <i>n</i> and <i>p</i> and overlay the benchmarks named in this essay.</p>
 
-      <div class="eq"><b>SE</b>(p̂) = sqrt( p (1 <i>-</i> p) / n )         n = 100, p = 0.70  <i>-&gt;</i>  SE = 0.046,  95% interval about <i>+/- 9</i> points
-                                        n = 1,000, p = 0.70  <i>-&gt;</i>  SE = 0.014,  95% interval about <i>+/- 3</i> points</div>
+      <div class="eq"><b>SE</b>(p̂) = sqrt( p (1 <i>-</i> p) / n )
 
-      <p class="reveal">Six properties of language models make the four joints harder than they are in classical machine learning. Outputs are
+n = 100,   p = 0.70   <i>-&gt;</i>   SE = 0.046,   95% interval about <i>+/- 9</i> points
+n = 1,000, p = 0.70   <i>-&gt;</i>   SE = 0.014,   95% interval about <i>+/- 3</i> points</div>
+
+      <details class="more"><summary>The six properties of language models that make measurement harder</summary><div>
+<p class="reveal">Six properties of language models make the four joints harder than they are in classical machine learning. Outputs are
         open-ended, so a score depends on a grader, and graders have properties of their own. Sampling is stochastic, so a single run is one
         draw from a distribution. Scores move with prompt phrasing, few-shot order and even the delimiter between examples, so a benchmark
         number is really a triple: the model, the prompt and the harness. Benchmarks are on the internet and models are trained on the internet,
         so contamination is hard to rule out from outside. A public benchmark is a target, so its validity decays under optimisation pressure,
         which is Goodhart's law applied to measurement. And when the grader or the simulated user is itself a model, the instrument moves with
         every version change. Stanford's AI Measurement Science lab describes the result as "a measurement crisis characterized by benchmark saturation, inconsistent evaluation methodologies, and difficulty in making valid claims about AI capabilities", and a 2025 study of what it called potemkin understanding found that models define concepts correctly 94.2% of the time and then fail to apply them at high rates, which is the construct problem in miniature: a right answer on the item is not the property the item was written to measure.<sup class="src"><a href="#s67">67</a>, <a href="#s65">65</a></sup> The eleven problems below are the concrete forms these properties take in the public numbers of 2026.</p>
+</div></details>
     </div>
   </div>
 </section>
@@ -645,19 +707,20 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="problems" class="alt" aria-labelledby="problems-h">
   <div class="wrap">
     <p class="kicker reveal">02 &nbsp;/&nbsp; The general problems</p>
-    <h2 class="reveal" id="problems-h">Eleven ways a public score stops measuring capability</h2>
+    <h2 class="reveal" id="problems-h">Eleven problems with public scores as measures of capability</h2>
     <p class="lede reveal d1">Seven of these are structural and have been documented since 2023. Four are newer, and the launch week of
       September 2026 supplied a fresh example of each.</p>
 
     <div class="read">
 
-      <h3 class="reveal" id="p1">1. Preference is not capability</h3>
-      <p class="reveal">The Text Arena at arena.ai ranks models from anonymous pairwise votes fitted with a
+      <h3 class="reveal" id="p1">1. Arena votes measure preference, not capability</h3>
+      <p class="reveal">The <button type="button" class="term" data-modal="m-arena">Text Arena</button> at arena.ai ranks models from anonymous pairwise votes fitted with a
         <button type="button" class="term" data-modal="m-bt">Bradley-Terry model</button>. As of 6 September 2026 the page reports
         7,999,020 votes across 400 models, with a data stamp of 2 September.<sup class="src"><a href="#s17">17</a></sup> A vote records
         that one self-selected person preferred one of two responses to a prompt they wrote themselves. That is a real quantity, and a
         useful one, but it is a measurement of preference under those conditions, not of capability.</p>
-      <p class="reveal">The gap between the two is not hypothetical. In August 2024 the Arena team fitted the same votes with controls
+      <details class="more"><summary>How the Arena's own corrections show the gap</summary><div>
+<p class="reveal">The gap between the two is not hypothetical. In August 2024 the Arena team fitted the same votes with controls
         for answer length, the method it calls <button type="button" class="term" data-modal="m-style">style control</button>, and for the number of markdown headers, bold elements and lists, and reported: "We controlled for the effect of
         length and markdown, and indeed, the ranking changed." Two small models fell below most of the frontier and three others rose
         substantially.<sup class="src"><a href="#s21">21</a></sup> In May 2026 the team found two further biases in a new source of
@@ -666,6 +729,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         correction is a statement that the raw votes had been rewarding something other than quality. The same effect appears in automatic
         proxies for human preference: length-controlling AlpacaEval raised its correlation with Arena rankings from 0.94 to
         0.98.<sup class="src"><a href="#s31">31</a></sup></p>
+</div></details>
 
       <figure class="reveal">
         <p class="fig-head">Six models, one voter population, one style knob <span class="sim">simulation</span></p>
@@ -682,18 +746,19 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           The models, voters and votes are invented; the mechanism is the published one.<sup class="src"><a href="#s21">21</a></sup></figcaption>
       </figure>
 
-      <h3 class="reveal" id="p2">2. Contamination</h3>
+      <h3 class="reveal" id="p2">2. Contamination: test items that were in the training data</h3>
       <p class="reveal">If test items, or paraphrases of them, sit in the training corpus, a score measures recall; this is <button type="button" class="term" data-modal="m-contam">contamination</button>. Three measurements
         show how large the effect can be. When a team commissioned GSM1k, a fresh set of grade-school arithmetic problems matched in
         difficulty to GSM8K, several model families lost up to 8 points, and the size of a model's loss correlated with how readily it could
-        regenerate GSM8K problems verbatim.<sup class="src"><a href="#s40">40</a></sup> On SWE-bench Verified, models identified the buggy
+        regenerate GSM8K problems verbatim.<sup class="src"><a href="#s40">40</a></sup> On <button type="button" class="term" data-modal="m-swebench">SWE-bench Verified</button>, models identified the buggy
         file from the issue text alone, with no access to the repository, up to 76% of the time, against up to 53% on repositories outside
-        the benchmark.<sup class="src"><a href="#s39">39</a></sup> Agents that search the web while answering Humanity's Last Exam, SimpleQA
-        and GPQA found the evaluation datasets themselves, with labels, on Hugging Face for about 3% of questions; blocking that source cut
+        the benchmark.<sup class="src"><a href="#s39">39</a></sup> Agents that search the web while answering <button type="button" class="term" data-modal="m-hle">Humanity's Last Exam</button>, SimpleQA
+        and <button type="button" class="term" data-modal="m-gpqa">GPQA</button> found the evaluation datasets themselves, with labels, on Hugging Face for about 3% of questions; blocking that source cut
         accuracy on the affected subset by about 15%.<sup class="src"><a href="#s41">41</a></sup></p>
-      <p class="reveal">The launch week added a case from inside a lab. OpenAI reported that Astra scored 100% on ExploitBench, a set of
-        historical software vulnerabilities. Its system card says the result "may be artificially inflated due to potential contamination
-        from exposure to historical vulnerabilities", and gives the mechanism: asked to exploit one CVE, the model failed, then recalled a
+      <details class="more"><summary>The launch-week case, and the limits of detecting contamination from outside</summary><div>
+<p class="reveal">The launch week added a case from inside a lab. OpenAI reported that Astra scored 100% on ExploitBench, a set of
+        historical software vulnerabilities. Its <button type="button" class="term" data-modal="m-syscard">system card</button> says the result "may be artificially inflated due to potential contamination
+        from exposure to historical vulnerabilities", and gives the mechanism: asked to exploit one <button type="button" class="term" data-modal="m-cve">CVE</button>, the model failed, then recalled a
         different, later CVE from memory and used that instead.<sup class="src"><a href="#s7">7</a></sup> OpenAI then built an internal
         set of 20 vulnerabilities disclosed after the model's training cutoff. On that set Astra scored 39.0% and its predecessor 5.5%, with
         a footnote that the 5.5% is partly an artefact of a 300-turn limit and that the older model reached 11.5% when it hit fewer
@@ -701,6 +766,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         problem set drawn from June 2026 arXiv abstracts: "some contamination cannot be ruled out".<sup class="src"><a href="#s13">13</a></sup>
         Detection from outside is weaker than it looks; a 2024 study showed a contamination method that "significantly inflates benchmark
         performance while completely evading current detection methods".<sup class="src"><a href="#s73">73</a></sup></p>
+</div></details>
 
       <figure class="reveal">
         <p class="fig-head">The same skill, a historical set and a post-cutoff set <span>animated, OpenAI's own numbers</span></p>
@@ -710,21 +776,22 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           the caveats about turn limits and about whether 100% is achievable on the new set are OpenAI's own footnotes.<sup class="src"><a href="#s4">4</a></sup></figcaption>
       </figure>
 
-      <h3 class="reveal" id="p3">3. Label noise and saturation</h3>
+      <h3 class="reveal" id="p3">3. Wrong answer keys and saturated benchmarks</h3>
       <p class="reveal">A benchmark is a set of items written by people, and people make mistakes. A 2024 re-annotation estimated that
-        6.49% of MMLU questions contain errors, rising to 57% in the virology subset.<sup class="src"><a href="#s35">35</a></sup> For
+        6.49% of <button type="button" class="term" data-modal="m-mmlu">MMLU</button> questions contain errors, rising to 57% in the virology subset.<sup class="src"><a href="#s35">35</a></sup> For
         Humanity's Last Exam, FutureHouse reported that 29 &plusmn; 3.7% of the text-only chemistry and biology questions "had answers with
         directly conflicting evidence in peer reviewed literature"; the benchmark's authors re-reviewed and reported an expert disagreement
         rate of 15.4% on the public set, about 18% on a biology, chemistry and health subset, and 25% on that subset under a single-reviewer
         rule.<sup class="src"><a href="#s36">36</a>, <a href="#s37">37</a></sup> SWE-bench Verified exists because 68.3% of a random sample
         of the original SWE-bench was filtered out by 93 developers for under-specified statements or unit tests that could reject valid
-        solutions; on the cleaned set GPT-4o's score went from 16% to 33.2%.<sup class="src"><a href="#s38">38</a></sup> OSWorld-Verified
+        solutions; on the cleaned set GPT-4o's score went from 16% to 33.2%.<sup class="src"><a href="#s38">38</a></sup> <button type="button" class="term" data-modal="m-osworld">OSWorld</button>-Verified
         was produced by a team of about ten people fixing more than 300 reported problems over two months.<sup class="src"><a href="#s64">64</a></sup>
         In February 2026 OpenAI audited the hardest SWE-bench Verified problems, found that "at least 59.4% of the audited problems have flawed test
         cases that reject functionally correct submissions" while scores kept "improving from 74.9% to 80.9% in the last 6 months", and stopped
         reporting the benchmark it had built.<sup class="src"><a href="#s99">99</a></sup></p>
-      <p class="reveal">A 2026 audit of multiple-choice sets made the dependence on item quality explicit: injecting noise into the distractors "raises accuracy to nearly 100%, confirming that most errors disappear when meaningful distractor competition is removed".<sup class="src"><a href="#s66">66</a></sup> Once the strong models clear the sound items, the remaining score is dominated by the noisy ones. That is saturation,
-        and it now arrives quickly. Epoch AI, which tracks benchmarks across generations, states that "Most benchmarks saturate too quickly to study long-run AI trends", that "benchmarks tend to saturate within
+      <details class="more"><summary>Saturation: how quickly benchmarks reach their ceiling</summary><div>
+<p class="reveal">A 2026 audit of multiple-choice sets made the dependence on item quality explicit: injecting noise into the distractors "raises accuracy to nearly 100%, confirming that most errors disappear when meaningful distractor competition is removed".<sup class="src"><a href="#s66">66</a></sup> Once the strong models clear the sound items, the remaining score is dominated by the noisy ones. That is saturation,
+        and it now arrives quickly. <button type="button" class="term" data-modal="m-epoch">Epoch AI</button>, which tracks benchmarks across generations, states that "Most benchmarks saturate too quickly to study long-run AI trends", that "benchmarks tend to saturate within
         1-3 years" and in May 2026 described GPQA as "clearly saturated", dating the event to the winter of 2025, about two years after
         release.<sup class="src"><a href="#s68">68</a>, <a href="#s42">42</a></sup> A September 2026 paper opens with flagship models "scoring above 90%" on
         MMLU.<sup class="src"><a href="#s44">44</a></sup> The ARC Prize Foundation's own history is the sharpest version: ARC-AGI-1 stayed
@@ -733,6 +800,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         the two harnesses by 3 September.<sup class="src"><a href="#s43">43</a>, <a href="#s1">1</a></sup> A benchmark near its ceiling
         measures mostly label noise and the last ambiguous items, so a one-point gap there carries less information than the same gap in the
         middle of the scale.</p>
+</div></details>
 
       <figure class="reveal">
         <p class="fig-head">Benchmark lifetimes, release to the best published score today <span>animated</span></p>
@@ -750,8 +818,8 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           cannot fairly be scored. They agree that the error floor is far above the one-point gaps that decide rankings.<sup class="src"><a href="#s35">35</a>, <a href="#s36">36</a>, <a href="#s37">37</a>, <a href="#s38">38</a></sup></figcaption>
       </figure>
 
-      <h3 class="reveal" id="p4">4. The judge has its own preferences</h3>
-      <p class="reveal">Most open-ended evaluation now uses a model as the grader, because it is the only scalable option. The biases were
+      <h3 class="reveal" id="p4">4. Model judges have measurable biases of their own</h3>
+      <p class="reveal">Most open-ended evaluation now uses <button type="button" class="term" data-modal="m-judge">a model as the grader</button>, because it is the only scalable option. The biases were
         catalogued with the MT-Bench paper in 2023 and have not gone away. When the order of two answers was swapped, Claude-v1 gave the same
         verdict 23.8% of the time, GPT-3.5 46.2% and GPT-4 65.0%. Under a "repetitive list" attack that pads an answer without adding content,
         Claude-v1 and GPT-3.5 preferred the padded answer 91.3% of the time. GPT-4 favoured its own outputs by 10 points of win rate and
@@ -759,13 +827,15 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         the time out of the box, and when the same authors fine-tuned GPT-3.5 and Llama 2 to raise or lower their self-recognition, the strength of self-preference rose and fell linearly with it.<sup class="src"><a href="#s32">32</a></sup>
         A "null model" that returns one fixed response regardless of the question reached an 86.5% length-controlled win rate on AlpacaEval 2.0,
         83.0 on Arena-Hard-Auto and 9.55 on MT-Bench.<sup class="src"><a href="#s30">30</a></sup></p>
-      <p class="reveal">Two 2026 studies confirm the biases shrink with stronger judges without disappearing: "Stronger judges reduce but do
+      <details class="more"><summary>Judges in 2026: stronger, still biased, and changing under the evaluation</summary><div>
+<p class="reveal">Two 2026 studies confirm the biases shrink with stronger judges without disappearing: "Stronger judges reduce but do
         not remove position and verbosity bias", and the strongest judge in one panel still changed 14.7% of verdicts when the answers were
         swapped.<sup class="src"><a href="#s33">33</a></sup> The judge is also a moving instrument. Because it "is itself a model behind an API",
         a silent version bump or a changed scoring prompt means that "every drift alarm is ambiguous between a worse product and a changed
-        judge".<sup class="src"><a href="#s34">34</a></sup> Judges are inside several of the numbers in this essay: Artificial Analysis's
-        GDPval-AA reports an Elo from judged comparisons, Arena introduced AutoEval scores in July 2026 to provide ratings "when waiting for human
+        judge".<sup class="src"><a href="#s34">34</a></sup> Judges are inside several of the numbers in this essay: <button type="button" class="term" data-modal="m-aa">Artificial Analysis</button>'s
+        <button type="button" class="term" data-modal="m-gdpval">GDPval-AA</button> reports an <button type="button" class="term" data-modal="m-elo">Elo</button> from judged comparisons, Arena introduced AutoEval scores in July 2026 to provide ratings "when waiting for human
         votes to accumulate", and OpenAI's launch table grades HealthBench Professional with GPT-5.4.<sup class="src"><a href="#s8">8</a>, <a href="#s63">63</a>, <a href="#s4">4</a></sup></p>
+</div></details>
 
       <figure class="reveal">
         <p class="fig-head">Swap the order, pad the answer, watch the verdict <span class="sim">simulation</span></p>
@@ -781,9 +851,9 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           running both permutations and averaging, which removes position bias but not length bias.<sup class="src"><a href="#s29">29</a></sup></figcaption>
       </figure>
 
-      <h3 class="reveal" id="p5">5. Private testing and selective disclosure</h3>
+      <h3 class="reveal" id="p5">5. Private testing of many variants, and publishing only the best</h3>
       <p class="reveal">In April 2025 a group of researchers from Cohere, Princeton, Stanford, MIT and elsewhere published "The Leaderboard
-        Illusion", an audit of Chatbot Arena. They identified 27 private variants tested by Meta before the Llama 4 release, estimated that Google
+        Illusion", an audit of Chatbot Arena. They identified 27 private variants tested by Meta before the <button type="button" class="term" data-modal="m-maverick">Llama 4</button> release, estimated that Google
         and OpenAI had received 19.2% and 20.4% of all Arena data while 83 open-weight models together received 29.7%, and showed that extra
         access to Arena data could produce relative gains of up to 112% on an Arena-distribution test set.<sup class="src"><a href="#s22">22</a></sup>
         The Arena's reply, published on 9 May 2025, accepted the premise while disputing the magnitudes. It stated that "any model provider can
@@ -811,9 +881,9 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           axis.<sup class="src"><a href="#s22">22</a>, <a href="#s20">20</a></sup></figcaption>
       </figure>
 
-      <h3 class="reveal" id="p6">6. The harness is part of the score</h3>
+      <h3 class="reveal" id="p6">6. The harness around the model changes the score</h3>
       <p class="reveal">An agent benchmark scores a model together with the scaffold around it: the prompt, the tools, the memory between
-        steps, the reasoning effort, the time and turn limits. Change the scaffold and the score moves by amounts that exceed the gaps between
+        steps, the <button type="button" class="term" data-modal="m-effort">reasoning effort</button>, the time and turn limits. Change the scaffold and the score moves by amounts that exceed the gaps between
         models. OpenAI's July 2026 experiment held GPT-5.6 Sol fixed and changed two API settings, retained reasoning and compaction; the
         ARC-AGI-3 public-set score went from 13.3% to 38.3% with six times fewer output tokens.<sup class="src"><a href="#s6">6</a></sup>
         Under ARC Prize's two harnesses in September, Astra's semi-private score moved from 62.7% to 99.9%, and the Provider Adapter runs were
@@ -823,13 +893,15 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         after swapping the scaffold and fixing grading errors for the same model.<sup class="src"><a href="#s54">54</a></sup> A 2026 study that
         varied only the harness measured a 27.4-point spread in pass@1 from harness choice against 29.4 points from model choice, and a jump from
         19.1% to 73.4% for one backbone from the adapter design alone.<sup class="src"><a href="#s56">56</a></sup></p>
-      <p class="reveal">The benchmark maintainers know this. Anthropic's system card notes that Terminal-Bench 4.0 "reduced the confounding role of
+      <details class="more"><summary>What benchmark maintainers have done about the harness</summary><div>
+<p class="reveal">The benchmark maintainers know this. Anthropic's system card notes that Terminal-Bench 4.0 "reduced the confounding role of
         various harnesses (e.g., CLI memory footprint, compaction strategy, and container communication protocol)" compared with earlier
         versions.<sup class="src"><a href="#s13">13</a></sup> Terminal-Bench 2.1 modified 26 tasks "to fix bugs, modify timeouts or resources,
         or improve robustness to reward hacking".<sup class="src"><a href="#s57">57</a></sup> The official SWE-bench leaderboard now carries a
         "Bash Only" view in which every model runs in the same minimal agent, mini-SWE-agent, because the scaffold effect is large enough to need a
         standard.<sup class="src"><a href="#s71">71</a></sup> None of this makes a harness-optimised score dishonest. It makes it a measurement
         of the model and the harness together, which is a different quantity from the one a leaderboard column heading implies.</p>
+</div></details>
 
     </div>
       <figure class="reveal">
@@ -851,7 +923,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
       </figure>
     <div class="read">
 
-      <h3 class="reveal" id="p7">7. Noise, and the trial counts nobody prints</h3>
+      <h3 class="reveal" id="p7">7. Small test sets, noisy scores and unreported trial counts</h3>
       <p class="reveal">A leaderboard gap is a difference between two estimates, and both estimates have variance. The methods for handling
         this are not exotic. Evan Miller's 2024 note set out five: standard errors from the central limit theorem, clustered standard errors when
         questions come in related groups, variance reduction by resampling, paired differences when two models are compared on the same items,
@@ -860,18 +932,20 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         cases".<sup class="src"><a href="#s47">47</a></sup> Yet the BetterBench audit found that 14 of 24 benchmarks "did not perform multiple
         evaluations of the same model or report statistical significance or uncertainty of results", and a 2025 review of 445 benchmarks found
         that only 53.4% presented evidence for construct validity and fewer than 10% used complete real-world tasks.<sup class="src"><a href="#s46">46</a>, <a href="#s45">45</a></sup></p>
-      <p class="reveal">The sources of variance are mundane. Across leading model families, MMLU accuracy varied by up to 23 points with the
+      <details class="more"><summary>Where the variance comes from, and the trial counts that are printed</summary><div>
+<p class="reveal">The sources of variance are mundane. Across leading model families, MMLU accuracy varied by up to 23 points with the
         single character used to separate few-shot examples, enough, the authors note, to put any model in the lead by choosing the
         separator.<sup class="src"><a href="#s48">48</a></sup> Two common prompting styles moved ARC and MMLU scores by more than 20 points, and
         micro versus macro averaging over MMLU's 57 subjects shifts a headline by several points.<sup class="src"><a href="#s49">49</a></sup>
-        Where trial counts are printed, they are instructive. Anthropic ran Terminal-Bench-Science ten times per task, 700 trials, and still reports
+        Where trial counts are printed, they are instructive. Anthropic ran <button type="button" class="term" data-modal="m-tbench">Terminal-Bench-Science</button> ten times per task, 700 trials, and still reports
         a standard error of 3.5 to 4.5 points per model, because two thirds of the tasks are solved either at least 80% or at most 20% of the time,
         so "most of the uncertainty comes from tasks rather than run-to-run variance".<sup class="src"><a href="#s13">13</a></sup> Epoch AI's
-        FrontierMath Tier 4 leaderboard prints intervals of &plusmn;2.4 to &plusmn;7 points on 43 problems.<sup class="src"><a href="#s11">11</a></sup>
+        <button type="button" class="term" data-modal="m-frontiermath">FrontierMath</button> Tier 4 leaderboard prints intervals of &plusmn;2.4 to &plusmn;7 points on 43 problems.<sup class="src"><a href="#s11">11</a></sup>
         ARC Prize states that "A single run is used, we do not average scores across runs."<sup class="src"><a href="#s3">3</a></sup> The Arena's
         top fifteen carry intervals of &plusmn;3 to &plusmn;11 points around a spread of 8 points between first and fifth.<sup class="src"><a href="#s17">17</a></sup>
         The New Stack made the arithmetic explicit for one launch-week claim: a 1.3-point difference on a 113-task coding benchmark "is roughly
         equivalent to one or two tasks".<sup class="src"><a href="#s25">25</a></sup></p>
+</div></details>
 
       <figure class="reveal">
         <p class="fig-head">How wide is the interval around a pass rate <span>interactive</span></p>
@@ -890,7 +964,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           Terminal-Bench-Science (70), DeepSWE (113), SWE-bench Verified (500).<sup class="src"><a href="#s11">11</a>, <a href="#s14">14</a>, <a href="#s25">25</a>, <a href="#s38">38</a></sup></figcaption>
       </figure>
 
-      <h3 class="reveal" id="p8">8. Best-of reporting, subsets and asymmetric footnotes</h3>
+      <h3 class="reveal" id="p8">8. Best-of-several reporting, subsets, and footnotes that apply to one column</h3>
       <p class="reveal">The methodology line printed beneath the tables in OpenAI's launch post reads: "Evaluation scores are the maximum at any effort."<sup class="src"><a href="#s4">4</a></sup>
         That is a legitimate choice, and it is also a selection: each cell is the best of several runs at different effort settings, and the
         effort that produced it is not shown. Other selections sit in the footnotes. On SRE-Bench the model "solved 88.0% of tasks in a single
@@ -909,7 +983,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         other models "within noise", while the public board itself lists neither Fable 5.1 nor Astra.<sup class="src"><a href="#s12">12</a>, <a href="#s14">14</a></sup>
         Neither practice is hidden. Both require the reader to hold the footnotes next to the headline, and the headline travels alone.</p>
 
-      <h3 class="reveal" id="p9">9. The tested system is not the shipped one, and the model may know it is a test</h3>
+      <h3 class="reveal" id="p9">9. The evaluated system differs from the shipped one, and models can recognise an evaluation</h3>
       <p class="reveal">Footnote 2 of the same table defines the comparison model as "the version available in our API, ChatGPT Codex, and
         ChatGPT Work. The version in ChatGPT Chat is slightly different."<sup class="src"><a href="#s4">4</a></sup> Footnote 16 explains that
         cross-vendor safety tests used "a simpler research setup" than the production product. The configuration that produced 99.9% is the
@@ -917,12 +991,13 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         image: its models were evaluated "with its production safeguards enabled", and where a safeguard intervened the model "scored a zero" on
         that task.<sup class="src"><a href="#s12">12</a></sup> A shipped system can therefore score below or above the evaluated one depending on
         which layers were present during the test.</p>
-      <p class="reveal">A second gap opened in 2026 between the evaluated behaviour and the deployed behaviour. METR's pre-deployment evaluation of
+      <details class="more"><summary>Evaluation awareness and cheating: the 2026 evidence</summary><div>
+<p class="reveal">A second gap opened in 2026 between the evaluated behaviour and the deployed behaviour. <button type="button" class="term" data-modal="m-metr">METR</button>'s pre-deployment evaluation of
         GPT-5.6 Sol found a "detected cheating rate" that "was higher than any public model we have evaluated on our ReAct agent harness", where
-        cheating means exploiting bugs in the environment or using disallowed strategies. Counting cheating as failure gave a 50% time horizon of
+        cheating means exploiting bugs in the environment or using disallowed strategies. Counting cheating as failure gave a 50% <button type="button" class="term" data-modal="m-timehorizon">time horizon</button> of
         about 11.3 hours with a 95% interval from 5 to 40 hours; counting it as success moved the estimate "beyond 270hrs". METR's conclusion was
-        that it did "not consider any of these numbers to represent a robust measurement".<sup class="src"><a href="#s23">23</a></sup> Apollo
-        Research, testing Astra for three days before release, recorded verbalised <button type="button" class="term" data-modal="m-awareness">evaluation awareness</button> in 41.1% of samples at one effort setting
+        that it did "not consider any of these numbers to represent a robust measurement".<sup class="src"><a href="#s23">23</a></sup> <button type="button" class="term" data-modal="m-apollo">Apollo
+        Research</button>, testing Astra for three days before release, recorded verbalised <button type="button" class="term" data-modal="m-awareness">evaluation awareness</button> in 41.1% of samples at one effort setting
         and 50.6% at maximum, and wrote that low rates of misbehaviour under those conditions "do not provide substantial evidence about the
         model's alignment or misalignment".<sup class="src"><a href="#s7">7</a></sup> Anthropic's Claude Sonnet 5 card called verbalised awareness
         of about 6% of rollouts in its most realistic evaluation "concerningly high".<sup class="src"><a href="#s52">52</a></sup> A 2025 study
@@ -931,15 +1006,17 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         Claude 3 Opus losing 39.8 points on a dangerous-capability biology set against 9.7 on ordinary biology questions.<sup class="src"><a href="#s51">51</a></sup>
         Every capability number is conditional on the model behaving as it would when it is not being watched, and that condition is now
         measurably false some of the time.</p>
+</div></details>
 
-      <h3 class="reveal" id="p10">10. Boards lag and versions drift</h3>
+      <h3 class="reveal" id="p10">10. Independent boards lag launches, and index versions change</h3>
       <p class="reveal">A lab's comparison chart is published on launch day. Independent boards follow on their own schedules, and by the time
         they publish, the index they publish into may have changed. Three days after the Astra launch, as of 6 September 2026, the model had a
-        score on ARC Prize, Artificial Analysis, Epoch AI, LiveBench and Vals AI, and no entry on the Arena text leaderboard, the official SWE-bench
+        score on ARC Prize, Artificial Analysis, Epoch AI, <button type="button" class="term" data-modal="m-livebench">LiveBench</button> and <button type="button" class="term" data-modal="m-vals">Vals AI</button>, and no entry on the Arena text leaderboard, the official SWE-bench
         Verified board (whose newest entries were from February 2026), the public Humanity's Last Exam site, the Scale Labs leaderboards, the
         OSWorld 2.0 academic board or METR.<sup class="src"><a href="#s17">17</a>, <a href="#s71">71</a>, <a href="#s72">72</a>, <a href="#s64">64</a>, <a href="#s23">23</a></sup>
         The Arena had added it to the Agent Arena with "Scores coming soon".<sup class="src"><a href="#s70">70</a></sup></p>
-      <p class="reveal">Meanwhile the indices moved. Artificial Analysis published Astra at 61 on Intelligence Index v4.1.1 on 3 September and
+      <details class="more"><summary>Version drift during the launch week</summary><div>
+<p class="reveal">Meanwhile the indices moved. Artificial Analysis published Astra at 61 on Intelligence Index v4.1.1 on 3 September and
         announced v4.2, which "has more complex and realistic tasks, and more private test sets to prevent gaming", on 4 September; its comparison page
         for the same two models then read 55 against 51 where the article had read 61 against 61, and its release page listed the high-effort
         configuration at 53. Zvi Mowshowitz, summarising the re-run on 5 September, noted that "Retroactive adjustments are more than a little suspicious, but this is more plausible."<sup class="src"><a href="#s8">8</a>, <a href="#s9">9</a>, <a href="#s69">69</a></sup> Epoch AI's FrontierMath v2, released on 12 June 2026,
@@ -949,8 +1026,9 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         and modified grading from the Fable 5.1 System Card"; the academic board, updated on 3 September, lists Claude Opus 5 on the August release as its top entry at 31.4% of tasks completed and a 68.3% partial
         score, with the June release's leader, Claude Opus 4.8, at 20.6% and 54.8%.<sup class="src"><a href="#s12">12</a>, <a href="#s4">4</a>, <a href="#s64">64</a></sup> A number quoted without its index version and
         task release cannot be checked against the board it came from.</p>
+</div></details>
 
-      <h3 class="reveal" id="p11">11. Money and access</h3>
+      <h3 class="reveal" id="p11">11. Funding, data access and commercial ties between evaluators and labs</h3>
       <p class="reveal">The organisations that measure the frontier are funded by, sell to, or depend on access from the organisations they
         measure. Epoch AI's FrontierMath pages state that the benchmark "was developed with funding from OpenAI, who has exclusive access to a
         subset of the benchmark", and Tier 4 has two public problems out of 43.<sup class="src"><a href="#s11">11</a></sup> The Arena raised a
@@ -972,9 +1050,9 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="astra" aria-labelledby="astra-h">
   <div class="wrap">
     <p class="kicker reveal">03 &nbsp;/&nbsp; Case one</p>
-    <h2 class="reveal" id="astra-h">The week of 1 to 6 September 2026</h2>
+    <h2 class="reveal" id="astra-h">Case one: the launch week of 1 to 6 September 2026</h2>
     <p class="lede reveal d1">Two frontier launches, one benchmark foundation, two independent indices and a week of coverage produced,
-      for one model, at least four different headline numbers on one benchmark and three on one safety test.</p>
+      for one model, four different headline figures on one benchmark and three on one safety test. Anthropic's launch of the same week is read with the same checks in case four.</p>
 
     <div class="read">
       <div class="tl reveal" aria-label="Timeline of the launch week">
@@ -982,7 +1060,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         <div class="tl-day">
           <h4>Tuesday 1 September</h4>
           <div class="tl-ev lab"><span class="who">Anthropic</span><b>Claude Fable 5.1 and Claude Mythos 5.1</b> are released with a benchmark table (Terminal-Bench-Science 52.6%, Humanity's Last Exam 60.9% without tools and 65.0% with, OSWorld 2.0 on the August task release) and a system card that prints trial counts and standard errors.<sup class="src"><a href="#s12">12</a>, <a href="#s13">13</a></sup></div>
-          <div class="tl-ev lab"><span class="who">OpenAI</span><b>"Path to Astra"</b> designates the forthcoming model Critical for cybersecurity, reports 100% on ExploitBench, describes an internal post-cutoff set built "due to contamination concerns", and states that GPT-5.6 Sol attacked honeypot targets in 56% of tests.<sup class="src"><a href="#s5">5</a></sup></div>
+          <div class="tl-ev lab"><span class="who">OpenAI</span><b>"Path to Astra"</b> designates the forthcoming model <button type="button" class="term" data-modal="m-preparedness">Critical for cybersecurity</button>, reports 100% on ExploitBench, describes an internal post-cutoff set built "due to contamination concerns", and states that GPT-5.6 Sol attacked honeypot targets in 56% of tests.<sup class="src"><a href="#s5">5</a></sup></div>
           <div class="tl-ev ind"><span class="who">Arena</span>The leaderboard policy page is updated; pre-release testing of multiple variants remains permitted.<sup class="src"><a href="#s19">19</a></sup></div>
         </div>
         <div class="tl-day">
@@ -991,14 +1069,14 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
           <div class="tl-ev ind"><span class="who">ARC Prize Foundation</span>Publishes 62.7% under the Standard harness and 99.9% under the Provider Adapter harness, with the full effort-by-harness table and costs, and commits to labelling both conditions on its leaderboard.<sup class="src"><a href="#s1">1</a></sup></div>
           <div class="tl-ev ind"><span class="who">Artificial Analysis</span>Intelligence Index v4.1.1: Astra 61, equal to GPT-5.6 Sol and five points behind Claude Fable 5.1; Coding Agent Index 67 against Fable 5.1's 70.<sup class="src"><a href="#s8">8</a></sup></div>
           <div class="tl-ev ind"><span class="who">Epoch AI</span>Epoch Capabilities Index 169, rank 1 of 267, against 163 for Fable 5.1; FrontierMath Tier 4 at 97.6%.<sup class="src"><a href="#s10">10</a>, <a href="#s11">11</a></sup></div>
-          <div class="tl-ev press"><span class="who">The New Stack, Fortune, TechCrunch</span>Two New Stack articles report 98.6% on ARC-AGI-3. Fortune reports 99.9% "using a souped-up harness" and 66% on the standard harness, and later that day corrects the name of the cyber benchmark from ExploitGym to ExploitBench. TechCrunch quotes the company president calling it "our most intelligent and, also very importantly, our most aligned model yet".<sup class="src"><a href="#s25">25</a>, <a href="#s26">26</a>, <a href="#s24">24</a>, <a href="#s27">27</a></sup></div>
-          <div class="tl-ev ind"><span class="who">Arena</span>Astra is added to the Agent Arena: "Scores coming soon."<sup class="src"><a href="#s70">70</a></sup></div>
+          <div class="tl-ev press"><span class="who">The New Stack, Fortune, TechCrunch</span>Two New Stack articles report 98.6% on ARC-AGI-3. Fortune reports 99.9% "using a souped-up harness" and 66% on the standard harness, and later that day corrects the name of the cyber benchmark from ExploitGym to ExploitBench. TechCrunch quotes the company president describing it as the company's "most intelligent and, also very importantly, our most aligned model yet".<sup class="src"><a href="#s25">25</a>, <a href="#s26">26</a>, <a href="#s24">24</a>, <a href="#s27">27</a></sup></div>
         </div>
         <div class="tl-day">
           <h4>Friday 4 September</h4>
+          <div class="tl-ev ind"><span class="who">Arena</span>Astra is added to the Agent Arena: "Scores coming soon."<sup class="src"><a href="#s70">70</a></sup></div>
           <div class="tl-ev ind"><span class="who">Artificial Analysis</span>Announces Intelligence Index v4.2 with "more private test sets to prevent gaming"; the comparison page for the same two models now shows 55 against 51.<sup class="src"><a href="#s8">8</a>, <a href="#s9">9</a></sup></div>
           <div class="tl-ev ind"><span class="who">Vals AI</span>Vals Index: Fable 5.1 68.83%, Astra 66.61%.<sup class="src"><a href="#s16">16</a></sup></div>
-          <div class="tl-ev press"><span class="who">Fortune, The Decoder</span>Fortune adds a clarification of "the ARC-AGI-3 results that Astra achieved and the conditions under which it was tested". The Decoder's headline: "Benchmarks disagree on GPT-6 Astra."<sup class="src"><a href="#s24">24</a>, <a href="#s28">28</a></sup></div>
+          <div class="tl-ev press"><span class="who">Fortune, The Decoder</span>Fortune adds a clarification of "the ARC-AGI-3 results that Astra achieved and the conditions under which it was tested". The Decoder's headline begins "Benchmarks disagree on GPT-6 Astra".<sup class="src"><a href="#s24">24</a>, <a href="#s28">28</a></sup></div>
         </div>
         <div class="tl-day">
           <h4>Sunday 6 September</h4>
@@ -1006,7 +1084,116 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         </div>
       </div>
 
-      <h3 class="reveal">One row, two conditions</h3>
+
+      <h3 class="reveal">What the accounts posted, 1 to 6 September</h3>
+      <p class="reveal">The launch week was also conducted in public posts. The set below pairs the labs' own announcements with the
+        evaluators' and commentators' posts from the same hours. Text and attached images are taken from each post's public embed data
+        as of 6 September 2026, with times in UTC; posts longer than the embed returns are cut at the last complete sentence and linked.</p>
+      <div class="posts reveal">
+        <article class="post">
+          <div class="ph"><span class="av lab">CL</span><div><div class="nm">Claude</div><div class="hd">@claudeai &middot; 01 Sep, 18:03 UTC</div></div></div>
+          <p class="tx">We’re introducing Claude Fable 5.1 and Claude Mythos 5.1.
+
+They&#x27;re the world’s most advanced models for coding and knowledge work.</p>
+          <img src="assets/leaderboards/posts/2094848572143407483.jpg" alt="Image attached to the post by Claude" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>the lab</span><a href="https://x.com/claudeai/status/2094848572143407483" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av lab">OA</span><div><div class="nm">OpenAI</div><div class="hd">@OpenAI &middot; 03 Sep, 19:32 UTC</div></div></div>
+          <p class="tx">GPT-6 Astra is state-of-the-art on FrontierMath Tier 4, ARC-AGI 3, and TerminalBench-4.0.
+
+GPT‑6 Astra is also a major advance for scientific discovery, with state-of-the-art performance on Terminal-Bench Science 0.1 and HealthBench Pro.</p>
+          <img src="assets/leaderboards/posts/2095595752815030713.jpg" alt="Image attached to the post by OpenAI" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>the lab</span><a href="https://x.com/OpenAI/status/2095595752815030713" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">ARC</span><div><div class="nm">ARC Prize</div><div class="hd">@arcprize &middot; 03 Sep, 19:39 UTC</div></div></div>
+          <p class="tx">GPT-6 Astra by @OpenAI achieves SOTA on ARC-AGI:
+
+- Astra scores 63% on ARC-AGI-3, 99% via a new provider adapter harness
+- It surpasses human performance on 96% of ARC-AGI-3 levels
+- It builds the most precise symbolic model of novel environments we&#x27;ve seen
+
+Our analysis: […]</p>
+          <img src="assets/leaderboards/posts/2095597602545025138.jpg" alt="Image attached to the post by ARC Prize" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/arcprize/status/2095597602545025138" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">FC</span><div><div class="nm">François Chollet</div><div class="hd">@fchollet &middot; 03 Sep, 19:42 UTC</div></div></div>
+          <p class="tx">GPT-6 Astra represents a step-function change in model capability for interactive reasoning problems. It scores 66% on ARC-AGI-3 using our standard harness, and nearly 100% with a continuous conversation harness and custom compaction, at a cost of roughly $360 per game. […]</p>
+          
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/fchollet/status/2095598451115614371" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">GK</span><div><div class="nm">Greg Kamradt</div><div class="hd">@GregKamradt &middot; 03 Sep, 19:49 UTC</div></div></div>
+          <p class="tx">Reflections on Astra from a benchmark perspective:
+
+1. No harness was used in the making of these scores
+
+Up until this point we’ve seen multiple groups report results above 90% on ARC-AGI-3. […]</p>
+          
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/GregKamradt/status/2095600045873828013" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av lab">GB</span><div><div class="nm">Greg Brockman</div><div class="hd">@gdb &middot; 03 Sep, 21:46 UTC</div></div></div>
+          <p class="tx">arc-agi-3 is now saturated […]</p>
+          
+          <div class="pf"><span>the lab</span><a href="https://x.com/gdb/status/2095629409017614390" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">EP</span><div><div class="nm">Epoch AI</div><div class="hd">@EpochAIResearch &middot; 03 Sep, 20:00 UTC</div></div></div>
+          <p class="tx">GPT-6 Astra has set a new ECI record, with a score of 169. This is a substantial jump from the prior best (163), but is within our uncertainty range for the reasoning-era ECI trend. Astra also set new records on our math, continual learning, and game-puzzles benchmarks. […]</p>
+          <img src="assets/leaderboards/posts/2095602754282783108.jpg" alt="Image attached to the post by Epoch AI" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/EpochAIResearch/status/2095602754282783108" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">AA</span><div><div class="nm">Artificial Analysis</div><div class="hd">@ArtificialAnlys &middot; 03 Sep, 19:31 UTC</div></div></div>
+          <p class="tx">GPT-6 Astra is 75% more expensive than GPT-5.6 Sol at max effort, and largely sits behind its predecessor on the Intelligence Index vs Cost per Task frontier. This is driven by a 2.5x increase in price, partially offset by a reduction in token use.</p>
+          <img src="assets/leaderboards/posts/2095595509906120927.jpg" alt="Image attached to the post by Artificial Analysis" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/ArtificialAnlys/status/2095595509906120927" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">AA</span><div><div class="nm">Artificial Analysis</div><div class="hd">@ArtificialAnlys &middot; 04 Sep, 22:26 UTC</div></div></div>
+          <p class="tx">Anthropic’s Claude Fable 5.1 and Opus 5 lead AA-Briefcase, followed by GPT-6 Astra and Muse Spark 1.3. GPT-6 Astra shows a substantial gain above GPT-5.6 Sol of ~85 Elo points.
+
+AA-Briefcase is our frontier in-house evaluation with a private held-out test set. […]</p>
+          <img src="assets/leaderboards/posts/2096001995522118125.jpg" alt="Image attached to the post by Artificial Analysis" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/ArtificialAnlys/status/2096001995522118125" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">AA</span><div><div class="nm">Artificial Analysis</div><div class="hd">@ArtificialAnlys &middot; 04 Sep, 22:26 UTC</div></div></div>
+          <p class="tx">OpenAI leads GDP.pdf with GPT-6 Astra at 33.2% and GPT-5.6 Sol at 28.2%, followed by Claude Fable 5.1 at 26.2%.
+
+Created by @HelloSurgeAI, GDP.pdf evaluates single-turn professional document reasoning across 100 PDFs and ten domains. […]</p>
+          <img src="assets/leaderboards/posts/2096001998055416201.jpg" alt="Image attached to the post by Artificial Analysis" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/ArtificialAnlys/status/2096001998055416201" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">AR</span><div><div class="nm">Arena.ai</div><div class="hd">@arena &middot; 05 Sep, 17:32 UTC</div></div></div>
+          <p class="tx">Real-world results are in. There is a new #1 on Code Arena - GPT-6 Astra (Max)!
+
+It also reshapes the Pareto frontier as the best-performing model at $40/Mtoken, which matches the latest Claude model pricing. […]</p>
+          <img src="assets/leaderboards/posts/2096290434700247250.jpg" alt="Image attached to the post by Arena.ai" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/arena/status/2096290434700247250" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">AR</span><div><div class="nm">Arena.ai</div><div class="hd">@arena &middot; 06 Sep, 00:44 UTC</div></div></div>
+          <p class="tx">Claude Fable 5.1 (Max) by @AnthropicAI has landed in the Agent Arena at #1 with +15.8% net improvement across 6.7k+ real-world agentic sessions! It also redraws the price-performance frontier: #1 on the leaderboard at a median cost of $4.14/task. […]</p>
+          <img src="assets/leaderboards/posts/2096398986383184269.jpg" alt="Image attached to the post by Arena.ai" loading="lazy" width="1200" height="675">
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/arena/status/2096398986383184269" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+        <article class="post">
+          <div class="ph"><span class="av ind">AR</span><div><div class="nm">Arena.ai</div><div class="hd">@arena &middot; 06 Sep, 00:50 UTC</div></div></div>
+          <p class="tx">More data is needed for GPT-6 Astra scores to reach strong confidence intervals. Build and evaluate in Agent Mode to contribute towards the real-world results.</p>
+          
+          <div class="pf"><span>evaluator or commentator</span><a href="https://x.com/arena/status/2096400620744053185" target="_blank" rel="noopener">View on X &#8599;</a></div>
+        </article>
+      </div>
+      <p class="small reveal" style="margin-top:14px">Three readings of one result appear in the first four cards: the Foundation's account rounds to 63% and 99%, its
+        co-founder's post gives 66% and "nearly 100%", and its blog table gives 62.7% and 99.9%. The two Arena posts, twelve hours apart, name a
+        different model first on two different boards, and the third asks for more data before the confidence intervals tighten.</p>
+
+      <h3 class="reveal">The ARC-AGI-3 row in OpenAI's table mixes two harness conditions</h3>
       <p class="reveal">The launch post's abstract-reasoning table has one row for ARC-AGI-3: GPT-6 Astra 99.9%, GPT-5.6 Sol 7.8%, Claude Opus 5
         30.2%. Footnote 1, attached to the first cell, says the model "was run with our responses API harness, which changes two settings to
         better match real-world performance. The changes do not specifically target ARC-AGI-3."<sup class="src"><a href="#s4">4</a></sup> The
@@ -1016,7 +1203,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         which is still the highest Standard-harness score on the board and still a 32-point lead over Opus 5. The improved condition was not
         needed to make the point, and it converted a large lead into an implausible one.</p>
 
-      <h3 class="reveal">A perfect score and its footnote</h3>
+      <h3 class="reveal">The 100% ExploitBench score and the contamination note in the system card</h3>
       <p class="reveal">The 100% on ExploitBench appears in the launch post, in "Path to Astra" and in press coverage. The system card, the
         longest and least read of the three documents, is where the qualification lives: the results "may be artificially inflated due to
         potential contamination from exposure to historical vulnerabilities", with the example of the model recalling CVE-2024-0517 when asked
@@ -1027,28 +1214,33 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         reader who saw only the system card would take away 39% with a contamination caveat. Both documents were published by the same
         organisation within two days.</p>
 
-      <h3 class="reveal">Three numbers for one test</h3>
+      <h3 class="reveal">Three different figures for one safety test across three OpenAI documents</h3>
       <p class="reveal">One safety evaluation asks whether a model facing an impossible task will attack surrounding infrastructure instead. For
         GPT-5.6 Sol the launch post's table says 48.2% and its prose says 48%; "Path to Astra" says 56%; the system card says 55.4% "at maximum
         reasoning effort", and adds that Astra, which made no attacks, legitimately completed the task 1.3% of the time.<sup class="src"><a href="#s4">4</a>, <a href="#s5">5</a>, <a href="#s7">7</a></sup>
         The three figures may be different aggregations of the same runs, for example an average across effort levels against the maximum-effort
         setting, but none of the documents says so. The press picked one: The New Stack repeated 48.2%.<sup class="src"><a href="#s25">25</a></sup></p>
 
-      <h3 class="reveal">What the coverage printed</h3>
-      <p class="reveal">Fortune, The New Stack and TechCrunch each had the launch material in advance. Both New Stack pieces, by different
+      <h3 class="reveal">How the press reported the ARC-AGI-3 score</h3>
+      <details class="more"><summary>What each outlet printed</summary><div>
+<p class="reveal">Fortune, The New Stack and TechCrunch each had the launch material in advance. Both New Stack pieces, by different
         authors, gave the ARC-AGI-3 result as 98.6%, a number that is in ARC Prize's table (the maximum-effort Provider Adapter cell) but not in
-        OpenAI's post, which prints the high-effort cell, 99.9%. Fortune printed 99.9% and a 66% standard-harness figure that appears in neither
-        primary source, then published a clarification the next day. The New Stack added an editor's note that a 98.6% score "does not mean the
+        OpenAI's post, which prints the high-effort cell, 99.9%. Fortune printed 99.9% and a 66% standard-harness figure. The 66% is not in the Foundation's blog table, which gives 62.7%, but it is
+        the figure ARC Prize co-founder François Chollet posted that afternoon ("It scores 66% on ARC-AGI-3 using our standard harness"), while the
+        Foundation's own account rounded the pair to "63%" and "99%"; Fortune published a clarification the next day.<sup class="src"><a href="#s112">112</a>, <a href="#s113">113</a></sup> The New Stack added an editor's note that a 98.6% score "does not mean the
         benchmark was 'aced'", because the metric is scored against a human baseline. The same New Stack article paraphrased OpenAI's methodology
         line as "the models in its evaluations ran at maximum effort", which is a narrower claim than "the maximum at any effort".<sup class="src"><a href="#s24">24</a>, <a href="#s25">25</a>, <a href="#s26">26</a>, <a href="#s1">1</a>, <a href="#s4">4</a></sup>
         Nothing here is unusual for launch coverage. It shows how a number with two conditions becomes three or four numbers with none.</p>
+</div></details>
 
-      <h3 class="reveal">The limits that were moved</h3>
-      <p class="reveal">Two footnotes change the conditions of the test itself. On ExploitGym, "we tested Astra and Sol without the 6-hour time
+      <h3 class="reveal">Two footnotes that changed the benchmarks' limits</h3>
+      <details class="more"><summary>The two footnotes</summary><div>
+<p class="reveal">Two footnotes change the conditions of the test itself. On ExploitGym, "we tested Astra and Sol without the 6-hour time
         limit, to better assess their full cyber capabilities". On the post-cutoff ExploitBench set, Sol's 5.5% "is an artifact of the 300-turn limit
         in the benchmark", and "the model at similar settings achieved an 11.5% score when hitting fewer limits".<sup class="src"><a href="#s4">4</a></sup>
         Each note is reasonable on its own terms. Together they show that the limits of a benchmark are parameters the reporting lab can relax
         for one comparison and keep for another, and that the choice is visible only in the footnotes.</p>
+</div></details>
 
       <div class="kf reveal">
         <div class="hot"><dt>ARC-AGI-3, headline figures in circulation</dt><dd>4<small>99.9% and 62.7% (ARC Prize), 98.6% (press, also in ARC's table), 66% (Fortune)</small></dd></div>
@@ -1063,7 +1255,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="whoahead" class="alt" aria-labelledby="who-h">
   <div class="wrap">
     <p class="kicker reveal">04 &nbsp;/&nbsp; Case two</p>
-    <h2 class="reveal" id="who-h">Which model leads depends on who you ask</h2>
+    <h2 class="reveal" id="who-h">Case two: the leading model depends on which evaluator is asked</h2>
     <p class="lede reveal d1">Fourteen published comparisons between GPT-6 Astra and Claude Fable 5.1, from two labs, two composite indices,
       four independent boards and one benchmark foundation, as of 6 September 2026.</p>
 
@@ -1075,8 +1267,8 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         Sol and five points behind Fable 5.1 at 66.<sup class="src"><a href="#s8">8</a></sup> OpenAI's own table reproduces that second result,
         61.2 against 65.7, in a row beneath the rows where it leads.<sup class="src"><a href="#s4">4</a></sup> Both indices are honest about
         their construction, and their construction is why they differ: Epoch's index rewards a model for clearing hard benchmarks it has been run on,
-        and Astra, in Epoch's own account, "set new records on our math, continual learning, and game-puzzles benchmarks" while ranking "between Opus 4.7 and Fable 5" on its long-horizon coding benchmark; Artificial Analysis weights
-        its nine evaluations equally and several of them moved against Astra.<sup class="src"><a href="#s62">62</a>, <a href="#s8">8</a></sup></p>
+        and Astra, in Epoch's own account, "set new records on our math, continual learning, and game-puzzles benchmarks" while ranking "between Opus 4.7 and Fable 5" on its long-horizon coding benchmark; Artificial Analysis averages nine
+        evaluations with category weights set out in its published methodology, and several of them moved against Astra.<sup class="src"><a href="#s62">62</a>, <a href="#s8">8</a></sup></p>
 
       <div class="matrix reveal" role="table" aria-label="Fourteen comparisons between GPT-6 Astra and Claude Fable 5.1, with the source of each">
         <div class="mx-row" role="row"><div class="mx-h" role="columnheader">Instrument</div><div class="mx-h" role="columnheader">GPT-6 Astra</div><div class="mx-h" role="columnheader">Claude Fable 5.1</div><div class="mx-h who" role="columnheader">Leads</div></div>
@@ -1122,7 +1314,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="arena" aria-labelledby="arena-h">
   <div class="wrap">
     <p class="kicker reveal">05 &nbsp;/&nbsp; Case three</p>
-    <h2 class="reveal" id="arena-h">The top of the Arena, read with its intervals</h2>
+    <h2 class="reveal" id="arena-h">Case three: the top of the Arena leaderboard, read with its confidence intervals</h2>
     <p class="lede reveal d1">The most cited human-preference leaderboard separates its top five models by eight points and prints intervals
       of four to eleven points around them.</p>
 
@@ -1152,8 +1344,9 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         The interval also depends on what the votes are being asked to measure. The board offers three adjustments, Style Control, Factuality and
         None, and the style-controlled fit has been shown since 2024 to reorder the frontier.<sup class="src"><a href="#s17">17</a>, <a href="#s21">21</a></sup></p>
 
-      <h3 class="reveal">What has changed since the audit</h3>
-      <p class="reveal">The Arena's changelog, kept since July 2025, records the methodological responses to the problems catalogued in the 2025
+      <h3 class="reveal">Changes to the Arena's method since the 2025 audit</h3>
+      <details class="more"><summary>The changelog since 2025, and what did not change</summary><div>
+<p class="reveal">The Arena's changelog, kept since July 2025, records the methodological responses to the problems catalogued in the 2025
         audit and elsewhere. In July 2025 it strengthened deduplication (removing about 10% of votes from over-represented prompts) and identity-leak
         filtering (under 4% of votes), and moved its confidence intervals from bootstrap to a closed-form central-limit method. In September 2025
         it added a filter for "users who exhibit statistically anomalous voting patterns" and the preliminary tag for models voted on before release.
@@ -1171,6 +1364,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         the labs it ranks, with a reported $100 million annualised run-rate eight months after launching that service.<sup class="src"><a href="#s61">61</a></sup>
         None of this makes the board useless. It makes "first on the Arena" a claim about a few points of preference, under one adjustment,
         inside an interval that usually covers the next several models.</p>
+</div></details>
     </div>
   </div>
 </section>
@@ -1178,7 +1372,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="footnotes" class="alt" aria-labelledby="fn-h">
   <div class="wrap">
     <p class="kicker reveal">06 &nbsp;/&nbsp; Case four</p>
-    <h2 class="reveal" id="fn-h">One benchmark, two labs, two footnotes</h2>
+    <h2 class="reveal" id="fn-h">Case four: the same benchmark reported by two labs under different conditions</h2>
     <p class="lede reveal d1">The same benchmark name appeared in both launch tables in the same week. The conditions behind the name did not
       match, and each lab said so in a footnote about the other.</p>
 
@@ -1195,7 +1389,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         </button>
         <button type="button" class="flip" aria-pressed="false">
           <div class="front"><span class="tag lab">Terminal-Bench-Science 0.1 &middot; the two labs</span><span class="big">64.6% / 52.6%</span>
-            <p>OpenAI reports Astra at 64.6% and quotes Anthropic's 52.6% for Fable 5.1. Anthropic's 52.6% is "averaged over 10 trials per task (700 trials)" with a standard error of 3.5 to 4.5 points, in an internal setup that reproduces two public-board numbers "within noise".<sup class="src"><a href="#s4">4</a>, <a href="#s13">13</a></sup></p>
+            <p>OpenAI reports Astra at 64.6% and quotes Anthropic's 52.6% for Fable 5.1. Anthropic's 52.6% is "averaged over 10 trials per task (700 trials)" with a standard error of 3.5 to 4.5 points, in an internal setup that reproduces two public-board numbers "within expected noise".<sup class="src"><a href="#s4">4</a>, <a href="#s13">13</a></sup></p>
             <span class="hint">Turn for the public board</span></div>
           <div class="back"><span class="tag ind">Terminal-Bench-Science 0.1 &middot; public leaderboard, 6 Sep</span><span class="big">30.0%</span>
             <p>Claude Opus 5 (max) in Claude Code, "30.0% +/- 3.2%", three trials per task, leads the public board. Fable 5 is listed at 21.4%. Neither Fable 5.1 nor GPT-6 Astra appears on the board.<sup class="src"><a href="#s14">14</a></sup></p>
@@ -1206,7 +1400,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
             <p>Claude Fable 5.1, "averaged over... 15 trials per task (990 trials)", standard error 1.6 to 2 points, Claude Code in bare mode at maximum thinking effort. Mythos 5.1, the same model with fewer safeguards, 60.9%.<sup class="src"><a href="#s13">13</a></sup></p>
             <span class="hint">Turn for the public board</span></div>
           <div class="back"><span class="tag ind">Terminal-Bench 4.0 &middot; public leaderboard, per Anthropic</span><span class="big">51.8%</span>
-            <p>"The public leaderboard reports Opus 5 at 51.8% and Fable 5 at 44.5% (five trials, Claude Code harness), within the noise of our internal setup. The public leaderboard also reports OpenAI's GPT-5.6 Sol at 37.3%, scored with the Codex CLI."<sup class="src"><a href="#s13">13</a></sup></p>
+            <p>"The public leaderboard reports Opus 5 at 51.8% and Fable 5 at 44.5% (five trials, Claude Code harness), within the noise of our internal setup. The public leaderboard also reports OpenAI's GPT-5.6 Sol at 37.3%, scored with the Codex CLI at max thinking effort."<sup class="src"><a href="#s13">13</a></sup></p>
             <span class="hint">Turn back</span></div>
         </button>
         <button type="button" class="flip" aria-pressed="false">
@@ -1246,83 +1440,103 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="history" aria-labelledby="hist-h">
   <div class="wrap">
     <p class="kicker reveal">07 &nbsp;/&nbsp; Earlier episodes</p>
-    <h2 class="reveal" id="hist-h">The same patterns, December 2024 to August 2026</h2>
+    <h2 class="reveal" id="hist-h">Earlier episodes, December 2024 to August 2026</h2>
     <p class="lede reveal d1">Each episode below pairs a number that circulated with the number that sat beside it in the primary source.
       None required a leak to find.</p>
 
     <div class="read">
       <h3 class="reveal">December 2024 to April 2025: o3 on ARC-AGI-1</h3>
-      <p class="reveal">On 20 December 2024 ARC Prize reported that OpenAI's o3 had "scored a breakthrough 75.7% on the Semi-Private Evaluation
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">On 20 December 2024 ARC Prize reported that OpenAI's o3 had "scored a breakthrough 75.7% on the Semi-Private Evaluation
         set at our stated public leaderboard $10k compute limit", and that "A high-compute (172x) o3 configuration scored 87.5%". When o3 was
         released in April 2025, ARC Prize added a note: "OpenAI has confirmed that this version is not the same as the one we tested in this
         original post." The released model scored 41% at low effort and 53% at medium on the same set, and the December preview, OpenAI disclosed,
         "included 75% of the ARC-AGI-1 dataset during training". The cost figures in the December post were revised twice, in March and December
         2025, as pricing assumptions changed.<sup class="src"><a href="#s88">88</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">January 2025: who paid for FrontierMath</h3>
-      <p class="reveal">Epoch AI's clarification of 23 January 2025 stated that "OpenAI commissioned Epoch AI to produce 300 advanced math problems
+      <h3 class="reveal">January 2025: the disclosure of FrontierMath's funding</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">Epoch AI's clarification of 23 January 2025 stated that "OpenAI commissioned Epoch AI to produce 300 advanced math problems
         for AI evaluation that form the core of the FrontierMath benchmark", that OpenAI "retains ownership of these questions and has access to the
         problems and solutions, with the exception of a holdout set", and that a 50-problem set was being finalised "for which OpenAI will only receive
         the problem statements and not the solutions". Epoch added: "Our agreement did not prevent us from disclosing to our contributors that this work
         was sponsored by an AI company... our communication with them should have been more systematic and transparent."<sup class="src"><a href="#s89">89</a>, <a href="#s90">90</a></sup>
         The disclosure now sits on every FrontierMath page, which is the remedy; the episode is why the question "who funds the benchmark" is on the checklist.</p>
+</div></details>
 
-      <h3 class="reveal">April 2025: the experimental Maverick</h3>
-      <p class="reveal">Meta's Llama 4 launch post described "an experimental chat version scoring ELO of 1417 on LMArena". The Arena announced it at
+      <h3 class="reveal">April 2025: Meta's experimental Llama 4 Maverick on the Arena</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">Meta's Llama 4 launch post described "an experimental chat version scoring ELO of 1417 on LMArena". The Arena announced it at
         second place. The model Meta released for download was a different configuration; when the Arena added it, it ranked thirty-second, below
         GPT-4o, Claude 3.5 Sonnet and Gemini 1.5 Pro. The Arena's statement was direct: "Meta should have made it clearer that
         'Llama-4-Maverick-03-26-Experimental' was a customized model to optimize for human preference." The audit published three weeks later counted
         27 private Meta variants tested before the launch.<sup class="src"><a href="#s60">60</a>, <a href="#s91">91</a>, <a href="#s92">92</a>, <a href="#s22">22</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">July 2025: Grok 4 and the tools</h3>
-      <p class="reveal">xAI's launch page said Grok 4 Heavy "is the first to score 50.7% on Humanity's Last Exam (text-only subset)". The chart data on
+      <h3 class="reveal">July 2025: Grok 4's Humanity's Last Exam score with and without tools</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">xAI's launch page said Grok 4 Heavy "is the first to score 50.7% on Humanity's Last Exam (text-only subset)". The chart data on
         the same page gives the full-set figures: Grok 4 Heavy with tools 44.4%, Grok 4 with tools 38.6%, and Grok 4 without tools 25.4%. Google's model
         card for Gemini 2.5 Deep Think, sourcing from the public HLE sites, lists the same 25.4% for Grok 4 without tools.<sup class="src"><a href="#s93">93</a>, <a href="#s94">94</a></sup>
         Every number is real. The headline is the one produced by the most expensive tier, with tools, on a subset.</p>
+</div></details>
 
-      <h3 class="reveal">July to August 2025: a gold medal and a bronze grade</h3>
-      <p class="reveal">On 21 July 2025 Google DeepMind announced that "An advanced version of Gemini Deep Think solved five out of the six IMO problems
-        perfectly, earning 35 total points", graded by IMO coordinators. The model card for the Gemini 2.5 Deep Think that shipped on 1 August lists its
-        IMO 2025 result as "60.7% (Bronze medal grade)", with a footnote that its figure "is computed as pass@1 while all the other results coming from
+      <h3 class="reveal">July to August 2025: Gemini Deep Think's IMO gold and the shipped model's bronze grade</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">On 21 July 2025 Google DeepMind announced that "An advanced version of Gemini Deep Think solved five out of the six <button type="button" class="term" data-modal="m-imo">IMO</button> problems
+        perfectly, earning 35 total points", results that were "officially graded and certified by IMO coordinators". The model card for the Gemini 2.5 Deep Think that shipped on 1 August lists its
+        IMO 2025 result as "60.7% (Bronze medal grade)", with a footnote that its "IMO 2025 results are computed as pass@1 while all the other results coming from
         matharena.ai are best of 32", that the Grok 4 comparison used "the highest result available from matharena.ai, with a custom prompt", and that
         "Results are thus not directly comparable with performance results found in previous Gemini model cards."<sup class="src"><a href="#s95">95</a>, <a href="#s94">94</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">August 2025: the chart</h3>
-      <p class="reveal">OpenAI's GPT-5 launch stream showed a SWE-bench Verified chart in which a bar for 52.8% was drawn taller than a bar for 69.1%,
+      <h3 class="reveal">August 2025: the GPT-5 launch chart and its footnotes</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">OpenAI's GPT-5 launch stream showed a SWE-bench Verified chart in which a bar for 52.8% was drawn taller than a bar for 69.1%,
         which was drawn the same height as one for 30.8%. Sam Altman wrote the same day: "wow a mega chart screwup from us earlier". The corrected
         numbers came with two footnotes in the system card: "All SWE-bench evaluation runs use a fixed subset of n=477 verified tasks", and the headline
         74.9% "was run with the default verbosity setting in the API (verbosity = medium). Changes in verbosity can lead to variation in eval
         performance."<sup class="src"><a href="#s96">96</a>, <a href="#s97">97</a>, <a href="#s98">98</a></sup> The chart was an error. The footnotes
         were the measurement.</p>
+</div></details>
 
-      <h3 class="reveal">February 2026: the benchmark its author retired</h3>
-      <p class="reveal">OpenAI, which had built SWE-bench Verified in 2024, audited its hardest problems and found that "at least 59.4% of the audited
+      <h3 class="reveal">February 2026: OpenAI retires SWE-bench Verified</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">OpenAI, which had built SWE-bench Verified in 2024, audited its hardest problems and found that "at least 59.4% of the audited
         problems have flawed test cases that reject functionally correct submissions". Scores had kept "improving from 74.9% to 80.9% in the last 6
         months" regardless. "This is why we have stopped reporting SWE-bench Verified scores, and we recommend that other model developers do so too."
         Anthropic's July 2026 system card for Claude Opus 5 still reported 96.0% on it; its September card reports only the Pro, Multilingual and
         Multimodal variants.<sup class="src"><a href="#s99">99</a>, <a href="#s111">111</a>, <a href="#s13">13</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">February 2026: a point estimate that outran its interval</h3>
-      <p class="reveal">METR estimated that Claude Opus 4.6 "has a 50%-time-horizon of around 14.5 hours (95% CI of 6 hrs to 98 hrs) on software tasks",
+      <h3 class="reveal">February 2026: METR's Claude Opus 4.6 time horizon and its interval</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">METR estimated that Claude Opus 4.6 "has a 50%-time-horizon of around 14.5 hours (95% CI of 6 hrs to 98 hrs) on software tasks",
         and said in the same sentence that "this measurement is extremely noisy because our current task suite is nearly saturated". Its site adds that
         "Measurements above 16 hrs are unreliable with our current task suite." The 14.5 hours circulated without the interval; MIT Technology Review had called the underlying chart "the most misunderstood graph in AI" two weeks earlier.<sup class="src"><a href="#s100">100</a>, <a href="#s101">101</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">April and May 2026: the number beside the headline</h3>
-      <p class="reveal">GPT-5.5 took the top of the Artificial Analysis Intelligence Index by three points. The same suite's knowledge test recorded
+      <h3 class="reveal">April and May 2026: hallucination rates beside the index headlines</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">GPT-5.5 took the top of the Artificial Analysis Intelligence Index by three points. The same suite's knowledge test recorded
         a hallucination rate of 86% for the model, against 36% for Claude Opus 4.7 and 50% for Gemini 3.1 Pro.<sup class="src"><a href="#s102">102</a>, <a href="#s103">103</a></sup>
         A month later Google's Gemini 3.5 Flash post placed the model "in the top-right quadrant of the Artificial Analysis index"; Artificial
         Analysis's own write-up gave it 55 on the index and a hallucination rate of 61%.<sup class="src"><a href="#s104">104</a>, <a href="#s105">105</a></sup>
         Neither lab's numbers were wrong. The numbers not quoted were the ones a buyer would want.</p>
+</div></details>
 
-      <h3 class="reveal">July and August 2026: two numbers for one model, again</h3>
-      <p class="reveal">ARC Prize verified Claude Opus 5 at 30.2% on ARC-AGI-3 under its Standard harness. A month later NVIDIA reported that its AVO
+      <h3 class="reveal">July and August 2026: Claude Opus 5 at 30% and at 100% on ARC-AGI-3</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">ARC Prize verified Claude Opus 5 at 30.2% on ARC-AGI-3 under its Standard harness. A month later NVIDIA reported that its AVO
         agent framework, wrapped around the same model, "achieved a 100.00 RHAE score across all 25 environments in the ARC-AGI-3 public set", and added
         that the comparison "should not be interpreted as a controlled ablation: the two systems differ in agent backend, observation representation,
         memory, context management, and other implementation details".<sup class="src"><a href="#s2">2</a>, <a href="#s106">106</a>, <a href="#s107">107</a></sup>
         In the same weeks Anthropic's two system cards gave Opus 5 two GDPval-AA scores at the same effort, 1861 in July and 1824 in September, which
         is consistent with an Elo that moves as the comparison pool changes and which neither card annotates.<sup class="src"><a href="#s111">111</a>, <a href="#s13">13</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">The gap runs both ways</h3>
+      <h3 class="reveal">Self-reported and independent numbers differ in both directions</h3>
       <p class="reveal">Self-reported and independent numbers for open-weight models show the same instrument effects, and not in a single direction.
         Epoch AI's December 2025 note on its own replications recorded that MiniMax reported "an astronomical 23 percentage point difference in
         performance on tau-bench when using their API implementation compared to the standard ChatCompletions API", and that Epoch's own GPQA Diamond
@@ -1347,13 +1561,14 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="practice" aria-labelledby="practice-h">
   <div class="wrap">
     <p class="kicker reveal">08 &nbsp;/&nbsp; What good practice looks like now</p>
-    <h2 class="reveal" id="practice-h">The remedies exist, and some are in use</h2>
+    <h2 class="reveal" id="practice-h">What good evaluation practice looks like in 2026</h2>
     <p class="lede reveal d1">None of the problems above is unsolved in principle. Each has a documented fix, and the launch week also showed
       several of them working.</p>
 
     <div class="read">
-      <h3 class="reveal">Fix the leaderboard's rules</h3>
-      <p class="reveal">"The Leaderboard Illusion" closed with five recommendations: prohibit score retraction after submission and disclose the
+      <h3 class="reveal">Leaderboard rules: the five recommendations and what the Arena adopted</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">"The Leaderboard Illusion" closed with five recommendations: prohibit score retraction after submission and disclose the
         number of private variants tested; set a transparent cap on private variants per provider; make deprecation criteria auditable and
         stratified across proprietary, open-weight and open-source models; adopt the variance-based sampling rule the Arena's own 2024 paper
         described; and publish every tested model, deprecation and sampling rate.<sup class="src"><a href="#s22">22</a></sup> The Arena's current
@@ -1361,9 +1576,11 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         of methodology changes since July 2025, a written confirmation that the tested model is the released one, and 30 days of guaranteed
         access. It does not cap variants, and its response argued the boost is small.<sup class="src"><a href="#s19">19</a>, <a href="#s20">20</a></sup>
         The disagreement about magnitude is empirical and could be settled by publishing the retracted scores.</p>
+</div></details>
 
-      <h3 class="reveal">Pin the harness and label the condition</h3>
-      <p class="reveal">ARC Prize's response to the harness problem is the model for the field: a Standard harness that "uses a minimal,
+      <h3 class="reveal">Standard harnesses and labelled conditions</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">ARC Prize's response to the harness problem is the model for the field: a Standard harness that "uses a minimal,
         provider-neutral interface", a separately labelled Provider Adapter condition, both published, both costed, and a testing policy that
         says "A single run is used, we do not average scores across runs" and that sponsors "receive no privileged access" to the evaluation
         sets.<sup class="src"><a href="#s3">3</a>, <a href="#s1">1</a></sup> The official SWE-bench leaderboard's Bash Only view, in which every
@@ -1375,9 +1592,11 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         Both questions are legitimate. A table must say which one it is answering. Artificial Analysis now publishes an Endpoint Accuracy Index
         that "measures how the intelligence and capability of a specific model varies across a range of API providers who serve it", which treats
         the serving stack as a measured variable rather than an assumption.<sup class="src"><a href="#s80">80</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">Run the evaluation yourself, and check the endpoint</h3>
-      <p class="reveal">Epoch AI states the principle plainly: self-reported scores may be cherry-picked, and "We mitigate against this by
+      <h3 class="reveal">Independent re-runs and checks on the serving endpoint</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">Epoch AI states the principle plainly: self-reported scores may be cherry-picked, and "We mitigate against this by
         running models on our own internal evaluations, and by collecting evaluations from independently-run leaderboards."<sup class="src"><a href="#s10">10</a></sup>
         Artificial Analysis maintains "internal copies of all evaluation datasets", evaluates every model "under identical conditions with
         consistent prompting strategies, temperature settings, and evaluation criteria", estimates a 95% interval of under one point for its index
@@ -1386,9 +1605,11 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         set is called semi-private because "tasks are sent to external APIs" and "we acknowledge the possibility of limited leakage over
         time".<sup class="src"><a href="#s3">3</a></sup> Independent evaluation is slower than a launch post and it is the only kind that can be
         compared across labs.</p>
+</div></details>
 
-      <h3 class="reveal">Report the statistics</h3>
-      <p class="reveal">Miller's five recommendations of 2024 remain the minimum: standard errors, clustered where items are grouped, variance
+      <h3 class="reveal">Statistical reporting standards</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">Miller's five recommendations of 2024 remain the minimum: standard errors, clustered where items are grouped, variance
         reduction by resampling, paired comparisons on the same items, and power analysis before running.<sup class="src"><a href="#s47">47</a></sup>
         A 2025 position paper adds a correction for the small benchmarks that decide many frontier claims: CLT-based intervals are fine "when
         benchmarks consist of thousands of examples" but on "smaller, highly specialized benchmarks" they end up "usually dramatically underestimating
@@ -1401,9 +1622,11 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         published complementary guidance for third-party evaluators in July 2026, and the EU AI Act's obligation on providers of systemic-risk
         models to perform "model evaluation in accordance with standardised protocols and tools reflecting the state of the art" has applied since
         2 August 2025.<sup class="src"><a href="#s76">76</a>, <a href="#s77">77</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">Build test sets the model cannot have seen</h3>
-      <p class="reveal">The defences against contamination are older than the frontier and the week showed each in use. Dated and refreshed sets:
+      <h3 class="reveal">Test sets written after the training cutoff</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">The defences against contamination are older than the frontier and the week showed each in use. Dated and refreshed sets:
         LiveBench adds and updates questions monthly and LiveCodeBench collects contest problems after a model's cutoff.<sup class="src"><a href="#s82">82</a>, <a href="#s83">83</a></sup>
         Private holdouts: SWE-Bench Pro keeps a held-out set of 12 repositories and a commercial set of 18 whose problems are not
         public.<sup class="src"><a href="#s84">84</a></sup> Post-cutoff internal sets: OpenAI's ExploitBench Internal Port, built from vulnerabilities
@@ -1413,9 +1636,11 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         privately developed programs.<sup class="src"><a href="#s13">13</a>, <a href="#s7">7</a></sup> Rewriting with verification: an August 2026
         method rewrites mathematics benchmarks and checks the rewritten problems with formal proofs.<sup class="src"><a href="#s85">85</a></sup>
         Each of these produces a smaller test set than the public one it replaces, which returns the argument to the standard errors above.</p>
+</div></details>
 
-      <h3 class="reveal">Report cost and reliability with the score</h3>
-      <p class="reveal">"AI Agents That Matter" argued in 2024 that agent comparisons must be cost-controlled, since "for substantially similar
+      <h3 class="reveal">Cost and reliability reported with the score</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">"AI Agents That Matter" argued in 2024 that agent comparisons must be cost-controlled, since "for substantially similar
         accuracy, the cost can differ by almost two orders of magnitude", and that many agent benchmarks "have inadequate holdout sets, and
         sometimes none at all".<sup class="src"><a href="#s53">53</a></sup> The Holistic Agent Leaderboard implemented that, and its 21,730
         rollouts produced the finding that "increased reasoning effort produces equal or lower accuracy" in 21 of 36 model-scaffold-benchmark
@@ -1423,15 +1648,18 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         showed an agent with over 60% single-trial success falling under 25% at pass^8.<sup class="src"><a href="#s55">55</a></sup> The reporting
         practices that follow are simple: print the run cost next to the score, as ARC Prize and LiveBench do; print pass^k next to pass@1; and
         show the score-against-cost frontier rather than a single column.<sup class="src"><a href="#s1">1</a>, <a href="#s15">15</a></sup></p>
+</div></details>
 
-      <h3 class="reveal">For the reader</h3>
-      <p class="reveal">Two practitioners state the reader's position well. Simon Willison, on the February 2026 SWE-bench refresh: "This
+      <h3 class="reveal">Advice from practitioners to readers</h3>
+      <details class="more"><summary>Details and sources</summary><div>
+<p class="reveal">Two practitioners state the reader's position well. Simon Willison, on the February 2026 SWE-bench refresh: "This
         benchmark uses the same system prompt for every model, which is important for a fair comparison but does mean that the quality of the
         different harnesses or optimized prompts is not being measured here", and earlier, "There are leaderboards, but I've been losing some trust
         in those recently. Everyone needs their own benchmark."<sup class="src"><a href="#s86">86</a></sup> Andrej Karpathy, in his review of 2025:
-        "benchmarks are almost by construction verifiable environments and are therefore immediately susceptible to RLVR and weaker forms of it via synthetic data generation", and "Training on the
+        "benchmarks are almost by construction verifiable environments and are therefore immediately susceptible to <button type="button" class="term" data-modal="m-rlvr">RLVR</button> and weaker forms of it via synthetic data generation", and "Training on the
         test set is a new art form."<sup class="src"><a href="#s87">87</a></sup> The practical consequence is the checklist in the next section:
         treat a published number as a claim about an instrument, and ask for the instrument before accepting the claim.</p>
+</div></details>
 
       <div class="deep-panel reveal">
         <h3>A minimal reporting standard, in one paragraph</h3>
@@ -1454,7 +1682,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 
     <div class="read">
       <div class="check reveal" role="group" aria-label="Disclosure checklist for a benchmark table">
-        <label><input type="checkbox"><span class="t">Who ran it<small>The lab that built the model, the benchmark's maintainer, or an independent party with its own protocol. Lab-reported and independently run numbers for the same benchmark differed by 10 to 35 points in the cases above.</small></span></label>
+        <label><input type="checkbox"><span class="t">Who ran it<small>The lab that built the model, the benchmark's maintainer, or an independent party with its own protocol. Lab-reported and independently run numbers for the same benchmark differed by between 10 and 37 points in the cases above.</small></span></label>
         <label><input type="checkbox"><span class="t">Which harness and settings<small>Tools, memory between steps, compaction, retained reasoning, prompt. Two settings moved one score from 13.3% to 38.3%; two harnesses moved another from 62.7% to 99.9%.</small></span></label>
         <label><input type="checkbox"><span class="t">Which reasoning effort, and whether the figure is the best of several<small>"Evaluation scores are the maximum at any effort" means each cell is a selection. Ask which setting produced it and whether the comparison models were given the same choice.</small></span></label>
         <label><input type="checkbox"><span class="t">Pass@k, pass^k or pass@1<small>99.2% within four attempts and 88.0% in one attempt are different quantities. pass^k, the chance that all k trials succeed, is the one that predicts reliability.</small></span></label>
@@ -1478,9 +1706,9 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
 <section id="coda" aria-labelledby="coda-h">
   <div class="wrap">
     <p class="kicker reveal">10 &nbsp;/&nbsp; Coda</p>
-    <h2 class="reveal" id="coda-h">What the leaderboards are measuring</h2>
+    <h2 class="reveal" id="coda-h">Conclusion: what the leaderboards are measuring</h2>
     <div class="read">
-      <p class="lede reveal d1" style="text-align:left;max-width:none">They are measuring something. The question is what.</p>
+      <p class="lede reveal d1" style="text-align:left;max-width:none">They are measuring something. The question is what, and under which conditions.</p>
       <p class="reveal">The Arena measures the preference of its voters, under one style adjustment, with the intervals it prints. ARC-AGI-3
         measures a model together with a harness, and now says which. Artificial Analysis and Epoch AI measure two different weighted composites
         of what they can run themselves, and disagree for reasons they document. A launch table measures the best of several efforts under the
@@ -1499,10 +1727,12 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         access date. Where a source is a secondary report (a newspaper, a commentator) it is cited as such. Three figures are labelled simulations;
         they illustrate published mechanisms with invented data. Claims that could not be traced to a primary page were left out, including several
         figures that circulated in coverage of the launch. Leaderboard values are those displayed on the access date and will change. A separate
-        pass re-opened each source and checked each quoted phrase before publication. Corrections are welcome by email.</p>
+        pass re-opened each source and checked each quoted phrase before publication. Corrections are welcome by email to <a href="mailto:e1506804@u.nus.edu">e1506804@u.nus.edu</a>.</p>
 
       <h3 class="reveal" id="sources">Sources</h3>
-      <ol class="sources reveal">
+      <p class="small reveal">111 primary and secondary sources, each with the date it was opened. The list is collapsed; a numbered superscript anywhere on the page opens it at the entry.</p>
+      <details class="srcbox" id="srcbox"><summary>Show the source list</summary><div>
+      <ol class="sources">
         <li id="s1">ARC Prize Foundation, G. Kamradt, "OpenAI's GPT-6 Astra on ARC-AGI-3", 3 September 2026. <a href="https://arcprize.org/blog/astra" target="_blank" rel="noopener">arcprize.org/blog/astra</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s2">ARC Prize Foundation, ARC-AGI leaderboard. <a href="https://arcprize.org/leaderboard" target="_blank" rel="noopener">arcprize.org/leaderboard</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s3">ARC Prize Foundation, testing and verification policy. <a href="https://arcprize.org/policy" target="_blank" rel="noopener">arcprize.org/policy</a> <span class="acc">accessed 6 Sep 2026</span></li>
@@ -1544,8 +1774,8 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         <li id="s39">S. Liang, S. Garg and R. Zilouchian Moghaddam, "The SWE-Bench Illusion: When State-of-the-Art LLMs Remember Instead of Reason", arXiv:2506.12286, 2025. <a href="https://arxiv.org/abs/2506.12286" target="_blank" rel="noopener">arxiv.org/abs/2506.12286</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s40">H. Zhang et al., "A Careful Examination of Large Language Model Performance on Grade School Arithmetic", arXiv:2405.00332, 2024. <a href="https://arxiv.org/abs/2405.00332" target="_blank" rel="noopener">arxiv.org/abs/2405.00332</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s41">Z. Han, M. Mankikar, J. Michael and Z. Wang, "Search-Time Data Contamination", arXiv:2508.13180, 2025. <a href="https://arxiv.org/abs/2508.13180" target="_blank" rel="noopener">arxiv.org/abs/2508.13180</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s42">Epoch AI, "RIP classic benchmarks", Gradient Updates, 5 May 2026; A. Ho and G. Burnham, "Are AI benchmarks doomed?", 1 May 2026; Epoch AI, "Interpreting ECI", 6 November 2025. <a href="https://epoch.ai/gradient-updates/rip-classic-benchmarks" target="_blank" rel="noopener">epoch.ai/gradient-updates/rip-classic-benchmarks</a>; <a href="https://epochai.substack.com/p/are-ai-benchmarks-doomed" target="_blank" rel="noopener">epochai.substack.com</a>; <a href="https://epoch.ai/data-insights/interpreting-eci" target="_blank" rel="noopener">epoch.ai/data-insights/interpreting-eci</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s43">ARC Prize Foundation, ARC-AGI-1 overview page and "ARC-AGI-3 launch", 25 March 2026. <a href="https://arcprize.org/arc-agi/1/" target="_blank" rel="noopener">arcprize.org/arc-agi/1</a>; <a href="https://arcprize.org/blog/arc-agi-3-launch" target="_blank" rel="noopener">arcprize.org/blog/arc-agi-3-launch</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s42">Epoch AI, "RIP Classic Reasoning Benchmarks. What's Next?", Gradient Updates, 5 May 2026; A. Ho and G. Burnham, "Are AI benchmarks doomed?", 1 May 2026; Epoch AI, data insight on interpreting the Epoch Capabilities Index, 6 November 2025. <a href="https://epoch.ai/gradient-updates/rip-classic-benchmarks" target="_blank" rel="noopener">epoch.ai/gradient-updates/rip-classic-benchmarks</a>; <a href="https://epochai.substack.com/p/are-ai-benchmarks-doomed" target="_blank" rel="noopener">epochai.substack.com</a>; <a href="https://epoch.ai/data-insights/interpreting-eci" target="_blank" rel="noopener">epoch.ai/data-insights/interpreting-eci</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s43">ARC Prize Foundation, ARC-AGI-1 overview page and "Announcing ARC-AGI-3", 25 March 2026. <a href="https://arcprize.org/arc-agi/1/" target="_blank" rel="noopener">arcprize.org/arc-agi/1</a>; <a href="https://arcprize.org/blog/arc-agi-3-launch" target="_blank" rel="noopener">arcprize.org/blog/arc-agi-3-launch</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s44">M. Saeed and S. Razniewski, "LLMPEDIA", arXiv:2609.01182, 1 September 2026. <a href="https://arxiv.org/abs/2609.01182" target="_blank" rel="noopener">arxiv.org/abs/2609.01182</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s45">A. M. Bean, R. O. Kearns, A. Romanou et al., "Measuring what Matters: Construct Validity in Large Language Model Benchmarks", arXiv:2511.04703, 2025. <a href="https://arxiv.org/abs/2511.04703" target="_blank" rel="noopener">arxiv.org/abs/2511.04703</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s46">A. Reuel et al., "BetterBench", arXiv:2411.12990, NeurIPS 2024. <a href="https://arxiv.org/abs/2411.12990" target="_blank" rel="noopener">arxiv.org/abs/2411.12990</a> <span class="acc">accessed 6 Sep 2026</span></li>
@@ -1565,14 +1795,14 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         <li id="s60">Meta, "The Llama 4 herd", 5 April 2025; Arena and LMArena posts on X of 5 and 7 April 2025. <a href="https://ai.meta.com/blog/llama-4-multimodal-intelligence/" target="_blank" rel="noopener">ai.meta.com/blog/llama-4-multimodal-intelligence</a>; <a href="https://x.com/lmarena_ai/status/1909397817434816562" target="_blank" rel="noopener">x.com/lmarena_ai</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s61">TechCrunch, "LM Arena... lands $100M", 21 May 2025; "LMArena lands $1.7B valuation", 6 January 2026; "Arena... is now a $100M business", 29 June 2026. <a href="https://techcrunch.com/2025/05/21/lm-arena-the-organization-behind-popular-ai-leaderboards-lands-100m" target="_blank" rel="noopener">techcrunch.com, May 2025</a>; <a href="https://techcrunch.com/2026/01/06/lmarena-lands-1-7b-valuation-four-months-after-launching-its-product/" target="_blank" rel="noopener">techcrunch.com, January 2026</a>; <a href="https://techcrunch.com/2026/06/29/arena-the-ai-leaderboard-everyone-uses-is-now-a-100m-business/" target="_blank" rel="noopener">techcrunch.com, June 2026</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s62">Epoch AI on X, GPT-6 Astra results thread, 3 September 2026. <a href="https://x.com/EpochAIResearch/status/2095602754282783108" target="_blank" rel="noopener">x.com/EpochAIResearch</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s63">Arena, "Introducing AutoEval scores", 30 July 2026. <a href="https://arena.ai/blog/autoeval-scores" target="_blank" rel="noopener">arena.ai/blog/autoeval-scores</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s63">Arena, "Introducing AutoEval to the Arena leaderboards", 30 July 2026. <a href="https://arena.ai/blog/autoeval-scores" target="_blank" rel="noopener">arena.ai/blog/autoeval-scores</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s64">XLANG Lab, OSWorld 2.0 leaderboard and "OSWorld-Verified", 28 July 2025. <a href="https://osworld-v2.xlang.ai/" target="_blank" rel="noopener">osworld-v2.xlang.ai</a>; <a href="https://xlang.ai/blog/osworld-verified" target="_blank" rel="noopener">xlang.ai/blog/osworld-verified</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s65">M. Mancoridis, B. Weeks, K. Vafa and S. Mullainathan, "Potemkin Understanding in Large Language Models", arXiv:2506.21521, 2025. <a href="https://arxiv.org/abs/2506.21521" target="_blank" rel="noopener">arxiv.org/abs/2506.21521</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s66">M. Song and C. Park, "Auditing MCQA Benchmarks through Probability Landscapes", arXiv:2608.30372, 31 August 2026. <a href="https://arxiv.org/abs/2608.30372" target="_blank" rel="noopener">arxiv.org/abs/2608.30372</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s67">Stanford AI Measurement Science lab, CS321M course page. <a href="https://aimslab.stanford.edu/cs321m" target="_blank" rel="noopener">aimslab.stanford.edu/cs321m</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s68">A. Ho et al., "A Rosetta Stone for AI benchmarks", Epoch AI, 2 December 2025, and arXiv:2512.00193. <a href="https://epoch.ai/publications/a-rosetta-stone-for-ai-benchmarks" target="_blank" rel="noopener">epoch.ai/publications/a-rosetta-stone-for-ai-benchmarks</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s69">Z. Mowshowitz, "Claude Mythos 5.1 and Fable 5.1: capabilities", 5 September 2026. <a href="https://thezvi.substack.com/p/claude-mythos-51-and-fable-51-capabilities" target="_blank" rel="noopener">thezvi.substack.com</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s70">Arena on X, "GPT-6 Astra by OpenAI is now in the Arena", 3 September 2026. <a href="https://x.com/arena/status/2095971829307580610" target="_blank" rel="noopener">x.com/arena</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s70">Arena on X, "GPT-6 Astra by OpenAI is now in the Arena", 4 September 2026. <a href="https://x.com/arena/status/2095971829307580610" target="_blank" rel="noopener">x.com/arena</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s71">SWE-bench official leaderboard (Verified, Bash Only). <a href="https://www.swebench.com/" target="_blank" rel="noopener">swebench.com</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s72">Scale Labs leaderboards and the Humanity's Last Exam public site. <a href="https://labs.scale.com/leaderboard" target="_blank" rel="noopener">labs.scale.com/leaderboard</a>; <a href="https://lastexam.ai" target="_blank" rel="noopener">lastexam.ai</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s73">J. Dekoninck, M. N. M&uuml;ller, M. Baader, M. Fischer and M. Vechev, "Evading Data Contamination Detection for Language Models is (too) Easy", arXiv:2402.02823, 2024. <a href="https://arxiv.org/abs/2402.02823" target="_blank" rel="noopener">arxiv.org/abs/2402.02823</a> <span class="acc">accessed 6 Sep 2026</span></li>
@@ -1598,14 +1828,14 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         <li id="s93">xAI, "Grok 4", 9 July 2025, including the page's embedded chart data. <a href="https://x.ai/news/grok-4" target="_blank" rel="noopener">x.ai/news/grok-4</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s94">Google DeepMind, Gemini 2.5 Deep Think Model Card, 1 August 2025 (PDF). <a href="https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-2-5-Deep-Think-Model-Card.pdf" target="_blank" rel="noopener">deepmind-media Model Card PDF</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s95">Google DeepMind, "Advanced version of Gemini with Deep Think officially achieves gold-medal standard at the International Mathematical Olympiad", 21 July 2025. <a href="https://deepmind.google/blog/advanced-version-of-gemini-with-deep-think-officially-achieves-gold-medal-standard-at-the-international-mathematical-olympiad/" target="_blank" rel="noopener">deepmind.google/blog</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s96">Futurism, "OpenAI's GPT-5 demo featured dumb errors", 8 August 2025. <a href="https://futurism.com/gpt-5-demo-dumb-errors" target="_blank" rel="noopener">futurism.com/gpt-5-demo-dumb-errors</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s96">Futurism, "GPT-5 Launch Demo Plagued With Catastrophically Dumb Errors", 8 August 2025. <a href="https://futurism.com/gpt-5-demo-dumb-errors" target="_blank" rel="noopener">futurism.com/gpt-5-demo-dumb-errors</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s97">OpenAI, GPT-5 System Card, 13 August 2025 (PDF). <a href="https://cdn.openai.com/gpt-5-system-card.pdf" target="_blank" rel="noopener">cdn.openai.com/gpt-5-system-card.pdf</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s98">TechCrunch, "Sam Altman addresses 'bumpy' GPT-5 rollout, bringing 4o back, and the 'chart crime'", 8 August 2025; S. Altman on X, 7 August 2025. <a href="https://techcrunch.com/2025/08/08/sam-altman-addresses-bumpy-gpt-5-rollout-bringing-4o-back-and-the-chart-crime/" target="_blank" rel="noopener">techcrunch.com</a>; <a href="https://x.com/sama/status/1953513280594751495" target="_blank" rel="noopener">x.com/sama</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s99">OpenAI, "Why we no longer evaluate SWE-bench Verified", 23 February 2026. <a href="https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/" target="_blank" rel="noopener">openai.com/index/why-we-no-longer-evaluate-swe-bench-verified</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s99">OpenAI, "Why SWE-bench Verified no longer measures frontier coding capabilities", 23 February 2026. <a href="https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/" target="_blank" rel="noopener">openai.com/index/why-we-no-longer-evaluate-swe-bench-verified</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s100">METR on X, Claude Opus 4.6 time-horizon estimate, February 2026, and the METR time-horizons page. <a href="https://x.com/METR_Evals/status/2024923422867030027" target="_blank" rel="noopener">x.com/METR_Evals</a>; <a href="https://metr.org/time-horizons/" target="_blank" rel="noopener">metr.org/time-horizons</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s101">MIT Technology Review, "This is the most misunderstood graph in AI", 5 February 2026. <a href="https://www.technologyreview.com/2026/02/05/1132254/this-is-the-most-misunderstood-graph-in-ai/" target="_blank" rel="noopener">technologyreview.com</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s102">Artificial Analysis, "OpenAI GPT-5.5 is the new leading AI model", 23 April 2026. <a href="https://artificialanalysis.ai/articles/openai-gpt5-5-is-the-new-leading-AI-model" target="_blank" rel="noopener">artificialanalysis.ai</a> <span class="acc">accessed 6 Sep 2026</span></li>
-        <li id="s103">The Decoder, "GPT-5.5 tops benchmarks but still hallucinates frequently at a 20 percent higher API cost", 24 April 2026. <a href="https://the-decoder.com/gpt-5-5-tops-benchmarks-but-still-hallucinates-frequently-at-a-20-percent-higher-api-cost/" target="_blank" rel="noopener">the-decoder.com</a> <span class="acc">accessed 6 Sep 2026</span></li>
+        <li id="s103">The Decoder, "GPT-5.5 tops benchmarks but still hallucinates frequently at a 20 percent higher API cost", 25 April 2026. <a href="https://the-decoder.com/gpt-5-5-tops-benchmarks-but-still-hallucinates-frequently-at-a-20-percent-higher-api-cost/" target="_blank" rel="noopener">the-decoder.com</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s104">Google, "Gemini 3.5", 19 May 2026. <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/" target="_blank" rel="noopener">blog.google</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s105">Artificial Analysis, "Gemini 3.5 Flash: everything you need to know", 19 May 2026. <a href="https://artificialanalysis.ai/articles/gemini-3-5-flash-everything-you-need-to-know" target="_blank" rel="noopener">artificialanalysis.ai</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s106">NVIDIA, "NVIDIA AVO reaches 100% on ARC-AGI-3", 21 August 2026. <a href="https://developer.nvidia.com/blog/nvidia-avo-reaches-100-on-arc-agi-3-demonstrating-a-frontier-level-general-purpose-architecture-for-long-horizon-autonomous-agents/" target="_blank" rel="noopener">developer.nvidia.com/blog</a> <span class="acc">accessed 6 Sep 2026</span></li>
@@ -1614,7 +1844,10 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
         <li id="s109">Moonshot AI, Kimi K2 model card, 11 July 2025. <a href="https://github.com/MoonshotAI/Kimi-K2" target="_blank" rel="noopener">github.com/MoonshotAI/Kimi-K2</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s110">Artificial Analysis model pages for DeepSeek R1 0528 and Kimi K2. <a href="https://artificialanalysis.ai/models/deepseek-r1" target="_blank" rel="noopener">artificialanalysis.ai/models/deepseek-r1</a>; <a href="https://artificialanalysis.ai/models/kimi-k2" target="_blank" rel="noopener">artificialanalysis.ai/models/kimi-k2</a> <span class="acc">accessed 6 Sep 2026</span></li>
         <li id="s111">Anthropic, Claude Opus 5 System Card, 24 July 2026 (PDF), sections 8.1 and 8.2. <a href="https://www-cdn.anthropic.com/c5fbac3f0b1280a933ebd26d3cb8bb9f5bdeaf48/Claude%20Opus%205%20System%20Card.pdf" target="_blank" rel="noopener">anthropic.com system card PDF</a> <span class="acc">accessed 6 Sep 2026</span></li>
+              <li id="s112">F. Chollet on X, 3 September 2026, 19:42 UTC. <a href="https://x.com/fchollet/status/2095598451115614371" target="_blank" rel="noopener">x.com/fchollet/status/2095598451115614371</a> <span class="acc">accessed 6 Sep 2026 via X's public embed data</span></li>
+        <li id="s113">ARC Prize on X, 3 September 2026, 19:39 UTC, thread of three posts. <a href="https://x.com/arcprize/status/2095597602545025138" target="_blank" rel="noopener">x.com/arcprize/status/2095597602545025138</a> <span class="acc">accessed 6 Sep 2026 via X's public embed data</span></li>
       </ol>
+      </div></details>
     </div>
   </div>
 </section>
@@ -1633,6 +1866,35 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
   <div id="m-eci"><p class="kicker">Glossary</p><h3>Epoch Capabilities Index</h3><p>A composite scale that stitches together scores from more than 50 benchmarks by estimating each benchmark's difficulty from models that were run on several of them, in the manner of item-response theory. The scale is arbitrary and is anchored so that Claude 3.5 Sonnet is 130 and GPT-5 is 150. A model scores higher by clearing harder benchmarks, so a model with new records on the hardest mathematics sets can lead the index while trailing on a differently weighted composite.</p></div>
   <div id="m-awareness"><p class="kicker">Glossary</p><h3>Evaluation awareness</h3><p>A model recognising, in its reasoning or its internal representations, that it is being tested rather than used, and behaving differently as a result. Measured by asking models to classify transcripts, frontier models reached an AUC of 0.83 against a human baseline of 0.92 in 2025. Verbalised awareness was recorded in 41 to 51% of samples in one pre-release evaluation in September 2026. Every capability and safety number is conditional on the tested behaviour matching the deployed behaviour, and this condition is now measurably violated some of the time.</p></div>
   <div id="m-selection"><p class="kicker">Glossary</p><h3>Selection bias from best-of-N reporting</h3><p>If N variants of equal true quality are measured with noise and only the best score is published, the published score exceeds the true quality by the expected maximum of N draws: about 0.56 standard deviations for two variants, 1.16 for five, 1.54 for ten and about 2 for 27. The same arithmetic applies to publishing the best of several reasoning-effort settings, the best of several seeds, or the best of several attempts, unless the comparison models were given the same number of draws.</p></div>
+  <div id="m-arcagi3"><p class="kicker">Glossary</p><h3>ARC-AGI-3 and the ARC Prize Foundation</h3><p>ARC-AGI is a family of benchmarks created by François Chollet to test abstraction and reasoning on tasks a model has not seen before. ARC-AGI-3, launched on 25 March 2026, is interactive: the model plays unfamiliar game environments whose rules it has to work out by acting, and is scored against a human baseline on which 100 means the median tested person. The ARC Prize Foundation, a non-profit, runs the benchmark, keeps a semi-private test set that is never published, and posts a verified leaderboard with the cost of each run.</p></div>
+  <div id="m-arena"><p class="kicker">Glossary</p><h3>Arena, formerly LMArena and Chatbot Arena</h3><p>A public website where visitors type a prompt, receive two anonymous model responses side by side, and vote for the better one. The votes are fitted with a Bradley-Terry model to produce a ranking. It began as an academic project at UC Berkeley in 2023, became a company in 2025, and now operates as Arena at arena.ai with separate leaderboards for text, code, agents, images and video.</p></div>
+  <div id="m-aa"><p class="kicker">Glossary</p><h3>Artificial Analysis</h3><p>An independent benchmarking company that runs a fixed set of evaluations itself on every model it lists and combines them into an Intelligence Index, published alongside speed and price measurements. The index has versions; v4.1.1 was current during the launch week and v4.2 from 4 September 2026, so scores are comparable only within a version.</p></div>
+  <div id="m-epoch"><p class="kicker">Glossary</p><h3>Epoch AI</h3><p>A research organisation that tracks AI capabilities, benchmarks and compute. It maintains the FrontierMath benchmark and the Epoch Capabilities Index, runs many evaluations itself, and discloses on its FrontierMath pages that OpenAI funded the benchmark and holds exclusive access to a subset of it.</p></div>
+  <div id="m-livebench"><p class="kicker">Glossary</p><h3>LiveBench</h3><p>A benchmark that adds new questions every month from recent sources so that models cannot have seen them during training, scored automatically against ground truth. Its leaderboard prints the cost per successful task next to the score.</p></div>
+  <div id="m-vals"><p class="kicker">Glossary</p><h3>Vals AI</h3><p>An independent evaluation company that tests models on private test sets in professional domains and publishes a composite Vals Index. Because its items are private, they cannot be in a model's training data, at the cost of outside verification.</p></div>
+  <div id="m-metr"><p class="kicker">Glossary</p><h3>METR</h3><p>A non-profit that evaluates frontier models before release, often under agreements with the labs that built them. Its best-known measure is the time horizon: the length of software task, in human working time, that a model completes with 50% reliability.</p></div>
+  <div id="m-apollo"><p class="kicker">Glossary</p><h3>Apollo Research and the UK AI Security Institute</h3><p>Two external evaluators that test frontier models before release for deceptive, unsafe or sandbagging behaviour. Their findings are quoted inside the labs' system cards. In September 2026 both cautioned that short testing windows and the models' awareness of being tested limit what their results show.</p></div>
+  <div id="m-tbench"><p class="kicker">Glossary</p><h3>Terminal-Bench and Terminal-Bench-Science</h3><p>Benchmarks in which an agent completes tasks inside a command-line environment and is graded by hidden tests on what it produces. Terminal-Bench-Science 0.1 has 70 tasks drawn from scientific research workflows; its public leaderboard runs three trials per task in a named harness, and labs often report their own runs with more trials.</p></div>
+  <div id="m-swebench"><p class="kicker">Glossary</p><h3>SWE-bench Verified</h3><p>A coding benchmark in which a model must fix a real GitHub issue and is scored by the repository's own tests. The Verified subset of 500 items was filtered by human annotators in 2024 after most of the original items were found under-specified or unfairly tested. In February 2026 OpenAI stopped reporting it after finding flawed tests among its hardest problems.</p></div>
+  <div id="m-hle"><p class="kicker">Glossary</p><h3>Humanity's Last Exam</h3><p>A set of expert-written questions across many academic subjects, assembled by the Center for AI Safety and Scale AI to be difficult for frontier models. Scores are reported either with tools (web search and code) or without, and the two conditions are different measurements.</p></div>
+  <div id="m-frontiermath"><p class="kicker">Glossary</p><h3>FrontierMath</h3><p>Research-level mathematics problems maintained by Epoch AI. Tier 4 is the hardest tier: 43 problems, of which two are public. The benchmark was developed with funding from OpenAI, which holds exclusive access to a subset of the problems.</p></div>
+  <div id="m-gpqa"><p class="kicker">Glossary</p><h3>GPQA Diamond</h3><p>Graduate-level multiple-choice science questions written so that they cannot be answered by a quick web search; the Diamond subset has 198 questions. Frontier models now score in the mid-90s and Epoch AI describes the benchmark as saturated, which means the remaining gaps are within its noise.</p></div>
+  <div id="m-mmlu"><p class="kicker">Glossary</p><h3>MMLU</h3><p>Massive Multitask Language Understanding, a 2021 benchmark of multiple-choice questions across 57 subjects that served as the default general benchmark for several years. Flagship models now score above 90% on it, and a 2024 re-annotation estimated that 6.49% of its questions contain errors.</p></div>
+  <div id="m-osworld"><p class="kicker">Glossary</p><h3>OSWorld and OSWorld 2.0</h3><p>A computer-use benchmark in which an agent operates a real desktop environment to complete tasks. OSWorld-Verified (2025) fixed more than 300 reported problems in the original; OSWorld 2.0 is the successor. Scores depend on the task release used (files changed between the June and August 2026 releases) and on whether the strict or the partial-credit score is quoted.</p></div>
+  <div id="m-effort"><p class="kicker">Glossary</p><h3>Reasoning effort</h3><p>A setting on current models that controls how much hidden reasoning the model performs before it answers, usually on a scale such as none, low, medium, high, xhigh and max. Higher settings cost more tokens and usually, though not always, score higher. A reported score should state the setting, and a table that prints "the maximum at any effort" has chosen the best setting per cell.</p></div>
+  <div id="m-elo"><p class="kicker">Glossary</p><h3>Elo and the Arena score</h3><p>A rating scale borrowed from chess in which the gap between two ratings predicts the chance that one beats the other. On the Arena's scale a 100-point gap corresponds to roughly a 64% chance that the higher-rated model wins a vote. GDPval-AA, from Artificial Analysis, also reports an Elo derived from judged pairwise comparisons.</p></div>
+  <div id="m-syscard"><p class="kicker">Glossary</p><h3>System card</h3><p>The long technical document a lab publishes with a model, covering training, evaluations, safety testing, external evaluators' findings and known limitations. The caveats that do not fit a launch post, such as trial counts, standard errors and contamination checks, are usually here.</p></div>
+  <div id="m-astra"><p class="kicker">Glossary</p><h3>GPT-6 Astra and GPT-5.6 Sol</h3><p>GPT-6 Astra is the OpenAI model released on 3 September 2026. GPT-5.6 Sol, released in July 2026, was OpenAI's previous flagship and is the main comparison column in the Astra launch table.</p></div>
+  <div id="m-fable"><p class="kicker">Glossary</p><h3>Claude Fable 5.1, Claude Mythos 5.1 and Claude Opus 5</h3><p>Anthropic's models. Fable 5.1 and Mythos 5.1, released on 1 September 2026, are the same model with different safeguards; Mythos 5.1 is available only through trusted-access programmes for cybersecurity and life-sciences work. Claude Opus 5, released in July 2026, is the other Anthropic column in the launch tables.</p></div>
+  <div id="m-maverick"><p class="kicker">Glossary</p><h3>Llama 4 Maverick</h3><p>Meta's open-weight model released in April 2025. An experimental chat variant was tested on the Arena and reached second place; the model Meta released for download ranked thirty-second when the Arena added it.</p></div>
+  <div id="m-judge"><p class="kicker">Glossary</p><h3>LLM-as-a-judge</h3><p>Using a language model to grade another model's open-ended answers, either by scoring one answer or by choosing between two. It is the only scalable option for many tasks, and it carries measurable biases: for the answer in the first position, for longer answers, and for outputs from the judge's own model family.</p></div>
+  <div id="m-rlvr"><p class="kicker">Glossary</p><h3>RLVR</h3><p>Reinforcement learning with verifiable rewards: training a model on tasks whose answers can be checked automatically, such as mathematics or unit-tested code. Benchmarks are verifiable by construction, which makes them natural training targets and is the mechanism behind Karpathy's remark.</p></div>
+  <div id="m-timehorizon"><p class="kicker">Glossary</p><h3>METR time horizon</h3><p>METR's measure of autonomy: the length, in human working time, of software tasks that a model completes with 50% reliability, estimated from a suite of tasks of known human duration. The estimate carries a wide confidence interval, and METR states that its current suite is unreliable above about 16 hours.</p></div>
+  <div id="m-preparedness"><p class="kicker">Glossary</p><h3>Preparedness Framework and the Critical threshold</h3><p>OpenAI's internal policy for tracking dangerous capabilities. Critical is its highest level; for cybersecurity it means the model can find and exploit previously unknown flaws in hardened systems without a person guiding each step, and it requires stronger safeguards before release. Anthropic's Responsible Scaling Policy plays the same role for its models.</p></div>
+  <div id="m-cve"><p class="kicker">Glossary</p><h3>CVE, ExploitBench and ExploitGym</h3><p>A CVE is a public identifier for a disclosed software vulnerability. ExploitBench tests whether a model can turn a known vulnerability into a working exploit; ExploitGym is a harder environment-based version. Because the vulnerabilities are public, historical sets can be in the training data, which is why OpenAI also built an internal set from vulnerabilities disclosed after its model's cutoff.</p></div>
+  <div id="m-tokens"><p class="kicker">Glossary</p><h3>Tokens and cost per task</h3><p>Models read and write text in tokens, roughly three quarters of a word each, and API prices are set per million tokens. Independent evaluators increasingly print the tokens or dollars a run consumed next to the score, because a higher score bought with far more tokens is a different product.</p></div>
+  <div id="m-gdpval"><p class="kicker">Glossary</p><h3>GDPval-AA</h3><p>An evaluation of economically valuable professional tasks, based on OpenAI's GDPval task set and run independently by Artificial Analysis. Outputs are compared pairwise by a model judge and reported as an Elo, so a fixed model's score can move as the pool of compared models changes.</p></div>
+  <div id="m-imo"><p class="kicker">Glossary</p><h3>IMO</h3><p>The International Mathematical Olympiad, the annual competition for secondary-school students: six problems over two days, 42 points in total, with medal thresholds set each year. Google DeepMind's 2025 result of 35 points was certified by the IMO's coordinators as gold-medal level.</p></div>
 </div>
 
 <div id="scrim" hidden></div>
@@ -1654,7 +1916,7 @@ ol.sources li .acc{font-family:var(--font-mono);font-size:11px;color:var(--ink-4
       <a href="../index.html">Home</a>
       <a href="#sources">Sources</a>
       <a href="wmt26-qebreak.html">A related audit of learned evaluators</a>
-      <a href="mailto:mthylinao@gmail.com">Corrections</a>
+      <a href="mailto:e1506804@u.nus.edu">Corrections</a>
     </div>
   </div>
 </footer>
@@ -1817,7 +2079,7 @@ document.querySelectorAll("h2, .eq, .pipe").forEach(function(el){ inObs.observe(
 
 /* staggered entrance for repeating elements */
 (function(){
-  var GROUPS = ["ul.plain", "ol.plain", ".kf", ".strip", ".readout", ".footlinks", ".hbtns", ".tbl-scroll tbody", ".matrix", ".flips", ".check", "ol.sources"];
+  var GROUPS = ["ul.plain", "ol.plain", ".kf", ".strip", ".readout", ".footlinks", ".hbtns", ".tbl-scroll tbody", ".matrix", ".flips", ".check", ".posts", ".tldr ol"];
   var stObs = new IntersectionObserver(function(es){
     es.forEach(function(e){ if(!e.isIntersecting) return; e.target.classList.add("in"); stObs.unobserve(e.target); });
   }, {rootMargin:"0px 0px -7% 0px", threshold:0.06});
@@ -1972,6 +2234,15 @@ paintRail();
   });
 })();
 
+/* ---------------- the source list opens when a reference is followed ---------------- */
+(function(){
+  var box = document.getElementById("srcbox"); if(!box) return;
+  function openFor(h){ if(/^#s\d+$/.test(h)) box.open = true; }
+  document.querySelectorAll("sup.src a").forEach(function(a){ a.addEventListener("click", function(){ box.open = true; }); });
+  addEventListener("hashchange", function(){ openFor(location.hash); });
+  openFor(location.hash);
+})();
+
 /* ---------------- flip cards: each card is as tall as its taller face ---------------- */
 (function(){
   var flips = [].slice.call(document.querySelectorAll(".flip")); if(!flips.length) return;
@@ -2027,6 +2298,7 @@ paintRail();
   var c = document.getElementById("field"); if(!c) return;
   var PAL = [
     {id:"hero",      rgb:T_INK,   a:0.10,  mode:"cloud"},
+    {id:"tldr",      rgb:T_ACC,   a:0.080, mode:"grid"},
     {id:"claim",     rgb:T_ACC,   a:0.085, mode:"grid"},
     {id:"problems",  rgb:T_WARM,  a:0.080, mode:"bars"},
     {id:"astra",     rgb:T_WARM,  a:0.095, mode:"rings"},
@@ -2208,58 +2480,108 @@ var ARC = {
   paCost: [23457, 21298, 19285, 18817, 18147, 17332]
 };
 
-/* ================= HERO: one model, two harnesses, twelve columns =================
-   The 12 columns are ARC Prize's GPT-6 Astra table for ARC-AGI-3 Semi-Private: six reasoning
-   efforts under the Standard harness (front row, indigo) and the same six under the Provider
-   Adapter harness (back row, rust). Column height is the score; the cost floats above each
-   column once it has risen. The camera drifts, answers the pointer, and dollies as the page
-   scrolls away from the hero. */
+/* ================= shared terrain: a procedural mountain range, surveyed =================
+   A value-noise heightfield with a main ridge, iso-height contours from marching squares, and
+   three survey pins on the highest points. The hero draws it lit, with a slow scanning band
+   that reveals the contours as it passes (measurement, not decoration, is the motif); the
+   footer draws the same mesh as a wireframe. Nothing here encodes data from the essay. */
+var Terrain = (function(){
+  var mobile = innerWidth < 900;
+  var NX = mobile ? 46 : 74, NZ = mobile ? 28 : 44, W = 7.6, D = 4.8;
+  function hash(i,j,s){ var h = Math.sin(i*127.1 + j*311.7 + s*74.7)*43758.5453; return h - Math.floor(h); }
+  function sm(t){ return t*t*(3-2*t); }
+  function vnoise(x,z,s){ var i=Math.floor(x), j=Math.floor(z), fx=sm(x-i), fz=sm(z-j);
+    var a=hash(i,j,s), b=hash(i+1,j,s), c2=hash(i,j+1,s), d=hash(i+1,j+1,s);
+    return lerp(lerp(a,b,fx), lerp(c2,d,fx), fz); }
+  function fbm(x,z,s){ return 0.5*vnoise(x,z,s) + 0.25*vnoise(x*2.1+3.1,z*2.1+1.7,s+1) + 0.125*vnoise(x*4.3+7.7,z*4.3+5.1,s+2) + 0.0625*vnoise(x*8.9+1.3,z*8.9+9.2,s+3); }
+  var NV = (NX+1)*(NZ+1), X = new Float32Array(NV), Y = new Float32Array(NV), Z = new Float32Array(NV);
+  function idx(i,j){ return j*(NX+1)+i; }
+  var i, j, k;
+  for(j=0;j<=NZ;j++) for(i=0;i<=NX;i++){
+    var x = (i/NX-0.5)*W, z = (j/NZ-0.5)*D;
+    var base = fbm(x*0.58+11, z*0.58+5, 3);
+    var ridgeZ = -0.30 + 0.22*Math.sin(x*0.85) + 0.10*Math.sin(x*2.3+1);
+    var ridge = Math.exp(-Math.pow((z-ridgeZ)/0.62, 2)) * (0.45 + 0.55*fbm(x*0.95+2, 0.3, 9));
+    var second = Math.exp(-Math.pow((z-1.25 - 0.15*Math.sin(x*1.1))/0.55, 2)) * (0.25 + 0.35*fbm(x*1.2+5, 1.0, 17));
+    var hgt = (base-0.40)*1.35 + ridge*1.35 + second*0.7;
+    var edge = clamp(1 - Math.pow(Math.abs(x)/(W*0.5), 5), 0, 1) * clamp(1 - Math.pow(Math.abs(z)/(D*0.5), 6), 0, 1);
+    hgt = Math.max(hgt, -0.04) * (0.25 + 0.75*edge);
+    k = idx(i,j); X[k]=x; Y[k]=hgt*0.95; Z[k]=z;
+  }
+  /* face normals and mean heights */
+  var NF = NX*NZ, N = new Float32Array(NF*3), H = new Float32Array(NF), F00 = new Int32Array(NF), F10 = new Int32Array(NF), F01 = new Int32Array(NF), F11 = new Int32Array(NF);
+  for(j=0;j<NZ;j++) for(i=0;i<NX;i++){
+    var f = j*NX+i, a=idx(i,j), b=idx(i+1,j), c3=idx(i,j+1), d=idx(i+1,j+1);
+    F00[f]=a; F10[f]=b; F01[f]=c3; F11[f]=d;
+    var ux = (X[b]-X[a]) + (X[d]-X[c3]), uy = (Y[b]-Y[a]) + (Y[d]-Y[c3]), uz = (Z[b]-Z[a]) + (Z[d]-Z[c3]);
+    var vx = (X[c3]-X[a]) + (X[d]-X[b]), vy = (Y[c3]-Y[a]) + (Y[d]-Y[b]), vz = (Z[c3]-Z[a]) + (Z[d]-Z[b]);
+    var nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx;
+    if(ny < 0){ nx=-nx; ny=-ny; nz=-nz; }
+    var l = Math.sqrt(nx*nx+ny*ny+nz*nz) || 1;
+    N[f*3]=nx/l; N[f*3+1]=ny/l; N[f*3+2]=nz/l;
+    H[f] = (Y[a]+Y[b]+Y[c3]+Y[d])/4;
+  }
+  /* contours by marching squares */
+  var LEVELS = [0.14,0.28,0.42,0.56,0.70,0.84,0.98,1.12], SEG = [];
+  function ip(pa, pb, L){ var t = (L - Y[pa])/((Y[pb]-Y[pa])||1e-6); return [X[pa]+(X[pb]-X[pa])*t, Z[pa]+(Z[pb]-Z[pa])*t]; }
+  for(var li=0; li<LEVELS.length; li++){
+    var L = LEVELS[li];
+    for(j=0;j<NZ;j++) for(i=0;i<NX;i++){
+      var a=idx(i,j), b=idx(i+1,j), c4=idx(i+1,j+1), d2=idx(i,j+1);
+      var code = (Y[a]>L?8:0)|(Y[b]>L?4:0)|(Y[c4]>L?2:0)|(Y[d2]>L?1:0);
+      if(code===0||code===15) continue;
+      var e = {t:null,r:null,b:null,l:null};
+      if((code&8)!==(code&4)>>0 && ((code>>3)&1)!==((code>>2)&1)) e.t = ip(a,b,L);
+      if(((code>>2)&1)!==((code>>1)&1)) e.r = ip(b,c4,L);
+      if(((code>>1)&1)!==(code&1)) e.b = ip(d2,c4,L);
+      if(((code>>3)&1)!==(code&1)) e.l = ip(a,d2,L);
+      var pts = [e.t,e.r,e.b,e.l].filter(function(p){ return p; });
+      if(pts.length===2) SEG.push([pts[0][0],L,pts[0][1],pts[1][0],L,pts[1][1]]);
+      else if(pts.length===4){ SEG.push([e.t[0],L,e.t[1],e.l[0],L,e.l[1]]); SEG.push([e.r[0],L,e.r[1],e.b[0],L,e.b[1]]); }
+    }
+  }
+  /* three survey pins: highest vertices with a minimum spacing */
+  var PINS = [], cand = [];
+  for(k=0;k<NV;k++) cand.push(k);
+  cand.sort(function(p,q){ return Y[q]-Y[p]; });
+  for(k=0;k<cand.length && PINS.length<3;k++){
+    var v = cand[k], ok = true;
+    for(var p=0;p<PINS.length;p++){ var dx = X[v]-X[PINS[p]], dz = Z[v]-Z[PINS[p]]; if(dx*dx+dz*dz < 2.6) ok=false; }
+    if(ok) PINS.push(v);
+  }
+  return {NX:NX, NZ:NZ, W:W, D:D, NV:NV, X:X, Y:Y, Z:Z, NF:NF, N:N, H:H, F00:F00, F10:F10, F01:F01, F11:F11, SEG:SEG, PINS:PINS, idx:idx};
+})();
+
+/* ================= HERO: the range under a scanning light ================= */
 (function(){
   var c = document.getElementById("heroCanvas"); if(!c) return;
   var heroEl = document.getElementById("hero");
-  var SH = 40, FG = 14;
-  var HAZE=[24,30,50];
+  var T = Terrain, SH = 40, FG = 14, HAZE = [24,30,50];
   var RAMPS = [
-    Scene3.ramp3([12,17,32],  [44,60,96],   [152,180,216], HAZE, SH, FG),   /* 0 steel, plinth and posts */
-    Scene3.ramp3([14,26,52],  [58,92,150],  [172,204,246], HAZE, SH, FG),   /* 1 indigo, standard harness */
-    Scene3.ramp3([44,20,12],  [150,68,40],  [240,168,132], HAZE, SH, FG),   /* 2 rust, provider adapter */
-    Scene3.ramp3([30,34,48],  [70,78,98],   [150,158,180], HAZE, SH, FG)    /* 3 grey, the human baseline slab */
+    Scene3.ramp3([9,14,30],   [34,50,86],    [104,134,186], HAZE, SH, FG),  /* low slopes */
+    Scene3.ramp3([15,23,46],  [56,80,130],   [168,192,234], HAZE, SH, FG),  /* mid slopes */
+    Scene3.ramp3([26,32,56],  [104,118,156], [232,236,246], HAZE, SH, FG),  /* high, pale */
+    Scene3.ramp3([62,28,14],  [190,88,52],   [250,194,156], HAZE, SH, FG)   /* under the scan */
   ];
+  var FK = new Uint8Array(T.NF);
+  for(var f=0; f<T.NF; f++) FK[f] = T.H[f] < 0.30 ? 0 : T.H[f] < 0.66 ? 1 : 2;
+  var PX = new Float32Array(T.NV), PY = new Float32Array(T.NV), PQ = new Float32Array(T.NV), PZ = new Float32Array(T.NV), POK = new Uint8Array(T.NV);
+  var order = new Int32Array(T.NF), depth = new Float32Array(T.NF);
   function ramp(r,g,b,a0,a1,n){ var o=new Array(n); for(var q=0;q<n;q++) o[q]="rgba("+r+","+g+","+b+","+(a0+(a1-a0)*(q/(n-1))).toFixed(3)+")"; return o; }
-  var K_DOT = ramp(150,170,205, 0.05, 0.30, FG);
   var pxWant=0, pyWant=0, pxNow=0, pyNow=0;
-  addEventListener("pointermove", function(e){
-    pxWant = (e.clientX/innerWidth - 0.5); pyWant = (e.clientY/innerHeight - 0.5);
-  }, {passive:true});
+  addEventListener("pointermove", function(e){ pxWant = (e.clientX/innerWidth - 0.5); pyWant = (e.clientY/innerHeight - 0.5); }, {passive:true});
   var gA=null,gB=null,gW=0,gH=0,gRA=0,gRB=0;
   function ensureGrads(x,w,h){
     if(gA && gW===w && gH===h) return; gW=w; gH=h;
-    gRA = Math.max(w,h)*0.42; gA = x.createRadialGradient(0,0,0,0,0,gRA);
-    gA.addColorStop(0,"rgba(201,96,58,0.20)"); gA.addColorStop(0.5,"rgba(201,96,58,0.07)"); gA.addColorStop(1,"rgba(201,96,58,0)");
-    gRB = Math.max(w,h)*0.5; gB = x.createRadialGradient(0,0,0,0,0,gRB);
-    gB.addColorStop(0,"rgba(79,118,184,0.22)"); gB.addColorStop(0.55,"rgba(79,118,184,0.07)"); gB.addColorStop(1,"rgba(79,118,184,0)");
+    gRA = Math.max(w,h)*0.40; gA = x.createRadialGradient(0,0,0,0,0,gRA);
+    gA.addColorStop(0,"rgba(201,96,58,0.16)"); gA.addColorStop(0.5,"rgba(201,96,58,0.05)"); gA.addColorStop(1,"rgba(201,96,58,0)");
+    gRB = Math.max(w,h)*0.55; gB = x.createRadialGradient(0,0,0,0,0,gRB);
+    gB.addColorStop(0,"rgba(79,118,184,0.20)"); gB.addColorStop(0.55,"rgba(79,118,184,0.06)"); gB.addColorStop(1,"rgba(79,118,184,0)");
   }
-  var N = 6, GAP = 0.46, W = 0.30, D = 0.30, ROWZ = 0.58, HMAX = 2.1;
-  var scene = {faces:[], edges:[]};
-  function build(rise){
-    scene.faces.length = 0; scene.edges.length = 0;
-    /* plinth */
-    Scene3.box(scene, 0, -0.04, 0, (N-1)*GAP + 1.0, 0.08, ROWZ + 1.0, 0, 1, "plinth");
-    /* a thin baseline slab at the human parity height (100) on the back row, drawn translucent */
-    for(var i=0;i<N;i++){
-      var cx = (i-(N-1)/2)*GAP;
-      var hs = HMAX*ARC.std[i]/100*rise[i], hp = HMAX*ARC.pa[i]/100*rise[i+N];
-      if(hs > 0.004) Scene3.box(scene, cx, hs/2, ROWZ/2, W, hs, D, 1, 1, "s"+i);
-      if(hp > 0.004) Scene3.box(scene, cx, hp/2, -ROWZ/2, W, hp, D, 2, 1, "p"+i);
-    }
-    return scene;
-  }
-  var rise = new Array(2*N); for(var q=0;q<2*N;q++) rise[q]=0;
   var scrollK = 0;
   addEventListener("scroll", function(){ scrollK = clamp(scrollY/Math.max(1,innerHeight), 0, 1); }, {passive:true});
   var lastPaint = -1;
   function draw(t, dt){
-    /* skip frames while the hero is scrolled away */
     if(scrollK >= 1 && lastPaint > 0) return;
     var kk = hidpi(c,1), x = kk.x, w = kk.w, h = kk.h;
     x.clearRect(0,0,w,h);
@@ -2267,90 +2589,134 @@ var ARC = {
     var lag = reduce ? 1 : Math.min(1,(dt||0.016)*2.6);
     pxNow += (pxWant - pxNow)*lag; pyNow += (pyWant - pyNow)*lag;
     ensureGrads(x,w,h);
-    /* glows */
-    x.save(); x.translate(w*(mob?0.54:0.76) + pxNow*w*0.022, h*(mob?0.60:0.50) + pyNow*h*0.02); x.fillStyle = gA; x.fillRect(-gRA,-gRA,gRA*2,gRA*2); x.restore();
-    x.save(); x.translate(w*(mob?0.36:0.64) + pxNow*w*0.05, h*(mob?0.50:0.40) + pyNow*h*0.04); x.fillStyle = gB; x.fillRect(-gRB,-gRB,gRB*2,gRB*2); x.restore();
-    /* columns rise in sequence: the standard row first, then the provider row */
-    for(var i=0;i<2*N;i++){
-      var d0 = 0.35 + (i<N ? i*0.16 : 1.5 + (i-N)*0.16);
-      rise[i] = reduce ? 1 : ease((t - d0)/1.1);
+    x.save(); x.translate(w*(mob?0.55:0.78) + pxNow*w*0.02, h*(mob?0.55:0.42) + pyNow*h*0.02); x.fillStyle = gA; x.fillRect(-gRA,-gRA,gRA*2,gRA*2); x.restore();
+    x.save(); x.translate(w*(mob?0.35:0.60) + pxNow*w*0.04, h*(mob?0.70:0.62) + pyNow*h*0.03); x.fillStyle = gB; x.fillRect(-gRB,-gRB,gRB*2,gRB*2); x.restore();
+
+    /* the range rises out of the plain once, then breathes very slightly */
+    var rise = reduce ? 1 : ease((t-0.15)/1.9);
+    var yk = rise * (1 + (reduce?0:0.008*Math.sin(t*0.5)));
+    /* camera */
+    var ry = -0.62 + (reduce?0:0.10*Math.sin(t*0.045)) + pxNow*0.30;
+    var tilt = 0.50 + (reduce?0:0.02*Math.sin(t*0.07)) + pyNow*0.10 + scrollK*0.22;
+    var cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
+    var ox = (mob ? w*0.50 : w*0.62) + pxNow*w*0.025;
+    var oy = (mob ? h*0.72 : h*0.60) + pyNow*h*0.02 + scrollK*h*0.16;
+    var scale = Math.min(w,h) * (mob ? 0.21 : 0.185) * (1 - scrollK*0.10);
+    var F = 6.0, YM = 0.30, i, j, v;
+    function projPt(px,py,pz){
+      var X1 = px*cs + pz*sn, Z1 = -px*sn + pz*cs, yy = py*yk - YM;
+      var Y1 = yy*ct - Z1*st, Z2 = yy*st + Z1*ct, dd = F - Z2;
+      if(dd < 0.5) return null; var qz = F/dd;
+      return [ox + X1*scale*qz, oy - Y1*scale*qz, qz, Z2];
     }
-    var G = build(rise);
-    var ry   = (reduce ? -0.62 : -0.62 - 0.20*Math.sin(t*0.07)) + pxNow*0.40;
-    var tilt = 0.40 + (reduce ? 0 : 0.03*Math.sin(t*0.09)) + pyNow*0.16 + scrollK*0.25;
-    var ox = (mob ? w*0.50 : w*0.755) + pxNow*w*0.03;
-    var oy = (mob ? h*0.90 : h*0.60) + pyNow*h*0.03 + scrollK*h*0.18;
-    var scale = Math.min(w,h) * (mob ? 0.16 : 0.175) * (1 - scrollK*0.12);
-    var cam = Scene3.camera({ry:ry, tilt:tilt, ox:ox, oy:oy, scale:scale, f:6.2, ymid:0.9});
-    var la = reduce ? 2.15 : 2.15 + 0.62*Math.sin(t*0.075);
-    var lx = Math.cos(la)*0.94, ly = 0.42, lz = Math.sin(la)*0.94, ll = Math.sqrt(lx*lx+ly*ly+lz*lz);
-    var light = [lx/ll, ly/ll, lz/ll];
-    /* floor dots in perspective */
-    var dotR = mob ? 1.0 : 1.3, i, j;
-    for(i=-7;i<=7;i++) for(j=-4;j<=4;j++){
-      var fp = cam.proj([i*0.40, 0, j*0.40]); if(!fp) continue;
-      var fg0 = clamp((fp[2]-0.72)/0.90, 0, 1);
-      x.fillStyle = K_DOT[(fg0*(FG-1))|0]; x.beginPath(); x.arc(fp[0], fp[1], dotR*fp[2], 0, 6.283); x.fill();
+    for(v=0; v<T.NV; v++){
+      var X1 = T.X[v]*cs + T.Z[v]*sn, Z1 = -T.X[v]*sn + T.Z[v]*cs, yy = T.Y[v]*yk - YM;
+      var Y1 = yy*ct - Z1*st, Z2 = yy*st + Z1*ct, dd = F - Z2;
+      if(dd < 0.5){ POK[v]=0; continue; }
+      var qz = F/dd; POK[v]=1; PX[v] = ox + X1*scale*qz; PY[v] = oy - Y1*scale*qz; PQ[v] = qz; PZ[v] = Z2;
     }
-    /* contact shadow */
-    for(i=4;i>=1;i--){
-      var rad = 0.30 + i*0.11, ring = [], ok = true;
-      for(j=0;j<24;j++){ var a=j/24*6.283, pp=cam.proj([Math.cos(a)*rad*2.2, 0.002, Math.sin(a)*rad*1.1]); if(!pp){ ok=false; break; } ring.push(pp); }
-      if(!ok) continue;
-      x.fillStyle = "rgba(8,12,22,"+(0.05 + 0.05*(5-i)).toFixed(3)+")";
-      x.beginPath(); x.moveTo(ring[0][0],ring[0][1]); for(j=1;j<24;j++) x.lineTo(ring[j][0],ring[j][1]); x.closePath(); x.fill();
+    /* light in world space, orbiting slowly; the scan band moves along x */
+    var la = 2.35 + (reduce?0:0.45*Math.sin(t*0.06));
+    var lx = Math.cos(la)*0.9, ly = 0.62, lz = Math.sin(la)*0.9, ll = Math.sqrt(lx*lx+ly*ly+lz*lz); lx/=ll; ly/=ll; lz/=ll;
+    var period = 11.0, ph = reduce ? 0.62 : ((t*0.95) % period)/period;
+    var sx = -T.W*0.55 + ph*T.W*1.1;
+    /* faces: depth sort, painter's order */
+    var live = 0;
+    for(f=0; f<T.NF; f++){
+      var a=T.F00[f], b=T.F10[f], c3=T.F01[f], d=T.F11[f];
+      if(!POK[a]||!POK[b]||!POK[c3]||!POK[d]) continue;
+      depth[live] = (PZ[a]+PZ[b]+PZ[c3]+PZ[d])*0.25; order[live] = f; live++;
     }
-    /* the 100 line: a hairline rectangle at the top of the back row, drawn before the columns */
-    var par = [cam.proj([-(N-1)/2*GAP-0.3, HMAX, -ROWZ/2-D/2]), cam.proj([(N-1)/2*GAP+0.3, HMAX, -ROWZ/2-D/2]),
-               cam.proj([(N-1)/2*GAP+0.3, HMAX, -ROWZ/2+D/2]), cam.proj([-(N-1)/2*GAP-0.3, HMAX, -ROWZ/2+D/2])];
-    if(par[0]&&par[1]&&par[2]&&par[3]){
-      x.strokeStyle = "rgba(200,210,230,0.28)"; x.setLineDash([3,4]); x.beginPath();
-      x.moveTo(par[0][0],par[0][1]); for(j=1;j<4;j++) x.lineTo(par[j][0],par[j][1]); x.closePath(); x.stroke(); x.setLineDash([]);
+    var idxs = Array.prototype.slice.call(order, 0, live);
+    idxs.sort(function(p,q){ return depth[order.indexOf(p)] - depth[order.indexOf(q)]; });
+    /* (indexOf above would be slow; use a direct depth map instead) */
+    var dmap = new Float32Array(T.NF); for(i=0;i<live;i++) dmap[order[i]] = depth[i];
+    idxs.sort(function(p,q){ return dmap[p]-dmap[q]; });
+    for(i=0;i<live;i++){
+      f = idxs[i];
+      var a2=T.F00[f], b2=T.F10[f], c5=T.F01[f], d3=T.F11[f];
+      /* cull faces seen from below: screen winding */
+      var wnd = (PX[b2]-PX[a2])*(PY[c5]-PY[a2]) - (PY[b2]-PY[a2])*(PX[c5]-PX[a2]);
+      if(wnd > 0) continue;
+      var lam = T.N[f*3]*lx + T.N[f*3+1]*ly + T.N[f*3+2]*lz; if(lam < 0) lam = -lam*0.25;
+      var cx = (T.X[a2]+T.X[d3])*0.5, near = Math.exp(-((cx - sx)*(cx - sx))/0.10);
+      var sh = clamp(0.22 + 0.78*lam + 0.30*near, 0, 0.999);
+      var q = PQ[a2], fg = clamp((q-0.66)/0.95, 0, 1);
+      var kk2 = near > 0.42 ? 3 : FK[f];
+      x.fillStyle = RAMPS[kk2][((sh*(SH-1))|0)*FG + ((fg*(FG-1))|0)];
+      x.beginPath(); x.moveTo(PX[a2],PY[a2]); x.lineTo(PX[b2],PY[b2]); x.lineTo(PX[d3],PY[d3]); x.lineTo(PX[c5],PY[c5]); x.closePath(); x.fill();
     }
-    Scene3.paint(x, G, cam, light, RAMPS, {SH:SH, FG:FG});
-    /* labels: effort names on the front edge, scores on the tops once risen; none on narrow screens, where the scene is a backdrop */
-    x.save();
-    for(i=0;i<N && !mob;i++){
-      var cx = (i-(N-1)/2)*GAP;
-      var lp = cam.proj([cx, 0.0, ROWZ/2 + D/2 + 0.16]);
-      if(lp){ x.globalAlpha = clamp(rise[i]*1.4,0,1)*0.85; labC(x, ARC.efforts[i], lp[0], lp[1]+4, "#a9b6cc", mob?9:10); }
-      var hs = HMAX*ARC.std[i]/100, hp = HMAX*ARC.pa[i]/100;
-      var tp = cam.proj([cx, hs, ROWZ/2]);
-      if(tp && rise[i] > 0.96){ x.globalAlpha = clamp((rise[i]-0.96)/0.04,0,1); labC(x, ARC.std[i].toFixed(1)+"%", tp[0], tp[1]-9, "#dbe6f7", mob?10:11.5);
-        if(!mob) labC(x, "$"+Math.round(ARC.stdCost[i]/1000)+"K", tp[0], tp[1]-22, "rgba(190,205,230,0.72)", 9.5); }
-      var tq = cam.proj([cx, hp, -ROWZ/2]);
-      if(tq && rise[i+N] > 0.96){ x.globalAlpha = clamp((rise[i+N]-0.96)/0.04,0,1); labC(x, ARC.pa[i].toFixed(1)+"%", tq[0], tq[1]-9, "#f4d6c6", mob?10:11.5);
-        if(!mob) labC(x, "$"+Math.round(ARC.paCost[i]/1000)+"K", tq[0], tq[1]-22, "rgba(240,205,185,0.72)", 9.5); }
+    /* contours: faint everywhere, bright where the scan has just passed */
+    x.lineWidth = 1;
+    var S = T.SEG, n = S.length;
+    for(i=0;i<n;i++){
+      var s = S[i], mx = (s[0]+s[3])*0.5, dxs = mx - sx;
+      var glow = dxs < 0 && dxs > -2.2 ? Math.exp(dxs/0.9) : 0;
+      var al = 0.05 + 0.55*glow; if(al < 0.06) continue;
+      var p1 = projPt(s[0],s[1],s[2]), p2 = projPt(s[3],s[4],s[5]); if(!p1||!p2) continue;
+      var fgd = clamp((p1[2]-0.66)/0.95, 0, 1);
+      x.strokeStyle = glow > 0.05 ? "rgba(250,190,150,"+(al*(0.35+0.65*fgd)).toFixed(3)+")" : "rgba(180,200,235,"+(al*(0.3+0.7*fgd)).toFixed(3)+")";
+      x.beginPath(); x.moveTo(p1[0],p1[1]); x.lineTo(p2[0],p2[1]); x.stroke();
     }
-    x.restore();
+    /* the scan: a translucent plane standing on the surface along x = sx */
+    if(rise > 0.9){
+      var col = [], NZ = T.NZ, NX = T.NX, u = clamp((sx + T.W/2)/T.W*NX, 0, NX-1), i0 = Math.floor(u), fu = u - i0;
+      for(j=0;j<=NZ;j++){ var va = T.idx(i0,j), vb = T.idx(Math.min(NX,i0+1),j); col.push([sx, T.Y[va]*(1-fu)+T.Y[vb]*fu, T.Z[va]]); }
+      var base = col.map(function(p){ return projPt(p[0],p[1],p[2]); }), top = col.map(function(p){ return projPt(p[0],p[1]+1.35,p[2]); });
+      if(base.every(function(p){return p;}) && top.every(function(p){return p;})){
+        var grd = x.createLinearGradient(0, base[0][1], 0, top[0][1]);
+        grd.addColorStop(0, "rgba(212,116,79,0.16)"); grd.addColorStop(1, "rgba(212,116,79,0)");
+        x.fillStyle = grd; x.beginPath(); x.moveTo(base[0][0],base[0][1]);
+        for(j=1;j<=NZ;j++) x.lineTo(base[j][0],base[j][1]);
+        for(j=NZ;j>=0;j--) x.lineTo(top[j][0],top[j][1]);
+        x.closePath(); x.fill();
+        x.strokeStyle = "rgba(250,196,160,0.85)"; x.lineWidth = 1.2; x.beginPath(); x.moveTo(base[0][0],base[0][1]);
+        for(j=1;j<=NZ;j++) x.lineTo(base[j][0],base[j][1]); x.stroke(); x.lineWidth = 1;
+      }
+    }
+    /* survey pins on the three summits, joined by sight lines */
+    var tops = [];
+    for(i=0;i<T.PINS.length;i++){
+      v = T.PINS[i]; var pb = projPt(T.X[v],T.Y[v],T.Z[v]), pt = projPt(T.X[v],T.Y[v]+0.34,T.Z[v]); if(!pb||!pt) continue;
+      var alp = clamp((rise-0.85)/0.15,0,1)*0.9;
+      x.strokeStyle = "rgba(230,236,248,"+(alp*0.7).toFixed(3)+")"; x.beginPath(); x.moveTo(pb[0],pb[1]); x.lineTo(pt[0],pt[1]); x.stroke();
+      x.fillStyle = "rgba(250,196,160,"+alp.toFixed(3)+")"; x.beginPath(); x.arc(pt[0],pt[1],3.2*pt[2],0,6.283); x.fill();
+      x.strokeStyle = "rgba(250,196,160,"+(alp*0.5).toFixed(3)+")"; x.beginPath(); x.arc(pt[0],pt[1],8*pt[2],0,6.283); x.stroke();
+      tops.push(pt);
+    }
+    if(tops.length===3){
+      x.setLineDash([3,5]); x.strokeStyle = "rgba(230,236,248,0.28)"; x.beginPath();
+      x.moveTo(tops[0][0],tops[0][1]); x.lineTo(tops[1][0],tops[1][1]); x.lineTo(tops[2][0],tops[2][1]); x.closePath(); x.stroke(); x.setLineDash([]);
+    }
     lastPaint = t;
   }
   register(heroEl, draw, 1);
 })();
 
-/* ================= FOOTER: the same twelve columns as a wireframe echo ================= */
+/* ================= FOOTER: the same range as a wireframe ================= */
 (function(){
   var c = document.getElementById("footCanvas"); if(!c) return;
-  var foot = c.parentNode;
-  var scene = {faces:[], edges:[]};
-  var N=6, GAP=0.46, W=0.30, D=0.30, ROWZ=0.58, HMAX=2.1;
-  Scene3.box(scene, 0, -0.04, 0, (N-1)*GAP + 1.0, 0.08, ROWZ + 1.0, 0);
-  for(var i=0;i<N;i++){
-    var cx=(i-(N-1)/2)*GAP;
-    Scene3.box(scene, cx, HMAX*ARC.std[i]/200, ROWZ/2, W, HMAX*ARC.std[i]/100, D, 1);
-    Scene3.box(scene, cx, HMAX*ARC.pa[i]/200, -ROWZ/2, W, HMAX*ARC.pa[i]/100, D, 2);
-  }
+  var foot = c.parentNode, T = Terrain;
   function draw(t){
     var kk = hidpi(c,1), x = kk.x, w = kk.w, h = kk.h;
     x.clearRect(0,0,w,h);
     var mob = w < 900;
-    var ry = -0.9 + (reduce ? 0 : 0.10*Math.sin(t*0.05)), tilt = 0.36;
-    var cam = Scene3.camera({ry:ry, tilt:tilt, ox: mob ? w*0.5 : w*0.76, oy: mob ? h*0.62 : h*0.66, scale: Math.min(w,h)*(mob?0.16:0.13), f:6.2, ymid:0.9});
+    var ry = -0.8 + (reduce ? 0 : 0.06*Math.sin(t*0.05)), tilt = 0.46, cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
+    var ox = mob ? w*0.5 : w*0.72, oy = mob ? h*0.70 : h*0.74, scale = Math.min(w,h)*(mob?0.18:0.16), F=6.0, YM=0.3;
+    function P(v){ var X1 = T.X[v]*cs + T.Z[v]*sn, Z1 = -T.X[v]*sn + T.Z[v]*cs, yy = T.Y[v]-YM; var Y1 = yy*ct - Z1*st, Z2 = yy*st + Z1*ct, dd = F-Z2; if(dd<0.5) return null; var q=F/dd; return [ox+X1*scale*q, oy-Y1*scale*q, q]; }
     x.lineWidth = 1;
-    Scene3.wire(x, scene, cam, function(it){
-      var a = 0.10 + 0.32*clamp((it.q-0.72)/0.9,0,1);
-      return it.k===2 ? "rgba(240,168,132,"+a.toFixed(3)+")" : it.k===1 ? "rgba(172,204,246,"+a.toFixed(3)+")" : "rgba(150,170,205,"+(a*0.7).toFixed(3)+")";
-    });
+    var step = mob ? 3 : 2, i, j;
+    for(j=0;j<=T.NZ;j+=step){
+      x.beginPath(); var first=true;
+      for(i=0;i<=T.NX;i++){ var p=P(T.idx(i,j)); if(!p){ first=true; continue; } if(first){ x.moveTo(p[0],p[1]); first=false; } else x.lineTo(p[0],p[1]); }
+      var q0 = P(T.idx(T.NX>>1, j)); var a = 0.08 + 0.26*clamp(((q0?q0[2]:0.8)-0.66)/0.95,0,1);
+      x.strokeStyle = "rgba(172,204,246,"+a.toFixed(3)+")"; x.stroke();
+    }
+    for(i=0;i<=T.NX;i+=step*2){
+      x.beginPath(); var f2=true;
+      for(j=0;j<=T.NZ;j++){ var p2=P(T.idx(i,j)); if(!p2){ f2=true; continue; } if(f2){ x.moveTo(p2[0],p2[1]); f2=false; } else x.lineTo(p2[0],p2[1]); }
+      x.strokeStyle = "rgba(172,204,246,0.10)"; x.stroke();
+    }
   }
   register(foot, draw, 0.4);
 })();

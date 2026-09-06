@@ -385,7 +385,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 #topbar{position:fixed;top:0;left:0;right:0;z-index:50;background:transparent;border-bottom:1px solid transparent;transition:border-color .3s var(--ease),background .3s var(--ease),backdrop-filter .3s var(--ease),opacity .3s var(--ease)}
 #topbar.stuck{border-bottom-color:var(--rule-strong);background:rgba(251,250,247,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 #topbar:not(.stuck){opacity:0;pointer-events:none}
-#topbar .wrap{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;height:56px;gap:18px}
+#topbar .wrap{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;height:56px;gap:18px}
 #topbar .homebtn{justify-self:start;display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-decoration:none;white-space:nowrap;padding:6px 13px 6px 11px;border:1px solid var(--rule-strong);border-radius:999px;background:rgba(243,239,230,.6);
   transition:color .22s var(--ease),border-color .22s var(--ease),background .22s var(--ease),transform .22s var(--ease),box-shadow .22s var(--ease)}
 #topbar .homebtn svg{flex:none;transition:transform .26s var(--ease)}
@@ -394,9 +394,44 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 #topbar .brand{justify-self:start;white-space:nowrap;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:none}
 #topbar .brand:hover{color:var(--ink)}
 #topbar .rail-end{justify-self:end;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4);white-space:nowrap}
-@media(max-width:1340px){#topbar .rail-end{display:none}#topbar .wrap{grid-template-columns:auto auto minmax(0,1fr)}}
-@media(max-width:1150px){#topbar .brand{display:none}#topbar .wrap{grid-template-columns:auto minmax(0,1fr)}}
-@media(max-width:860px){#topbar .wrap{grid-template-columns:auto;justify-content:start}}
+@media(max-width:1340px){#topbar .rail-end{display:none}#topbar .wrap{grid-template-columns:auto auto minmax(0,1fr) auto}}
+@media(max-width:1150px){#topbar .brand{display:none}#topbar .wrap{grid-template-columns:auto minmax(0,1fr) auto}}
+@media(max-width:860px){#topbar .wrap{grid-template-columns:auto auto;justify-content:space-between}}
+.tb-pod{position:relative;justify-self:end}
+.tb-play{display:inline-flex;align-items:center;gap:9px;height:36px;padding:0 14px 0 5px;border-radius:999px;cursor:pointer;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--warm-deep);
+  background:linear-gradient(90deg,rgba(212,116,79,.14),rgba(212,116,79,.05));border:1px solid rgba(212,116,79,.45);
+  box-shadow:0 0 0 0 rgba(212,116,79,.25),0 0 14px rgba(212,116,79,.12);animation:ember-tb 3.6s ease-in-out infinite;transition:border-color .2s,transform .3s var(--ease),background .2s}
+.tb-play:hover{border-color:var(--warm);background:rgba(212,116,79,.16);transform:translateY(-1px)}
+.tb-play:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px}
+.tb-play[aria-expanded="true"]{border-color:var(--warm);background:rgba(212,116,79,.18)}
+.tb-play.playing{animation:none;box-shadow:0 0 0 3px rgba(212,116,79,.14),0 0 18px rgba(212,116,79,.22)}
+@keyframes ember-tb{0%,100%{box-shadow:0 0 0 0 rgba(212,116,79,.25),0 0 14px rgba(212,116,79,.12)}50%{box-shadow:0 0 0 6px rgba(212,116,79,0),0 0 22px rgba(212,116,79,.22)}}
+.tb-badge{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#1a1008;background:linear-gradient(135deg,#ffcfae,#d4744f);box-shadow:0 0 0 3px rgba(255,196,160,.22)}
+.tb-badge svg{width:14px;height:14px;fill:currentColor}
+.tb-badge .bars{display:none}
+.tb-play.playing .tb-badge .tri{display:none}
+.tb-play.playing .tb-badge .bars{display:block}
+.tb-play .peq{display:none;height:12px;width:14px}
+.tb-play .peq i{background:var(--warm);opacity:1;animation:peq .9s ease-in-out infinite alternate;height:12px}
+.tb-play .peq i:nth-child(2){animation-delay:-.3s}.tb-play .peq i:nth-child(3){animation-delay:-.55s}.tb-play .peq i:nth-child(4){animation-delay:-.15s}
+.tb-play.playing .peq{display:flex}
+.tb-play.playing .tb-lab{display:none}
+.tb-menu{position:absolute;top:calc(100% + 10px);right:0;width:min(400px,calc(100vw - 32px));background:#fff;border:1px solid var(--rule-strong);border-radius:12px;
+  box-shadow:0 22px 48px -20px rgba(23,28,44,.45),0 2px 6px rgba(23,28,44,.06);padding:8px;z-index:60;transform-origin:top right;animation:tbmenu .22s var(--ease)}
+@keyframes tbmenu{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+.tb-h{margin:4px 12px 6px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-4)}
+.tb-row{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:2px 14px;align-items:center;width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:none;background:transparent;cursor:pointer;color:var(--ink);font:inherit}
+.tb-row + .tb-row{margin-top:2px}
+.tb-row:hover,.tb-row:focus-visible{background:var(--bg-2);outline:none}
+.tb-row:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-deep)}
+.tb-row .tb-k{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-4)}
+.tb-row b{font-family:var(--font-display);font-weight:500;font-size:15px;line-height:1.25;letter-spacing:-.005em;color:var(--ink)}
+.tb-row .tb-act{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.tb-row .tb-t{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-height:1em}
+.tb-row .tb-btn{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#1a1008;background:linear-gradient(135deg,#ffcfae,#d4744f);border-radius:999px;padding:6px 13px;font-weight:600}
+.tb-row.playing .tb-btn{background:var(--ink);color:#fff}
+@media(prefers-reduced-motion:reduce){.tb-play{animation:none}.tb-menu{animation:none}.tb-play .peq i{animation:none;transform:scaleY(.6)}}
 #toc{justify-self:stretch;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;justify-content:center;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
 #toc::-webkit-scrollbar{display:none}
 #toc a{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);border:none;padding:6px 8px;border-radius:3px;white-space:nowrap;transition:color .2s var(--ease),background .2s var(--ease)}
@@ -434,7 +469,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 #hero .who b{color:#fff;font-weight:500}
 /* ---------- podcast pills in the hero ---------- */
 .pods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:26px 0 0;max-width:900px}
-.pod{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 16px 10px 10px;border-radius:999px;
+.pod{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:6px 16px 6px 6px;border-radius:999px;
   border:1px solid rgba(255,196,160,.42);color:#fff;min-width:0;
   background:linear-gradient(90deg,rgba(212,116,79,.22),rgba(26,32,64,.62) 58%,rgba(212,116,79,.10));
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
@@ -445,14 +480,16 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 .pod.playing{animation:none;border-color:rgba(255,206,176,.9);box-shadow:0 0 0 3px rgba(255,196,160,.16),0 0 44px rgba(255,170,120,.32),0 18px 40px -18px rgba(0,0,0,.7)}
 @keyframes ember{0%,100%{box-shadow:0 0 0 0 rgba(255,196,160,.35),0 0 26px rgba(255,170,120,.16),0 18px 40px -18px rgba(0,0,0,.7)}
   50%{box-shadow:0 0 0 9px rgba(255,196,160,0),0 0 54px rgba(255,170,120,.34),0 18px 40px -18px rgba(0,0,0,.7)}}
-.pod-play{position:relative;flex:none;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;color:#1a1008;padding:0;
-  background:linear-gradient(135deg,#ffcfae,#d4744f);box-shadow:0 0 0 5px rgba(255,196,160,.14),0 0 22px rgba(255,170,120,.45);display:grid;place-items:center;transition:transform .3s var(--ease),box-shadow .3s}
-.pod:hover .pod-play{transform:scale(1.06);box-shadow:0 0 0 7px rgba(255,196,160,.2),0 0 30px rgba(255,170,120,.6)}
-.pod-play:focus-visible{outline:2px solid #fff;outline-offset:4px}
-.pod-ring{position:absolute;left:-5px;top:-5px;width:56px;height:56px;transform:rotate(-90deg);pointer-events:none}
-.pod-ring .track{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2}
-.pod-ring .prog{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-dasharray:125.66;stroke-dashoffset:125.66;transition:stroke-dashoffset .25s linear}
-.pod-icon{width:22px;height:22px;fill:currentColor;position:relative}
+@property --p{syntax:"<percentage>";inherits:false;initial-value:0%}
+.pod-play{position:relative;flex:none;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;color:#1a1008;padding:0;margin:0;
+  background:transparent;display:grid;place-items:center;--p:0%;transition:--p .25s linear;-webkit-tap-highlight-color:transparent}
+.pod-play::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#fff var(--p),rgba(255,255,255,.16) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.4px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.4px))}
+.pod-play::after{content:"";position:absolute;inset:5px;border-radius:50%;background:linear-gradient(135deg,#ffcfae,#d4744f);
+  box-shadow:0 0 0 5px rgba(255,196,160,.14),0 0 22px rgba(255,170,120,.45);transition:transform .3s var(--ease),box-shadow .3s}
+.pod:hover .pod-play::after{transform:scale(1.06);box-shadow:0 0 0 7px rgba(255,196,160,.2),0 0 30px rgba(255,170,120,.6)}
+.pod-play:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.pod-icon{width:22px;height:22px;fill:currentColor;position:relative;z-index:1}
 .pod-icon .bars{display:none}
 .pod.playing .pod-icon .tri{display:none}
 .pod.playing .pod-icon .bars{display:block}
@@ -641,6 +678,18 @@ details.srcbox ol.sources{margin-top:12px}
     <a href="#checklist" data-sec="checklist">Checklist</a>
     <a href="#coda" data-sec="coda">Coda</a>
   </nav>
+  <div class="tb-pod">
+    <button type="button" class="tb-play" id="tbPlay" aria-haspopup="menu" aria-expanded="false" aria-controls="tbMenu" aria-label="Listen to this essay as a podcast">
+      <span class="tb-badge" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="tri" d="M11.6 9.2v13.6L22.8 16 11.6 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></span>
+      <span class="tb-lab">Listen</span>
+      <span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    </button>
+    <div class="tb-menu" id="tbMenu" role="menu" aria-label="Podcast episodes" hidden>
+      <p class="tb-h">Listen to this essay</p>
+      <button type="button" class="tb-row" role="menuitem" data-pod="0"><span class="tb-k">Long episode &middot; 53 min</span><b>How AI Labs Game Their Benchmarks</b><span class="tb-act"><span class="tb-t"></span><span class="tb-btn">Play</span></span></button>
+      <button type="button" class="tb-row" role="menuitem" data-pod="1"><span class="tb-k">Short episode &middot; 22 min</span><b>Why AI Benchmark Scores Are Misleading</b><span class="tb-act"><span class="tb-t"></span><span class="tb-btn">Play</span></span></button>
+    </div>
+  </div>
   <span class="rail-end" id="railPct">00%</span>
 </div></div>
 
@@ -666,7 +715,7 @@ details.srcbox ol.sources{margin-top:12px}
     <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore</p>
     <div class="pods" role="group" aria-label="Listen to this essay as a podcast">
       <div class="pod" data-src="assets/leaderboards/podcast-long.m4a" data-len="3176" data-title="the long episode, How AI Labs Game Their Benchmarks">
-        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the long episode, How AI Labs Game Their Benchmarks, 53 minutes"><svg class="pod-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="20"/><circle class="prog" cx="22" cy="22" r="20"/></svg><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M12.2 9.2v13.6L23.4 16 12.2 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
+        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the long episode, How AI Labs Game Their Benchmarks, 53 minutes"><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M11.6 9.2v13.6L22.8 16 11.6 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
         <div class="pod-t">
           <span class="pod-k"><span class="pod-tag">Podcast &middot; long &middot; 53 min</span><span class="pod-time"><span class="cur">0:00</span><span class="sep"> / </span><span class="tot"></span></span></span>
           <b>How AI Labs Game Their Benchmarks</b>
@@ -678,7 +727,7 @@ details.srcbox ol.sources{margin-top:12px}
         </div>
       </div>
       <div class="pod" data-src="assets/leaderboards/podcast-short.m4a" data-len="1332" data-title="the short episode, Why AI Benchmark Scores Are Misleading">
-        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the short episode, Why AI Benchmark Scores Are Misleading, 22 minutes"><svg class="pod-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="20"/><circle class="prog" cx="22" cy="22" r="20"/></svg><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M12.2 9.2v13.6L23.4 16 12.2 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
+        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the short episode, Why AI Benchmark Scores Are Misleading, 22 minutes"><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M11.6 9.2v13.6L22.8 16 11.6 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
         <div class="pod-t">
           <span class="pod-k"><span class="pod-tag">Podcast &middot; short &middot; 22 min</span><span class="pod-time"><span class="cur">0:00</span><span class="sep"> / </span><span class="tot"></span></span></span>
           <b>Why AI Benchmark Scores Are Misleading</b>
@@ -3639,12 +3688,12 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
     var a = new Audio(); a.preload = "none"; a.src = el.getAttribute("data-src");
     var len = parseFloat(el.getAttribute("data-len")) || 0, title = el.getAttribute("data-title");
     var btn = el.querySelector(".pod-play"), seek = el.querySelector(".pod-seek"), cur = el.querySelector(".cur"), tot = el.querySelector(".tot"),
-        ring = el.querySelector(".pod-ring .prog"), rate = el.querySelector(".pod-rate"), ri = 0, seeking = false;
+        rate = el.querySelector(".pod-rate"), ri = 0, seeking = false;
     var P = {a:a, el:el}; players.push(P);
     function dur(){ return isFinite(a.duration) && a.duration > 0 ? a.duration : len; }
     function paint(){ var d = dur(), p = d ? clamp(a.currentTime/d, 0, 1) : 0;
       if(!seeking) seek.value = Math.round(p*1000); seek.style.setProperty("--p", (p*100).toFixed(2) + "%");
-      ring.style.strokeDashoffset = (CIRC*(1-p)).toFixed(2); cur.textContent = fmt(a.currentTime); }
+      btn.style.setProperty("--p", (p*100).toFixed(2) + "%"); cur.textContent = fmt(a.currentTime); }
     function setPlaying(on){ el.classList.toggle("playing", on); btn.setAttribute("aria-pressed", on ? "true" : "false");
       btn.setAttribute("aria-label", (on ? "Pause " : "Play ") + title); }
     btn.addEventListener("click", function(){
@@ -3667,8 +3716,32 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
     seek.addEventListener("input", function(){ seeking = true; var t = seek.value/1000*dur(); cur.textContent = fmt(t); seek.style.setProperty("--p", (seek.value/10).toFixed(2) + "%"); });
     seek.addEventListener("change", function(){ a.currentTime = seek.value/1000*dur(); seeking = false; el.classList.add("started"); paint(); });
     rate.addEventListener("click", function(){ ri = (ri+1) % RATES.length; a.playbackRate = RATES[ri]; rate.textContent = RATES[ri] + "×"; rate.setAttribute("aria-label", "Playback speed, currently " + RATES[ri] + "x"); });
-    tot.textContent = fmt(len); ring.style.strokeDashoffset = CIRC;
+    tot.textContent = fmt(len);
+    P.dur = dur; P.fmt = fmt; P.title = title; P.isStarted = function(){ return el.classList.contains("started"); };
+    P.play = function(){ if(a.paused) btn.click(); }; P.pause = function(){ if(!a.paused) a.pause(); };
   });
+  /* the top bar: one button that stays with the reader, and a menu with the two episodes */
+  var tbPlay = document.getElementById("tbPlay"), tbMenu = document.getElementById("tbMenu");
+  if(tbPlay && tbMenu){
+    var rows = [].slice.call(tbMenu.querySelectorAll(".tb-row"));
+    function syncRows(){ rows.forEach(function(r){ var P = players[+r.getAttribute("data-pod")]; if(!P) return; var on = !P.a.paused;
+      r.classList.toggle("playing", on); r.querySelector(".tb-btn").textContent = on ? "Pause" : (P.isStarted() ? "Resume" : "Play");
+      r.querySelector(".tb-t").textContent = P.isStarted() ? fmt(P.a.currentTime) + " / " + fmt(P.dur()) : ""; }); }
+    function syncTop(){ var on = players.some(function(P){ return !P.a.paused; }); tbPlay.classList.toggle("playing", on);
+      tbPlay.setAttribute("aria-label", on ? "Podcast playing: open the episode list to pause or switch" : "Listen to this essay as a podcast"); }
+    function openMenu(on){ tbMenu.hidden = !on; tbPlay.setAttribute("aria-expanded", on ? "true" : "false"); if(on){ syncRows(); rows[0].focus(); } }
+    tbPlay.addEventListener("click", function(e){ e.stopPropagation(); openMenu(tbMenu.hidden); });
+    document.addEventListener("click", function(e){ if(!tbMenu.hidden && !tbMenu.contains(e.target) && !tbPlay.contains(e.target)) openMenu(false); });
+    document.addEventListener("keydown", function(e){
+      if(tbMenu.hidden) return;
+      if(e.key === "Escape"){ openMenu(false); tbPlay.focus(); }
+      else if(e.key === "ArrowDown" || e.key === "ArrowUp"){ var i = rows.indexOf(document.activeElement); if(i < 0) i = 0; else i = (i + (e.key === "ArrowDown" ? 1 : rows.length - 1)) % rows.length; rows[i].focus(); e.preventDefault(); }
+    });
+    rows.forEach(function(r){ r.addEventListener("click", function(e){ e.stopPropagation(); var P = players[+r.getAttribute("data-pod")]; if(!P) return;
+      if(P.a.paused){ P.play(); openMenu(false); tbPlay.focus(); } else { P.pause(); syncRows(); } }); });
+    players.forEach(function(P){ P.a.addEventListener("play", function(){ syncTop(); syncRows(); }); P.a.addEventListener("pause", function(){ syncTop(); syncRows(); });
+      P.a.addEventListener("timeupdate", function(){ if(!tbMenu.hidden) syncRows(); }); });
+  }
 })();
 
 /* ================= F11: the top of the Arena with its intervals ================= */

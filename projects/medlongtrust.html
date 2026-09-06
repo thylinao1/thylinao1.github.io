@@ -7,7 +7,7 @@
 <meta name="description" content="My solution to the UbiComp 2026 MedLongTrust-EHR benchmark on trust assessment over longitudinal electronic health records. The task asks for a trust label, its risk types, and the record paragraphs that justify the decision. The usual build hands the record to a language model; I did the reverse. Deterministic tools read the record and make every decision by an explicit rule, and a small local model only plans and checks around them, never allowed to change a grounded answer. That entry placed first at 100.0, and most of the seventeen-point margin came from a part of the task most entries skipped: reconstructing the supporting evidence. Interactive figures you can drag and replay, and an honest account of where the perfect label score comes from." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,400;0,9..144,460;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,420&family=Source+Serif+4:ital,opsz,wght@0,8..60,380;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   /* deep navy dossier, dark luxury: navy background, light text */
@@ -22,10 +22,10 @@
   --flag:#d4a23f;
   --gold:#d3ab48; --gold-deep:#a07e2a; --gold-soft:#e6cf9c; --gold-bright:#ecc85c;
   --night:#0a1120; --night-ink:#eef2fa;
-  --font-display:"Newsreader",Georgia,"Times New Roman",serif;
-  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"Fraunces","Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
   --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --font-num:"Space Grotesk","IBM Plex Sans",system-ui,sans-serif;
+  --font-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
   --maxw:1300px; --read:820px;
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-out:cubic-bezier(.23,1,.32,1);

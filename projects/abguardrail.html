@@ -7,6 +7,7 @@
 <meta name="description" content="An A/B test can be broken and still report a clean p-value. A command-line guardrail that reads what the p-value cannot see (SRM, confounding, multiple testing) via a deterministic pipeline, with an LLM writing only the closing summary.">
 <meta property="og:title" content="The Experimentation Guardrail Agent · Case Study">
 <meta property="og:description" content="When an A/B test lies, the model never tells you. The SRM does.">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,400;0,9..144,460;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,420&family=Source+Serif+4:ital,opsz,wght@0,8..60,380;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4efe6; --bg-2:#ede5d4; --bg-3:#e3d9c0; --bg-dark:#1e1c14;
@@ -14,9 +15,9 @@
   --rule:rgba(0,0,0,.08); --rule-strong:rgba(0,0,0,.18);
   --accent:#b8651a; --accent-2:#8a4910; --accent-soft:rgba(184,101,26,.12);
   --bad:#a4321b; --good:#3b6b3a;
-  --font-sans:"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display:"Spectral","Source Serif Pro", Georgia, serif;
-  --font-mono:ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
+  --font-sans:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-display:"Fraunces", "Source Serif 4", Georgia, serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --maxw: 1180px;
 }
 *{box-sizing:border-box}

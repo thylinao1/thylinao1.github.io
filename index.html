@@ -7,7 +7,7 @@
 <meta name="description" content="Personal portfolio of Maksim Silchenko. Applied statistics, causal inference, experimentation, and machine learning systems.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8; --bg-dark:#15110b;
@@ -15,8 +15,8 @@
     --rule:rgba(21,17,11,.12); --rule-strong:rgba(21,17,11,.28);
     --accent:#c8421f; --accent-soft:#e5a892; --accent-bg:rgba(200,66,31,.08);
     --good:#1f6b3a;
-    --font-display:"Fraunces", "Source Serif 4", Georgia, serif;
-    --font-body:"Source Serif 4", Georgia, "Times New Roman", serif;
+    --font-display:"Instrument Serif", Georgia, serif;
+    --font-body:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", monospace;
     --maxw:1180px; --maxw-narrow:820px;
   }
@@ -24,8 +24,8 @@
   html,body{margin:0;padding:0}
   body{
     background:var(--bg); color:var(--ink);
-    font-family:var(--font-body); font-size:17px; line-height:1.58;
-    -webkit-font-smoothing:antialiased;
+    font-family:var(--font-body); font-size:16.5px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; font-feature-settings:"ss01","cv11";
     overflow-wrap:break-word;
   }
   ::selection{background:var(--accent-bg); color:var(--ink)}
@@ -48,7 +48,7 @@
     align-items:center; gap:20px;
     padding:0 32px; max-width:var(--maxw); margin:0 auto;
   }
-  .topbar .brand{font-family:var(--font-display); font-style:italic; font-size:16px; font-weight:500; color:var(--ink); text-decoration:none; white-space:nowrap; justify-self:start}
+  .topbar .brand{font-family:var(--font-display); font-style:italic; font-size:17px; color:var(--ink); text-decoration:none; white-space:nowrap; justify-self:start}
   .topbar nav{display:flex; gap:17px; color:var(--ink-3); justify-self:center}
   .topbar nav a{color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:600; letter-spacing:.02em}
   .topbar nav a:hover{color:var(--accent)}
@@ -114,7 +114,7 @@
     font-family:var(--font-mono); font-size:11px; letter-spacing:.18em;
     text-transform:uppercase; color:var(--ink-3);
   }
-  .display{font-family:var(--font-display); font-weight:400; letter-spacing:-.018em; line-height:1.0; margin:0; color:var(--ink)}
+  .display{font-family:var(--font-display); font-weight:400; letter-spacing:-.005em; line-height:.98; margin:0; color:var(--ink)}
   .display-xxl{font-size:clamp(56px, 8.4vw, 124px)}
   .display-xl{font-size:clamp(40px, 5.4vw, 64px)}
   .display-l{font-size:clamp(32px, 3.8vw, 48px); line-height:1.05}
@@ -126,13 +126,11 @@
     max-width:36em; color:var(--ink-2); margin:32px 0 0;
   }
   .hero-bio{
-    max-width:none; font-size:15.5px; line-height:1.6;
+    max-width:none; font-size:16px; line-height:1.6;
     color:var(--ink-2);
   }
-  .hero-bio p{margin:0; break-inside:avoid}
+  .hero-bio p{margin:0}
   .hero-bio p + p{margin-top:.85em}
-  .hero-bio p:first-child{font-family:var(--font-display); font-size:20px; line-height:1.4; color:var(--ink); column-span:all; margin-bottom:14px}
-  @media(min-width:961px){ .hero-bio{columns:2; column-gap:44px} }
   .hero-bio em{color:var(--ink); font-style:italic}
 
   .hero-card{
@@ -181,10 +179,7 @@
   section.dark h2, section.dark h3{color:#f3ede0}
   section.dark a{color:#f3ede0}
   section.dark a:hover{color:var(--accent-soft)}
-  .section-head{display:flex; align-items:baseline; gap:18px; margin-bottom:22px; flex-wrap:wrap}
-  .section-head h2{margin:0}
-  .section-num{font-family:var(--font-mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); font-weight:500; margin:0}
-  section.dark .section-num{color:rgba(243,237,224,.6)}
+  .section-num{font-family:var(--font-mono); font-size:20px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); font-weight:600; margin-bottom:30px}
   .section-title{margin-bottom:26px}
   .section-title-tight{margin-bottom:18px}
   p.lede{
@@ -340,37 +335,13 @@
     .award, .award:nth-child(3n){border-right:none}
   }
 
-  /* featured band: the funded research and the essays, two cards in one row */
-  .featured{padding:44px 0 8px; border-top:none}
-  .feature-row{display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:20px; align-items:stretch}
-  @media(max-width:960px){ .feature-row{grid-template-columns:1fr} }
+  /* featured research card (compact banner) */
   .research-feature{padding:52px 0 4px; border-top:none}
-  .writing-card{
-    display:flex; flex-direction:column; border:1px solid var(--rule-strong); border-radius:12px;
-    background:linear-gradient(180deg, var(--bg-2), var(--bg)); padding:16px 24px 14px; min-width:0;
-  }
-  .writing-card .feature-tag{color:var(--accent)}
-  .writing-card .feature-tag .dot{background:var(--accent); box-shadow:0 0 0 4px var(--accent-bg)}
-  .w-list{display:flex; flex-direction:column; margin:2px 0 0; flex:1}
-  .w-item{
-    display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 16px; align-items:baseline;
-    padding:11px 0; border-top:1px solid var(--rule); text-decoration:none; color:var(--ink);
-  }
-  .w-item:first-child{border-top:none; padding-top:4px}
-  .w-item h3{font-family:var(--font-display); font-weight:500; font-size:18px; line-height:1.25; margin:0; letter-spacing:-.01em; transition:color .15s}
-  .w-item:hover h3{color:var(--accent)}
-  .w-item .w-sub{grid-column:1 / -1; margin:0; font-size:14px; line-height:1.45; color:var(--ink-2)}
-  .w-item .w-meta{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; color:var(--ink-3); white-space:nowrap}
-  .w-item .w-meta.ongoing{color:var(--accent)}
-  .w-item.is-forthcoming h3{color:var(--ink-2)}
-  .w-item:focus{outline:none}
-  .w-item:focus-visible{outline:2px solid var(--accent); outline-offset:4px; border-radius:4px}
-  .w-more{margin-top:auto; padding-top:10px; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; color:var(--ink-3)}
   .feature-card{
-    display:flex; flex-direction:column; justify-content:flex-start; text-decoration:none; color:var(--ink);
+    display:block; text-decoration:none; color:var(--ink);
     border:1px solid var(--rule-strong); border-radius:12px;
     background:linear-gradient(180deg, var(--bg-2), var(--bg));
-    padding:18px 26px; position:relative; overflow:hidden; min-width:0;
+    padding:12px 26px; position:relative; overflow:hidden;
     transition:border-color .18s, box-shadow .18s, transform .18s;
   }
   .feature-card:hover{
@@ -380,19 +351,18 @@
   .feature-card:focus{outline:none}
   .feature-card:focus-visible{outline:2px solid var(--accent); outline-offset:4px}
   .feature-tag{
-    display:inline-flex; align-items:flex-start; gap:9px; line-height:1.35;
+    display:inline-flex; align-items:center; gap:9px;
     font-family:var(--font-mono); font-size:13px; letter-spacing:.1em;
     text-transform:uppercase; color:var(--good); font-weight:600; margin-bottom:6px;
   }
   .feature-tag .dot{
-    width:8px; height:8px; border-radius:50%; background:var(--good); flex:none; margin-top:5px;
+    width:8px; height:8px; border-radius:50%; background:var(--good);
     box-shadow:0 0 0 4px rgba(31,107,58,.14);
   }
-  .feature-grid{display:flex; align-items:stretch; gap:18px; flex:1}
-  .feature-main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column}
-  .feature-main .feature-actions{margin-top:auto; padding-top:10px}
-  .feature-title{font-size:clamp(20px, 2.1vw, 26px); margin:0 0 8px; line-height:1.14; letter-spacing:-.012em}
-  .feature-desc{color:var(--ink-2); font-size:14.5px; line-height:1.5; margin:0 0 10px; max-width:40em}
+  .feature-grid{display:flex; align-items:center; gap:18px}
+  .feature-main{flex:0 1 670px; min-width:0}
+  .feature-title{font-size:clamp(20px, 2.3vw, 27px); margin:0 0 6px; line-height:1.08}
+  .feature-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0 0 7px; max-width:48em}
   .feature-cta{
     display:inline-flex; align-items:center; gap:8px;
     font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
@@ -410,9 +380,8 @@
     border-radius:999px; padding:8px 16px; text-decoration:none; transition:background .15s, color .15s;
   }
   .feature-grant:hover{background:var(--accent-bg); color:var(--accent)}
-  .feature-aside{flex:0 0 250px; display:flex; justify-content:flex-end; align-items:flex-end; padding-bottom:6px}
-  .feature-aside svg{width:100%; height:auto; max-width:250px}
-  @media(max-width:1180px){ .feature-aside{display:none} }
+  .feature-aside{flex:1 1 0; display:flex; justify-content:flex-end; align-items:center; transform:translateY(-16px)}
+  .feature-aside svg{width:100%; height:auto; max-width:351px}
   @media(max-width:680px){
     .feature-card{padding:16px 18px}
     .feature-grid{flex-direction:column; align-items:flex-start; gap:14px}
@@ -719,7 +688,7 @@
       <a href="#results">Results</a>
       <a href="#internships">Internships</a>
       <a href="#projects">Projects</a>
-      <a href="#writing">Writing</a>
+      <a href="#blog">Blog</a>
       <a href="#education">Education</a>
       <a href="#skills">Skills</a>
     </nav>
@@ -793,69 +762,42 @@
   </div>
 </section>
 
-<!-- ============ FEATURED: funded research and the essays ============ -->
-<section id="featured" class="s featured">
+<!-- ============ FEATURED RESEARCH ============ -->
+<section id="research" class="s research-feature">
   <div class="wrap">
-    <div class="feature-row">
-      <div class="feature-card" id="research">
-        <div class="feature-tag"><span class="dot"></span>Funded AI-safety research (ongoing) &middot; BlueDot Impact Rapid Grant</div>
-        <div class="feature-grid">
-          <div class="feature-main">
-            <h2 class="display feature-title">Does a language model's chain-of-thought <span style="font-style:normal; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px">actually cause</span> its answer?</h2>
-            <p class="feature-desc">
-              A Bayesian causal-mediation test of whether an LLM's stated reasoning drives its answer or is post-hoc, with calibrated uncertainty for scalable oversight.
-            </p>
-            <div class="feature-actions">
-              <a class="feature-cta" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Explore the research <span class="arrow">&rarr;</span></a>
-              <a class="feature-grant" href="https://app.grantmaking.ai/projects/efb4131f-820a-41ed-a4a7-88e7ec14c98d" target="_blank" rel="noopener">Ongoing fundraising &#8599;</a>
-            </div>
-          </div>
-          <div class="feature-aside">
-            <svg viewBox="0 0 380 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
-              <defs>
-                <marker id="ah-acc" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
-                <marker id="ah-mut" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
-              </defs>
-              <path d="M52 104 Q190 130 328 104" fill="none" stroke="#968d77" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#ah-mut)"/>
-              <path d="M51 86 L166 56" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
-              <path d="M214 56 L329 86" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
-              <circle cx="30" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
-              <circle cx="190" cy="46" r="22" fill="#c8421f"/>
-              <circle cx="350" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
-              <text x="30" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
-              <text x="190" y="53" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
-              <text x="350" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
-              <text x="30" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">PROMPT</text>
-              <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">CoT</text>
-              <text x="350" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">ANSWER</text>
-            </svg>
+    <div class="feature-card">
+      <div class="feature-tag"><span class="dot"></span>Funded AI-Safety Research (ongoing) · BlueDot Impact Rapid Grant</div>
+      <div class="feature-grid">
+        <div class="feature-main">
+          <h2 class="display feature-title">Does a language model's chain-of-thought <span style="font-style:normal; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px">actually cause</span> its answer?</h2>
+          <p class="feature-desc">
+            A Bayesian causal-mediation test of whether an LLM's stated reasoning truly drives
+            its answer or is just post-hoc, with calibrated uncertainty for scalable oversight.
+          </p>
+          <div class="feature-actions">
+            <a class="feature-cta" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Explore the funded AI-safety research <span class="arrow">&rarr;</span></a>
+            <a class="feature-grant" href="https://app.grantmaking.ai/projects/efb4131f-820a-41ed-a4a7-88e7ec14c98d" target="_blank" rel="noopener">Ongoing fundraising &#8599;</a>
           </div>
         </div>
-      </div>
-
-      <div class="writing-card" id="writing">
-        <div class="feature-tag"><span class="dot"></span>Writing &middot; essays</div>
-        <div class="w-list">
-          <a class="w-item" href="projects/leaderboards.html" target="_blank" rel="noopener">
-            <h3>What the Leaderboards Are Actually Measuring</h3>
-            <span class="w-meta">2026 &middot; 70 min</span>
-            <p class="w-sub">A critique of the public evaluation metrics for frontier AI models, written in the launch week of Claude Fable 5.1 and GPT-6 Astra.</p>
-          </a>
-          <a class="w-item" href="projects/p-values.html" target="_blank" rel="noopener">
-            <h3>One in Twenty</h3>
-            <span class="w-meta">2026 &middot; 15 min</span>
-            <p class="w-sub">The most overhyped threshold in statistics, told as a courtroom drama with interactive figures.</p>
-          </a>
-          <a class="w-item" href="projects/hidden-markov-models.html" target="_blank" rel="noopener">
-            <h3>Lamps in the Dark</h3>
-            <span class="w-meta">2026 &middot; 16 min</span>
-            <p class="w-sub">A geometric reading of hidden Markov models and the EM algorithm.</p>
-          </a>
-          <div class="w-item is-forthcoming">
-            <h3>Where State-of-the-Art LLM Evaluators Fail at Translation</h3>
-            <span class="w-meta ongoing">Ongoing</span>
-            <p class="w-sub">Extending the WMT26 QEbreak findings (EMNLP 2026) beyond the challenge set.</p>
-          </div>
+        <div class="feature-aside">
+          <svg viewBox="0 0 380 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: a prompt influences the answer through the chain-of-thought mediator, with a faint direct path that bypasses it">
+            <defs>
+              <marker id="ah-acc" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
+              <marker id="ah-mut" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
+            </defs>
+            <path d="M52 104 Q190 130 328 104" fill="none" stroke="#968d77" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#ah-mut)"/>
+            <path d="M51 86 L166 56" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
+            <path d="M214 56 L329 86" fill="none" stroke="#c8421f" stroke-width="2.6" marker-end="url(#ah-acc)"/>
+            <circle cx="30" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
+            <circle cx="190" cy="46" r="22" fill="#c8421f"/>
+            <circle cx="350" cy="96" r="20" fill="#f4efe6" stroke="#15110b" stroke-width="1.7"/>
+            <text x="30" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
+            <text x="190" y="53" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
+            <text x="350" y="102" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
+            <text x="30" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">PROMPT</text>
+            <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">CoT</text>
+            <text x="350" y="128" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" letter-spacing="1.5" fill="#6b6452">ANSWER</text>
+          </svg>
         </div>
       </div>
     </div>
@@ -865,7 +807,7 @@
 <!-- ============ SELECTED DISTINCTIONS (replaces stats grid) ============ -->
 <section id="awards" class="s dark awards-section">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">&sect; 01</span><h2 class="display display-l">Selected <span class="italic">distinctions.</span></h2></div>
+    <h2 class="display display-l section-title-tight">Selected <span class="italic">distinctions.</span></h2>
 
     <div class="awards">
       <div class="award">
@@ -918,7 +860,7 @@
 <!-- ============ RECENT RESULTS (dated ledger) ============ -->
 <section id="results" class="s">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">&sect; 02</span><h2 class="display display-l">Other recent <span class="italic">results.</span></h2></div>
+    <h2 class="display display-l section-title-tight">Other recent <span class="italic">results.</span></h2>
 
     <div class="ledger">
 
@@ -1172,7 +1114,7 @@
 <!-- ============ INTERNSHIPS ============ -->
 <section id="internships" class="s">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">&sect; 03</span><h2 class="display display-l">Internships.</h2></div>
+    <div class="section-num">§ 01 · Internships</div>
 
     <div class="exp-list">
 
@@ -1284,7 +1226,7 @@
 <!-- ============ PROJECTS ============ -->
 <section id="projects" class="s alt">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">&sect; 04</span><h2 class="display display-l">Projects.</h2></div>
+    <div class="section-num">§ 02 · Projects</div>
 
     <div class="exp-list">
 
@@ -1450,10 +1392,132 @@
   </div>
 </section>
 
+<!-- ============ BLOG ============ -->
+<section id="blog" class="s">
+  <div class="wrap">
+    <div class="section-num">§ 03 · Blog</div>
+
+    <div class="blog-list">
+
+      <!-- Ongoing: LLM evaluator translation failures (extends WMT26 / EMNLP 2026 paper) -->
+      <div class="blog-entry is-forthcoming">
+        <div class="exp-meta">
+          <span class="date">2026 · ongoing</span>
+          <span class="type forthcoming">Ongoing</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">Where State-of-the-Art LLM Evaluators Fail at Translation</h3>
+          <p class="sub">Extending the WMT26 QEbreak findings (EMNLP 2026) beyond the challenge set</p>
+          <p class="blog-excerpt">
+            The QEbreak paper measured one thing: learned quality metrics punish added text far
+            more than missing text. This write-up asks the wider question of what else the current
+            LLM-based evaluators get wrong about translation quality, and why the same blind spots
+            keep showing up across systems.
+          </p>
+          <div class="tags">
+            <span class="tag">Machine Translation</span>
+            <span class="tag">LLM-as-a-Judge</span>
+            <span class="tag">Quality Estimation</span>
+            <span class="tag">WMT26</span>
+          </div>
+          <span class="blog-forthcoming-note"><span class="dot"></span>Ongoing</span>
+        </div>
+      </div>
+
+      <!-- Critique of public frontier-model evaluation metrics (published 6 Sep 2026) -->
+      <a class="blog-entry" href="projects/leaderboards.html" target="_blank" rel="noopener">
+        <div class="exp-meta">
+          <span class="date">2026 · ~70 min read</span>
+          <span class="type essay">Essay</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">What the Leaderboards Are Actually Measuring</h3>
+          <p class="sub">A critique of the public evaluation metrics for frontier AI models</p>
+          <p class="blog-excerpt">
+            Arena rankings, benchmark scores and lab-reported numbers get read as measurements of
+            capability. This essay looks at what they measure instead: voter preference for style
+            and length, contaminated and saturated test sets, model judges with their own biases,
+            private testing of many variants before one score is disclosed, and harness settings that
+            moved one model from 62.7% to 99.9% on the same benchmark in the same week. Written around
+            the launch week of September 2026, when Anthropic's Claude Fable 5.1 and OpenAI's GPT-6 Astra
+            shipped two days apart, with the same checks applied to both labs and every number traced
+            to a primary source. Summary at the top, glossary pop-ups throughout, scroll-driven figures
+            and interactive simulations.
+          </p>
+          <div class="tags">
+            <span class="tag">AI Evaluation</span>
+            <span class="tag">Benchmarks</span>
+            <span class="tag">Leaderboards</span>
+            <span class="tag">Goodhart's Law</span>
+            <span class="tag">Interactive</span>
+          </div>
+          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
+        </div>
+      </a>
+
+      <!-- One in Twenty / p-values -->
+      <a class="blog-entry" href="projects/p-values.html" target="_blank" rel="noopener">
+        <div class="exp-meta">
+          <span class="date">2026 · ~15 min read</span>
+          <span class="type essay">Essay</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">One in Twenty</h3>
+          <p class="sub">The most overhyped threshold in statistics</p>
+          <p class="blog-excerpt">
+            Like a lot of people, when I was first introduced to the 0.05 significance threshold, I
+            just took it for granted. Later, as I learned more statistics, I realized how confusing
+            and misleading that hard line actually is. This essay explores why: a courtroom retelling
+            where the p-value is the evidence, 'significant' is the verdict, and 0.05 is a
+            fixed sentence nobody ever justified, with interactive figures for the tail area, the
+            false-discovery rate, the dance of the p-values, and the Type I/II tradeoff.
+          </p>
+          <div class="tags">
+            <span class="tag">p-values</span>
+            <span class="tag">Significance Testing</span>
+            <span class="tag">False Discovery Rate</span>
+            <span class="tag">Statistical Inference</span>
+            <span class="tag">Interactive</span>
+          </div>
+          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
+        </div>
+      </a>
+
+      <!-- Hidden Markov Models / EM -->
+      <a class="blog-entry" href="https://thylinao1.github.io/projects/hidden-markov-models.html" target="_blank" rel="noopener">
+        <div class="exp-meta">
+          <span class="date">2026 · ~16 min read</span>
+          <span class="type essay">Essay</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">Lamps in the Dark</h3>
+          <p class="sub">A geometric reading of Hidden Markov Models &amp; the EM algorithm</p>
+          <p class="blog-excerpt">
+            When I was learning hidden Markov models, I couldn't find an explanation that
+            really showed how they work. This piece builds a geometric, intuitive picture of
+            hidden Markov models, along with the EM steps, forward-backward, Baum-Welch, and the
+            Viterbi algorithm, and even how they link to PCA. Interactive diagrams and animations
+            throughout aim to make the picture stick in your head.
+          </p>
+          <div class="tags">
+            <span class="tag">Hidden Markov Models</span>
+            <span class="tag">EM Algorithm</span>
+            <span class="tag">Baum-Welch</span>
+            <span class="tag">Forward-Backward</span>
+            <span class="tag">Viterbi</span>
+          </div>
+          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
 <!-- ============ EDUCATION ============ -->
 <section id="education" class="s alt">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">&sect; 05</span><h2 class="display display-l">Education.</h2></div>
+    <div class="section-num">§ 04 · Education</div>
 
     <div class="edu-list">
       <div class="edu">
@@ -1506,7 +1570,7 @@
 <!-- ============ SKILLS (moved to bottom) ============ -->
 <section id="skills" class="s">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">&sect; 06</span><h2 class="display display-l">Skills.</h2></div>
+    <div class="section-num">§ 05 · Skills</div>
 
     <div class="skills-grid">
       <div class="skill-group">
@@ -1599,7 +1663,7 @@
     <a href="#results">Results</a>
     <a href="#internships">Internships</a>
     <a href="#projects">Projects</a>
-    <a href="#writing">Writing</a>
+    <a href="#blog">Blog</a>
     <a href="#education">Education</a>
     <a href="#skills">Skills</a>
   </div>

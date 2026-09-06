@@ -476,6 +476,10 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 .pod.playing .peq i{opacity:1;animation:peq .9s ease-in-out infinite alternate}
 .pod.playing .peq i:nth-child(2){animation-delay:-.3s}.pod.playing .peq i:nth-child(3){animation-delay:-.55s}.pod.playing .peq i:nth-child(4){animation-delay:-.15s}
 @keyframes peq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.pod.playing.buffering .peq i{opacity:.45;animation:peqbuf 1.1s ease-in-out infinite}
+@keyframes peqbuf{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(.6)}}
+.pod.failed{border-color:rgba(255,120,100,.6);animation:none}
+.pod.failed .pod-tag{color:#ffb4a0}
 .pod-rate{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 8px;cursor:pointer;line-height:1.2}
 .pod-rate:hover{border-color:#fff}
 .pod-rate:focus-visible{outline:2px solid #fff;outline-offset:2px}
@@ -3650,9 +3654,13 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
         var pr = a.play(); if(pr && pr.catch) pr.catch(function(){ setPlaying(false); });
       } else a.pause();
     });
-    a.addEventListener("play", function(){ setPlaying(true);
+    a.addEventListener("play", function(){ setPlaying(true); if(a.readyState < 3) el.classList.add("buffering");
       if("mediaSession" in navigator && window.MediaMetadata){ try{ navigator.mediaSession.metadata = new MediaMetadata({title: title.replace(/^the (long|short) episode, /, ""), artist: "Maksim Silchenko", album: "What the Leaderboards Are Actually Measuring"}); }catch(e){} } });
-    a.addEventListener("pause", function(){ setPlaying(false); });
+    a.addEventListener("pause", function(){ setPlaying(false); el.classList.remove("buffering"); });
+    a.addEventListener("waiting", function(){ el.classList.add("buffering"); });
+    a.addEventListener("playing", function(){ el.classList.remove("buffering"); });
+    a.addEventListener("error", function(){ setPlaying(false); el.classList.remove("buffering"); el.classList.add("failed");
+      el.querySelector(".pod-tag").textContent = "Audio could not load"; });
     a.addEventListener("ended", function(){ setPlaying(false); a.currentTime = 0; paint(); });
     a.addEventListener("timeupdate", paint);
     a.addEventListener("loadedmetadata", function(){ tot.textContent = fmt(dur()); paint(); });

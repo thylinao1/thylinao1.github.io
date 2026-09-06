@@ -432,6 +432,56 @@ input[type=range]:focus-visible{outline:2px solid var(--accent-deep);outline-off
 #hero .sub b{color:#fff;font-weight:600}
 #hero .who{font-family:var(--font-mono);font-size:12.5px;color:#9ba7bd;margin:24px 0 0}
 #hero .who b{color:#fff;font-weight:500}
+/* ---------- podcast pills in the hero ---------- */
+.pods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:-6px 0 30px;max-width:900px}
+.pod{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;padding:10px 16px 10px 10px;border-radius:999px;
+  border:1px solid rgba(255,196,160,.42);color:#fff;min-width:0;
+  background:linear-gradient(90deg,rgba(212,116,79,.22),rgba(26,32,64,.62) 58%,rgba(212,116,79,.10));
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 0 0 0 rgba(255,196,160,.35),0 0 26px rgba(255,170,120,.16),0 18px 40px -18px rgba(0,0,0,.7);
+  animation:ember 3.6s ease-in-out infinite;transition:border-color .3s,transform .35s var(--ease)}
+.pod:nth-child(2){animation-delay:-1.8s}
+.pod:hover{border-color:rgba(255,206,176,.85);transform:translateY(-2px)}
+.pod.playing{animation:none;border-color:rgba(255,206,176,.9);box-shadow:0 0 0 3px rgba(255,196,160,.16),0 0 44px rgba(255,170,120,.32),0 18px 40px -18px rgba(0,0,0,.7)}
+@keyframes ember{0%,100%{box-shadow:0 0 0 0 rgba(255,196,160,.35),0 0 26px rgba(255,170,120,.16),0 18px 40px -18px rgba(0,0,0,.7)}
+  50%{box-shadow:0 0 0 9px rgba(255,196,160,0),0 0 54px rgba(255,170,120,.34),0 18px 40px -18px rgba(0,0,0,.7)}}
+.pod-play{position:relative;flex:none;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;color:#1a1008;padding:0;
+  background:linear-gradient(135deg,#ffcfae,#d4744f);box-shadow:0 0 0 5px rgba(255,196,160,.14),0 0 22px rgba(255,170,120,.45);display:grid;place-items:center;transition:transform .3s var(--ease),box-shadow .3s}
+.pod:hover .pod-play{transform:scale(1.06);box-shadow:0 0 0 7px rgba(255,196,160,.2),0 0 30px rgba(255,170,120,.6)}
+.pod-play:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.pod-ring{position:absolute;left:-5px;top:-5px;width:56px;height:56px;transform:rotate(-90deg);pointer-events:none}
+.pod-ring .track{fill:none;stroke:rgba(255,255,255,.16);stroke-width:2}
+.pod-ring .prog{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-dasharray:125.66;stroke-dashoffset:125.66;transition:stroke-dashoffset .25s linear}
+.pod-icon{width:22px;height:22px;fill:currentColor;position:relative}
+.pod-icon .bars{display:none}
+.pod.playing .pod-icon .tri{display:none}
+.pod.playing .pod-icon .bars{display:block}
+.pod-t{min-width:0;display:flex;flex-direction:column;gap:2px}
+.pod-k{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,220,200,.85);white-space:nowrap}
+.pod-time{font-variant-numeric:tabular-nums;letter-spacing:.04em;text-transform:none;color:#c9d0e0;flex:none}
+.pod:not(.started) .pod-time .cur,.pod:not(.started) .pod-time .sep{display:none}
+.pod-t b{font-family:var(--font-display);font-weight:500;font-size:15.5px;line-height:1.2;letter-spacing:-.005em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pod-seek{-webkit-appearance:none;appearance:none;width:100%;height:14px;margin:2px 0 0;background:transparent;cursor:pointer;display:block}
+.pod-seek::-webkit-slider-runnable-track{height:2px;border-radius:1px;background:linear-gradient(90deg,#ffcfae var(--p,0%),rgba(255,255,255,.22) var(--p,0%))}
+.pod-seek::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:#fff;margin-top:-4px;box-shadow:0 0 0 3px rgba(255,196,160,.35);opacity:0;transition:opacity .2s}
+.pod:hover .pod-seek::-webkit-slider-thumb,.pod.started .pod-seek::-webkit-slider-thumb,.pod-seek:focus-visible::-webkit-slider-thumb{opacity:1}
+.pod-seek::-moz-range-track{height:2px;border-radius:1px;background:rgba(255,255,255,.22)}
+.pod-seek::-moz-range-progress{height:2px;border-radius:1px;background:#ffcfae}
+.pod-seek::-moz-range-thumb{width:10px;height:10px;border:none;border-radius:50%;background:#fff}
+.pod-seek:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:2px}
+.pod:not(.started):not(:hover) .pod-seek{opacity:.4}
+.pod-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.peq{display:flex;align-items:flex-end;gap:2px;height:16px;width:18px}
+.peq i{display:block;width:3px;height:16px;border-radius:1px;background:#ffcfae;opacity:.35;transform:scaleY(.25);transform-origin:bottom}
+.pod.playing .peq i{opacity:1;animation:peq .9s ease-in-out infinite alternate}
+.pod.playing .peq i:nth-child(2){animation-delay:-.3s}.pod.playing .peq i:nth-child(3){animation-delay:-.55s}.pod.playing .peq i:nth-child(4){animation-delay:-.15s}
+@keyframes peq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.pod-rate{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 8px;cursor:pointer;line-height:1.2}
+.pod-rate:hover{border-color:#fff}
+.pod-rate:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.pod{animation:none}.pod.playing .peq i{animation:none;transform:scaleY(.6)}}
+@media(max-width:760px){.pods{grid-template-columns:1fr;gap:10px;margin-bottom:24px}}
+@media(max-width:480px){.pod{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:9px 14px 9px 9px;border-radius:34px}.pod-side{display:none}.pod-t b{font-size:14.5px;white-space:normal}}
 .hbtns{display:flex;flex-wrap:wrap;gap:9px;margin:32px 0 0}
 .hbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.3);color:#fff;background:transparent;
   transition:background .24s var(--ease),border-color .24s var(--ease),transform .24s var(--ease),box-shadow .24s var(--ease)}
@@ -602,6 +652,32 @@ details.srcbox ol.sources{margin-top:12px}
   <canvas id="heroCanvas" aria-hidden="true"></canvas>
   <div class="wrap">
     <p class="tag">Essay &middot; 6 September 2026 &middot; about 70 minutes</p>
+    <div class="pods" role="group" aria-label="Listen to this essay as a podcast">
+      <div class="pod" data-src="assets/leaderboards/podcast-long.m4a" data-len="3176" data-title="the long episode, How AI Labs Game Their Benchmarks">
+        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the long episode, How AI Labs Game Their Benchmarks, 53 minutes"><svg class="pod-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="20"/><circle class="prog" cx="22" cy="22" r="20"/></svg><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M12.2 9.2v13.6L23.4 16 12.2 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
+        <div class="pod-t">
+          <span class="pod-k"><span class="pod-tag">Podcast &middot; long &middot; 53 min</span><span class="pod-time"><span class="cur">0:00</span><span class="sep"> / </span><span class="tot"></span></span></span>
+          <b>How AI Labs Game Their Benchmarks</b>
+          <input type="range" class="pod-seek" min="0" max="1000" value="0" step="1" aria-label="Position in the long episode">
+        </div>
+        <div class="pod-side">
+          <span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <button type="button" class="pod-rate" aria-label="Playback speed, currently 1x">1&times;</button>
+        </div>
+      </div>
+      <div class="pod" data-src="assets/leaderboards/podcast-short.m4a" data-len="1332" data-title="the short episode, Why AI Benchmark Scores Are Misleading">
+        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the short episode, Why AI Benchmark Scores Are Misleading, 22 minutes"><svg class="pod-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="20"/><circle class="prog" cx="22" cy="22" r="20"/></svg><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M12.2 9.2v13.6L23.4 16 12.2 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
+        <div class="pod-t">
+          <span class="pod-k"><span class="pod-tag">Podcast &middot; short &middot; 22 min</span><span class="pod-time"><span class="cur">0:00</span><span class="sep"> / </span><span class="tot"></span></span></span>
+          <b>Why AI Benchmark Scores Are Misleading</b>
+          <input type="range" class="pod-seek" min="0" max="1000" value="0" step="1" aria-label="Position in the short episode">
+        </div>
+        <div class="pod-side">
+          <span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <button type="button" class="pod-rate" aria-label="Playback speed, currently 1x">1&times;</button>
+        </div>
+      </div>
+    </div>
     <h1 id="hero-h">What the Leaderboards Are Actually Measuring</h1>
     <p class="sub">A critique of the public evaluation metrics for frontier AI models. Arena rankings, benchmark scores
       and lab-reported numbers get read as measurements of <b>capability</b>. This essay asks what each of them measures, and under
@@ -3547,6 +3623,44 @@ var Terrain = {ready:false, HM:null, NX:0, NZ:0, X0:-12.0, X1:12.0, Z0:-7.0, Z1:
   nIn.addEventListener("input", function(){ n=parseInt(nIn.value,10); nOut.textContent=String(n); upd(); });
   pIn.addEventListener("input", function(){ p=parseInt(pIn.value,10)/100; pOut.textContent=p.toFixed(2); upd(); });
   upd();
+})();
+
+/* ================= PODCAST: two episodes in the hero, one shared player ================= */
+(function(){
+  var pods = [].slice.call(document.querySelectorAll(".pods .pod")); if(!pods.length) return;
+  var RATES = [1, 1.25, 1.5, 2], CIRC = 125.66, players = [];
+  function fmt(s){ s = Math.max(0, Math.round(s)); var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), x = s%60;
+    return (h ? h + ":" + (m<10?"0":"") + m : m) + ":" + (x<10?"0":"") + x; }
+  pods.forEach(function(el){
+    var a = new Audio(); a.preload = "none"; a.src = el.getAttribute("data-src");
+    var len = parseFloat(el.getAttribute("data-len")) || 0, title = el.getAttribute("data-title");
+    var btn = el.querySelector(".pod-play"), seek = el.querySelector(".pod-seek"), cur = el.querySelector(".cur"), tot = el.querySelector(".tot"),
+        ring = el.querySelector(".pod-ring .prog"), rate = el.querySelector(".pod-rate"), ri = 0, seeking = false;
+    var P = {a:a, el:el}; players.push(P);
+    function dur(){ return isFinite(a.duration) && a.duration > 0 ? a.duration : len; }
+    function paint(){ var d = dur(), p = d ? clamp(a.currentTime/d, 0, 1) : 0;
+      if(!seeking) seek.value = Math.round(p*1000); seek.style.setProperty("--p", (p*100).toFixed(2) + "%");
+      ring.style.strokeDashoffset = (CIRC*(1-p)).toFixed(2); cur.textContent = fmt(a.currentTime); }
+    function setPlaying(on){ el.classList.toggle("playing", on); btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.setAttribute("aria-label", (on ? "Pause " : "Play ") + title); }
+    btn.addEventListener("click", function(){
+      if(a.paused){
+        players.forEach(function(q){ if(q !== P && !q.a.paused) q.a.pause(); });
+        el.classList.add("started");
+        var pr = a.play(); if(pr && pr.catch) pr.catch(function(){ setPlaying(false); });
+      } else a.pause();
+    });
+    a.addEventListener("play", function(){ setPlaying(true);
+      if("mediaSession" in navigator && window.MediaMetadata){ try{ navigator.mediaSession.metadata = new MediaMetadata({title: title.replace(/^the (long|short) episode, /, ""), artist: "Maksim Silchenko", album: "What the Leaderboards Are Actually Measuring"}); }catch(e){} } });
+    a.addEventListener("pause", function(){ setPlaying(false); });
+    a.addEventListener("ended", function(){ setPlaying(false); a.currentTime = 0; paint(); });
+    a.addEventListener("timeupdate", paint);
+    a.addEventListener("loadedmetadata", function(){ tot.textContent = fmt(dur()); paint(); });
+    seek.addEventListener("input", function(){ seeking = true; var t = seek.value/1000*dur(); cur.textContent = fmt(t); seek.style.setProperty("--p", (seek.value/10).toFixed(2) + "%"); });
+    seek.addEventListener("change", function(){ a.currentTime = seek.value/1000*dur(); seeking = false; el.classList.add("started"); paint(); });
+    rate.addEventListener("click", function(){ ri = (ri+1) % RATES.length; a.playbackRate = RATES[ri]; rate.textContent = RATES[ri] + "×"; rate.setAttribute("aria-label", "Playback speed, currently " + RATES[ri] + "x"); });
+    tot.textContent = fmt(len); ring.style.strokeDashoffset = CIRC;
+  });
 })();
 
 /* ================= F11: the top of the Arena with its intervals ================= */

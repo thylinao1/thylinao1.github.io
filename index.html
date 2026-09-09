@@ -203,6 +203,7 @@
   }
   .exp-meta .type.internship{background:var(--ink); color:var(--bg)}
   .exp-meta .type.project{border:1px solid var(--rule-strong); color:var(--ink-2)}
+  .exp-meta .type.research{border:1px solid var(--accent); color:var(--accent)}
   section.alt .exp{border-top-color:rgba(21,17,11,.10)}
   .exp-body h3{
     font-family:var(--font-display); font-size:clamp(26px, 3vw, 36px);
@@ -703,6 +704,10 @@
   .edu-ra-head strong{color:var(--ink); font-weight:600; font-size:15.5px}
   .edu-ra-role{margin:0 0 6px; font-style:italic; color:var(--ink-2); font-size:14px}
   .edu-ra-desc{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.55}
+  ul.edu-ra-desc{padding:0; list-style:none}
+  ul.edu-ra-desc li{position:relative; padding-left:16px; margin-bottom:6px}
+  ul.edu-ra-desc li:last-child{margin-bottom:0}
+  ul.edu-ra-desc li::before{content:'\2014'; position:absolute; left:0; color:var(--ink-3)}
   @media(max-width:640px){
     ul.bc-dated li,.edu-ra-head{flex-direction:column; gap:2px}
     .edu-date{font-size:12.5px}
@@ -733,7 +738,7 @@
     <nav>
       <a href="#awards">Distinctions</a>
       <a href="#results">Results</a>
-      <a href="#internships">Internships</a>
+      <a href="#internships">Experience</a>
       <a href="#projects">Projects</a>
       <a href="#blog">Blog</a>
       <a href="#education">Education</a>
@@ -768,9 +773,9 @@
         <h1 class="display display-l">Maksim Silchenko</h1>
         <div class="hero-bio">
           <p>
-            Hi! I'm currently an MSc student at the NUS School of Computing,
-            working at the intersection of causal inference, machine
-            learning, and AI safety.
+            Hi! I'm currently an MSc student at the NUS School of Computing
+            and a SPAR Fellow, working at the intersection of causal
+            inference, machine learning, and AI safety.
           </p>
           <p>
             This year, I've received the BlueDot AI Safety Grant
@@ -795,7 +800,8 @@
             Tazapay, a stablecoin-based cross-border payments company, and
             as a Research Assistant on recommender systems at HONOR (China).
             Alongside this, I'm completing the TARA (ARENA) and BlueDot
-            Technical AI Safety programmes.
+            Technical AI Safety programmes, and will be attending the funded
+            ML4Good bootcamp in Hong Kong (Oct 2026).
           </p>
           <p>
             My previous experience includes quantitative research at Orbuc,
@@ -1116,20 +1122,6 @@
 
 
       <div class="led-row">
-        <div class="led-date">Aug to Sep 2026</div>
-        <div class="led-main">
-          <div class="led-title">TikTok TechJam 2026 &middot; Shadow Commit</div>
-          <div class="led-note">A transaction layer for autonomous coding agents: each agent turn runs against a sealed copy of the workspace, the full set of effects it produced is judged after it runs, and nothing reaches the real workspace until a policy or a person approves it. Track 1 (safety middleware for AI coding agents).</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Submitted</span>
-          <a class="solution-btn" href="https://thylinao1.github.io/shadowcommit-site-zff3/" target="_blank" rel="noopener" aria-label="Open the Shadow Commit showcase site">showcase
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
         <div class="led-date">Aug 2026</div>
         <div class="led-main">
           <div class="led-title">American Express AI Hackathon 2026 &middot; One Loop</div>
@@ -1174,19 +1166,86 @@
 <!-- ============ INTERNSHIPS ============ -->
 <section id="internships" class="s">
   <div class="wrap">
-    <div class="section-num">§ 01 · Internships</div>
+    <div class="section-num">§ 01 · Experience</div>
 
     <div class="exp-list">
 
-      <!-- Tazapay (incoming) -->
-      <article class="exp">
+      <!-- SPAR Research Fellowship -->
+      <article class="exp project-card" data-project-id="spar" tabindex="0" role="button" aria-haspopup="dialog">
         <div class="exp-meta">
-          <span class="date">Jul 2026 to Present</span>
+          <span class="date">Sep 2026 to Dec 2026</span>
+          <span class="type research">Research</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">SPAR · Research Fellow, Agent Attribution</h3>
+          <p class="sub">Mentor: Dr Yiming Li, Nanyang Technological University (NTU) · Singapore</p>
+          <div class="project-detail">
+            <ul>
+              <li>Recasting agent attribution as Bayesian inverse planning: posterior inference over candidate configurations (model, scaffold, prompt, memory), scored by the likelihood each assigns to the observed actions, with open-set rejection.</li>
+              <li>Building a unified testbed (open-set, EER/DET, cross-environment) against published behavioural-fingerprinting classifiers (&gt;95% closed-set), then intervention studies and activation probes to isolate which component carries the signal, toward a paper.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Bayesian Inverse Planning</span>
+              <span class="tag">Agent Attribution</span>
+              <span class="tag">Open-Set Recognition</span>
+              <span class="tag">EER / DET</span>
+              <span class="tag">Activation Probes</span>
+              <span class="tag">AI Safety</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- NUS x HONOR Research Assistant -->
+      <article class="exp project-card" data-project-id="honor-nus" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">Aug 2026 to Present</span>
+          <span class="type research">Research</span>
+        </div>
+        <div class="exp-body">
+          <h3 class="project-title">National University of Singapore · Research Assistant</h3>
+          <p class="sub">Honor-NUS Research Project, Recommender Systems · Advisor: Prof. James Pang, NUS Business Analytics Centre · Singapore</p>
+          <div class="project-detail">
+            <ul>
+              <li>Research with HONOR on its millions-user phone feed: generative ranking over long user histories (HSTU, MTGR, HPGR) and multi-task ranking that fixes rare conversion targets (PLE vs ESMM, AITM), with UniMixer for GPU optimisation and parameter scaling.</li>
+              <li>Designing the filter-bubble study: whether a less repetitive lock-screen feed raises retention and user satisfaction, and ultimately keeps readers out of an information bubble.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Generative Ranking</span>
+              <span class="tag">HSTU / MTGR / HPGR</span>
+              <span class="tag">Multi-Task Ranking</span>
+              <span class="tag">PLE / ESMM / AITM</span>
+              <span class="tag">GPU Optimisation</span>
+              <span class="tag">Filter Bubbles</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Tazapay (current) -->
+      <article class="exp project-card" data-project-id="tazapay" tabindex="0" role="button" aria-haspopup="dialog">
+        <div class="exp-meta">
+          <span class="date">Jun 2026 to Sep 2026</span>
           <span class="type incoming">Current</span>
         </div>
         <div class="exp-body">
-          <h3>Tazapay · AI &amp; Analytics Intern</h3>
-          <p class="sub">Cross-border payments start-up, backed by Sequoia Capital &amp; Circle Ventures · Singapore</p>
+          <h3 class="project-title">Tazapay · AI &amp; Analytics Intern</h3>
+          <p class="sub">Agentic AI, evals and ML pipelines for fees minimisation and cross-border payments with stablecoins · Singapore</p>
+          <div class="project-detail">
+            <ul>
+              <li>Building an agentic automation harness in n8n, using LangGraph to orchestrate Claude API, AWS S3, and internal tools into a closed-loop monthly data audit.</li>
+              <li>Developing and evaluating a company-wide finance chatbot (LangChain retrieval, LangSmith tracing), applying RLHF to improve responses from user feedback, alongside data engineering on ClickHouse and Tableau.</li>
+              <li>Analysing new client cohorts with OLS, difference-in-differences, and A/B tests with guardrail metrics to measure performance against existing segments.</li>
+            </ul>
+            <div class="tags">
+              <span class="tag">Agentic Automation</span>
+              <span class="tag">LangGraph / n8n</span>
+              <span class="tag">LLM Evals</span>
+              <span class="tag">RLHF</span>
+              <span class="tag">ClickHouse</span>
+              <span class="tag">Difference-in-Differences</span>
+            </div>
+          </div>
         </div>
       </article>
 
@@ -1198,7 +1257,7 @@
         </div>
         <div class="exp-body">
           <h3 class="project-title">Orbuc Research · Quantitative Research Intern</h3>
-          <p class="sub">Statistical Modeling &amp; Time-Series Research · London, UK</p>
+          <p class="sub">Quantitative research and ML engineering for crypto statistical-arbitrage trading strategies · London, UK</p>
           <div class="project-detail">
             <ul>
               <li>Developed a time-series anomaly-detection model that classifies latent states with Hidden Markov Models to flag unstable, low-predictability conditions, validated across 5 out-of-sample windows where it held up in 4 of 5.</li>
@@ -1229,7 +1288,7 @@
         </div>
         <div class="exp-body">
           <h3 class="project-title">The TCM Group · Data &amp; Analytics Consultant</h3>
-          <p class="sub">Bayes Business School Capstone · Highest grade in cohort · London, UK</p>
+          <p class="sub">Led the evaluation and measurement workstreams (RCTs, LLM evals) for conflict resolution · Bayes Business School Capstone, highest grade in cohort · London, UK</p>
           <div class="project-detail">
             <ul>
               <li>Designed a causal-inference framework (RCT-style wait-list control, paired hypothesis tests) to measure leadership-training outcomes, presented it to TCM's senior leadership, and saw it adopted as the standard for ongoing programme evaluation.</li>
@@ -1261,7 +1320,7 @@
         </div>
         <div class="exp-body">
           <h3 class="project-title">Oxford Comma Advisory · Data Analyst Intern</h3>
-          <p class="sub">Education &amp; Admissions Consultancy · London, UK</p>
+          <p class="sub">Implemented recommendation systems, ML models and survival analysis to help international students get into the top UK universities · London, UK</p>
           <div class="project-detail">
             <ul>
               <li>Cut university-shortlisting time from 2 hours to 3 minutes per student by achieving a 73% consultant approval rate on top-5 recommendations through a two-tower neural network trained on sparse implicit feedback with confidence-weighted negative sampling.</li>
@@ -1582,9 +1641,12 @@
           <p class="role">MSc in NUS School of Computing, specialising in Statistics</p>
 
           <div class="edu-ra">
-            <p class="edu-ra-head"><strong>HONOR x NUS Joint Research Project, Recommender Systems</strong><em class="edu-date">Aug 2026 to Present</em></p>
+            <p class="edu-ra-head"><strong>Honor-NUS Research Project, Recommender Systems</strong><em class="edu-date">Aug 2026 to Present</em></p>
             <p class="edu-ra-role">Research Assistant · Advisor: Prof. James Pang, NUS Business Analytics Centre</p>
-            <p class="edu-ra-desc">Building generative retrieval (HSTU, TIGER semantic IDs) and a multi-objective MMoE ranker for an industry feed recommender.</p>
+            <ul class="edu-ra-desc">
+              <li>Research with HONOR on its millions-user phone feed: generative ranking over long user histories (HSTU, MTGR, HPGR) and multi-task ranking that fixes rare conversion targets (PLE vs ESMM, AITM), with UniMixer for GPU optimisation and parameter scaling.</li>
+              <li>Designing the filter-bubble study: whether a less repetitive lock-screen feed raises retention and user satisfaction, and ultimately keeps readers out of an information bubble.</li>
+            </ul>
           </div>
 
           <p style="margin-top:14px"><strong style="color:var(--ink)">Bootcamps:</strong></p>
@@ -1716,7 +1778,7 @@
   <div class="drawer-links">
     <a href="#awards">Distinctions</a>
     <a href="#results">Results</a>
-    <a href="#internships">Internships</a>
+    <a href="#internships">Experience</a>
     <a href="#projects">Projects</a>
     <a href="#blog">Blog</a>
     <a href="#education">Education</a>

@@ -59,6 +59,7 @@ const TREE_CYCLE = TREE_NODES * TREE_STEP + TREE_HOLD;
 const DECOY_PERIOD = 12;
 const DECOY_TRAVEL = 2.6;
 const LENS_U = 0.42; // where the lens sits along a flow path
+const ORBIT_EASE = 0.32; // dwell on the readable yaws, hurry past the end on ones
 const STILL_T = 49.14; // frozen clock, chosen so the still frame explains the most
 
 /* ------------------------------------------------------- layout, wide frame */
@@ -147,23 +148,20 @@ const POINT_FRAG = /* glsl */ `
 /* ------------------------------------------------------------------ helpers */
 
 function glowMaterial(core, rim, opacity, power, gain, extra) {
-  return new THREE.ShaderMaterial(
-    Object.assign(
-      {
-        uniforms: {
-          uCore: { value: new THREE.Color(core) },
-          uRim: { value: new THREE.Color(rim) },
-          uOpacity: { value: opacity },
-          uPower: { value: power },
-          uGain: { value: gain },
-        },
-        vertexShader: GLOW_VERT,
-        fragmentShader: GLOW_FRAG,
-        transparent: opacity < 1,
-      },
-      extra || {}
-    )
-  );
+  const uniforms = {
+    uCore: { value: new THREE.Color(core) },
+    uRim: { value: new THREE.Color(rim) },
+    uOpacity: { value: opacity },
+    uPower: { value: power },
+    uGain: { value: gain },
+  };
+  const base = {
+    uniforms,
+    vertexShader: GLOW_VERT,
+    fragmentShader: GLOW_FRAG,
+    transparent: opacity < 1,
+  };
+  return new THREE.ShaderMaterial(Object.assign(base, extra || {}));
 }
 
 function decay(t, t0, k) {
@@ -173,10 +171,8 @@ function decay(t, t0, k) {
 function webglSupported() {
   try {
     const probe = document.createElement("canvas");
-    return !!(
-      window.WebGLRenderingContext &&
-      (probe.getContext("webgl2") || probe.getContext("webgl"))
-    );
+    const gl = probe.getContext("webgl2") || probe.getContext("webgl");
+    return !!(window.WebGLRenderingContext && gl);
   } catch (err) {
     return false;
   }
@@ -246,42 +242,41 @@ export function initHero(canvas, opts = {}) {
     return obj;
   };
 
+  /* every scene object goes in through here: make the mesh, put it where the
+     layout says, optionally yaw it, and park it in the orbiting group */
+  const place = (geo, mat, pos, rotY) => {
+    const m = new THREE.Mesh(geo, mat);
+    if (pos) m.position.copy(pos);
+    if (rotY) m.rotation.y = rotY;
+    orbit.add(m);
+    return m;
+  };
+
   /* ----------------------------------------------------------- sandbox cube */
 
   const cubePos = new THREE.Vector3().fromArray(BASE.cube);
   const half = BASE.cubeHalf;
 
   const glassGeo = track(new THREE.BoxGeometry(half * 2, half * 2, half * 2));
-  const glassMat = track(
-    glowMaterial(0x16313f, C.teal, 0.3, 2.6, 1.4, {
-      side: THREE.DoubleSide,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    })
-  );
-  const glass = new THREE.Mesh(glassGeo, glassMat);
-  glass.position.copy(cubePos);
-  orbit.add(glass);
+  const glassBlend = { side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending };
+  const glassMat = track(glowMaterial(0x16313f, C.teal, 0.3, 2.6, 1.4, glassBlend));
+  place(glassGeo, glassMat, cubePos);
 
   // twelve glowing edge tubes
   const edgeGeoLong = track(new THREE.CylinderGeometry(0.035, 0.035, half * 2, 6, 1, true));
   const edgeMat = track(glowMaterial(C.teal, C.soft, 0.95, 1.6, 1.5));
   const edgeGroup = new THREE.Group();
   edgeGroup.position.copy(cubePos);
-  const s = half;
-  const edgeSpecs = [];
-  for (const a of [-s, s]) {
-    for (const b of [-s, s]) {
-      edgeSpecs.push({ p: [0, a, b], r: [0, 0, Math.PI / 2] }); // along X
-      edgeSpecs.push({ p: [a, 0, b], r: [0, 0, 0] }); // along Y
-      edgeSpecs.push({ p: [a, b, 0], r: [Math.PI / 2, 0, 0] }); // along Z
+  for (const a of [-half, half]) {
+    for (const b of [-half, half]) {
+      // one tube per axis direction, through the four corner pairs
+      for (const spec of [[0, a, b, 0, 0, Math.PI / 2], [a, 0, b, 0, 0, 0], [a, b, 0, Math.PI / 2, 0, 0]]) {
+        const m = new THREE.Mesh(edgeGeoLong, edgeMat);
+        m.position.set(spec[0], spec[1], spec[2]);
+        m.rotation.set(spec[3], spec[4], spec[5]);
+        edgeGroup.add(m);
+      }
     }
-  }
-  for (const spec of edgeSpecs) {
-    const m = new THREE.Mesh(edgeGeoLong, edgeMat);
-    m.position.set(spec.p[0], spec.p[1], spec.p[2]);
-    m.rotation.set(spec.r[0], spec.r[1], spec.r[2]);
-    edgeGroup.add(m);
   }
   orbit.add(edgeGroup);
 
@@ -289,81 +284,48 @@ export function initHero(canvas, opts = {}) {
 
   const coreGeo = track(new THREE.IcosahedronGeometry(0.72, 1));
   const coreMat = track(glowMaterial(0x2f7f74, C.soft, 1, 1.8, 1.8));
-  const core = new THREE.Mesh(coreGeo, coreMat);
-  core.position.copy(cubePos);
-  orbit.add(core);
+  const core = place(coreGeo, coreMat, cubePos);
 
   const haloGeo = track(new THREE.IcosahedronGeometry(1.08, 0));
-  const haloMat = track(
-    glowMaterial(C.teal, C.bright, 0.28, 2.2, 1.6, {
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      side: THREE.BackSide,
-    })
-  );
-  const halo = new THREE.Mesh(haloGeo, haloMat);
-  halo.position.copy(cubePos);
-  orbit.add(halo);
+  const haloBlend = { side: THREE.BackSide, depthWrite: false, blending: THREE.AdditiveBlending };
+  const haloMat = track(glowMaterial(C.teal, C.bright, 0.28, 2.2, 1.6, haloBlend));
+  const halo = place(haloGeo, haloMat, cubePos);
 
   /* --------------------------------------------------------- decoy token in */
 
   const tokenGeo = track(new THREE.OctahedronGeometry(0.27, 0));
   const tokenMat = track(glowMaterial(0x8a6d1f, C.gold, 1, 1.4, 2));
-  const token = new THREE.Mesh(tokenGeo, tokenMat);
-  token.position.fromArray(BASE.decoyToken);
-  orbit.add(token);
+  const token = place(tokenGeo, tokenMat, new THREE.Vector3().fromArray(BASE.decoyToken));
 
   /* ------------------------------------------------------------ broker gate */
 
   const gatePos = new THREE.Vector3().fromArray(BASE.gate);
   const gateGeo = track(new THREE.TorusGeometry(1.15, 0.085, 6, 40));
   const gateMat = track(glowMaterial(C.bright, C.ink, 1, 1.5, 1.9));
-  const gate = new THREE.Mesh(gateGeo, gateMat);
-  gate.position.copy(gatePos);
-  gate.rotation.y = Math.PI / 2;
-  orbit.add(gate);
+  place(gateGeo, gateMat, gatePos, Math.PI / 2);
 
   const gateDiscGeo = track(new THREE.RingGeometry(0.86, 1.12, 40, 1));
+  const discBase = {
+    transparent: true, side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  };
   const gateDiscMat = track(
-    new THREE.MeshBasicMaterial({
-      color: new THREE.Color(C.bright),
-      transparent: true,
-      opacity: 0.14,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    })
+    new THREE.MeshBasicMaterial({ ...discBase, color: new THREE.Color(C.bright), opacity: 0.14 })
   );
-  const gateDisc = new THREE.Mesh(gateDiscGeo, gateDiscMat);
-  gateDisc.position.copy(gatePos);
-  gateDisc.rotation.y = Math.PI / 2;
-  orbit.add(gateDisc);
+  place(gateDiscGeo, gateDiscMat, gatePos, Math.PI / 2);
 
   /* ----------------------------------------------------------- witness lens */
 
   const lensPos = new THREE.Vector3().fromArray(BASE.lens);
   const lensGeo = track(new THREE.TorusGeometry(1.58, 0.16, 6, 36));
   const lensMat = track(glowMaterial(C.teal, C.soft, 1, 1.7, 1.7));
-  const lens = new THREE.Mesh(lensGeo, lensMat);
-  lens.position.copy(lensPos);
-  lens.rotation.y = Math.PI / 2;
-  orbit.add(lens);
+  const lens = place(lensGeo, lensMat, lensPos, Math.PI / 2);
 
   const lensDiscGeo = track(new THREE.CircleGeometry(1.5, 36));
   const lensDiscMat = track(
-    new THREE.MeshBasicMaterial({
-      color: new THREE.Color(C.soft),
-      transparent: true,
-      opacity: 0.08,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    })
+    new THREE.MeshBasicMaterial({ ...discBase, color: new THREE.Color(C.soft), opacity: 0.08 })
   );
-  const lensDisc = new THREE.Mesh(lensDiscGeo, lensDiscMat);
-  lensDisc.position.copy(lensPos);
-  lensDisc.rotation.y = Math.PI / 2;
-  orbit.add(lensDisc);
+  place(lensDiscGeo, lensDiscMat, lensPos, Math.PI / 2);
 
   /* ---------------------------------------------------- destinations, decoy */
 
@@ -374,34 +336,19 @@ export function initHero(canvas, opts = {}) {
     const p = destPosition(i);
     destPositions.push(p);
     const k = i / (FLOW_COUNT - 1);
-    const mat = track(
-      glowMaterial(
-        new THREE.Color(C.teal).lerp(new THREE.Color(C.soft), k * 0.7).getHex(),
-        C.ink,
-        1,
-        1.9,
-        1.5
-      )
-    );
-    const m = new THREE.Mesh(destGeo, mat);
-    m.position.copy(p);
-    orbit.add(m);
-    destMeshes.push(m);
+    const body = new THREE.Color(C.teal).lerp(new THREE.Color(C.soft), k * 0.7).getHex();
+    destMeshes.push(place(destGeo, track(glowMaterial(body, C.ink, 1, 1.9, 1.5)), p));
   }
 
   const decoyEnd = new THREE.Vector3().fromArray(BASE.decoyEnd);
   const decoyGeo = track(new THREE.SphereGeometry(0.38, 14, 10));
   const decoyMat = track(glowMaterial(0x7d6320, C.gold, 1, 1.6, 1.9));
-  const decoyMesh = new THREE.Mesh(decoyGeo, decoyMat);
-  decoyMesh.position.copy(decoyEnd);
-  orbit.add(decoyMesh);
+  const decoyMesh = place(decoyGeo, decoyMat, decoyEnd);
 
   const decoyRingGeo = track(new THREE.TorusGeometry(0.72, 0.035, 5, 28));
   const decoyRingMat = track(glowMaterial(C.gold, C.ink, 0.8, 1.5, 1.6));
-  const decoyRing = new THREE.Mesh(decoyRingGeo, decoyRingMat);
-  decoyRing.position.copy(decoyEnd);
+  const decoyRing = place(decoyRingGeo, decoyRingMat, decoyEnd);
   decoyRing.rotation.x = Math.PI / 2.4;
-  orbit.add(decoyRing);
 
   /* ------------------------------------------------------------ merkle tree */
 
@@ -413,24 +360,14 @@ export function initHero(canvas, opts = {}) {
     leafX.push(treeRoot.x + (j - 3.5) * (BASE.treeWidth / 7));
     nodePos.push(new THREE.Vector3(leafX[j], BASE.treeLeafY, treeRoot.z));
   }
-  for (let j = 0; j < 4; j++) {
-    nodePos.push(
-      new THREE.Vector3(
-        (leafX[j * 2] + leafX[j * 2 + 1]) / 2,
-        BASE.treeLeafY + levelH,
-        treeRoot.z
-      )
-    );
-  }
-  for (let j = 0; j < 2; j++) {
-    nodePos.push(
-      new THREE.Vector3(
-        (nodePos[8 + j * 2].x + nodePos[9 + j * 2].x) / 2,
-        BASE.treeLeafY + levelH * 2,
-        treeRoot.z
-      )
-    );
-  }
+  const addRow = (first, count, y) => {
+    for (let j = 0; j < count; j++) {
+      const x = (nodePos[first + j * 2].x + nodePos[first + j * 2 + 1].x) / 2;
+      nodePos.push(new THREE.Vector3(x, y, treeRoot.z));
+    }
+  };
+  addRow(0, 4, BASE.treeLeafY + levelH);
+  addRow(8, 2, BASE.treeLeafY + levelH * 2);
   nodePos.push(treeRoot.clone());
 
   /* order in which nodes light up: leaf, leaf, parent, and so on up */
@@ -445,15 +382,9 @@ export function initHero(canvas, opts = {}) {
   const topGeo = track(new THREE.IcosahedronGeometry(0.32, 1));
   const nodeMat = track(glowMaterial(C.teal, C.soft, 1, 1.7, 1.7));
   const rootMat = track(glowMaterial(C.bright, C.ink, 1, 1.5, 1.9));
-  const treeMeshes = nodePos.map((p, id) => {
-    const m = new THREE.Mesh(
-      id < 8 ? leafGeo : id === 14 ? topGeo : midGeo,
-      id === 14 ? rootMat : nodeMat
-    );
-    m.position.copy(p);
-    orbit.add(m);
-    return m;
-  });
+  const treeMeshes = nodePos.map((p, id) =>
+    place(id < 8 ? leafGeo : id === 14 ? topGeo : midGeo, id === 14 ? rootMat : nodeMat, p)
+  );
 
   const edgePairs = [
     [0, 8], [1, 8], [2, 9], [3, 9], [4, 10], [5, 10], [6, 11], [7, 11],
@@ -470,11 +401,7 @@ export function initHero(canvas, opts = {}) {
   const treeEdgeGeo = track(new THREE.BufferGeometry());
   treeEdgeGeo.setAttribute("position", new THREE.Float32BufferAttribute(edgePts, 3));
   const treeEdgeMat = track(
-    new THREE.LineBasicMaterial({
-      color: new THREE.Color(C.bright),
-      transparent: true,
-      opacity: 0.5,
-    })
+    new THREE.LineBasicMaterial({ color: new THREE.Color(C.bright), transparent: true, opacity: 0.5 })
   );
   orbit.add(new THREE.LineSegments(treeEdgeGeo, treeEdgeMat));
 
@@ -483,9 +410,7 @@ export function initHero(canvas, opts = {}) {
   const anchorPos = new THREE.Vector3().fromArray(BASE.anchor);
   const slabGeo = track(new THREE.BoxGeometry(0.82, 6.2, 0.36));
   const slabMat = track(glowMaterial(0xccdde6, C.bright, 1, 1.5, 2.2));
-  const slab = new THREE.Mesh(slabGeo, slabMat);
-  slab.position.copy(anchorPos);
-  orbit.add(slab);
+  place(slabGeo, slabMat, anchorPos);
 
   const aRingGeo = track(new THREE.TorusGeometry(1.52, 0.095, 6, 32));
   const aRingMat = track(glowMaterial(C.teal, C.soft, 0.95, 1.5, 1.8));
@@ -498,27 +423,17 @@ export function initHero(canvas, opts = {}) {
 
   const capGeo = track(new THREE.IcosahedronGeometry(0.2, 1));
   const capMat = track(glowMaterial(C.ink, C.bright, 1, 1.4, 1.6));
-  const cap = new THREE.Mesh(capGeo, capMat);
+  const cap = place(capGeo, capMat);
   cap.position.set(anchorPos.x, anchorPos.y + 3.28, anchorPos.z);
-  orbit.add(cap);
 
   const anchorLineGeo = track(new THREE.BufferGeometry());
-  anchorLineGeo.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(
-      [
-        treeRoot.x, treeRoot.y, treeRoot.z,
-        anchorPos.x, anchorPos.y + 0.7, anchorPos.z,
-      ],
-      3
-    )
-  );
+  const anchorLinePts = [
+    treeRoot.x, treeRoot.y, treeRoot.z,
+    anchorPos.x, anchorPos.y + 0.7, anchorPos.z,
+  ];
+  anchorLineGeo.setAttribute("position", new THREE.Float32BufferAttribute(anchorLinePts, 3));
   const anchorLineMat = track(
-    new THREE.LineBasicMaterial({
-      color: new THREE.Color(C.soft),
-      transparent: true,
-      opacity: 0.17,
-    })
+    new THREE.LineBasicMaterial({ color: new THREE.Color(C.soft), transparent: true, opacity: 0.17 })
   );
   orbit.add(new THREE.Line(anchorLineGeo, anchorLineMat));
 
@@ -526,12 +441,10 @@ export function initHero(canvas, opts = {}) {
   const beadGeo = track(new THREE.IcosahedronGeometry(0.11, 0));
   const captureBeadMat = track(glowMaterial(C.soft, C.ink, 1, 1.4, 1.8));
   const anchorBeadMat = track(glowMaterial(C.bright, C.ink, 1, 1.4, 1.8));
-  const captureBead = new THREE.Mesh(beadGeo, captureBeadMat);
-  const anchorBead = new THREE.Mesh(beadGeo, anchorBeadMat);
+  const captureBead = place(beadGeo, captureBeadMat);
+  const anchorBead = place(beadGeo, anchorBeadMat);
   captureBead.visible = false;
   anchorBead.visible = false;
-  orbit.add(captureBead);
-  orbit.add(anchorBead);
 
   /* ---------------------------------------------------------- flow curves  */
 
@@ -619,9 +532,7 @@ export function initHero(canvas, opts = {}) {
       uniforms: { uScale: { value: 300 } },
       vertexShader: POINT_VERT,
       fragmentShader: POINT_FRAG,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     })
   );
   orbit.add(new THREE.Points(pGeo, pMat));
@@ -769,7 +680,7 @@ export function initHero(canvas, opts = {}) {
     // diagonal and shrink it so the same scene still reads on a phone
     const k = THREE.MathUtils.clamp((aspect - 0.85) / (1.7 - 0.85), 0, 1);
     const ease = k * k * (3 - 2 * k);
-    const tilt = -1.15 * (1 - ease);
+    const tilt = -1.3 * (1 - ease);
     const scale = 0.5 + 0.5 * ease;
     root.rotation.z = tilt;
     root.scale.setScalar(scale);
@@ -834,7 +745,12 @@ export function initHero(canvas, opts = {}) {
     const t = stillTime == null ? clock : stillTime;
     px += (tx - px) * (stillTime == null ? 0.06 : 1);
     py += (ty - py) * (stillTime == null ? 0.06 : 1);
-    orbit.rotation.y = startAngle + (stillTime == null ? (t / orbitPeriod) * Math.PI * 2 : 0) + px;
+    // One full revolution per orbitPeriod, eased: it lingers on the readable
+    // three quarter views and sweeps through the end on angles, where a pipeline
+    // laid out along one axis stops explaining itself.
+    const x = (t / orbitPeriod) * Math.PI * 2;
+    const spin = x - ORBIT_EASE * Math.sin(2 * x);
+    orbit.rotation.y = startAngle + (stillTime == null ? spin : 0) + px;
     orbit.rotation.x = py;
     root.position.y = baseY + Math.sin(t * 0.5) * 0.14;
     updateScene(t);
@@ -853,7 +769,8 @@ export function initHero(canvas, opts = {}) {
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
     last = now;
     clock += dt;
-    fit();
+    // no fit() here on purpose: reading clientWidth every frame forces layout,
+    // and the ResizeObserver already covers every size change
     draw();
   }
 
@@ -966,9 +883,6 @@ export function initHero(canvas, opts = {}) {
       window.removeEventListener("pointermove", onPointer);
       canvas.removeEventListener("webglcontextlost", onContextLost);
       if (mq) mq.removeEventListener("change", onMq);
-      scene.traverse((o) => {
-        if (o.isMesh || o.isPoints || o.isLine) o.geometry = null;
-      });
       for (const d of disposables) if (d && d.dispose) d.dispose();
       renderer.dispose();
       if (renderer.forceContextLoss) renderer.forceContextLoss();

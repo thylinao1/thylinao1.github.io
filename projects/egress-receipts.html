@@ -640,7 +640,7 @@ main .cite b{color:var(--ink)}
 .cmdblock pre{margin:0;padding:16px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;background:#132634;color:#dbe9e5}
 .copybtn{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--rule-strong);background:#fff;color:var(--ink-2);cursor:pointer}
 .copybtn:hover{border-color:var(--accent);color:var(--accent-deep)}
-.exits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:18px 0 0;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.exits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:18px 0 30px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
 .exits div{background:#fff;padding:14px 16px}
 .exits dt{font-family:var(--font-mono);font-size:22px;color:var(--accent-deep);margin:0 0 4px}
 .exits dd{margin:0;font-size:14.5px;line-height:1.5;color:var(--ink-2)}
@@ -1028,9 +1028,8 @@ cd .. &amp;&amp; node standard/checks/05-benign-reconciliation.mjs   # recompute
         are drawn from those records; Figure 2 is the receipt schema as the verifier reads it. The
         browser verifier on this page is a port of the node verifier and was checked for parity against
         it on every shipped receipt.</p>
-      <p class="small">Large language models were used in this project as assistance, for code, for
-        measurements and their re-verification, for figures, and for drafting text including this page,
-        which I reviewed and edited. Every quantitative claim traces to a recorded measurement rather than
+      <p class="small">Large language models were used in this project only as assistance, for code and for
+        drafting, including this page. Every quantitative claim traces to a recorded measurement rather than
         to a model's summary of one.</p>
       <p class="small">Corrections are welcome. If something here misstates the incident record, a
         source, or a measurement, tell me and I will fix it.</p>
@@ -1887,7 +1886,8 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
   canvas.addEventListener("hero-fallback", fallback);
   try{
     var mod=await import("./assets/egress-receipts/hero.js");
-    var hero=mod.initHero(canvas,{});
+    var narrow=innerWidth<900, shot=location.search.indexOf("shot=1")>=0;
+    var hero=mod.initHero(canvas,{ offset: narrow ? [0,-0.15] : [0,0], preserveDrawingBuffer: shot });
     if(reduce && hero && hero.setReducedMotion) hero.setReducedMotion(true);
     matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change",function(e){ if(hero&&hero.setReducedMotion) hero.setReducedMotion(e.matches); });
   }catch(err){ fallback(); }
@@ -1952,7 +1952,7 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
     var r=await mod.verifyReceipt(rc,{journalPubPem: (which==="clean" ? pub : (rc.labPublicKeyPem || pub)), rekorPubPem:rekorPub});
     var head = which==="clean" ? "$ verify receipt-real-clean-public-anchor.json   (in this browser, WebCrypto, offline)" : "$ verify the same receipt with enforcement row 13 hidden, the root recomputed and the envelope re-signed by the lab's own key";
     await typeLines([head].concat(r.lines), r.anchor && r.anchor.readBack==="not-in-browser" ? "anchor read-back is not run in a browser; the node kit reads the git note back from the bundled anchor repository, which is why the offline kit is the reference" : "");
-    summarise(r); state.textContent = "exit "+r.exitCode;
+    summarise(r); state.textContent = "exit "+r.exitCode; try{ console.log("verify-web: "+which+" exit "+r.exitCode+" omitted "+(r.reconcile?r.reconcile.omitted.length:"?")+" anchor "+(r.anchor?r.anchor.readBack:"?")); }catch(e){}
   }
   if(location.search.indexOf("autoverify")>=0){ setTimeout(function(){ bRun.click(); },300); setTimeout(function(){ bHide.click(); },3200); }
   bRun.addEventListener("click", function(){ run("clean"); if(merkle&&merkle.restore) merkle.restore(); bRes.disabled=true; });

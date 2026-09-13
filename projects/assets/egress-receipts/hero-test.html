@@ -146,6 +146,15 @@
   const params = new URLSearchParams(location.search);
   const num = (k) => (params.has(k) ? parseFloat(params.get(k)) : undefined);
 
+  // ?w=390 pins the band to a phone sized container, since headless Chrome on
+  // macOS will not open a window narrower than 500px
+  if (params.has("w")) {
+    const band = document.getElementById("band");
+    band.style.width = params.get("w") + "px";
+    band.style.height = Math.round(parseFloat(params.get("w")) * 1.52) + "px";
+    band.style.minHeight = "0";
+  }
+
   const heroCanvas = document.getElementById("hero");
   heroCanvas.addEventListener("hero-ready", (e) => {
     say("hero triangles " + e.detail.triangles + ", draw calls " + e.detail.calls +
@@ -261,6 +270,21 @@
   if (params.get("hide") === "1") merkle.hide(13);
   if (params.get("restore") === "1") { merkle.hide(13); merkle.restore(); }
   if (params.get("band") === "0") document.getElementById("band").style.display = "none";
+  if (params.get("destroy") === "1") {
+    setTimeout(() => {
+      try {
+        hero.pause();
+        hero.resume();
+        hero.setReducedMotion(true);
+        hero.setReducedMotion(false);
+        hero.destroy();
+        merkle.destroy();
+        say("lifecycle ok: pause, resume, reduced motion both ways, destroy");
+      } catch (err) {
+        say("lifecycle FAILED: " + err);
+      }
+    }, 1200);
+  }
 
   say("modules loaded, leaves " + dummyLeaves.length);
 </script>

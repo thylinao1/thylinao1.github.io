@@ -337,6 +337,7 @@ export function initMerkle3d(canvas, options = {}) {
       el.style.color = "#e0836f";
       el.style.opacity = "0.95";
       ghostMesh.userData.label = el;
+      ghostMesh.userData.labelDrop = true; // second row, clear of its neighbours
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
@@ -471,10 +472,8 @@ export function initMerkle3d(canvas, options = {}) {
       group.localToWorld(projected);
       projected.project(camera);
       el.style.left = ((projected.x * 0.5 + 0.5) * w).toFixed(1) + "px";
-      el.style.top = (
-        (-projected.y * 0.5 + 0.5) * h -
-        (mesh.userData.labelAbove ? 14 : 0)
-      ).toFixed(1) + "px";
+      const shift = mesh.userData.labelAbove ? -14 : mesh.userData.labelDrop ? 13 : 0;
+      el.style.top = ((-projected.y * 0.5 + 0.5) * h + shift).toFixed(1) + "px";
     }
   }
 
@@ -510,7 +509,8 @@ export function initMerkle3d(canvas, options = {}) {
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
     last = now;
     clock += dt;
-    fit();
+    // the ResizeObserver owns resizing; reading clientWidth here would force
+    // a layout on every frame
     render(clock);
   }
 

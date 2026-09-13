@@ -659,6 +659,42 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
 /* the observers diagram carries a receipt box under the sandbox; it needs more height than the default figure ratio */
 #cObservers{aspect-ratio:16/12}
 @media(max-width:660px){#cObservers{aspect-ratio:1/1.05}}
+
+/* ---------- figure 2: anatomy of the receipt, an SVG that assembles itself ----------
+   The SVG carries its own colours, fonts and geometry as presentation attributes, so with
+   this stylesheet or its script missing the figure still renders in its finished state.
+   Everything here is the motion layer; the panel itself is styled on the element. */
+
+/* parts that fade and rise (cards, field lines, chips, badges) and lines that draw themselves */
+#anatFig .ap{transition:opacity .6s var(--ease-soft),transform .6s var(--ease)}
+#anatFig .ap.fast{transition:opacity .26s var(--ease-soft),transform .26s var(--ease-soft)}
+#anatFig .al{transition:stroke-dashoffset .5s var(--ease-soft)}
+
+/* armed by the script only when motion is welcome: the finished state is the default */
+#anatFig.armed .ap{opacity:0;transform:translateY(14px)}
+#anatFig.armed .ap.fast{transform:translateY(4px)}
+#anatFig.armed .ap.lift{transform:translateY(28px)}
+#anatFig.armed.go .ap,
+#anatFig.armed.go .ap.fast,
+#anatFig.armed.go .ap.lift{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  #anatFig .ap,#anatFig .al{transition:none}
+  #anatFig.armed .ap{opacity:1;transform:none}
+  #anatFig .al{stroke-dasharray:none;stroke-dashoffset:0}
+}
+
+/* ---------- the Merkle tree canvas (2D drawing, merkle2d.js) ---------- */
+/* The drawing carries four rows of text besides the tree itself (the two
+   legend lines, the root label, the leaf index row and the hidden tag), so
+   the ratio is set here per breakpoint rather than left at the figure default.
+   Nothing here may set `display` on .vlab-tree: the module's fallback path
+   hides that element with the `hidden` attribute. */
+#cMerkle{aspect-ratio:16/11;border:1px solid rgba(19,38,52,.35);
+  box-shadow:0 14px 30px -22px rgba(19,38,52,.75)}
+/* one column below 900px: the canvas gets much wider, so it can be shallower */
+@media(max-width:900px){#cMerkle{aspect-ratio:16/8.5}}
+@media(max-width:520px){#cMerkle{aspect-ratio:16/10}}
 </style>
 </head>
 
@@ -698,7 +734,7 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
       &nbsp;&middot;&nbsp; solo entry, built on Shadow Commit</p>
     <div class="hbtns">
       <a class="hbtn solid" href="assets/egress-receipts-paper.pdf" target="_blank" rel="noopener">Read the report <span class="arrow">&rarr;</span></a>
-      <a class="hbtn" href="https://github.com/thylinao1/shadowcommit/tree/apart-sprint" target="_blank" rel="noopener">Code and judge-kit</a>
+      <a class="hbtn" href="https://github.com/thylinao1/egress-receipts" target="_blank" rel="noopener">Code and judge-kit</a>
       <a class="hbtn" href="#verify">Verify a receipt here</a>
     </div>
     <dl class="hstats">
@@ -800,11 +836,124 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
       </ol>
     </div>
     <figure class="reveal d1">
-      <img class="figimg" src="assets/egress-receipts/fig2-receipt-anatomy.svg" alt="Anatomy of the receipt: three observers, three Merkle roots, one DSSE-signed statement, an external anchor, and the judge-kit exit codes." loading="lazy">
-      <figcaption><b>Figure 2.</b> Anatomy of the receipt as the verifier reads it. The reconciler
-        classifies every witnessed flow against the enforcement log as matched, expected-benign,
-        omitted or phantom, with three enumerated allow-classes (the DNS resolver, the model provider,
-        the decoy endpoint), so a clean turn reconciles to zero omitted flows without hand-waving.</figcaption>
+      <svg id="anatFig" class="anat" viewBox="0 0 1000 646" role="img"
+        aria-describedby="anatCap"
+        style="width:100%;height:auto;display:block;background:#fff;border:1px solid #e8ecef;border-radius:4px"
+        font-family="'Source Serif 4',Georgia,serif"
+        aria-label="Anatomy of the receipt: three observers, the enforcement log, an independent egress witness and decoy tripwires, each producing one Merkle root; the three roots go into one signed receipt anchored during the run; and any third party verifies it offline, with exit code 0 clean, 1 a check ran and failed, 2 a check could not run.">
+        <!-- observer one: enforcement log -->
+        <g id="anatC0" transform="translate(8 4)">
+          <g class="ap" data-d="0">
+            <rect id="anatC0box" width="314" height="198" rx="9" fill="#ffffff" stroke="#dee2e6"></rect>
+            <rect x="22" y="22" width="34" height="3" rx="1.5" fill="#5a9e8f"></rect>
+            <text x="22" y="52" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" letter-spacing="0.5" fill="#3d7568">WHAT DID THE POLICY ALLOW?</text>
+            <text x="22" y="92" font-family="Fraunces,'Source Serif 4',Georgia,serif" font-weight="460" font-size="24" fill="#2c3e50">Enforcement log</text>
+            <text x="22" y="126" font-size="16" fill="#44586b">A record the broker keeps of</text>
+            <text x="22" y="150" font-size="16" fill="#44586b">every allow and deny.</text>
+            <text x="22" y="182" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="16" fill="#3d7568">enforcementLogMerkleRoot</text>
+          </g>
+        </g>
+        <!-- observer two: independent witness -->
+        <g id="anatC1" transform="translate(343 4)">
+          <g class="ap" data-d="230">
+            <rect id="anatC1box" width="314" height="198" rx="9" fill="#ffffff" stroke="#dee2e6"></rect>
+            <rect x="22" y="22" width="34" height="3" rx="1.5" fill="#5a9e8f"></rect>
+            <text x="22" y="52" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" letter-spacing="0.5" fill="#3d7568">WHAT ACTUALLY CROSSED THE WIRE?</text>
+            <text x="22" y="92" font-family="Fraunces,'Source Serif 4',Georgia,serif" font-weight="460" font-size="24" fill="#2c3e50">Independent witness</text>
+            <text x="22" y="126" font-size="16" fill="#44586b">A second capture of the same</text>
+            <text x="22" y="150" font-size="16" fill="#44586b">egress, outside the sandbox.</text>
+            <text x="22" y="182" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="16" fill="#3d7568">witnessMerkleRoot</text>
+          </g>
+        </g>
+        <!-- observer three: decoy tripwires -->
+        <g id="anatC2" transform="translate(678 4)">
+          <g class="ap" data-d="460">
+            <rect id="anatC2box" width="314" height="198" rx="9" fill="#ffffff" stroke="#dee2e6"></rect>
+            <rect x="22" y="22" width="34" height="3" rx="1.5" fill="#a8791c"></rect>
+            <text x="22" y="52" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" letter-spacing="0.5" fill="#8a6a24">WHAT DID IT REACH FOR?</text>
+            <text x="22" y="92" font-family="Fraunces,'Source Serif 4',Georgia,serif" font-weight="460" font-size="24" fill="#2c3e50">Decoy tripwires</text>
+            <text x="22" y="126" font-size="16" fill="#44586b">Bait a benign agent has no</text>
+            <text x="22" y="150" font-size="16" fill="#44586b">reason to touch or send.</text>
+            <text x="22" y="182" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="16" fill="#8a6a24">canaryHitsRoot</text>
+          </g>
+        </g>
+        <!-- three roots into one receipt -->
+        <path id="anatA0" class="al" data-d="760" fill="none" stroke="#3d7568" stroke-width="2" stroke-linecap="round"
+          d="M165 206 V226 Q165 240 179 240 H286 Q300 240 300 254 V256"></path>
+        <g id="anatH0" transform="translate(300 266)"><path class="ap fast" data-d="1230" d="M0 0 L-6 -11 L6 -11 Z" fill="#3d7568"></path></g>
+        <path id="anatA1" class="al" data-d="860" fill="none" stroke="#3d7568" stroke-width="2" stroke-linecap="round"
+          d="M500 206 V256"></path>
+        <g id="anatH1" transform="translate(500 266)"><path class="ap fast" data-d="1330" d="M0 0 L-6 -11 L6 -11 Z" fill="#3d7568"></path></g>
+        <path id="anatA2" class="al" data-d="960" fill="none" stroke="#a8791c" stroke-width="2" stroke-linecap="round"
+          d="M835 206 V226 Q835 240 821 240 H714 Q700 240 700 254 V256"></path>
+        <g id="anatH2" transform="translate(700 266)"><path class="ap fast" data-d="1430" d="M0 0 L-6 -11 L6 -11 Z" fill="#a8791c"></path></g>
+        <!-- the receipt -->
+        <g id="anatR" transform="translate(175 266)">
+          <g class="ap" data-d="1320">
+            <rect id="anatRsh" x="3" y="5" width="650" height="234" rx="10" fill="#1e3a4f" opacity="0.07"></rect>
+            <rect id="anatRbox" width="650" height="234" rx="10" fill="#ffffff" stroke="#2a5270" stroke-width="1.4"></rect>
+          </g>
+          <rect x="26" y="24" width="34" height="3" rx="1.5" fill="#2a5270" class="ap" data-d="1400"></rect>
+          <text class="ap" data-d="1450" x="26" y="54" font-family="Fraunces,'Source Serif 4',Georgia,serif" font-weight="460" font-size="24" fill="#2c3e50">One signed receipt</text>
+          <text class="ap" data-d="1520" x="26" y="78" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" letter-spacing="0.5" fill="#8a97a3">IN-TOTO, ANCHORED DURING THE RUN</text>
+          <text class="ap" data-d="1600" x="26" y="112" font-size="16" fill="#44586b">runId and policy allowlist</text>
+          <text class="ap" data-d="1680" x="26" y="136" font-size="16" fill="#44586b">image digest of every container</text>
+          <text class="ap" data-d="1760" x="26" y="160" font-size="16" fill="#44586b">three Merkle roots and sizes</text>
+          <text class="ap" data-d="1840" x="26" y="184" font-size="16" fill="#44586b">an anchor made during the run</text>
+          <text class="ap" data-d="1920" x="26" y="208" font-size="16" fill="#44586b">Ed25519 DSSE, key out of band</text>
+          <line id="anatRdiv" x1="376" y1="96" x2="376" y2="212" stroke="#e8ecef" stroke-width="1"></line>
+          <g id="anatK0" transform="translate(400 112)"><g class="ap" data-d="2030">
+            <rect width="213" height="28" rx="14" fill="#3d75681f" stroke="#3d756866"></rect>
+            <text x="13" y="19" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" fill="#3d7568">enforcementLogMerkleRoot</text>
+          </g></g>
+          <g id="anatK1" transform="translate(400 146)"><g class="ap" data-d="2130">
+            <rect width="159" height="28" rx="14" fill="#3d75681f" stroke="#3d756866"></rect>
+            <text x="13" y="19" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" fill="#3d7568">witnessMerkleRoot</text>
+          </g></g>
+          <g id="anatK2" transform="translate(400 180)"><g class="ap" data-d="2230">
+            <rect width="135" height="28" rx="14" fill="#a8791c26" stroke="#a8791c66"></rect>
+            <text x="13" y="19" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" fill="#8a6a24">canaryHitsRoot</text>
+          </g></g>
+        </g>
+        <!-- into the hands of a third party -->
+        <path id="anatA3" class="al" data-d="2380" fill="none" stroke="#6c757d" stroke-width="2" stroke-linecap="round"
+          d="M500 506 V522"></path>
+        <g id="anatH3" transform="translate(500 532)"><path class="ap fast" data-d="2740" d="M0 0 L-6 -11 L6 -11 Z" fill="#6c757d"></path></g>
+        <!-- the verify strip -->
+        <g id="anatS" transform="translate(8 532)">
+          <g class="ap lift" data-d="2600">
+            <rect id="anatSbox" width="984" height="106" rx="9" fill="#eef6f4" stroke="#bfded6"></rect>
+            <text x="26" y="44" font-family="Fraunces,'Source Serif 4',Georgia,serif" font-weight="460" font-size="24" fill="#2c3e50">Verify it offline</text>
+            <text x="26" y="68" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" letter-spacing="0.5" fill="#6c757d">ANYONE, NO NETWORK, NO LAB ACCESS</text>
+          </g>
+          <g id="anatB0" transform="translate(600 14)"><g class="ap" data-d="2740">
+            <rect width="30" height="24" rx="6" fill="#3d7568"></rect>
+            <text x="15" y="17" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="16" fill="#ffffff">0</text>
+            <text x="44" y="17" font-size="16" fill="#44586b">clean, nothing omitted</text>
+          </g></g>
+          <g id="anatB1" transform="translate(600 44)"><g class="ap" data-d="2840">
+            <rect width="30" height="24" rx="6" fill="#a94438"></rect>
+            <text x="15" y="17" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="16" fill="#ffffff">1</text>
+            <text x="44" y="17" font-size="16" fill="#44586b">a check ran and failed</text>
+          </g></g>
+          <g id="anatB2" transform="translate(600 74)"><g class="ap" data-d="2940">
+            <rect width="30" height="24" rx="6" fill="#8a97a3"></rect>
+            <text x="15" y="17" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="16" fill="#ffffff">2</text>
+            <text x="44" y="17" font-size="16" fill="#44586b">a check could not run</text>
+          </g></g>
+          <text id="anatPw" class="ap" data-d="3020" x="26" y="92" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" fill="#8a6a24">a check that did not run is not a check that passed</text>
+          <g id="anatPn" display="none"><g class="ap" data-d="3020">
+            <text x="26" y="196" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" fill="#8a6a24">a check that did not run</text>
+            <text x="26" y="218" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="13" fill="#8a6a24">is not a check that passed</text>
+          </g></g>
+        </g>
+      </svg>
+      <figcaption id="anatCap"><b>Figure 2.</b> Anatomy of the receipt as the verifier reads it:
+        three observers that do not share a trust base, one signed statement anchored during the run,
+        and the three exit codes a stranger can get offline. The reconciler classifies every witnessed
+        flow against the enforcement log as matched, expected-benign, omitted or phantom, with three
+        enumerated allow-classes (the DNS resolver, the model provider, the decoy endpoint), so a clean
+        turn reconciles to zero omitted flows without hand-waving.</figcaption>
     </figure>
   </div>
 </section>
@@ -1041,7 +1190,7 @@ cd .. &amp;&amp; node standard/checks/05-benign-reconciliation.mjs   # recompute
       <div class="footlinks">
         <a href="assets/egress-receipts-paper.pdf" target="_blank" rel="noopener">Report (PDF)</a>
         <a href="assets/egress-receipts-deck.pdf" target="_blank" rel="noopener">Slides (PDF)</a>
-        <a href="https://github.com/thylinao1/shadowcommit/tree/apart-sprint" target="_blank" rel="noopener">Code and judge-kit</a>
+        <a href="https://github.com/thylinao1/egress-receipts" target="_blank" rel="noopener">Code and judge-kit</a>
         <a href="https://apartresearch.com/sprints/ai-incident-response-sprint-2026-09-11-to-2026-09-13" target="_blank" rel="noopener">Sprint page</a>
       </div>
     </div>
@@ -1620,7 +1769,7 @@ function wrapLines(x, text, maxw){
   register(c,draw,0.44); draw(0);
 })();
 
-/* ================= FIG (sticky): the three observers ================= */
+/* ================= FIG (sticky): the three observers, as six numbered steps ================= */
 var obsStep = 0;
 (function(){
   var c=document.getElementById("cObservers"); if(!c) return;
@@ -1635,113 +1784,240 @@ var obsStep = 0;
     });
   },{rootMargin:"-40% 0px -45% 0px",threshold:0});
   steps.forEach(function(li){ so.observe(li); });
+  /* the six steps, in reading order; three widths: print export, desktop column, phone */
+  var CAP=[
+    ["1 every connection leaves through one gate","1 every connection leaves by one gate","1 one gate for all egress"],
+    ["2 the broker writes what it allowed","2 the broker logs what it allowed","2 broker logs allow and deny"],
+    ["3 an independent witness records the same connections","3 an independent witness sees the same","3 an outside witness sees it"],
+    ["4 the root is anchored during the run","4 the root is anchored mid-run","4 root anchored during the run"],
+    ["5 bait that fires only on exfiltration","5 bait that fires only on exfiltration","5 bait fires only on exfil"],
+    ["6 three roots, one signed file, verified offline","6 three roots, one file, verified offline","6 three roots, one signed file"]
+  ];
+  var GRP=[0,0,1,1,2,3];                    /* which scrolly step lights each caption */
   var rnd=mulberry(7), PARTS=[];
-  for(var i=0;i<42;i++) PARTS.push({u:rnd(), dst:i%7, spd:0.10+rnd()*0.08});
+  for(var i=0;i<16;i++) PARTS.push({u:rnd(), d:i%6, s:0.038+rnd()*0.022});
+
   function draw(t,dt){
-    var k=hidpi(c,0.78), x=k.x, w=k.w, h=k.h, narrow=w<520;
+    var k=hidpi(c,0.78), x=k.x, w=k.w, h=k.h;
+    var narrow=w<520, tier=narrow?2:(w<760?1:0);
+    var FS=(typeof __FS!=="undefined")?__FS:1, S=obsStep;
     x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
-    var S=obsStep;
-    function hi(n){ return S===n ? 1 : (S===3 ? 0.85 : 0.38); }
-    /* geometry */
-    var bx=w*0.06, by=h*0.30, bw=w*0.30, bh=h*(PRINT?0.34:0.30); /* sandbox */
-    var gx=bx+bw, gy=by+bh/2;                                  /* gate */
-    var wx=w*0.55, wy=gy;                                      /* witness */
-    var ax=w*0.70, ay=h*0.12;                                 /* anchor, above the flow stream, beside the tree */                                  /* anchor */
-    var dst=[]; for(var i=0;i<7;i++){ var ang=(-0.55+i*0.183); dst.push({x:w*0.78+Math.cos(ang)*w*0.10, y:gy+Math.sin(ang)*h*0.30}); }
-    var rx=w*0.12, ry=h*0.77, rw=w*0.76, rh=h*0.19;             /* receipt */
-    /* sandbox */
-    x.globalAlpha=hi(0);
-    x.fillStyle=rgba(T_CORE,0.06); x.strokeStyle=rgba(T_CORE,0.55); x.lineWidth=1.4;
-    rr(x,bx,by,bw,bh,10); x.fill(); x.stroke();
-    lab(x,"SANDBOX",bx+12,by+18,CORED,9.5,1.1);
-    x.fillStyle=CORE; x.beginPath(); x.arc(bx+bw*0.42,gy,9+(reduce?0:Math.sin(t*2)*1.2),0,6.283); x.fill();
-    labC(x,"agent",bx+bw*0.42,gy+26,INK3,9.5);
-    /* gate + enforcement log */
-    x.strokeStyle=hi(0)>0.5?ACC:rgba(T_ACC,0.6); x.lineWidth=3; x.beginPath(); x.arc(gx,gy,12,0,6.283); x.stroke();
-    x.fillStyle="#fff"; x.beginPath(); x.arc(gx,gy,9,0,6.283); x.fill();
-    labC(x,"broker gate",gx,gy+30,INK3,9.5);
-    /* enforcement log card */
-    var lx=bx, ly=by+bh+22;
-    x.fillStyle="#fff"; x.strokeStyle=S===0?ACC:rgba(T_INK,0.25); x.lineWidth=S===0?1.6:1;
-    rr(x,lx,ly,bw,narrow?40:46,6); x.fill(); x.stroke();
-    lab(x,"ENFORCEMENT LOG",lx+10,ly+16,S===0?ACCD:INK3,9,1);
-    lab(x,narrow?"allow / deny rows":"allow / deny rows, kept by the broker",lx+10,ly+(narrow?30:33),INK4,9);
-    x.globalAlpha=1;
-    /* flows and destinations */
-    for(i=0;i<7;i++){
-      x.globalAlpha=0.9*hi(1);
-      x.fillStyle=i===6 ? GOLDB : ACC; x.beginPath(); x.arc(dst[i].x,dst[i].y,5,0,6.283); x.fill();
-    }
-    x.globalAlpha=1;
-    if(!narrow) labC(x,"destinations",dst[0].x,dst[0].y-14,INK4,9.5);
-    var dl="decoy endpoint", dlw=tw(x,dl,9); if(dst[6].x+9+dlw<=w-4) lab(x,dl,dst[6].x+9,dst[6].y+4,GOLD,9); else lab(x,dl,w-4-dlw,dst[6].y+18,GOLD,9);
-    /* paths: gate -> witness -> destination */
-    for(i=0;i<PARTS.length;i++){
-      var pt=PARTS[i]; if(!reduce) pt.u=(pt.u+pt.spd*dt)%1;
-      var d=dst[pt.dst], u=pt.u;
-      var px = u<0.5 ? lerp(gx,wx,u*2) : lerp(wx,d.x,(u-0.5)*2);
-      var py = u<0.5 ? lerp(gy,wy,u*2) : lerp(wy,d.y,(u-0.5)*2);
-      x.globalAlpha=(0.25+0.6*hi(1))*(pt.dst===6?0.9:1);
-      x.fillStyle=pt.dst===6?GOLDB:ACC; x.beginPath(); x.arc(px,py,2.2,0,6.283); x.fill();
-    }
-    x.globalAlpha=1;
-    /* witness lens */
-    x.globalAlpha=hi(1);
-    x.strokeStyle=S===1?ACCD:rgba(T_ACC,0.8); x.lineWidth=2.2;
-    x.beginPath(); x.ellipse(wx,wy,15,22,0,0,6.283); x.stroke();
-    x.fillStyle=rgba(T_ACC,0.18); x.fill();
-    var wl=PRINT?17:12;
-    labCS(x,"WITNESS",wx,wy+40,S===1?ACCD:INK3,9.5,1.1);
-    labC(x,"kernel connection tracker,",wx,wy+40+wl,INK4,9);
-    labC(x,"outside the sandbox",wx,wy+40+2*wl,INK4,9);
-    /* merkle tree above the witness */
-    var tx=wx, ty=wy-58;
-    var nodes=[[tx,ty-40],[tx-22,ty-16],[tx+22,ty-16],[tx-33,ty+6],[tx-11,ty+6],[tx+11,ty+6],[tx+33,ty+6]];
-    x.strokeStyle=rgba(T_ACC,0.6); x.lineWidth=1;
-    x.beginPath(); x.moveTo(nodes[1][0],nodes[1][1]); x.lineTo(nodes[0][0],nodes[0][1]); x.lineTo(nodes[2][0],nodes[2][1]);
-    x.moveTo(nodes[3][0],nodes[3][1]); x.lineTo(nodes[1][0],nodes[1][1]); x.lineTo(nodes[4][0],nodes[4][1]);
-    x.moveTo(nodes[5][0],nodes[5][1]); x.lineTo(nodes[2][0],nodes[2][1]); x.lineTo(nodes[6][0],nodes[6][1]); x.stroke();
-    for(i=0;i<nodes.length;i++){ x.fillStyle=i===0?ACCD:ACC; x.beginPath(); x.arc(nodes[i][0],nodes[i][1],i===0?4.5:3,0,6.283); x.fill(); }
-    labR(x,"witness root",tx-10,ty-36,INK3,9);
-    x.globalAlpha=1;
-    /* anchor */
-    x.globalAlpha=S===3?1:0.55;
-    x.fillStyle=rgba(T_CORE,0.12); x.strokeStyle=CORE; x.lineWidth=1.3;
-    rr(x,ax-12,ay-34,24,68,4); x.fill(); x.stroke();
-    var pulse = reduce ? 0.5 : (t*0.5)%1;
-    x.strokeStyle=rgba(T_ACC,0.55); x.setLineDash([3,4]); x.lineDashOffset=-t*18;
-    x.beginPath(); x.moveTo(nodes[0][0]+5,nodes[0][1]-3); x.lineTo(ax-13,ay); x.stroke(); x.setLineDash([]);
-    x.fillStyle=ACC; x.beginPath(); x.arc(lerp(nodes[0][0]+5,ax-13,pulse), lerp(nodes[0][1]-3,ay,pulse),2.6,0,6.283); x.fill();
-    labC(x,"PUBLIC ANCHOR",ax,ay+52,S===3?CORED:INK3,9,1);
-    labC(x,"git note, Rekor",ax,ay+64,INK4,9);
-    x.globalAlpha=1;
-    /* decoy token inside the sandbox */
-    x.globalAlpha=hi(2);
-    if(narrow){ x.fillStyle=GOLDB; rr(x,bx+bw*0.72-8,gy-36,16,11,3); x.fill(); labC(x,"credential",bx+bw*0.72,gy-10,GOLD,9); }
-    else { x.fillStyle=GOLDB; rr(x,bx+bw*0.66-9,gy-24-6,18,12,3); x.fill(); labC(x,"planted credential",bx+bw*0.66,gy-40,GOLD,9); }
-    x.globalAlpha=1;
-    /* receipt */
-    var rA = S===3 ? 1 : 0.45;
-    x.globalAlpha=rA;
-    x.fillStyle="#fff"; x.strokeStyle=S===3?ACCD:rgba(T_INK,0.3); x.lineWidth=S===3?1.8:1;
-    rr(x,rx,ry,rw,rh,8); x.fill(); x.stroke();
-    lab(x,"ONE SIGNED RECEIPT",rx+12,ry+18,S===3?ACCD:INK3,9.5,1.1);
-    if(!narrow){
-      x.save(); mono(x,9);
-      var rl = wrapLines(x,"in-toto statement, predicate egress-receipt/v0.3, DSSE envelope signed with Ed25519; the public key is held out of band, never inside the receipt.", rw-24);
-      if(PRINT) rl = rl.concat(wrapLines(x,"externalAnchor commits the witness root, submitted during the run: a git note always, the public Rekor log with one flag on.", rw-24));
+    function hi(n){ if(PRINT) return 1; return S===n ? 1 : (S===3 ? 0.85 : 0.38); }
+    function ta(n){ return PRINT ? 1 : (0.45+0.55*hi(n)); }
+    var LS=narrow?8.5:9, NM=narrow?9:9.5;
+    var cf=LS*FS, CR=Math.max(6,cf*0.72), CG=Math.max(5,cf*0.40);
+
+    /* ---- numbered caption: accent disc carrying the digit, label to its right ---- */
+    function capW(i){ var s=CAP[i][tier]; return 2*CR+CG+tw(x,s.slice(2),LS); }
+    function cap(i,px,py,align){
+      var s=CAP[i][tier], W=capW(i), g=GRP[i], on=(S===g);
+      var x0 = align==="r" ? px-W : (align==="c" ? px-W/2 : px);
+      x.save(); x.globalAlpha=ta(g);
+      x.fillStyle=on?ACCD:ACC; x.beginPath(); x.arc(x0+CR,py,CR,0,6.283); x.fill();
+      labC(x,s.charAt(0),x0+CR,py+cf*0.33,"#ffffff",LS*0.95);
+      lab(x,s.slice(2),x0+2*CR+CG,py+cf*0.34,on?INK:INK2,LS);
       x.restore();
-      for(var ri=0; ri<rl.length; ri++) lab(x, rl[ri], rx+12, ry+(PRINT?40:34)+ri*(PRINT?17:12), INK3, 9);
-    } else lab(x,"in-toto statement, DSSE, Ed25519",rx+12,ry+34,INK3,9);
-    var roots=["enforcementLogMerkleRoot","witnessMerkleRoot","canaryHitsRoot"];
-    var cols=[ (S===0||S===3)?ACCD:INK4, (S===1||S===3)?ACCD:INK4, (S===2||S===3)?GOLD:INK4 ];
-    for(i=0;i<3;i++) lab(x, narrow?roots[i].replace("MerkleRoot","").replace("Log","").replace("Hits",""):roots[i], rx+12+i*(rw/3), ry+rh-10, cols[i], narrow?8.5:9.5);
-    /* binding lines into the receipt when on step 3 */
-    if(S===3){
-      x.strokeStyle=rgba(T_ACC,0.5); x.lineWidth=1; x.setLineDash([2,3]);
-      x.beginPath(); x.moveTo(lx+bw/2,ly+46); x.lineTo(rx+rw*0.17,ry); x.moveTo(wx,wy+40+2*wl+8); x.lineTo(rx+rw*0.5,ry); x.moveTo(dst[6].x,dst[6].y+6); x.lineTo(rx+rw*0.83,ry); x.stroke(); x.setLineDash([]);
     }
-    x.globalAlpha=1;
+    function head(x1,y1,x2,y2,col,sz){
+      var a=Math.atan2(y2-y1,x2-x1), d=sz||Math.max(4.5,3.6*FS);
+      x.save(); x.fillStyle=col; x.beginPath(); x.moveTo(x2,y2);
+      x.lineTo(x2-d*Math.cos(a-0.44),y2-d*Math.sin(a-0.44));
+      x.lineTo(x2-d*Math.cos(a+0.44),y2-d*Math.sin(a+0.44));
+      x.closePath(); x.fill(); x.restore();
+    }
+    function arw(x1,y1,x2,y2,col,lw,dash){
+      x.save(); x.strokeStyle=col; x.lineWidth=lw||Math.max(1.1,1.1*FS);
+      if(dash) x.setLineDash(dash);
+      x.beginPath(); x.moveTo(x1,y1); x.lineTo(x2,y2); x.stroke(); x.restore();
+      head(x1,y1,x2,y2,col);
+    }
+    function polyDot(pts,col,alpha,lw){
+      x.save(); x.globalAlpha=alpha; x.strokeStyle=col; x.lineWidth=lw||Math.max(1,0.9*FS);
+      x.setLineDash([2*FS,3.4*FS]);
+      x.beginPath(); x.moveTo(pts[0][0],pts[0][1]);
+      for(var q=1;q<pts.length;q++) x.lineTo(pts[q][0],pts[q][1]);
+      x.stroke(); x.restore();
+    }
+
+    /* ---------------------------- geometry ---------------------------- */
+    var G = narrow ? {
+      bx:0.030*w, bw:0.350*w, by:0.340*h, bh:0.160*h,
+      tyr:0.190*h, tyc:0.226*h, tyl:0.262*h,
+      bnd:0.460*w, bl0:0.330*h, bl1:0.530*h, blY:0.560*h, blX:0.545*w,
+      wx:0.600*w, lrx:0.030*w, lry:0.045*h,
+      tdx:0.045*w, tdx2:0.068*w, wroot:0.030*w,
+      ax:0.130*w, aw:0.055*w, ay0:0.020*h, ay1:0.120*h, al0:0.148*h, al1:0.172*h,
+      dx:0.900*w, lx:0.030*w, lw:0.340*w, ly:0.600*h, lh:0.115*h,
+      rx:0.030*w, rw:0.940*w, ry:0.800*h, rh:0.150*h, elb:0.955*w, feed:0.020*w
+    } : {
+      bx:0.040*w, bw:0.232*w, by:0.330*h, bh:0.180*h,
+      tyr:0.215*h, tyc:0.252*h, tyl:0.289*h,
+      bnd:0.345*w, bl0:0.315*h, bl1:0.570*h, blY:0.600*h, blX:0.390*w,
+      wx:0.515*w, lrx:0.017*w, lry:0.058*h,
+      tdx:0.024*w, tdx2:0.036*w, wroot:0.016*w,
+      ax:0.790*w, aw:0.030*w, ay0:0.030*h, ay1:0.140*h, al0:0.166*h, al1:0.190*h,
+      dx:0.870*w, lx:0.040*w, lw:0.260*w, ly:0.660*h, lh:0.100*h,
+      rx:0.045*w, rw:0.910*w, ry:0.835*h, rh:0.118*h, elb:0.940*w, feed:0.045*w
+    };
+    var gx=G.bx+G.bw, gy=G.by+G.bh*0.62, wy=gy;
+    var tyr=G.tyr, tyc=G.tyc, tyl=G.tyl;
+    var CPOS = narrow ? [
+      [0.030*w, 0.245*h, "l"], [0.895*w, 0.745*h, "r"], [0.895*w, 0.615*h, "r"],
+      [0.030*w, 0.300*h, "l"], [0.895*w, 0.680*h, "r"],
+      [G.rx+G.rw-0.024*w, G.ry+G.rh*0.20, "r"]
+    ] : [
+      [G.bx, 0.285*h, "l"], [G.bx, 0.795*h, "l"], [0.300*w, gy+0.205*h, "l"],
+      [0.970*w, 0.222*h, "r"], [0.900*w, gy+0.160*h, "r"],
+      [G.rx+G.rw-0.014*w, G.ry+G.rh*0.20, "r"]
+    ];
+    var DST=[]; for(i=0;i<5;i++) DST.push([G.dx, gy-0.075*h + i*(0.150*h/4)]);
+    var DEC=[G.dx, gy+0.105*h];
+
+    /* --------- 3: the flows, drawn first so every box sits on top of them --------- */
+    var fa=0.28+0.62*hi(1);
+    for(i=0;i<5;i++) polyDot([[gx,gy],[G.wx,wy],[DST[i][0],DST[i][1]]], ACC, fa);
+    polyDot([[G.bx+G.bw*0.60,gy-0.060*h],[gx,gy],[G.wx,wy],[DEC[0],DEC[1]]], GOLDB, 0.30+0.62*hi(2));
+    if(!reduce){
+      for(i=0;i<PARTS.length;i++){
+        var pt=PARTS[i]; pt.u=(pt.u+pt.s*dt)%1;
+        var tg = pt.d===5 ? DEC : DST[pt.d], u=pt.u;
+        var px = u<0.5 ? lerp(gx,G.wx,u*2) : lerp(G.wx,tg[0],(u-0.5)*2);
+        var py = u<0.5 ? lerp(gy,wy,u*2)   : lerp(wy,tg[1],(u-0.5)*2);
+        x.globalAlpha=(0.30+0.60*hi(pt.d===5?2:1));
+        x.fillStyle=pt.d===5?GOLDB:ACC;
+        x.beginPath(); x.arc(px,py,Math.max(1.8,1.7*FS),0,6.283); x.fill();
+      }
+      x.globalAlpha=1;
+    }
+
+    /* --------- the trust boundary --------- */
+    x.save(); x.globalAlpha=0.85; x.strokeStyle=rgba(T_INK,0.42); x.lineWidth=Math.max(1,1*FS);
+    x.setLineDash([5*FS,4*FS]); x.beginPath(); x.moveTo(G.bnd,G.bl0); x.lineTo(G.bnd,G.bl1); x.stroke(); x.restore();
+    labC(x, tier===0?"outside the sandbox's reach":"outside the sandbox", G.blX, G.blY, INK4, LS);
+
+    /* --------- 1: sandbox, agent, planted credential, broker gate --------- */
+    x.save(); x.globalAlpha=hi(0);
+    x.fillStyle=rgba(T_CORE,0.05); x.strokeStyle=rgba(T_CORE,0.55); x.lineWidth=Math.max(1.2,1.2*FS);
+    rr(x,G.bx,G.by,G.bw,G.bh,8*FS); x.fill(); x.stroke();
+    lab(x,"SANDBOX",G.bx+0.014*w,G.by+(narrow?0.050:0.038)*h,CORED,NM,1.1*FS);
+    var agx=G.bx+G.bw*0.26, agr=Math.max(5,5.2*FS);
+    x.fillStyle=CORE; x.beginPath(); x.arc(agx,gy,agr,0,6.283); x.fill();
+    labC(x,"agent",agx,gy+0.038*h+cf*0.3,INK3,LS);
+    var tkx=G.bx+G.bw*0.60, tky=gy-0.075*h, tkw=Math.max(12,0.022*w), tkh=Math.max(9,0.024*h);
+    x.fillStyle=GOLDB; rr(x,tkx-tkw/2,tky,tkw,tkh,3*FS); x.fill();
+    labC(x,tier===0?"planted credential":"credential",tkx,gy-0.025*h,GOLD,LS);
+    arw(agx+agr+3*FS,gy,gx-(narrow?11:13)*FS,gy,rgba(T_CORE,0.75));
+    var gr=Math.max(7,7*FS);
+    x.strokeStyle=S===0?ACCD:ACC; x.lineWidth=Math.max(2.4,2.4*FS);
+    x.beginPath(); x.arc(gx,gy,gr,0,6.283); x.stroke();
+    x.fillStyle="#fff"; x.beginPath(); x.arc(gx,gy,gr-2*FS,0,6.283); x.fill();
+    x.fillStyle=S===0?ACCD:ACC; x.beginPath(); x.arc(gx,gy,Math.max(2,2*FS),0,6.283); x.fill();
+    x.restore();
+    var bgw=tw(x,"BROKER GATE",LS)+10*0.9*FS;
+    labCS(x,"BROKER GATE",gx-0.030*w-bgw/2,gy+0.115*h,S===0?ACCD:INK3,LS,1.0*FS);
+
+    /* --------- 2: the enforcement log --------- */
+    x.save(); x.globalAlpha=hi(0);
+    arw(gx,gy+gr+0.010*h, gx, G.ly-0.010*h, rgba(T_ACC,0.85));
+    x.fillStyle="#fff"; x.strokeStyle=S===0?ACCD:rgba(T_INK,0.28); x.lineWidth=S===0?Math.max(1.5,1.5*FS):Math.max(1,1*FS);
+    rr(x,G.lx,G.ly,G.lw,G.lh,6*FS); x.fill(); x.stroke();
+    lab(x,"ENFORCEMENT LOG",G.lx+0.012*w,G.ly+G.lh*0.28,S===0?ACCD:INK3,LS,0.9*FS);
+    var rws=[["a",0.86],["a",0.70],["d",0.78]];
+    for(i=0;i<3;i++){
+      var ry0=G.ly+G.lh*(0.48+i*0.20), gxx=G.lx+0.020*w, lnx=G.lx+0.048*w, g2=Math.max(3,3.1*FS);
+      var okc = rws[i][0]==="a" ? ACCD : DANGER;
+      x.strokeStyle=okc; x.lineWidth=Math.max(1.2,1.3*FS); x.beginPath();
+      if(rws[i][0]==="a"){ x.moveTo(gxx-g2,ry0-g2*0.1); x.lineTo(gxx-g2*0.25,ry0+g2*0.7); x.lineTo(gxx+g2,ry0-g2*0.8); }
+      else { x.moveTo(gxx-g2*0.8,ry0-g2*0.8); x.lineTo(gxx+g2*0.8,ry0+g2*0.8); x.moveTo(gxx+g2*0.8,ry0-g2*0.8); x.lineTo(gxx-g2*0.8,ry0+g2*0.8); }
+      x.stroke();
+      x.strokeStyle=rgba(T_INK,0.22); x.lineWidth=Math.max(2,2.2*FS); x.lineCap="round";
+      x.beginPath(); x.moveTo(lnx,ry0); x.lineTo(lnx+(G.lw-0.062*w)*rws[i][1],ry0); x.stroke(); x.lineCap="butt";
+    }
+    x.restore();
+
+    /* --------- 3: the witness lens --------- */
+    x.save(); x.globalAlpha=hi(1);
+    x.strokeStyle=S===1?ACCD:ACC; x.lineWidth=Math.max(2,2.1*FS);
+    x.beginPath(); x.ellipse(G.wx,wy,G.lrx,G.lry,0,0,6.283);
+    x.fillStyle=rgba(T_ACC,0.16); x.fill(); x.stroke();
+    x.restore();
+    labCS(x,"WITNESS",G.wx,gy+(narrow?0.075:0.085)*h,S===1?ACCD:INK3,NM,1.0*FS);
+    if(!narrow) labC(x,"kernel connection tracker",G.wx,gy+0.112*h,INK4,LS);
+
+    /* --------- 4: the witness merkle tree and the public anchor --------- */
+    x.save(); x.globalAlpha=hi(1);
+    var nd=[[G.wx,tyr],[G.wx-G.tdx,tyc],[G.wx+G.tdx,tyc],
+            [G.wx-G.tdx2,tyl],[G.wx-G.tdx2/3,tyl],[G.wx+G.tdx2/3,tyl],[G.wx+G.tdx2,tyl]];
+    x.strokeStyle=rgba(T_ACC,0.65); x.lineWidth=Math.max(1,1*FS);
+    x.beginPath();
+    x.moveTo(nd[1][0],nd[1][1]); x.lineTo(nd[0][0],nd[0][1]); x.lineTo(nd[2][0],nd[2][1]);
+    x.moveTo(nd[3][0],nd[3][1]); x.lineTo(nd[1][0],nd[1][1]); x.lineTo(nd[4][0],nd[4][1]);
+    x.moveTo(nd[5][0],nd[5][1]); x.lineTo(nd[2][0],nd[2][1]); x.lineTo(nd[6][0],nd[6][1]); x.stroke();
+    for(i=0;i<nd.length;i++){ x.fillStyle=i===0?ACCD:ACC;
+      x.beginPath(); x.arc(nd[i][0],nd[i][1],(i===0?4:2.8)*Math.max(1,FS),0,6.283); x.fill(); }
+    labR(x,"witness root",G.wx-G.wroot,tyr+cf*0.34,INK3,LS);
+    x.restore();
+    x.save(); x.globalAlpha=hi(1);
+    var amid=(G.ay0+G.ay1)/2, toL=G.ax<G.wx?-1:1;
+    arw(nd[0][0]+toL*0.008*w, tyr-0.008*h, G.ax-toL*(G.aw/2+3*FS), amid, rgba(T_ACC,0.85), Math.max(1,1*FS), [4*FS,4*FS]);
+    x.fillStyle=rgba(T_CORE,0.10); x.strokeStyle=S===1?CORED:CORE; x.lineWidth=Math.max(1.2,1.3*FS);
+    rr(x,G.ax-G.aw/2,G.ay0,G.aw,G.ay1-G.ay0,4*FS); x.fill(); x.stroke();
+    x.restore();
+    labCS(x,"PUBLIC ANCHOR",G.ax,G.al0,S===1?CORED:INK3,LS,0.9*FS);
+    labC(x,"git note, Rekor",G.ax,G.al1,INK4,LS);
+
+    /* --------- 5: destinations and the decoy endpoint --------- */
+    x.save(); x.globalAlpha=hi(1);
+    for(i=0;i<5;i++){ x.fillStyle=ACC; x.beginPath(); x.arc(DST[i][0],DST[i][1],Math.max(4,4.2*FS),0,6.283); x.fill(); }
+    x.restore();
+    labC(x,"destinations",G.dx,gy-0.105*h,INK4,LS);
+    x.save(); x.globalAlpha=hi(2);
+    x.fillStyle=GOLDB; x.beginPath(); x.arc(DEC[0],DEC[1],Math.max(5,5.4*FS),0,6.283); x.fill();
+    x.strokeStyle=GOLD; x.lineWidth=Math.max(1,1.1*FS);
+    x.beginPath(); x.arc(DEC[0],DEC[1],Math.max(8,8.6*FS),0,6.283); x.stroke();
+    x.restore();
+    labR(x,tier===2?"decoy":"decoy endpoint",G.dx-(narrow?0.034:0.030)*w,DEC[1]+cf*0.34,GOLD,LS);
+
+    /* --------- 6: the one signed receipt --------- */
+    x.save(); x.globalAlpha=PRINT?1:(S===3?1:0.62);
+    var rmid=G.ry+G.rh*0.5;
+    var elbL=G.lx+G.lw+G.feed;
+    x.strokeStyle=rgba(T_ACC,0.55); x.lineWidth=Math.max(1,1*FS);
+    x.beginPath(); x.moveTo(G.lx+G.lw,G.ly+G.lh*0.55); x.lineTo(elbL,G.ly+G.lh*0.55); x.lineTo(elbL,G.ry-0.008*h); x.stroke();
+    head(elbL,G.ry-0.05*h,elbL,G.ry-0.008*h,rgba(T_ACC,0.55));
+    if(!narrow) arw(G.wx, gy+0.250*h, G.rx+G.rw*0.52, G.ry-0.008*h, rgba(T_ACC,0.55), Math.max(1,1*FS));
+    x.strokeStyle=rgba(T_GOLD,0.55); x.lineWidth=Math.max(1,1*FS);
+    x.beginPath(); x.moveTo(DEC[0]+0.014*w,DEC[1]); x.lineTo(G.elb,DEC[1]); x.lineTo(G.elb,G.ry-0.008*h); x.stroke();
+    head(G.elb,G.ry-0.05*h,G.elb,G.ry-0.008*h,rgba(T_GOLD,0.55));
+    x.restore();
+    x.save(); x.globalAlpha=PRINT?1:(S===3?1:0.72);
+    x.fillStyle="#fff"; x.strokeStyle=S===3?ACCD:rgba(T_INK,0.3); x.lineWidth=S===3?Math.max(1.7,1.7*FS):Math.max(1,1*FS);
+    rr(x,G.rx,G.ry,G.rw,G.rh,7*FS); x.fill(); x.stroke();
+    lab(x,"ONE SIGNED RECEIPT",G.rx+0.014*w,G.ry+G.rh*0.35,S===3?ACCD:INK3,NM,1.0*FS);
+    var CH=["enforcementLogMerkleRoot","witnessMerkleRoot","canaryHitsRoot"];
+    if(narrow) CH=["enforcement","witness","canary"];
+    var inx=G.rx+0.016*w, slot=(G.rw-0.032*w)/3, chh=G.rh*0.36, chy=G.ry+G.rh*0.52;
+    var ccol=[(S===0||S===3)?ACCD:INK3,(S===1||S===3)?ACCD:INK3,(S===2||S===3)?GOLD:INK3];
+    for(i=0;i<3;i++){
+      var cxx=inx+i*slot, cww=slot-0.012*w;
+      x.fillStyle=i===2?rgba(T_GOLD,0.09):rgba(T_ACC,0.10);
+      x.strokeStyle=i===2?rgba(T_GOLD,0.45):rgba(T_ACC,0.45); x.lineWidth=Math.max(1,1*FS);
+      rr(x,cxx,chy,cww,chh,4*FS); x.fill(); x.stroke();
+      lab(x,CH[i],cxx+0.010*w,chy+chh/2+cf*0.34,ccol[i],LS);
+    }
+    x.restore();
+
+    /* --------- the six numbered captions --------- */
+    for(i=0;i<6;i++) cap(i,CPOS[i][0],CPOS[i][1],CPOS[i][2]);
+
+    /* --------- legend --------- */
+    if(!narrow){
+      var lgy=0.985*h, lgx=G.rx, sp=tw(x,"   ",LS);
+      var L1="teal: witnessed connection", L2="gold: decoy path", L3="dashed: anchoring";
+      lab(x,L1,lgx,lgy,ACCD,LS); lgx+=tw(x,L1,LS)+sp;
+      lab(x,L2,lgx,lgy,GOLD,LS);  lgx+=tw(x,L2,LS)+sp;
+      lab(x,L3,lgx,lgy,INK4,LS);
+    }
   }
   register(c,draw,0.78); draw(0,0);
 })();
@@ -1754,7 +2030,9 @@ var obsStep = 0;
   function draw(t){
     var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<620;
     x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
-    var m={l:narrow?44:60,r:20,t:(PRINT?78:48),b:96}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+    var FS=(typeof __FS!=="undefined")?__FS:1;
+    /* the title row sits above the plot: leave room for the 100% and 12/12 value labels under it */
+    var m={l:narrow?44:60,r:20,t:(PRINT?78:(narrow?48:64)),b:96}, pw=w-m.l-m.r, ph=h-m.t-m.b;
     function Y(v){ return m.t+ph-v*ph; }
     x.strokeStyle=RULE; x.lineWidth=1;
     for(var g=0;g<=4;g++){ var yy=Y(g/4); x.beginPath(); x.moveTo(m.l,yy); x.lineTo(m.l+pw,yy); x.stroke(); labR(x,(g*25)+"%",m.l-8,yy+4,INK4,9.5); }
@@ -1790,11 +2068,16 @@ var obsStep = 0;
       x.globalAlpha=cA;
       var sy=Y(0)+44, sw=pw/CLS.length;
       lab(x,"AFTER THE FIX, PER WORKLOAD CLASS",m.l,sy-8,INK4,9,1);
+      /* two lines per chip, vertically centred: the box grows with the font so the
+         second line never lands on the bottom border and the first never touches the top */
+      var s1=(narrow?8.5:9.5)*FS, s2=9.5*FS, lh=Math.max(s1,s2)*1.35;
+      var pad=Math.max(6,s1*0.5), chh=Math.round(pad*2+s1*0.75+lh+s2*0.22);
+      var b1=sy+pad+s1*0.75, b2=b1+lh;
       for(var i=0;i<CLS.length;i++){
         var sx=m.l+sw*i+3;
-        x.fillStyle=rgba(T_ACC,0.12); x.strokeStyle=rgba(T_ACC,0.5); x.lineWidth=1; rr(x,sx,sy,sw-6,30,4); x.fill(); x.stroke();
-        lab(x,narrow?CLS[i].l.replace(" + HF + DNS","+HF+DNS"):CLS[i].l,sx+8,sy+13,INK2,narrow?8.5:9.5);
-        lab(x,CLS[i].k+" of "+CLS[i].n,sx+8,sy+25,ACCD,9.5);
+        x.fillStyle=rgba(T_ACC,0.12); x.strokeStyle=rgba(T_ACC,0.5); x.lineWidth=1; rr(x,sx,sy,sw-6,chh,4); x.fill(); x.stroke();
+        lab(x,narrow?CLS[i].l.replace(" + HF + DNS","+HF+DNS"):CLS[i].l,sx+8,b1,INK2,narrow?8.5:9.5);
+        lab(x,CLS[i].k+" of "+CLS[i].n,sx+8,b2,ACCD,9.5);
       }
       x.globalAlpha=1;
     }
@@ -1896,6 +2179,140 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
   });
 });
 
+
+/* ======================================================================
+   Figure 2: anatomy of the receipt.
+   Runs inside the scaffold IIFE, so `reduce` is in scope. Two jobs:
+   (1) reflow the diagram into one column when the figure is narrow, by
+       rewriting geometry attributes (the viewBox cannot be set from CSS);
+   (2) play the reveal once, when 35 percent of the figure is on screen.
+   The markup in body.html is already the finished state, so with this
+   script absent the figure is simply the static wide diagram.
+   ====================================================================== */
+(function(){
+  var F = document.getElementById("anatFig");
+  if(!F) return;
+  var NARROW_AT = 640;          // rendered CSS px below which the diagram stacks
+  var VB_MIN = 340, VB_MAX = 540;
+  var RUN_MS = 4200;            // past the end of the whole sequence
+
+  function byId(id){ return document.getElementById(id); }
+
+  /* attribute writes are stashed once, so wide mode is a restore, not a second table */
+  var stashed = [];
+  function put(el, attr, val){
+    if(!el) return;
+    if(!el.__a) el.__a = {};
+    if(!(attr in el.__a)){ el.__a[attr] = el.getAttribute(attr); stashed.push([el, attr]); }
+    el.setAttribute(attr, val);
+  }
+  function restoreAll(){
+    for(var i=0;i<stashed.length;i++){
+      var el = stashed[i][0], a = stashed[i][1], v = el.__a[a];
+      if(v === null) el.removeAttribute(a); else el.setAttribute(a, v);
+    }
+  }
+
+  var arrows = [byId("anatA0"), byId("anatA1"), byId("anatA2"), byId("anatA3")];
+  var parts = [].slice.call(F.querySelectorAll(".ap"));
+  var mode = "", armed = false, fired = false, starting = false;
+
+  /* one column: the three observers hand their roots to a gutter on the left,
+     the gutter carries them down into the receipt, the receipt into the strip */
+  function stack(V){
+    var x = 30, W = V - 38, rcx = x + W/2, r = 6, i;
+    var cardY = [4, 216, 428];
+    put(F, "viewBox", "0 0 " + V + " 1304");
+    for(i=0;i<3;i++){
+      put(byId("anatC"+i), "transform", "translate(" + x + " " + cardY[i] + ")");
+      put(byId("anatC"+i+"box"), "width", W);
+      var mid = cardY[i] + 99, rail = 10 + 6*i, turn = 640 + 12*i, tip = rcx - 26 + 26*i;
+      put(arrows[i], "d",
+        "M" + x + " " + mid + " H" + (rail+r) +
+        " Q" + rail + " " + mid + " " + rail + " " + (mid+r) +
+        " V" + (turn-r) +
+        " Q" + rail + " " + turn + " " + (rail+r) + " " + turn +
+        " H" + (tip-r) +
+        " Q" + tip + " " + turn + " " + tip + " " + (turn+r) + " V680");
+      put(byId("anatH"+i), "transform", "translate(" + tip + " 690)");
+      put(byId("anatK"+i), "transform", "translate(26 " + (232 + 34*i) + ")");
+      put(byId("anatB"+i), "transform", "translate(26 " + (88 + 30*i) + ")");
+    }
+    put(byId("anatR"), "transform", "translate(" + x + " 690)");
+    put(byId("anatRbox"), "width", W); put(byId("anatRbox"), "height", 342);
+    put(byId("anatRsh"), "width", W);  put(byId("anatRsh"), "height", 342);
+    put(byId("anatRdiv"), "display", "none");   /* the two columns become one */
+    put(arrows[3], "d", "M" + rcx + " 1038 V1054");
+    put(byId("anatH3"), "transform", "translate(" + rcx + " 1064)");
+    put(byId("anatS"), "transform", "translate(" + x + " 1064)");
+    put(byId("anatSbox"), "width", W); put(byId("anatSbox"), "height", 232);
+    put(byId("anatPw"), "display", "none");
+    put(byId("anatPn"), "display", "inline");
+  }
+
+  /* dash lengths depend on the layout, so they are recomputed with it */
+  function syncLines(){
+    for(var i=0;i<arrows.length;i++){
+      var a = arrows[i]; if(!a) continue;
+      if(!armed || fired){ a.style.strokeDasharray = ""; a.style.strokeDashoffset = ""; }
+      else {
+        var L = a.getTotalLength();
+        a.style.strokeDasharray = L; a.style.strokeDashoffset = L;
+      }
+    }
+  }
+
+  function layout(){
+    var w = F.getBoundingClientRect().width || 1000;
+    var narrow = w < NARROW_AT;
+    var V = Math.max(VB_MIN, Math.min(VB_MAX, Math.round(w)));
+    var key = narrow ? "n" + V : "w";
+    if(key === mode) return;
+    mode = key;
+    if(narrow) stack(V); else restoreAll();
+    syncLines();
+  }
+
+  function arm(){
+    armed = true;
+    F.classList.add("armed");
+    var i;
+    for(i=0;i<parts.length;i++) parts[i].style.transitionDelay = (parts[i].getAttribute("data-d") || 0) + "ms";
+    for(i=0;i<arrows.length;i++) if(arrows[i]) arrows[i].style.transitionDelay = (arrows[i].getAttribute("data-d") || 0) + "ms";
+    syncLines();
+  }
+
+  function play(){
+    if(fired || starting) return;
+    starting = true;
+    /* two frames, so the armed state is painted before the transition starts:
+       without it a figure that is already in view can jump straight to the end */
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      fired = true;
+      F.classList.add("go");
+      for(var i=0;i<arrows.length;i++) if(arrows[i]) arrows[i].style.strokeDashoffset = "0";
+      setTimeout(syncLines, RUN_MS);
+    }); });
+  }
+
+  layout();
+  if(window.ResizeObserver) new ResizeObserver(layout).observe(F);
+  else addEventListener("resize", layout, {passive:true});
+
+  if(reduce) return;   /* finished state, no motion */
+  arm();
+
+  /* a tall figure can never reach 35 percent on a short viewport, so cap the threshold */
+  var h = F.getBoundingClientRect().height || 1;
+  var th = Math.max(0.02, Math.min(0.35, (innerHeight * 0.55) / h));
+  var io = new IntersectionObserver(function(es){
+    for(var i=0;i<es.length;i++){
+      if(es[i].isIntersecting){ io.disconnect(); play(); return; }
+    }
+  }, {threshold: th});
+  io.observe(F);
+})();
+
 })();
 </script>
 <script type="module">
@@ -1945,13 +2362,13 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
     var res=await Promise.all([fetch(base+"receipt-real-clean-public-anchor.json"),fetch(base+"journal.pub"),fetch(base+"rekor.pub")]);
     receipt=await res[0].json(); pub=await res[1].text(); rekorPub=await res[2].text();
   }catch(e){ mod=null; }
-  /* the 3D tree, if the module and the digests are available */
+  /* the 2D tree, if the module and the digests are available */
   try{
-    var mk=await import("./assets/egress-receipts/merkle3d.js");
+    var mk=await import("./assets/egress-receipts/merkle2d.js");
     var mc=document.getElementById("cMerkle");
     if(mc && mod && receipt){
       cleanLeaves=await mod.leafDigests(receipt);
-      merkle=mk.initMerkle3d(mc,{leaves:cleanLeaves, hashPair:mod.merkleHashPair, onRoot:function(){}});
+      merkle=mk.initMerkle2d(mc,{leaves:cleanLeaves, hashPair:mod.merkleHashPair, onRoot:function(){}});
       if(reduce && merkle.setReducedMotion) merkle.setReducedMotion(true);
     } else if(mc){ mc.closest(".vlab-tree").hidden=true; }
   }catch(e){ var tc=document.querySelector(".vlab-tree"); if(tc) tc.hidden=true; }

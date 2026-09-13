@@ -695,6 +695,80 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
 /* one column below 900px: the canvas gets much wider, so it can be shallower */
 @media(max-width:900px){#cMerkle{aspect-ratio:16/8.5}}
 @media(max-width:520px){#cMerkle{aspect-ratio:16/10}}
+
+/* ---------- podcast: one pill in the hero, one control in the top bar ---------- */
+.pods{display:grid;grid-template-columns:minmax(0,560px);margin:22px 0 0}
+.pod{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:6px 16px 6px 6px;border-radius:999px;
+  border:1px solid rgba(123,189,174,.42);color:#eef4f7;min-width:0;
+  background:linear-gradient(90deg,rgba(90,158,143,.22),rgba(30,58,79,.62) 58%,rgba(90,158,143,.10));
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 0 0 0 rgba(123,189,174,.35),0 0 26px rgba(90,158,143,.16),0 18px 40px -18px rgba(0,0,0,.7);
+  animation:podglow 3.6s ease-in-out infinite;transition:border-color .3s,transform .35s var(--ease)}
+.pod:hover{border-color:rgba(191,222,214,.85);transform:translateY(-2px)}
+.pod.playing{animation:none;border-color:rgba(191,222,214,.9);box-shadow:0 0 0 3px rgba(123,189,174,.16),0 0 44px rgba(90,158,143,.32),0 18px 40px -18px rgba(0,0,0,.7)}
+@keyframes podglow{0%,100%{box-shadow:0 0 0 0 rgba(123,189,174,.35),0 0 26px rgba(90,158,143,.16),0 18px 40px -18px rgba(0,0,0,.7)}
+  50%{box-shadow:0 0 0 9px rgba(123,189,174,0),0 0 54px rgba(90,158,143,.34),0 18px 40px -18px rgba(0,0,0,.7)}}
+@property --p{syntax:"<percentage>";inherits:false;initial-value:0%}
+.pod-play{position:relative;flex:none;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;color:#0f2430;padding:0;margin:0;
+  background:transparent;display:grid;place-items:center;--p:0%;transition:--p .25s linear;-webkit-tap-highlight-color:transparent}
+.pod-play::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#fff var(--p),rgba(255,255,255,.16) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.4px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.4px))}
+.pod-play::after{content:"";position:absolute;inset:5px;border-radius:50%;background:linear-gradient(135deg,#bfded6,#5a9e8f);
+  box-shadow:0 0 0 5px rgba(123,189,174,.14),0 0 22px rgba(90,158,143,.45);transition:transform .3s var(--ease),box-shadow .3s}
+.pod:hover .pod-play::after{transform:scale(1.06);box-shadow:0 0 0 7px rgba(123,189,174,.2),0 0 30px rgba(90,158,143,.6)}
+.pod-play:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.pod-icon{width:22px;height:22px;fill:currentColor;position:relative;z-index:1}
+.pod-icon .bars{display:none}
+.pod.playing .pod-icon .tri{display:none}
+.pod.playing .pod-icon .bars{display:block}
+.pod-t{min-width:0;display:flex;flex-direction:column;gap:2px}
+.pod-k{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(191,222,214,.9);white-space:nowrap}
+.pod-time{font-variant-numeric:tabular-nums;letter-spacing:.04em;text-transform:none;color:#c9d6de;flex:none}
+.pod:not(.started) .pod-time .cur,.pod:not(.started) .pod-time .sep{display:none}
+.pod-t b{font-family:var(--font-display);font-weight:500;font-size:15.5px;line-height:1.2;letter-spacing:-.005em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pod-seek{-webkit-appearance:none;appearance:none;width:100%;height:14px;margin:2px 0 0;background:transparent;cursor:pointer;display:block}
+.pod-seek::-webkit-slider-runnable-track{height:2px;border-radius:1px;background:linear-gradient(90deg,#bfded6 var(--p,0%),rgba(255,255,255,.22) var(--p,0%))}
+.pod-seek::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:#fff;margin-top:-4px;box-shadow:0 0 0 3px rgba(123,189,174,.35);opacity:0;transition:opacity .2s}
+.pod:hover .pod-seek::-webkit-slider-thumb,.pod.started .pod-seek::-webkit-slider-thumb,.pod-seek:focus-visible::-webkit-slider-thumb{opacity:1}
+.pod-seek::-moz-range-track{height:2px;border-radius:1px;background:rgba(255,255,255,.22)}
+.pod-seek::-moz-range-progress{height:2px;border-radius:1px;background:#bfded6}
+.pod-seek::-moz-range-thumb{width:10px;height:10px;border:none;border-radius:50%;background:#fff}
+.pod-side{display:flex;align-items:center;gap:12px;flex:none}
+.peq{display:flex;align-items:flex-end;gap:2px;height:16px;width:18px}
+.peq i{display:block;width:3px;height:16px;border-radius:1px;background:#bfded6;opacity:.35;transform:scaleY(.25);transform-origin:bottom}
+.pod.playing .peq i{opacity:1;animation:peq .9s ease-in-out infinite alternate}
+.pod.playing .peq i:nth-child(2){animation-delay:-.3s}.pod.playing .peq i:nth-child(3){animation-delay:-.55s}.pod.playing .peq i:nth-child(4){animation-delay:-.15s}
+@keyframes peq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.pod.playing.buffering .peq i{opacity:.45;animation:peqbuf 1.1s ease-in-out infinite}
+@keyframes peqbuf{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(.6)}}
+.pod-rate{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;color:#eef4f7;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:4px 9px;cursor:pointer}
+.pod-rate:hover{background:rgba(255,255,255,.16)}
+.pod.failed{border-color:rgba(224,138,114,.6)}
+.pod.failed .pod-tag{color:#e08a72}
+@media(prefers-reduced-motion:reduce){.pod{animation:none}.pod.playing .peq i{animation:none;transform:scaleY(.6)}}
+@media(max-width:480px){.pod{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:9px 14px 9px 9px;border-radius:34px}.pod-side{display:none}.pod-t b{font-size:14.5px;white-space:normal}}
+
+/* the top bar gets a fifth cell: the play control at the right edge, present on every scroll position */
+#topbar .wrap{grid-template-columns:auto auto minmax(0,1fr) auto auto}
+.tb-play{display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 13px 0 5px;border-radius:999px;cursor:pointer;justify-self:end;
+  border:1px solid var(--rule-strong,rgba(44,62,80,.22));background:rgba(90,158,143,.10);color:var(--ink,#2c3e50);font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  transition:border-color .25s,background .25s,transform .25s var(--ease),box-shadow .25s;-webkit-tap-highlight-color:transparent}
+.tb-play:hover{border-color:var(--accent,#5a9e8f);background:rgba(90,158,143,.18);transform:translateY(-1px)}
+.tb-play:focus-visible{outline:2px solid var(--accent-deep,#3d7568);outline-offset:3px}
+.tb-play.playing{border-color:var(--accent,#5a9e8f);box-shadow:0 0 0 3px rgba(90,158,143,.14),0 0 18px rgba(90,158,143,.22)}
+.tb-badge{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7bbdae,#3d7568);color:#fff;flex:none}
+.tb-badge svg{width:16px;height:16px;fill:currentColor}
+.tb-badge .bars{display:none}
+.tb-play.playing .tb-badge .tri{display:none}
+.tb-play.playing .tb-badge .bars{display:block}
+.tb-time{font-variant-numeric:tabular-nums;letter-spacing:.04em;text-transform:none;color:var(--ink-soft,#6c757d)}
+.tb-play .peq{display:none;height:12px;width:14px}
+.tb-play .peq i{background:var(--accent,#5a9e8f);opacity:1;animation:peq .9s ease-in-out infinite alternate;height:12px}
+.tb-play .peq i:nth-child(2){animation-delay:-.3s}.tb-play .peq i:nth-child(3){animation-delay:-.55s}.tb-play .peq i:nth-child(4){animation-delay:-.15s}
+.tb-play.playing .peq{display:flex}
+.tb-play.playing .tb-lab{display:none}
+@media(prefers-reduced-motion:reduce){.tb-play .peq i{animation:none;transform:scaleY(.6)}}
+@media(max-width:700px){.tb-play .tb-lab,.tb-play .tb-time{display:none}.tb-play{padding:0 5px}}
 </style>
 </head>
 
@@ -715,6 +789,7 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
     <a href="#limits" data-sec="limits">Limits</a>
     <a href="#run" data-sec="run">Run it</a>
   </nav>
+  <button type="button" class="tb-play" id="tbPlay" aria-pressed="false" aria-label="Play the podcast about this project"><span class="tb-badge" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="tri" d="M11.6 9.2v13.6L22.8 16 11.6 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></span><span class="tb-lab">Listen</span><span class="tb-time" hidden></span><span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
   <span class="rail-end" id="railPct">00%</span>
 </div></div>
 
@@ -730,12 +805,22 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
     <p class="sub">One signed file per evaluation run. A second witness outside the sandbox, a public
       anchor made while the run is still going, and planted bait that fires only on exfiltration.
       <b>Anyone verifies it offline, with no access to the lab.</b></p>
-    <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore
-      &nbsp;&middot;&nbsp; solo entry, built on Shadow Commit</p>
+    <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore</p>
     <div class="hbtns">
       <a class="hbtn solid" href="assets/egress-receipts-paper.pdf" target="_blank" rel="noopener">Read the report <span class="arrow">&rarr;</span></a>
       <a class="hbtn" href="https://github.com/thylinao1/egress-receipts" target="_blank" rel="noopener">Code and judge-kit</a>
       <a class="hbtn" href="#verify">Verify a receipt here</a>
+    </div>
+    <div class="pods" role="group" aria-label="Listen to the podcast about this project">
+      <div class="pod" id="pod" data-src="assets/egress-receipts/podcast.m4a" data-len="1354" data-title="the podcast, Egress receipts for AI sandbox containment">
+        <button type="button" class="pod-play" aria-pressed="false" aria-label="Play the podcast, Egress receipts for AI sandbox containment, 23 minutes"><svg class="pod-icon" viewBox="0 0 32 32" aria-hidden="true"><path class="tri" d="M11.6 9.2v13.6L22.8 16 11.6 9.2z"/><g class="bars"><rect x="10.6" y="9.6" width="3.6" height="12.8" rx="1.6"/><rect x="17.8" y="9.6" width="3.6" height="12.8" rx="1.6"/></g></svg></button>
+        <div class="pod-t">
+          <span class="pod-k"><span class="pod-tag">Podcast &middot; 23 min</span><span class="pod-time"><span class="cur">0:00</span><span class="sep"> / </span><span class="tot"></span></span></span>
+          <b>Egress receipts for AI sandbox containment</b>
+          <input type="range" class="pod-seek" min="0" max="1000" value="0" step="1" aria-label="Position in the podcast">
+        </div>
+        <div class="pod-side"><span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><button type="button" class="pod-rate" aria-label="Playback speed, currently 1x">1x</button></div>
+      </div>
     </div>
     <dl class="hstats">
       <div><dt>False alarms on real traffic</dt><dd><span class="count" data-final="0" data-dec="0">0</span> <span class="hsub">of 110 flows, 7 workload classes</span></dd></div>
@@ -2180,6 +2265,7 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
 });
 
 
+
 /* ======================================================================
    Figure 2: anatomy of the receipt.
    Runs inside the scaffold IIFE, so `reduce` is in scope. Two jobs:
@@ -2311,6 +2397,54 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
     }
   }, {threshold: th});
   io.observe(F);
+})();
+
+/* ================= PODCAST: one episode, a pill in the hero and a control in the top bar ================= */
+(function(){
+  var el = document.getElementById("pod"); if(!el) return;
+  var RATES = [1, 1.25, 1.5, 2];
+  function fmt(s){ s = Math.max(0, Math.round(s)); var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), x = s%60;
+    return (h ? h + ":" + (m<10?"0":"") + m : m) + ":" + (x<10?"0":"") + x; }
+  var a = new Audio(); a.preload = "none"; a.src = el.getAttribute("data-src");
+  var len = parseFloat(el.getAttribute("data-len")) || 0, title = el.getAttribute("data-title") || "the podcast";
+  var btn = el.querySelector(".pod-play"), seek = el.querySelector(".pod-seek"), cur = el.querySelector(".cur"), tot = el.querySelector(".tot"),
+      rate = el.querySelector(".pod-rate"), ri = 0, seeking = false;
+  var tb = document.getElementById("tbPlay"), tbTime = tb ? tb.querySelector(".tb-time") : null;
+  function dur(){ return isFinite(a.duration) && a.duration > 0 ? a.duration : len; }
+  function paint(){ var d = dur(), p = d ? Math.min(1, Math.max(0, a.currentTime/d)) : 0;
+    if(!seeking) seek.value = Math.round(p*1000); seek.style.setProperty("--p", (p*100).toFixed(2) + "%");
+    btn.style.setProperty("--p", (p*100).toFixed(2) + "%"); cur.textContent = fmt(a.currentTime);
+    if(tbTime && el.classList.contains("started")){ tbTime.hidden = false; tbTime.textContent = fmt(a.currentTime) + " / " + fmt(d); } }
+  function setPlaying(on){ el.classList.toggle("playing", on); btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", (on ? "Pause " : "Play ") + title);
+    if(tb){ tb.classList.toggle("playing", on); tb.setAttribute("aria-pressed", on ? "true" : "false");
+      tb.setAttribute("aria-label", on ? "Pause the podcast" : (el.classList.contains("started") ? "Resume the podcast" : "Play the podcast about this project")); } }
+  function toggle(){
+    if(a.paused){ el.classList.add("started"); var pr = a.play(); if(pr && pr.catch) pr.catch(function(){ setPlaying(false); }); }
+    else a.pause();
+  }
+  btn.addEventListener("click", toggle);
+  if(tb) tb.addEventListener("click", toggle);
+  a.addEventListener("play", function(){ setPlaying(true); if(a.readyState < 3) el.classList.add("buffering");
+    if("mediaSession" in navigator && window.MediaMetadata){ try{ navigator.mediaSession.metadata = new MediaMetadata({title: "Egress receipts for AI sandbox containment", artist: "Maksim Silchenko", album: "Apart x CeSIA AI Incident Response Sprint 2026"}); }catch(e){} } });
+  a.addEventListener("pause", function(){ setPlaying(false); el.classList.remove("buffering"); });
+  a.addEventListener("waiting", function(){ el.classList.add("buffering"); });
+  a.addEventListener("playing", function(){ el.classList.remove("buffering"); });
+  a.addEventListener("error", function(){ setPlaying(false); el.classList.remove("buffering"); el.classList.add("failed");
+    el.querySelector(".pod-tag").textContent = "Audio could not load"; });
+  a.addEventListener("ended", function(){ setPlaying(false); a.currentTime = 0; paint(); });
+  a.addEventListener("timeupdate", paint);
+  a.addEventListener("loadedmetadata", function(){ tot.textContent = fmt(dur()); paint(); });
+  seek.addEventListener("input", function(){ seeking = true; var t = seek.value/1000*dur(); cur.textContent = fmt(t); seek.style.setProperty("--p", (seek.value/10).toFixed(2) + "%"); });
+  seek.addEventListener("change", function(){ a.currentTime = seek.value/1000*dur(); seeking = false; el.classList.add("started"); paint(); });
+  if(rate) rate.addEventListener("click", function(){ ri = (ri+1) % RATES.length; a.playbackRate = RATES[ri]; rate.textContent = RATES[ri] + "x"; rate.setAttribute("aria-label", "Playback speed, currently " + RATES[ri] + "x"); });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== " " || e.target !== document.body) return;
+    if(!el.classList.contains("started")) return;
+    e.preventDefault(); toggle();
+  });
+  tot.textContent = fmt(len);
+  try{ window.__pod = a; }catch(e){}
 })();
 
 })();

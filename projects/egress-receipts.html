@@ -653,6 +653,12 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
 .pass{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent-deep)}
 .hist{display:block;font-family:var(--font-mono);font-size:10.5px;color:var(--gold-deep);margin-top:4px}
 #hero .sub{max-width:640px}
+
+/* the timeline needs more height on phones: two label stacks, a bracket and the receipt track */
+@media(max-width:660px){#cTimeline{aspect-ratio:16/12}}
+/* the observers diagram carries a receipt box under the sandbox; it needs more height than the default figure ratio */
+#cObservers{aspect-ratio:16/12}
+@media(max-width:660px){#cObservers{aspect-ratio:1/1.05}}
 </style>
 </head>
 
@@ -684,7 +690,7 @@ table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color
   <img id="heroFallback" class="hero-fallback" src="assets/egress-receipts/fig2-receipt-anatomy.svg" alt="" hidden>
   <div class="wrap">
     <p class="tag">Apart x CeSIA AI Incident Response Sprint 2026 &middot; Track 1, Containment</p>
-    <h1 id="hero-h">Egress Receipts: A Way for an Outsider to Catch an Evaluation Sandbox That Lies About Its Own Egress</h1>
+    <h1 id="hero-h">Egress receipts: a way for an outsider to catch an evaluation sandbox that lies about its own egress</h1>
     <p class="sub">One signed file per evaluation run. A second witness outside the sandbox, a public
       anchor made while the run is still going, and planted bait that fires only on exfiltration.
       <b>Anyone verifies it offline, with no access to the lab.</b></p>
@@ -1029,8 +1035,7 @@ cd .. &amp;&amp; node standard/checks/05-benign-reconciliation.mjs   # recompute
         browser verifier on this page is a port of the node verifier and was checked for parity against
         it on every shipped receipt.</p>
       <p class="small">Large language models were used in this project only as assistance, for code and for
-        drafting, including this page. Every quantitative claim traces to a recorded measurement rather than
-        to a model's summary of one.</p>
+        drafting, including this page.</p>
       <p class="small">Corrections are welcome. If something here misstates the incident record, a
         source, or a measurement, tell me and I will fix it.</p>
       <div class="footlinks">
@@ -1093,8 +1098,8 @@ function labC(x,t,px,py,col,size){ x.save(); mono(x,size||11);
 /* centred label with a paper-coloured plate behind it, for labels that cross a rule */
 function labCP(x,t,px,py,col,size){
   x.save(); mono(x,size||11);
-  var ww=x.measureText(t).width;
-  x.fillStyle="#ffffff"; x.fillRect(px-ww/2-7, py-(size||11)-2, ww+14, (size||11)+9);
+  var ww=x.measureText(t).width, fp=parseFloat(x.font)||(size||11);
+  x.fillStyle="#ffffff"; x.fillRect(px-ww/2-7, py-fp-2, ww+14, fp+9);
   x.fillStyle=col||INK4; x.fillText(t, px-ww/2, py); x.restore();
 }
 function tw(x,s,size){ x.save(); mono(x,size); var v=x.measureText(s).width; x.restore(); return v; }
@@ -1512,14 +1517,20 @@ paintRail();
    Egress receipts page: figures, scrolly, verifier panel, copy buttons.
    Runs inside the scaffold IIFE, so the hidpi, register, label, rgba and reduce helpers exist.
    Every number below is transcribed from repo/report/CLAIMS-LEDGER.md
-   (L-01 to L-25) and research/sprint/WS-K-OUT.md.
+   (L-01 to L-25) and the measurement records in the repository.
    ====================================================================== */
 var DANGER="#a94438", T_DANGER=[169,68,56], GOLDB="#d8b34a", T_GOLDB=[216,179,74];
+var PRINT = (typeof __FS !== "undefined" && __FS > 1.05);
 
 function wilson(k, n){
   if(n<=0) return [0,0];
   var z=1.959964, p=k/n, d=1+z*z/n, c=p+z*z/(2*n), h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n));
   return [Math.max(0,(c-h)/d), Math.min(1,(c+h)/d)];
+}
+function labCS(x,t,px,py,col,size,ls){
+  x.save(); mono(x,size||11); var str=String(t), ww=0;
+  for(var i=0;i<str.length;i++) ww+=x.measureText(str[i]).width+(i<str.length-1?(ls||0):0);
+  x.restore(); lab(x,t,px-ww/2,py,col,size,ls);
 }
 function wrapLines(x, text, maxw){
   var words=String(text).split(" "), lines=[], cur="";
@@ -1543,45 +1554,42 @@ function wrapLines(x, text, maxw){
     var k=hidpi(c,0.44), x=k.x, w=k.w, h=k.h, narrow=w<620;
     x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
     var m={l:narrow?22:40, r:narrow?22:40}, pw=w-m.l-m.r;
-    var yA=h*0.40, yB=h*0.80, fs=narrow?9.5:11;
+    var F = PRINT ? __FS : 1, fs=narrow?9.5:11, fpx=fs*F, LH=fpx+4;
+    var yA = PRINT ? h*0.40 : h*0.42, yB = PRINT ? h*0.70 : h*0.80;
     function X(day){ return m.l + day/62*pw; }
     var p = reduce ? 1 : clamp(t/1.6,0,1);
-    lab(x,"WHAT ACTUALLY HAPPENED, SELF-REPORT ONLY",m.l,26,DANGER,10,1.1);
+    /* pre-pass: wrap every label once, so the bracket can clear the tallest stack above the axis */
+    x.save(); mono(x,fs);
+    var wrapW=(narrow?110:170)*(PRINT?1.6:1), stacks=[], maxAbove=1;
+    for(var i=0;i<EV.length;i++){
+      var txt=(narrow||PRINT)?EV[i].s:EV[i].l, ls=wrapLines(x,txt,wrapW); stacks.push(ls);
+      if(i%2===0 && ls.length>maxAbove) maxAbove=ls.length;
+    }
+    x.restore();
+    var dateUp=yA-16, labelUp=dateUp-LH;              /* baselines above the axis: date next to it, label beyond */
+    var dateDn=yA+16+fpx*0.78, labelDn=dateDn+LH;     /* the same order below the axis */
+    var by=labelUp-LH*(maxAbove-1)-fpx-14;            /* the bracket sits above the tallest stack */
+    lab(x,"WHAT ACTUALLY HAPPENED, SELF-REPORT ONLY",m.l,PRINT?24:26,DANGER,10,1.1);
     x.strokeStyle=rgba(T_INK,0.22); x.lineWidth=1.2;
     x.beginPath(); x.moveTo(m.l,yA); x.lineTo(m.l+pw*p,yA); x.stroke();
-    for(var i=0;i<EV.length;i++){
+    for(i=0;i<EV.length;i++){
       var e=EV[i], a = reduce ? 1 : easeIO(clamp((t-0.15-i*0.42)/0.5,0,1));
       if(a<=0) continue;
-      var ex=X(e.day);
+      var ex=X(e.day), lines=stacks[i], above=(i%2===0);
       x.globalAlpha=a;
       x.fillStyle="#ffffff"; x.strokeStyle=DANGER; x.lineWidth=1.6;
       x.beginPath(); x.arc(ex,yA,6,0,6.283); x.fill(); x.stroke();
       x.fillStyle=DANGER; x.beginPath(); x.arc(ex,yA,2.4,0,6.283); x.fill();
-      var above = (i%2===0);
-      var ty = above ? yA-22 : yA+30;
-      var txt = narrow ? e.s : e.l;
-      x.save(); mono(x,fs);
-      var lines = wrapLines(x, txt, narrow?110:170);
       var align = i===0 ? "l" : (i===EV.length-1 ? "r" : "c");
-      var yy = above ? ty-(lines.length-1)*(fs+3) : ty;
-      for(var j=0;j<lines.length;j++){
-        var ly = yy + j*(fs+3);
-        if(align==="l") lab(x,lines[j],ex-6,ly,INK2,fs);
-        else if(align==="r") labR(x,lines[j],ex+6,ly,INK2,fs);
-        else labC(x,lines[j],ex,ly,INK2,fs);
-      }
-      var dy = above ? yA+20 : yA-14;
-      if(align==="l") lab(x,e.d,ex-6,dy,INK4,fs-0.5);
-      else if(align==="r") labR(x,e.d,ex+6,dy,INK4,fs-0.5);
-      else labC(x,e.d,ex,dy,INK4,fs-0.5);
-      x.restore();
+      var put = function(str,py,col,size){ if(align==="l") lab(x,str,ex-6,py,col,size); else if(align==="r") labR(x,str,ex+6,py,col,size); else labC(x,str,ex,py,col,size); };
+      put(e.d, above?dateUp:dateDn, INK4, fs-0.5);
+      for(var j=0;j<lines.length;j++) put(lines[j], above ? labelUp-(lines.length-1-j)*LH : labelDn+j*LH, INK2, fs);
       x.globalAlpha=1;
     }
     /* the 62 day bracket, counted up */
     var bA = reduce ? 1 : easeIO(clamp((t-1.9)/0.7,0,1));
     if(bA>0){
       x.globalAlpha=bA;
-      var by=yA-52-(narrow?0:8);
       x.strokeStyle=rgba(T_DANGER,0.7); x.lineWidth=1.2;
       x.beginPath(); x.moveTo(X(0),by); x.lineTo(X(62)*bA+X(0)*(1-bA),by); x.stroke();
       x.beginPath(); x.moveTo(X(0),by-5); x.lineTo(X(0),by+5); x.moveTo(X(62),by-5); x.lineTo(X(62),by+5); x.stroke();
@@ -1593,14 +1601,18 @@ function wrapLines(x, text, maxw){
     var rA = reduce ? 1 : easeIO(clamp((t-2.5)/0.8,0,1));
     if(rA>0){
       x.globalAlpha=rA;
-      lab(x,"WITH A RECEIPT, THE SAME RUN",m.l,yB-34,ACCD,10,1.1);
+      lab(x,"WITH A RECEIPT, THE SAME RUN",m.l,yB-(PRINT?30:34),ACCD,10,1.1);
       x.strokeStyle=rgba(T_ACC,0.35); x.lineWidth=1.2;
       x.beginPath(); x.moveTo(m.l,yB); x.lineTo(m.l+pw*rA,yB); x.stroke();
       x.fillStyle=ACC; x.beginPath(); x.arc(X(0),yB,7,0,6.283); x.fill();
       x.strokeStyle="#fff"; x.lineWidth=2; x.beginPath(); x.moveTo(X(0)-3.2,yB); x.lineTo(X(0)-0.8,yB+2.6); x.lineTo(X(0)+3.6,yB-2.8); x.stroke();
-      lab(x, narrow ? "0 days: witness head anchored during the run, verified offline" :
-        "0 days: the witness head is anchored outside the sandbox during the run; any outsider verifies offline, in about 0.17 s, with no access to the lab",
-        X(0)+16, yB+4, ACCD, narrow?9:10.5);
+      var gs=narrow?9:10.5, gpx=gs*F;
+      x.save(); mono(x,gs);
+      var gl = wrapLines(x, narrow ? "0 days: witness head anchored during the run, verified offline" :
+        "0 days: the witness head is anchored outside the sandbox during the run; any outsider verifies offline, in about 0.17 s, with no access to the lab", pw-40);
+      x.restore();
+      /* the sentence sits under the line rather than across it */
+      for(var gi=0; gi<gl.length; gi++) lab(x, gl[gi], X(0)+16, yB+10+gpx+gi*(gpx+5), ACCD, gs);
       x.globalAlpha=1;
     }
   }
@@ -1630,29 +1642,29 @@ var obsStep = 0;
     var S=obsStep;
     function hi(n){ return S===n ? 1 : (S===3 ? 0.85 : 0.38); }
     /* geometry */
-    var bx=w*0.06, by=h*0.30, bw=w*0.30, bh=h*0.34;          /* sandbox */
+    var bx=w*0.06, by=h*0.30, bw=w*0.30, bh=h*(PRINT?0.34:0.30); /* sandbox */
     var gx=bx+bw, gy=by+bh/2;                                  /* gate */
     var wx=w*0.55, wy=gy;                                      /* witness */
-    var ax=w*0.90, ay=h*0.20;                                  /* anchor */
+    var ax=w*0.70, ay=h*0.12;                                 /* anchor, above the flow stream, beside the tree */                                  /* anchor */
     var dst=[]; for(var i=0;i<7;i++){ var ang=(-0.55+i*0.183); dst.push({x:w*0.78+Math.cos(ang)*w*0.10, y:gy+Math.sin(ang)*h*0.30}); }
-    var rx=w*0.12, ry=h*0.80, rw=w*0.76, rh=h*0.14;             /* receipt */
+    var rx=w*0.12, ry=h*0.77, rw=w*0.76, rh=h*0.19;             /* receipt */
     /* sandbox */
     x.globalAlpha=hi(0);
     x.fillStyle=rgba(T_CORE,0.06); x.strokeStyle=rgba(T_CORE,0.55); x.lineWidth=1.4;
     rr(x,bx,by,bw,bh,10); x.fill(); x.stroke();
     lab(x,"SANDBOX",bx+12,by+18,CORED,9.5,1.1);
     x.fillStyle=CORE; x.beginPath(); x.arc(bx+bw*0.42,gy,9+(reduce?0:Math.sin(t*2)*1.2),0,6.283); x.fill();
-    lab(x,"agent",bx+bw*0.42-14,gy+26,INK3,9.5);
+    labC(x,"agent",bx+bw*0.42,gy+26,INK3,9.5);
     /* gate + enforcement log */
     x.strokeStyle=hi(0)>0.5?ACC:rgba(T_ACC,0.6); x.lineWidth=3; x.beginPath(); x.arc(gx,gy,12,0,6.283); x.stroke();
     x.fillStyle="#fff"; x.beginPath(); x.arc(gx,gy,9,0,6.283); x.fill();
-    lab(x,"broker gate",gx-30,gy+30,INK3,9.5);
+    labC(x,"broker gate",gx,gy+30,INK3,9.5);
     /* enforcement log card */
     var lx=bx, ly=by+bh+22;
     x.fillStyle="#fff"; x.strokeStyle=S===0?ACC:rgba(T_INK,0.25); x.lineWidth=S===0?1.6:1;
     rr(x,lx,ly,bw,narrow?40:46,6); x.fill(); x.stroke();
     lab(x,"ENFORCEMENT LOG",lx+10,ly+16,S===0?ACCD:INK3,9,1);
-    lab(x,"allow / deny rows, kept by the broker",lx+10,ly+(narrow?30:33),INK4,9);
+    lab(x,narrow?"allow / deny rows":"allow / deny rows, kept by the broker",lx+10,ly+(narrow?30:33),INK4,9);
     x.globalAlpha=1;
     /* flows and destinations */
     for(i=0;i<7;i++){
@@ -1660,8 +1672,8 @@ var obsStep = 0;
       x.fillStyle=i===6 ? GOLDB : ACC; x.beginPath(); x.arc(dst[i].x,dst[i].y,5,0,6.283); x.fill();
     }
     x.globalAlpha=1;
-    lab(x,"destinations",w*0.75,by-8,INK4,9.5);
-    lab(x,"decoy endpoint",dst[6].x+9,dst[6].y+4,GOLD,9);
+    if(!narrow) labC(x,"destinations",dst[0].x,dst[0].y-14,INK4,9.5);
+    var dl="decoy endpoint", dlw=tw(x,dl,9); if(dst[6].x+9+dlw<=w-4) lab(x,dl,dst[6].x+9,dst[6].y+4,GOLD,9); else lab(x,dl,w-4-dlw,dst[6].y+18,GOLD,9);
     /* paths: gate -> witness -> destination */
     for(i=0;i<PARTS.length;i++){
       var pt=PARTS[i]; if(!reduce) pt.u=(pt.u+pt.spd*dt)%1;
@@ -1677,9 +1689,10 @@ var obsStep = 0;
     x.strokeStyle=S===1?ACCD:rgba(T_ACC,0.8); x.lineWidth=2.2;
     x.beginPath(); x.ellipse(wx,wy,15,22,0,0,6.283); x.stroke();
     x.fillStyle=rgba(T_ACC,0.18); x.fill();
-    lab(x,"WITNESS",wx-24,wy+40,S===1?ACCD:INK3,9.5,1.1);
-    lab(x,"kernel connection tracker,",wx-58,wy+54,INK4,9);
-    lab(x,"outside the sandbox",wx-42,wy+66,INK4,9);
+    var wl=PRINT?17:12;
+    labCS(x,"WITNESS",wx,wy+40,S===1?ACCD:INK3,9.5,1.1);
+    labC(x,"kernel connection tracker,",wx,wy+40+wl,INK4,9);
+    labC(x,"outside the sandbox",wx,wy+40+2*wl,INK4,9);
     /* merkle tree above the witness */
     var tx=wx, ty=wy-58;
     var nodes=[[tx,ty-40],[tx-22,ty-16],[tx+22,ty-16],[tx-33,ty+6],[tx-11,ty+6],[tx+11,ty+6],[tx+33,ty+6]];
@@ -1688,7 +1701,7 @@ var obsStep = 0;
     x.moveTo(nodes[3][0],nodes[3][1]); x.lineTo(nodes[1][0],nodes[1][1]); x.lineTo(nodes[4][0],nodes[4][1]);
     x.moveTo(nodes[5][0],nodes[5][1]); x.lineTo(nodes[2][0],nodes[2][1]); x.lineTo(nodes[6][0],nodes[6][1]); x.stroke();
     for(i=0;i<nodes.length;i++){ x.fillStyle=i===0?ACCD:ACC; x.beginPath(); x.arc(nodes[i][0],nodes[i][1],i===0?4.5:3,0,6.283); x.fill(); }
-    lab(x,"witness root",tx-30,ty-52,INK3,9);
+    labR(x,"witness root",tx-10,ty-36,INK3,9);
     x.globalAlpha=1;
     /* anchor */
     x.globalAlpha=S===3?1:0.55;
@@ -1696,15 +1709,15 @@ var obsStep = 0;
     rr(x,ax-12,ay-34,24,68,4); x.fill(); x.stroke();
     var pulse = reduce ? 0.5 : (t*0.5)%1;
     x.strokeStyle=rgba(T_ACC,0.55); x.setLineDash([3,4]); x.lineDashOffset=-t*18;
-    x.beginPath(); x.moveTo(nodes[0][0]+6,nodes[0][1]-2); x.lineTo(ax-14,ay); x.stroke(); x.setLineDash([]);
-    x.fillStyle=ACC; x.beginPath(); x.arc(lerp(nodes[0][0]+6,ax-14,pulse), lerp(nodes[0][1]-2,ay,pulse),2.6,0,6.283); x.fill();
+    x.beginPath(); x.moveTo(nodes[0][0]+5,nodes[0][1]-3); x.lineTo(ax-13,ay); x.stroke(); x.setLineDash([]);
+    x.fillStyle=ACC; x.beginPath(); x.arc(lerp(nodes[0][0]+5,ax-13,pulse), lerp(nodes[0][1]-3,ay,pulse),2.6,0,6.283); x.fill();
     labC(x,"PUBLIC ANCHOR",ax,ay+52,S===3?CORED:INK3,9,1);
     labC(x,"git note, Rekor",ax,ay+64,INK4,9);
     x.globalAlpha=1;
     /* decoy token inside the sandbox */
     x.globalAlpha=hi(2);
-    x.fillStyle=GOLDB; rr(x,bx+bw*0.66-9,gy-24-6,18,12,3); x.fill();
-    lab(x,"planted credential",bx+bw*0.66-40,gy-40,GOLD,9);
+    if(narrow){ x.fillStyle=GOLDB; rr(x,bx+bw*0.72-8,gy-36,16,11,3); x.fill(); labC(x,"credential",bx+bw*0.72,gy-10,GOLD,9); }
+    else { x.fillStyle=GOLDB; rr(x,bx+bw*0.66-9,gy-24-6,18,12,3); x.fill(); labC(x,"planted credential",bx+bw*0.66,gy-40,GOLD,9); }
     x.globalAlpha=1;
     /* receipt */
     var rA = S===3 ? 1 : 0.45;
@@ -1713,16 +1726,19 @@ var obsStep = 0;
     rr(x,rx,ry,rw,rh,8); x.fill(); x.stroke();
     lab(x,"ONE SIGNED RECEIPT",rx+12,ry+18,S===3?ACCD:INK3,9.5,1.1);
     if(!narrow){
-      lab(x,"in-toto statement, predicate egress-receipt/v0.3, DSSE envelope signed with Ed25519; the public key is held out of band, never inside the receipt",rx+12,ry+rh*0.42,INK3,9);
-      lab(x,"externalAnchor commits the witness root, submitted during the run: a git note always, the public Rekor log with one flag on",rx+12,ry+rh*0.42+13,INK3,9);
-    }
+      x.save(); mono(x,9);
+      var rl = wrapLines(x,"in-toto statement, predicate egress-receipt/v0.3, DSSE envelope signed with Ed25519; the public key is held out of band, never inside the receipt.", rw-24);
+      if(PRINT) rl = rl.concat(wrapLines(x,"externalAnchor commits the witness root, submitted during the run: a git note always, the public Rekor log with one flag on.", rw-24));
+      x.restore();
+      for(var ri=0; ri<rl.length; ri++) lab(x, rl[ri], rx+12, ry+(PRINT?40:34)+ri*(PRINT?17:12), INK3, 9);
+    } else lab(x,"in-toto statement, DSSE, Ed25519",rx+12,ry+34,INK3,9);
     var roots=["enforcementLogMerkleRoot","witnessMerkleRoot","canaryHitsRoot"];
     var cols=[ (S===0||S===3)?ACCD:INK4, (S===1||S===3)?ACCD:INK4, (S===2||S===3)?GOLD:INK4 ];
     for(i=0;i<3;i++) lab(x, narrow?roots[i].replace("MerkleRoot","").replace("Log","").replace("Hits",""):roots[i], rx+12+i*(rw/3), ry+rh-10, cols[i], narrow?8.5:9.5);
     /* binding lines into the receipt when on step 3 */
     if(S===3){
       x.strokeStyle=rgba(T_ACC,0.5); x.lineWidth=1; x.setLineDash([2,3]);
-      x.beginPath(); x.moveTo(lx+bw/2,ly+46); x.lineTo(rx+rw*0.17,ry); x.moveTo(wx,wy+24); x.lineTo(rx+rw*0.5,ry); x.moveTo(dst[6].x,dst[6].y+6); x.lineTo(rx+rw*0.83,ry); x.stroke(); x.setLineDash([]);
+      x.beginPath(); x.moveTo(lx+bw/2,ly+46); x.lineTo(rx+rw*0.17,ry); x.moveTo(wx,wy+40+2*wl+8); x.lineTo(rx+rw*0.5,ry); x.moveTo(dst[6].x,dst[6].y+6); x.lineTo(rx+rw*0.83,ry); x.stroke(); x.setLineDash([]);
     }
     x.globalAlpha=1;
   }
@@ -1737,7 +1753,7 @@ var obsStep = 0;
   function draw(t){
     var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<620;
     x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
-    var m={l:narrow?44:60,r:20,t:40,b:96}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+    var m={l:narrow?44:60,r:20,t:(PRINT?78:48),b:96}, pw=w-m.l-m.r, ph=h-m.t-m.b;
     function Y(v){ return m.t+ph-v*ph; }
     x.strokeStyle=RULE; x.lineWidth=1;
     for(var g=0;g<=4;g++){ var yy=Y(g/4); x.beginPath(); x.moveTo(m.l,yy); x.lineTo(m.l+pw,yy); x.stroke(); labR(x,(g*25)+"%",m.l-8,yy+4,INK4,9.5); }
@@ -1762,10 +1778,11 @@ var obsStep = 0;
       }
       labC(x,d.l,cx,Y(0)+18,INK2,10.5);
     }
-    lab(x,"FALSE ALARMS, % OF WITNESSED FLOWS RECONCILED OMITTED",m.l,m.t-16,INK4,9.5,1);
-    /* legend */
-    x.fillStyle=rgba(T_DANGER,0.55); x.fillRect(m.l+pw-230,m.t-24,10,10); lab(x,"before the fix",m.l+pw-215,m.t-15,INK3,9.5);
-    x.fillStyle=ACCD; x.beginPath(); x.arc(m.l+pw-108,m.t-19,4,0,6.283); x.fill(); lab(x,"after, with 95% CI",m.l+pw-98,m.t-15,INK3,9.5);
+    lab(x,"FALSE ALARMS, % OF WITNESSED FLOWS RECONCILED OMITTED",m.l,20,INK4,9.5,1);
+    /* legend, right-aligned with measured widths */
+    var l2="after, with 95% CI", l1="before the fix", w2=tw(x,l2,9.5), w1=tw(x,l1,9.5), ly=20;
+    var x2=m.l+pw-w2; x.fillStyle=ACCD; x.beginPath(); x.arc(x2-9,ly-4,4,0,6.283); x.fill(); lab(x,l2,x2,ly,INK3,9.5);
+    var x1=x2-9-22-w1; x.fillStyle=rgba(T_DANGER,0.55); x.fillRect(x1-15,ly-9,10,10); lab(x,l1,x1,ly,INK3,9.5);
     /* per-class strip */
     var cA = reduce ? 1 : easeIO(clamp((t-2.0)/0.8,0,1));
     if(cA>0){
@@ -1798,7 +1815,7 @@ var obsStep = 0;
   function draw(t){
     var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<640;
     x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
-    var lw=narrow?w*0.40:w*0.40, cw=(w-lw-30)/2, rh=(h-54)/ROWS.length, top=44;
+    var lw=narrow?w*0.40:w*0.40, cw=(w-lw-30)/2, rh=(h-(PRINT?84:58))/ROWS.length, top=44;
     lab(x,"TECHNIQUE / HOP",16,top-14,INK4,9,1); labC(x,"STRICT",lw+cw/2,top-14,INK4,9); labC(x,"WEAKENED",lw+cw*1.5+10,top-14,INK4,9);
     for(var i=0;i<ROWS.length;i++){
       var a = reduce ? 1 : easeIO(clamp((t-0.15-i*0.22)/0.5,0,1)); if(a<=0) continue;
@@ -1841,10 +1858,18 @@ var obsStep = 0;
   function draw(t){
     var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<620;
     x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
-    var m={l:narrow?40:56,r:narrow?16:120,t:38,b:44}, pw=w-m.l-m.r, ph=h-m.t-m.b, MAX=850;
+    var m={l:narrow?40:56,r:narrow?16:(PRINT?185:120),t:38,b:44}, pw=w-m.l-m.r, ph=h-m.t-m.b, MAX=850;
     function Y(v){ return m.t+ph-v/MAX*ph; }
     x.strokeStyle=RULE; x.lineWidth=1;
     for(var g=0;g<=4;g++){ var v=g*200, yy=Y(v); x.beginPath(); x.moveTo(m.l,yy); x.lineTo(m.l+pw,yy); x.stroke(); labR(x,v+" ms",m.l-8,yy+4,INK4,9.5); }
+    var mA = reduce ? 1 : easeIO(clamp((t-1.6)/0.6,0,1));
+    if(mA>0){
+      x.globalAlpha=mA; x.strokeStyle=ACCD; x.setLineDash([4,4]); x.lineWidth=1.3;
+      x.beginPath(); x.moveTo(m.l,Y(MEDIAN)); x.lineTo(m.l+pw*mA,Y(MEDIAN)); x.stroke(); x.setLineDash([]);
+      if(!narrow){ lab(x,"median 689 ms",m.l+pw+8,Y(MEDIAN)+4,ACCD,10); lab(x,"range 638 to 785",m.l+pw+8,Y(MEDIAN)+(PRINT?20:18),INK3,9.5); }
+      else labCP(x,"median 689 ms, range 638 to 785",m.l+pw/2,Y(MEDIAN)-6,ACCD,9.5);
+      x.globalAlpha=1;
+    }
     var gw=pw/RUNS.length, bw=Math.min(54,gw*0.5);
     for(var i=0;i<RUNS.length;i++){
       var r=RUNS[i], cx=m.l+gw*i+gw/2, a = reduce ? 1 : easeIO(clamp((t-0.1-i*0.25)/0.6,0,1));
@@ -1852,16 +1877,8 @@ var obsStep = 0;
       for(var s=0;s<segs.length;s++){
         var v=segs[s]*a; x.fillStyle=SEG[s][1]; x.fillRect(cx-bw/2,Y(base+v),bw,Y(base)-Y(base+v)); base+=v;
       }
-      if(a>0.95) labC(x,r.total+" ms",cx,Y(r.total)-8,INK2,10);
+      if(a>0.95) labCP(x,r.total+" ms",cx,Y(r.total)-8,INK2,10);
       labC(x,"run "+(i+1),cx,Y(0)+16,INK3,9.5);
-    }
-    var mA = reduce ? 1 : easeIO(clamp((t-1.6)/0.6,0,1));
-    if(mA>0){
-      x.globalAlpha=mA; x.strokeStyle=ACCD; x.setLineDash([4,4]); x.lineWidth=1.3;
-      x.beginPath(); x.moveTo(m.l,Y(MEDIAN)); x.lineTo(m.l+pw*mA,Y(MEDIAN)); x.stroke(); x.setLineDash([]);
-      if(!narrow){ lab(x,"median 689 ms",m.l+pw+8,Y(MEDIAN)+4,ACCD,10); lab(x,"range 638 to 785",m.l+pw+8,Y(MEDIAN)+18,INK3,9.5); }
-      else labCP(x,"median 689 ms, range 638 to 785",m.l+pw/2,Y(MEDIAN)-6,ACCD,9.5);
-      x.globalAlpha=1;
     }
     var lx=m.l; for(s=0;s<SEG.length;s++){ x.fillStyle=SEG[s][1]; x.fillRect(lx,m.t-24,10,10); lab(x,SEG[s][0],lx+14,m.t-15,INK3,9.5); lx+=(narrow?58:74); }
     lab(x,"exfil to a signed receipt carrying the hit, one host clock; the fixed 1.2 s settle wait is not shown",m.l,h-8,INK4,narrow?8.5:9.5);

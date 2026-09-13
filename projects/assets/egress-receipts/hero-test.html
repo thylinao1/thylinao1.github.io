@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Egress receipts hero and merkle3d, test harness</title>
+<style>
+  :root {
+    --slate-a: #1e3a4f;
+    --slate-b: #2a5270;
+    --teal: #5a9e8f;
+    --bright: #7bbdae;
+    --soft: #bfded6;
+    --ink: #eef4f7;
+    --gold: #d8b34a;
+    --danger: #a94438;
+    --paper: #f5f1ea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: #1d2a31;
+    font: 15px/1.55 "Source Serif 4", Georgia, serif;
+  }
+  .band {
+    position: relative;
+    width: 100vw;
+    height: 70vh;
+    min-height: 360px;
+    overflow: hidden;
+    background: linear-gradient(118deg, var(--slate-a) 0%, var(--slate-b) 62%, #21415a 100%);
+  }
+  .band::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 80% at 22% 42%, rgba(90,158,143,0.16), transparent 62%);
+  }
+  .band canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .band-copy {
+    position: absolute;
+    left: clamp(18px, 5vw, 72px);
+    top: clamp(18px, 6vh, 64px);
+    z-index: 2;
+    max-width: 30ch;
+    color: var(--ink);
+    text-shadow: 0 2px 14px rgba(10,26,38,0.55);
+  }
+  .band-copy h1 {
+    margin: 0 0 .4rem;
+    font-size: clamp(1.6rem, 3.4vw, 2.9rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+  .band-copy p { margin: 0; font-size: .95rem; opacity: .82; }
+  .tag {
+    display: inline-block;
+    margin-bottom: .7rem;
+    padding: .2rem .6rem;
+    border: 1px solid rgba(191,222,214,0.45);
+    border-radius: 999px;
+    font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 2.2rem 1.2rem 4rem; }
+  h2 { font-size: 1.15rem; margin: 2rem 0 .6rem; }
+  .merkle-box {
+    position: relative;
+    width: 900px;
+    max-width: 100%;
+    height: 420px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: linear-gradient(150deg, var(--slate-a), var(--slate-b));
+  }
+  .merkle-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin: .9rem 0; }
+  button {
+    font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .05em;
+    padding: .6rem .9rem;
+    border: 1px solid #c9bfae;
+    border-radius: 6px;
+    background: #fffdf9;
+    color: #1d2a31;
+    cursor: pointer;
+    transition: border-color .18s ease, transform .18s ease;
+  }
+  button:hover { border-color: var(--teal); transform: translateY(-1px); }
+  button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  #readout {
+    font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: pre-wrap;
+    background: #fffdf9;
+    border: 1px solid #e3dbcd;
+    border-radius: 8px;
+    padding: .8rem 1rem;
+    margin-top: .9rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="band" id="band">
+  <canvas id="hero" aria-hidden="true"></canvas>
+  <div class="band-copy">
+    <span class="tag">test harness</span>
+    <h1>Receipts for what left the sandbox</h1>
+    <p>One signed receipt binds the broker log, the witness root and the decoy hits.</p>
+  </div>
+</div>
+
+<main>
+  <h2>merkle3d</h2>
+  <div class="merkle-box" id="merkle-box"><canvas id="merkle"></canvas></div>
+  <div class="controls">
+    <button id="btn-hide">hide leaf 13</button>
+    <button id="btn-restore">restore</button>
+    <button id="btn-pause">pause hero</button>
+    <button id="btn-resume">resume hero</button>
+    <button id="btn-rm-on">reduced motion on</button>
+    <button id="btn-rm-off">reduced motion off</button>
+  </div>
+  <pre id="readout">booting</pre>
+</main>
+
+<script type="module">
+  import { initHero } from "./hero.js";
+  import { initMerkle3d } from "./merkle3d.js";
+
+  const readout = document.getElementById("readout");
+  const lines = [];
+  function say(text) {
+    lines.push(text);
+    readout.textContent = lines.slice(-14).join("\n");
+    console.log("[test] " + text);
+  }
+
+  /* ------------------------------------------------------------------ hero */
+
+  const params = new URLSearchParams(location.search);
+  const num = (k) => (params.has(k) ? parseFloat(params.get(k)) : undefined);
+
+  const heroCanvas = document.getElementById("hero");
+  heroCanvas.addEventListener("hero-ready", (e) => {
+    say("hero triangles " + e.detail.triangles + ", draw calls " + e.detail.calls +
+        ", particles " + e.detail.points);
+  });
+  heroCanvas.addEventListener("hero-fallback", () => say("hero fallback fired, no WebGL"));
+  const hero = initHero(heroCanvas, {
+    respectPrefersReducedMotion: false,
+    preserveDrawingBuffer: true,
+    startAngle: num("angle"),
+    framePadding: num("pad"),
+    offset: params.has("offset") ? params.get("offset").split(",").map(Number) : undefined,
+  });
+
+  document.getElementById("btn-pause").onclick = () => { hero.pause(); say("hero paused"); };
+  document.getElementById("btn-resume").onclick = () => { hero.resume(); say("hero resumed"); };
+  document.getElementById("btn-rm-on").onclick = () => {
+    hero.setReducedMotion(true); merkle.setReducedMotion(true); say("reduced motion on");
+  };
+  document.getElementById("btn-rm-off").onclick = () => {
+    hero.setReducedMotion(false); merkle.setReducedMotion(false); say("reduced motion off");
+  };
+
+  /* --------------------------------------------------------------- merkle3d */
+
+  const enc = new TextEncoder();
+  function toHex(buf) {
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  function fromHex(hex) {
+    const out = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return out;
+  }
+  async function sha256Hex(bytes) {
+    return toHex(await crypto.subtle.digest("SHA-256", bytes));
+  }
+  // RFC 6962 leaf hash: SHA-256(0x00 || entry)
+  async function leafHash(text) {
+    const body = enc.encode(text);
+    const buf = new Uint8Array(1 + body.length);
+    buf[0] = 0x00;
+    buf.set(body, 1);
+    return sha256Hex(buf);
+  }
+  // RFC 6962 node hash: SHA-256(0x01 || left || right)
+  async function hashPair(leftHex, rightHex) {
+    const l = fromHex(leftHex);
+    const r = fromHex(rightHex);
+    const buf = new Uint8Array(1 + l.length + r.length);
+    buf[0] = 0x01;
+    buf.set(l, 1);
+    buf.set(r, 1 + l.length);
+    return sha256Hex(buf);
+  }
+
+  const TARGETS = [
+    "pypi.org:443", "files.pythonhosted.org:443", "pypi.org:443",
+    "huggingface.co:443", "pypi.org:443", "registry.npmjs.org:443",
+    "raw.githubusercontent.com:443", "github.com:443", "huggingface.co:443",
+    "storage.googleapis.com:443", "github.com:443", "files.pythonhosted.org:443",
+    "registry.npmjs.org:443", "storage.googleapis.com:443", "huggingface.co:443",
+  ];
+
+  const merkleCanvas = document.getElementById("merkle");
+  const dummyLeaves = await Promise.all(
+    TARGETS.map((t, i) => leafHash(i + "|CONNECT|" + t + "|ALLOW"))
+  );
+
+  // ?panel=0 drops the merkle panel so the fps figure covers the hero alone
+  const wantPanel = params.get("panel") !== "0";
+  if (!wantPanel) document.getElementById("merkle-box").remove();
+  const merkle = wantPanel
+    ? initMerkle3d(merkleCanvas, {
+        leaves: dummyLeaves,
+        hashPair,
+        preserveDrawingBuffer: true,
+        onRoot: (root, path) => {
+          say("root " + (root ? root.slice(0, 16) : "null") + ", changed nodes " + path.length +
+              (path.length ? " at levels " + [...new Set(path.map((p) => p.level))].join(",") : ""));
+        },
+      })
+    : { setLeaves() {}, hide() {}, restore() {}, setReducedMotion() {}, destroy() {} };
+
+  document.getElementById("btn-hide").onclick = () => { merkle.hide(13); say("hide leaf 13"); };
+  document.getElementById("btn-restore").onclick = () => { merkle.restore(); say("restore"); };
+
+  /* ------------------------------------------------------------------- fps */
+
+  let frames = 0;
+  let t0 = 0;
+  let reported = false;
+  function tick(now) {
+    if (!t0) t0 = now;
+    frames++;
+    const elapsed = now - t0;
+    if (!reported && elapsed >= 4000) {
+      reported = true;
+      const fps = (frames / (elapsed / 1000)).toFixed(1);
+      say("average fps over " + (elapsed / 1000).toFixed(1) + "s: " + fps);
+      return;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // query flags so headless screenshots land on a deterministic frame
+  if (params.get("still") === "1") {
+    hero.setReducedMotion(true);
+    merkle.setReducedMotion(true);
+    say("still frame requested");
+  }
+  if (params.get("hide") === "1") merkle.hide(13);
+  if (params.get("restore") === "1") { merkle.hide(13); merkle.restore(); }
+  if (params.get("band") === "0") document.getElementById("band").style.display = "none";
+
+  say("modules loaded, leaves " + dummyLeaves.length);
+</script>
+</body>
+</html>

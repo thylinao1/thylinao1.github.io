@@ -1,0 +1,1965 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Egress receipts: catching an evaluation sandbox that lies about its own egress</title>
+<meta name="description" content="Apart x CeSIA AI Incident Response Sprint 2026, Track 1: one signed receipt per evaluation run that an outsider verifies offline, with an independent witness, a public anchor made during the run and decoy tripwires. False alarms 0 of 110 on real traffic, 7 of 7 conformance clauses, a browser verifier on the page.">
+<meta property="og:title" content="Egress receipts: catching an evaluation sandbox that lies about its own egress">
+<meta property="og:description" content="A second witness outside the sandbox, a public anchor during the run, bait that fires only on exfiltration. Verify a real receipt in your browser.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,380;0,9..144,460;0,9..144,600;1,9..144,420&family=Source+Serif+4:opsz,wght@8..60,380;8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* AKBC 2026 palette: white paper, pale mint bands, teal accent, slate hero band. */
+  --bg:#ffffff; --bg-2:#f8f9fa; --bg-3:#e9eef1; --mint:#eef6f4;
+  --ink:#2c3e50; --ink-2:#44586b; --ink-3:#6c757d; --ink-4:#8a97a3;
+  --rule:#e8ecef; --rule-strong:#dee2e6;
+  --accent:#5a9e8f; --accent-deep:#3d7568; --accent-soft:#bfded6; --accent-bright:#7bbdae;
+  --core:#2a5270; --core-deep:#1e3a4f; --core-soft:#a8bccb;
+  --calm:#3d7568; --calm-deep:#2f5d53;
+  --gold:#a8791c; --gold-soft:#e5cfa0;
+  --gold-bright:#d8b34a; --gold-deep:#8a6a24;
+  --danger:#a94438; --warn:#a8791c;
+  --deep:#1e3a4f; --deep-2:#2a5270; --deep-ink:#eef4f7;
+  --font-display:"Fraunces","Source Serif 4",Georgia,serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --maxw:1280px; --read:812px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-soft:cubic-bezier(.33,1,.68,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);
+  font-size:19px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;overflow-wrap:break-word;
+}
+::selection{background:rgba(90,158,143,.20);color:var(--ink)}
+
+/* ---------- atmosphere ---------- */
+#field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.7}
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+#shell{position:relative;z-index:2}
+
+/* ---------- reading rail: scaleX so it stays on the compositor ---------- */
+#rail{position:fixed;left:0;top:0;height:3px;width:100%;z-index:60;background:transparent}
+#rail i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left center;
+  background:linear-gradient(90deg,var(--core),var(--accent),var(--accent-bright));
+  box-shadow:0 0 14px rgba(90,158,143,.5)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.read{max-width:var(--read);margin-left:auto;margin-right:auto}
+main section{padding:104px 0;position:relative}
+main section + section{border-top:1px solid var(--rule)}
+main section.alt{background:var(--mint);border-top-color:#dbe9e5}
+main section.alt + section{border-top-color:#dbe9e5}
+
+/* ---------- type ---------- */
+h1{font-family:var(--font-display);font-weight:380;font-size:clamp(33px,4.7vw,64px);
+  line-height:1.06;letter-spacing:-.022em;margin:0 0 24px;max-width:19ch}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(30px,3.9vw,46px);
+  line-height:1.13;letter-spacing:-.015em;margin:0 auto 26px;max-width:22ch;text-align:center;
+  position:relative;padding-bottom:16px}
+h2::after{content:"";position:absolute;left:50%;bottom:0;height:2px;width:0;
+  transform:translateX(-50%);border-radius:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  transition:width 1.4s var(--ease) .2s}
+h2.in::after{width:132px}
+h3{font-family:var(--font-display);font-weight:460;font-size:24px;line-height:1.28;
+  letter-spacing:-.01em;margin:44px 0 12px}
+h4{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin:30px 0 10px;font-weight:500}
+p{margin:0 0 20px}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 16px;text-align:center}
+.lede{font-size:22px;line-height:1.5;color:var(--ink-2);text-align:center;
+  max-width:720px;margin:0 auto 44px}
+.small{font-size:15px;line-height:1.55;color:var(--ink-3)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+b,strong{font-weight:600}
+em{font-style:italic}
+a{color:var(--accent-deep);text-decoration:none;border-bottom:1px solid var(--accent-soft);
+  transition:border-color .18s var(--ease),color .18s var(--ease)}
+a:hover{color:var(--accent);border-color:var(--accent)}
+.xlink{color:inherit;border-bottom:1px dotted var(--ink-4)}
+.xlink:hover{color:var(--accent-deep);border-bottom-color:var(--accent-deep)}
+ul.plain{margin:0 0 22px;padding:0;list-style:none}
+ul.plain li{position:relative;padding-left:26px;margin:0 0 14px;color:var(--ink-2)}
+ul.plain li::before{content:"";position:absolute;left:0;top:.68em;width:12px;height:2px;
+  border-radius:1px;background:var(--accent)}
+ul.plain li b{color:var(--ink)}
+
+/* ---------- reveal + generic stagger, transform and opacity only ---------- */
+.reveal{opacity:0;transform:translateY(30px);
+  transition:opacity 1.07s var(--ease),transform 1.07s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.104s}.reveal.d2{transition-delay:.208s}
+.reveal.d3{transition-delay:.312s}.reveal.d4{transition-delay:.416s}
+.st{opacity:0;transform:translateY(16px);
+  transition:opacity .66s var(--ease),transform .66s var(--ease);
+  transition-delay:calc(var(--i,0) * 68ms)}
+.st.in{opacity:1;transform:none}
+tr.st{transform:translateY(10px)}
+@media (prefers-reduced-motion:reduce){
+  .reveal,.st{opacity:1;transform:none;transition:none}
+  h2::after{transition:none;width:132px}
+}
+
+/* ---------- figures ---------- */
+figure{margin:38px 0 34px;position:relative}
+.fig-head{font-family:var(--font-mono);font-size:12px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-2);margin:0 0 11px;display:flex;align-items:center;
+  gap:11px;flex-wrap:wrap}
+.fig-head::before{content:"";width:20px;height:2px;background:var(--accent);flex:none;border-radius:1px}
+.fig-head span{color:var(--ink-4);letter-spacing:.08em}
+.fig{display:block;width:100%;height:auto;aspect-ratio:16/8;border-radius:4px;
+  background:#fff;border:1px solid var(--rule-strong)}
+.fig.tall{aspect-ratio:16/10}
+.fig.r7{aspect-ratio:16/7}
+.fig.r6{aspect-ratio:16/6}
+@media(max-width:900px){.fig{aspect-ratio:16/10}.fig.tall{aspect-ratio:16/12}
+  .fig.r7{aspect-ratio:16/9}.fig.r6{aspect-ratio:16/8}}
+/* narrow screens: each drawn figure needs its own room, so the ratios are set per figure
+   rather than by one rule that suits none of them */
+@media(max-width:640px){
+  #cScore{aspect-ratio:3/4}
+  #cPlateau{aspect-ratio:4/3}
+  #cWindows{aspect-ratio:4/3}
+  #cNull{aspect-ratio:3/5}
+  #cDecomp{aspect-ratio:1/1}
+  #cInstr{aspect-ratio:4/3}
+  #cValid{aspect-ratio:4/3}
+  #cRel{aspect-ratio:3/4}
+}
+figcaption{font-family:var(--font-mono);font-size:12.5px;line-height:1.55;color:var(--ink-3);
+  margin-top:12px;letter-spacing:.01em}
+figcaption b{color:var(--ink-2);font-weight:500}
+figure .scrub{position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--rule);
+  overflow:hidden;border-radius:1px}
+figure .scrub i{display:block;height:100%;width:100%;transform:scaleX(0);
+  transform-origin:left center;background:linear-gradient(90deg,var(--core),var(--accent))}
+
+/* ---------- deep panels ---------- */
+.deep-panel{background:var(--deep);color:#cddbe4;border-radius:5px;padding:38px 34px;
+  margin:44px 0;border:1px solid rgba(238,244,247,.12);position:relative;overflow:hidden}
+.deep-panel h3{color:#fff;margin-top:0}
+.deep-panel h4{color:rgba(238,244,247,.6)}
+.deep-panel p{color:#c2d3dd}
+.deep-panel .small{color:#9db1bf}
+.deep-panel b{color:#fff}
+.deep-panel::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 80% at 10% 0%,rgba(90,158,143,.20),transparent 58%),
+             radial-gradient(90% 70% at 94% 100%,rgba(42,82,112,.55),transparent 62%)}
+.deep-panel > *{position:relative;z-index:1}
+
+/* ---------- callouts ---------- */
+.note{border-left:2px solid var(--accent-soft);padding:2px 0 2px 20px;margin:30px 0;color:var(--ink-2)}
+.note.warn{border-color:var(--gold-soft)}
+.note.calm{border-color:#b6dcc9}
+.note p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;margin:26px 0;font-size:16px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule-strong);vertical-align:top}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-4);font-weight:400}
+td.num,th.num{font-family:var(--font-mono);font-size:14px;white-space:nowrap}
+td.rel{font-family:var(--font-mono);font-size:13.5px}
+tbody tr{transition:background .2s var(--ease)}
+tbody tr:hover td{background:rgba(90,158,143,.07)}
+tr.best td{background:rgba(90,158,143,.10)}
+tr.best:hover td{background:rgba(90,158,143,.16)}
+tr.best td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+caption{caption-side:bottom;text-align:left;font-family:var(--font-mono);font-size:12.5px;
+  color:var(--ink-3);padding-top:12px;line-height:1.55}
+
+/* ---------- equation blocks ---------- */
+.eq{font-family:var(--font-mono);font-size:13px;line-height:1.85;background:var(--bg-2);
+  border:1px solid var(--rule-strong);border-radius:3px;padding:15px 18px;margin:24px 0;
+  overflow-x:auto;white-space:pre;position:relative}
+section.alt .eq{background:#fff}
+.eq b{color:var(--accent-deep);font-weight:500}
+.eq i{color:var(--core);font-style:normal}
+.eq::after{content:"";position:absolute;inset:0;background:var(--bg-2);
+  transform-origin:right center;transform:scaleX(1);transition:transform 1.2s var(--ease) .1s}
+section.alt .eq::after{background:#fff}
+.eq.in::after{transform:scaleX(0)}
+.eq-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px;margin:26px 0}
+.eq-pair div{background:var(--bg-2);border:1px solid var(--rule-strong);border-radius:3px;
+  padding:17px 19px;transition:border-color .3s var(--ease),transform .4s var(--ease)}
+section.alt .eq-pair div{background:#fff}
+.eq-pair div:hover{border-color:var(--accent-soft);transform:translateY(-2px)}
+.eq-pair .f{font-family:var(--font-mono);font-size:15px;color:var(--ink);display:block;margin-bottom:8px}
+.eq-pair .f b{color:var(--accent-deep);font-weight:500}
+.eq-pair .n{font-size:15px;line-height:1.5;color:var(--ink-3);display:block}
+
+/* ---------- term links ---------- */
+.term{appearance:none;-webkit-appearance:none;border:0;border-bottom:1px dotted var(--ink-4);
+  background:none;padding:0;margin:0;font:inherit;cursor:pointer;color:var(--ink);
+  transition:color .18s var(--ease),border-color .18s var(--ease)}
+.term:hover{color:var(--accent-deep);border-bottom-color:var(--accent-deep)}
+.term::after{content:"\00a0\25be";font-size:.72em;color:var(--ink-4);vertical-align:.12em}
+.term:focus-visible,.btn:focus-visible,#toc a:focus-visible,a:focus-visible,
+.modal-x:focus-visible,.board-row:focus-visible,.hbtn:focus-visible,.homebtn:focus-visible{
+  outline:2px solid var(--accent-deep);outline-offset:3px;border-radius:2px}
+
+.count{font-variant-numeric:tabular-nums}
+
+/* ---------- modal system ---------- */
+#scrim{position:fixed;inset:0;z-index:80;background:rgba(30,58,79,.55);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  opacity:0;pointer-events:none;transition:opacity .32s var(--ease)}
+#scrim.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;z-index:81;left:50%;top:50%;width:min(720px,calc(100vw - 36px));
+  max-height:min(84vh,860px);overflow-y:auto;transform:translate(-50%,-46%) scale(.97);
+  opacity:0;pointer-events:none;visibility:hidden;background:var(--bg);
+  border:1px solid var(--rule-strong);border-radius:6px;padding:36px 38px 34px;
+  box-shadow:0 40px 90px -30px rgba(30,58,79,.42);
+  transition:opacity .32s var(--ease),transform .44s var(--ease),visibility 0s linear .32s}
+.modal.on{opacity:1;pointer-events:auto;visibility:visible;
+  transform:translate(-50%,-50%) scale(1);transition-delay:0s,0s,0s}
+.modal h3{margin-top:0;font-size:27px}
+.modal .kicker{text-align:left}
+.modal p:last-child{margin-bottom:0}
+.modal-x{position:absolute;top:14px;right:16px;width:32px;height:32px;border:none;
+  background:none;cursor:pointer;color:var(--ink-4);font-size:22px;line-height:1;
+  border-radius:50%;transition:background .18s var(--ease),color .18s var(--ease)}
+.modal-x:hover{background:var(--bg-3);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.modal{transition:opacity .01s}}
+#defs{display:none}
+
+/* ---------- nav ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:50;
+  background:transparent;border-bottom:1px solid transparent;
+  transition:border-color .3s var(--ease),background .3s var(--ease),
+             backdrop-filter .3s var(--ease),opacity .3s var(--ease)}
+#topbar.stuck{border-bottom-color:var(--rule-strong);background:rgba(255,255,255,.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+/* over the dark hero the bar is invisible until it sticks */
+#topbar:not(.stuck){opacity:0;pointer-events:none}
+#topbar .wrap{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;
+  height:56px;gap:18px}
+#topbar .homebtn{justify-self:start;display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);text-decoration:none;white-space:nowrap;
+  padding:6px 13px 6px 11px;border:1px solid var(--rule-strong);border-radius:999px;
+  background:rgba(238,246,244,.6);
+  transition:color .22s var(--ease),border-color .22s var(--ease),
+             background .22s var(--ease),transform .22s var(--ease),box-shadow .22s var(--ease)}
+#topbar .homebtn svg{flex:none;transition:transform .26s var(--ease)}
+#topbar .homebtn:hover{color:var(--accent-deep);border-color:var(--accent-soft);
+  background:rgba(90,158,143,.12);transform:translateY(-1px);
+  box-shadow:0 6px 16px -10px rgba(30,58,79,.5)}
+#topbar .homebtn:hover svg{transform:translateX(-3px)}
+#topbar .brand{justify-self:start;white-space:nowrap;font-family:var(--font-mono);font-size:12.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border:none}
+#topbar .brand:hover{color:var(--ink)}
+#topbar .rail-end{justify-self:end;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);white-space:nowrap}
+@media(max-width:1340px){#topbar .rail-end{display:none}
+  #topbar .wrap{grid-template-columns:auto auto minmax(0,1fr)}}
+@media(max-width:1150px){#topbar .brand{display:none}
+  #topbar .wrap{grid-template-columns:auto minmax(0,1fr)}}
+@media(max-width:860px){#topbar .wrap{grid-template-columns:auto;justify-content:start}}
+#toc{justify-self:stretch;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;
+  justify-content:center;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
+#toc::-webkit-scrollbar{display:none}
+#toc a{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-4);border:none;padding:6px 8px;border-radius:3px;white-space:nowrap;
+  transition:color .2s var(--ease),background .2s var(--ease)}
+@media(max-width:1260px){#toc a{font-size:11px;padding:6px 6px;letter-spacing:.04em}}
+#toc a:hover{color:var(--ink-2);background:var(--bg-2)}
+#toc a.active{color:var(--accent-deep);background:rgba(90,158,143,.14)}
+@media(max-width:860px){#toc{display:none}}
+
+/* ---------- hero ---------- */
+#hero{padding:0;position:relative;min-height:100svh;display:flex;align-items:center;
+  overflow:hidden;background:linear-gradient(135deg,#1a2f3f 0%,#2a5270 100%);
+  color:#fff;isolation:isolate}
+#hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(105% 82% at 76% 28%,rgba(90,158,143,.24),transparent 58%),
+             radial-gradient(80% 70% at 8% 92%,rgba(123,189,174,.14),transparent 62%),
+             linear-gradient(180deg,transparent 58%,rgba(20,40,55,.55) 100%)}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+@media(min-width:901px){
+  #heroCanvas{
+    -webkit-mask-image:linear-gradient(90deg,transparent 14%,rgba(0,0,0,.32) 38%,#000 58%,#000 97%,transparent 100%);
+            mask-image:linear-gradient(90deg,transparent 14%,rgba(0,0,0,.32) 38%,#000 58%,#000 97%,transparent 100%)}
+  /* the title column keeps its own scrim, so the scene never competes with the words */
+  #hero::after{background:
+    linear-gradient(100deg,rgba(17,35,48,.50) 0%,rgba(17,35,48,.20) 32%,transparent 54%),
+    linear-gradient(180deg,rgba(17,35,48,.40) 0%,rgba(17,35,48,.16) 28%,transparent 48%),
+    radial-gradient(105% 82% at 76% 28%,rgba(90,158,143,.24),transparent 58%),
+    radial-gradient(80% 70% at 8% 92%,rgba(123,189,174,.14),transparent 62%),
+    linear-gradient(180deg,transparent 58%,rgba(20,40,55,.55) 100%)}
+}
+@media(max-width:900px){
+  #heroCanvas{
+    -webkit-mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.45) 52%,#000 76%,#000 96%,transparent 100%);
+            mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.45) 52%,#000 76%,#000 96%,transparent 100%)}
+  #hero::after{background:
+    linear-gradient(180deg,rgba(17,35,48,.52) 0%,rgba(17,35,48,.26) 30%,transparent 56%),
+    radial-gradient(105% 82% at 76% 28%,rgba(90,158,143,.24),transparent 58%),
+    radial-gradient(80% 70% at 8% 92%,rgba(123,189,174,.14),transparent 62%),
+    linear-gradient(180deg,transparent 58%,rgba(20,40,55,.55) 100%)}
+}
+#hero .wrap{position:relative;z-index:3;padding-top:84px;padding-bottom:70px}
+@media(min-width:901px){
+  #hero h1{max-width:19ch}
+  #hero .sub{max-width:570px}
+}
+#hero .tag{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-bright);margin:0 0 26px;line-height:1.5}
+#hero .tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--accent-bright);margin-right:11px;vertical-align:1px;
+  box-shadow:0 0 0 4px rgba(123,189,174,.20)}
+#hero h1{color:#fff;max-width:30ch}
+#hero .sub{font-size:21px;line-height:1.5;color:#c7dae4;max-width:600px;margin:0 0 6px}
+#hero .sub b{color:#fff;font-weight:600}
+#hero .first-place{font-weight:600}
+#hero .who{font-family:var(--font-mono);font-size:12.5px;color:#9fb9c8;margin:24px 0 0}
+#hero .who b{color:#fff;font-weight:500}
+.hbtns{display:flex;flex-wrap:wrap;gap:9px;margin:32px 0 0}
+.hbtn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;
+  letter-spacing:.08em;text-transform:uppercase;padding:11px 18px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.3);color:#fff;background:transparent;
+  transition:background .24s var(--ease),border-color .24s var(--ease),
+             transform .24s var(--ease),box-shadow .24s var(--ease)}
+.hbtn:hover{background:rgba(255,255,255,.1);border-color:#fff;color:#fff;transform:translateY(-2px);
+  box-shadow:0 10px 26px -14px rgba(0,0,0,.7)}
+.hbtn.solid{background:var(--accent);border-color:var(--accent);color:#0f2530;font-weight:600}
+.hbtn.solid:hover{background:var(--accent-bright);border-color:var(--accent-bright);color:#0f2530}
+.hbtn .arrow{transition:transform .24s var(--ease)}
+.hbtn:hover .arrow{transform:translateX(4px)}
+.hstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:44px 0 0;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.18);border-radius:4px;
+  overflow:hidden;max-width:660px}
+.hstats div{background:rgba(18,38,53,.5);padding:18px 20px;
+  transition:background .3s var(--ease)}
+.hstats div:hover{background:rgba(18,38,53,.72)}
+.hstats dt{font-family:var(--font-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:#93aebd;margin:0 0 7px}
+.hstats dd{margin:0;font-family:var(--font-display);font-size:38px;line-height:1;color:#fff;
+  font-variant-numeric:tabular-nums;font-weight:380}
+.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:4;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:#93aebd;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scrollcue span{display:block;width:1px;height:34px;
+  background:linear-gradient(#93aebd,transparent);animation:cue 2.4s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(.2);transform-origin:top}
+  55%{transform:scaleY(1);transform-origin:top}
+  56%{transform:scaleY(1);transform-origin:bottom}
+  100%{transform:scaleY(0);transform-origin:bottom}}
+@media (prefers-reduced-motion:reduce){.scrollcue span{animation:none}}
+@media(max-width:760px){
+  .hstats{grid-template-columns:1fr 1fr}
+  .hstats div:last-child{grid-column:1 / -1}
+  .hstats dd{font-size:32px}
+}
+
+/* ---------- controls, buttons, readouts ---------- */
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+.btn{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  padding:9px 16px;border:1px solid var(--rule-strong);background:#fff;color:var(--ink-2);
+  border-radius:3px;cursor:pointer;
+  transition:color .2s var(--ease),border-color .2s var(--ease),
+             background .2s var(--ease),transform .2s var(--ease)}
+.btn:hover{border-color:var(--accent);color:var(--accent-deep);background:rgba(90,158,143,.09);
+  transform:translateY(-1px)}
+.btn.on{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+.btn[disabled]{opacity:.42;cursor:default}
+.btn[disabled]:hover{border-color:var(--rule-strong);color:var(--ink-2);background:#fff;transform:none}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:1px;
+  background:var(--rule-strong);border:1px solid var(--rule-strong);border-radius:3px;
+  margin:20px 0 0;overflow:hidden}
+.readout div{background:#fff;padding:14px 16px}
+.readout dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-4);margin:0 0 5px}
+.readout dd{margin:0;font-family:var(--font-mono);font-size:19px;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.readout dd.hot{color:var(--accent-deep)}
+.readout dd.cool{color:var(--core)}
+.readout dd.lock{color:var(--calm-deep)}
+@keyframes tick{0%{transform:translateY(-3px);opacity:.45}100%{transform:none;opacity:1}}
+.readout dd.bump{animation:tick .34s var(--ease)}
+@media (prefers-reduced-motion:reduce){.readout dd.bump{animation:none}}
+
+/* ---------- leaderboard ---------- */
+.board{margin:26px 0 0;border-top:1px solid var(--rule-strong)}
+.board-row{display:grid;grid-template-columns:36px minmax(96px,148px) minmax(0,1fr) 78px;
+  align-items:center;gap:14px;padding:10px 8px;border-bottom:1px solid var(--rule);
+  cursor:default;position:relative;background:none;border-left:none;border-right:none;
+  border-top:none;width:100%;text-align:left;font:inherit;color:inherit;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .55s var(--ease),transform .55s var(--ease),background .2s var(--ease);
+  transition-delay:calc(var(--i,0) * 52ms)}
+.board-row.grown{opacity:1;transform:none}
+.board-row.head{opacity:1;transform:none;transition:none;border-bottom-color:var(--rule-strong)}
+.board-row.head:hover{background:none}
+.board-th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-4);line-height:1.3}
+.board-th.ta-r{text-align:right}
+@media(max-width:700px){.board-row.head{display:none}}
+.board-row:hover,.board-row:focus-visible{background:rgba(90,158,143,.08)}
+.board-rank{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-4);letter-spacing:.05em}
+.board-team{font-family:var(--font-mono);font-size:13.5px;color:var(--ink-2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board-track{height:14px;background:var(--bg-3);border-radius:2px;overflow:hidden;position:relative}
+section.alt .board-track{background:#dfeeea}
+.board-fill{display:block;height:100%;width:100%;border-radius:2px;background:#a6cec4;
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform 1.05s var(--ease),background .25s var(--ease);
+  transition-delay:calc(var(--i,0) * 52ms + 120ms)}
+.board-row.grown .board-fill{transform:scaleX(var(--w,0))}
+.board-score{font-family:var(--font-mono);font-size:14px;color:var(--ink);text-align:right;
+  font-variant-numeric:tabular-nums}
+.board-row.first .board-team{color:var(--ink);font-weight:600}
+.board-row.first .board-fill{background:linear-gradient(90deg,#c9a63f,#d8b34a);
+  box-shadow:0 0 12px rgba(216,179,74,.42)}
+.board-row.first .board-score{color:var(--gold-deep);font-weight:600}
+.board-row.first .board-track{box-shadow:0 0 0 1px rgba(216,179,74,.5)}
+.board-row.first::before{content:"";position:absolute;left:-8px;top:5px;bottom:5px;width:2px;
+  border-radius:1px;background:var(--gold-bright)}
+.board-row:hover .board-fill{background:var(--core)}
+.board-row.first:hover .board-fill{background:linear-gradient(90deg,#d2af49,#e2c05e)}
+.board-row .board-gap{position:absolute;right:92px;top:50%;
+  transform:translateY(-50%) translateX(8px) scale(.96);
+  font-family:var(--font-mono);font-size:10.5px;color:var(--ink-2);opacity:0;pointer-events:none;
+  background:#fff;padding:3px 9px;border:1px solid var(--rule-strong);border-radius:3px;
+  white-space:nowrap;box-shadow:0 6px 18px -12px rgba(30,58,79,.6);
+  transition:opacity .2s var(--ease),transform .24s var(--ease)}
+.board-row:hover .board-gap,.board-row:focus-visible .board-gap{opacity:1;
+  transform:translateY(-50%) translateX(0) scale(1)}
+.first-place{color:var(--gold-bright);font-weight:500;
+  text-shadow:0 0 8px rgba(216,179,74,.35);animation:goldPulse 2.6s ease-in-out infinite}
+.first-place.on-light{color:var(--gold-deep);text-shadow:none;animation:goldPulseLight 2.6s ease-in-out infinite}
+@keyframes goldPulse{0%,100%{text-shadow:0 0 5px rgba(216,179,74,.28)}
+  50%{text-shadow:0 0 16px rgba(216,179,74,.72),0 0 30px rgba(216,179,74,.32)}}
+@keyframes goldPulseLight{0%,100%{text-shadow:0 0 0 rgba(138,106,36,0)}
+  50%{text-shadow:0 0 10px rgba(178,140,52,.55)}}
+@media (prefers-reduced-motion:reduce){.first-place,.first-place.on-light{animation:none}}
+.board-row .board-gap.first-place{border-color:var(--rule-strong);color:var(--gold-deep)}
+.board-axis{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;
+  color:var(--ink-4);letter-spacing:.06em;padding:8px 8px 0;
+  margin-left:calc(36px + 14px + 96px + 14px);margin-right:92px}
+@media(max-width:700px){
+  .board-row{grid-template-columns:28px minmax(0,1fr) 70px;gap:10px;row-gap:7px}
+  .board-track{grid-column:1 / -1;order:3}
+  .board-row .board-gap{right:8px;top:11px;transform:none;opacity:0}
+  .board-row:hover .board-gap,.board-row:focus-visible .board-gap{transform:none}
+  .board-axis{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .board-row{opacity:1;transform:none;transition:none}
+  .board-fill{transition:none;transform:scaleX(var(--w,0))}
+}
+
+/* ---------- sticky scrollytelling ---------- */
+.scrolly{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,400px);
+  gap:48px;align-items:start;margin:40px 0 0}
+.scrolly-sticky{position:sticky;top:78px;z-index:1}
+.scrolly-steps{margin:0;padding:0;list-style:none}
+.scrolly-steps li{min-height:74vh;display:flex;align-items:center}
+.scrolly-steps li:first-child{min-height:50vh}
+.scrolly-steps li:last-child{min-height:60vh}
+.step-card{background:#fff;border:1px solid var(--rule-strong);border-radius:4px;
+  padding:20px 24px;box-shadow:0 20px 44px -34px rgba(30,58,79,.55);
+  opacity:.3;transform:translateY(14px) scale(.985);
+  transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.step-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--accent);border-radius:1px;transform:scaleY(0);transform-origin:top center;
+  transition:transform .55s var(--ease)}
+.step-card{position:relative}
+.scrolly-steps li.on .step-card{opacity:1;transform:none}
+.scrolly-steps li.on .step-card::before{transform:scaleY(1)}
+.step-card h4{margin:0 0 8px}
+.step-card p{margin:0;font-size:16.5px;line-height:1.52;color:var(--ink-2)}
+.step-card p + p{margin-top:10px}
+@media (prefers-reduced-motion:reduce){
+  .step-card{opacity:1;transform:none;transition:none}
+  .step-card::before{transform:scaleY(1);transition:none}
+}
+@media(max-width:960px){
+  .scrolly{grid-template-columns:minmax(0,1fr);gap:0}
+  .scrolly-sticky{top:58px;background:var(--mint);padding:12px 0 14px;
+    box-shadow:0 14px 24px -20px rgba(30,58,79,.5)}
+  .scrolly-steps li{min-height:60vh}
+  .scrolly-steps li:first-child{min-height:32vh}
+}
+
+/* ---------- pipeline diagram ---------- */
+.pipe{width:100%;height:auto;display:block;margin:6px 0 0}
+.pipe .pbox{fill:var(--bg-2);stroke:var(--rule-strong);stroke-width:1}
+.pipe .pbox-a{fill:rgba(90,158,143,.10);stroke:var(--accent);stroke-width:1}
+.pipe .pbox-c{fill:rgba(42,82,112,.07);stroke:var(--core-soft);stroke-width:1}
+.pipe .plab{font-family:var(--font-mono);font-size:9.6px;fill:var(--ink);letter-spacing:.02em}
+.pipe .plab-s{font-family:var(--font-mono);font-size:8.4px;fill:var(--ink-3)}
+.pipe .phead{font-family:var(--font-mono);font-size:8.6px;fill:var(--ink-4);letter-spacing:.12em}
+.pipe .parrow{stroke:var(--ink-4);stroke-width:1;fill:none}
+.pipe .pdash{stroke:var(--rule-strong);stroke-width:1;stroke-dasharray:3 3;fill:none}
+.pipe .pdraw{stroke-dasharray:var(--len,300);stroke-dashoffset:var(--len,300);
+  transition:stroke-dashoffset 1s var(--ease)}
+.pipe.in .pdraw{stroke-dashoffset:0}
+@media (prefers-reduced-motion:reduce){.pipe .pdraw{stroke-dashoffset:0;transition:none}}
+
+/* ---------- ledger strips ---------- */
+.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:24px 0 0}
+.strip div{border:1px solid var(--rule-strong);border-top:2px solid var(--ink-4);border-radius:4px;
+  padding:14px 14px 15px;background:#fff;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.strip div:hover{transform:translateY(-3px);box-shadow:0 14px 30px -22px rgba(30,58,79,.6)}
+.strip div.bad{border-top-color:var(--danger)}
+.strip div.warnc{border-top-color:var(--warn)}
+.strip dt{font-family:var(--font-mono);font-size:9.8px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 8px}
+.strip dd{margin:0;font-size:15px;line-height:1.42;color:var(--ink-2)}
+@media(max-width:860px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip div:last-child{grid-column:1 / -1}}
+@media(max-width:430px){.strip{grid-template-columns:1fr}
+  .strip div:last-child{grid-column:auto}}
+
+/* ---------- key-figure band ---------- */
+.kf{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;
+  background:var(--rule-strong);border:1px solid var(--rule-strong);border-radius:4px;
+  overflow:hidden;margin:30px 0}
+.kf div{background:#fff;padding:20px 20px 19px;transition:background .3s var(--ease)}
+.kf div:hover{background:var(--mint)}
+.kf dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-4);margin:0 0 9px}
+.kf dd{margin:0;font-family:var(--font-display);font-size:34px;line-height:1.05;color:var(--ink);
+  font-variant-numeric:tabular-nums;font-weight:380}
+.kf dd small{display:block;font-family:var(--font-body);font-size:14px;color:var(--ink-3);
+  margin-top:8px;line-height:1.4;font-weight:400}
+.kf div.acc dd{color:var(--accent-deep)}
+.kf div.core dd{color:var(--core)}
+
+/* ---------- footer ---------- */
+footer{padding:74px 0 92px;background:var(--deep);color:#c2d3dd;position:relative;overflow:hidden}
+footer::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(90% 120% at 12% 0%,rgba(90,158,143,.18),transparent 60%)}
+#footCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.4) 52%,#000 68%,#000 98%,transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 30%,rgba(0,0,0,.4) 52%,#000 68%,#000 98%,transparent 100%)}
+@media(max-width:900px){
+  #footCanvas{
+    -webkit-mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.5) 46%,#000 72%,#000 100%);
+            mask-image:linear-gradient(180deg,transparent 18%,rgba(0,0,0,.5) 46%,#000 72%,#000 100%)}
+}
+footer .wrap{position:relative;z-index:1}
+footer h3{margin-top:0;color:#fff}
+footer .small{color:#a8bdc9}
+footer a{color:#bfded6;border-bottom-color:rgba(191,222,214,.4)}
+footer a:hover{color:#fff;border-bottom-color:#fff}
+.footlinks{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 0}
+.footlinks a{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);
+  font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:10px 17px;
+  border:1px solid rgba(255,255,255,.26);border-radius:999px;color:#dceeea;
+  transition:border-color .22s var(--ease),color .22s var(--ease),
+             background .22s var(--ease),transform .22s var(--ease)}
+.footlinks a:hover{border-color:var(--accent-bright);color:#fff;
+  background:rgba(90,158,143,.18);transform:translateY(-2px)}
+.cite{font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#a8bdc9;
+  border-left:2px solid var(--accent);padding-left:20px;margin:24px 0}
+.cite b{color:#fff;font-weight:500}
+main .cite{color:var(--ink-3);border-left-color:var(--accent)}
+main .cite b{color:var(--ink)}
+
+/* ---------- responsive ---------- */
+@media(max-width:900px){
+  main section{padding:78px 0}
+}
+@media(max-width:720px){
+  body{font-size:17.5px}
+  .wrap{padding:0 20px}
+  main section{padding:68px 0}
+  .lede{font-size:19px}
+  .deep-panel{padding:28px 22px}
+  .modal{padding:28px 22px 24px}
+  #hero .wrap{padding-top:74px;padding-bottom:66px}
+  #hero .sub{font-size:19px}
+  .step-card p{font-size:15.5px}
+}
+@media(max-width:380px){
+  .wrap{padding:0 15px}
+  .hbtn{padding:10px 14px;font-size:10.5px}
+  .hstats dd{font-size:28px}
+}
+</style>
+<noscript><style>
+  /* every figure is drawn at runtime; with scripting off the prose, tables and
+     leaderboard carry the same numbers, so the empty frames go away */
+  .fig,.btnrow,.readout,.scrolly-sticky,#rail,#field,#grain,.scrollcue{display:none}
+  .fig-head span{display:none}
+  .reveal,.st,.board-row{opacity:1;transform:none}
+  .step-card{opacity:1;transform:none}
+  .step-card::before{transform:scaleY(1)}
+  .board-fill{transform:scaleX(var(--w,0))}
+  #topbar:not(.stuck){opacity:1;pointer-events:auto;background:rgba(255,255,255,.94)}
+  h2::after{width:132px}
+  .scrolly{display:block}
+  .scrolly-steps li{min-height:0;display:block;margin-bottom:16px}
+  .eq::after{display:none}
+</style></noscript>
+<style>/* ---------- egress receipts page additions ---------- */
+.hsub{display:block;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.04em;color:#9fb9c8;margin-top:5px}
+.hero-fallback{position:absolute;right:-2%;top:16%;width:46%;max-width:680px;opacity:.13;z-index:0;pointer-events:none;filter:saturate(.6)}
+@media(max-width:900px){.hero-fallback{display:none}}
+@media(max-width:640px){.hstats{grid-template-columns:1fr}}
+.figimg{display:block;width:100%;height:auto;border-radius:4px;border:1px solid var(--rule);background:#fff}
+.vlab{border:1px solid var(--rule-strong);border-radius:10px;padding:20px 22px;background:#fff;margin:28px 0 0;box-shadow:0 18px 44px -30px rgba(30,58,79,.35)}
+.vlab-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.vbtn{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;padding:9px 15px;border-radius:999px;border:1px solid var(--rule-strong);background:#fff;color:var(--ink);cursor:pointer;transition:transform .2s var(--ease),border-color .2s,background .2s}
+.vbtn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.vbtn.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+.vbtn.solid:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+.vbtn:disabled{opacity:.42;cursor:default;transform:none}
+.vbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vstate{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-left:auto}
+.vlab-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:18px;margin-top:16px}
+@media(max-width:900px){.vlab-grid{grid-template-columns:minmax(0,1fr)}}
+.vchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.vchip{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--rule-strong);color:var(--ink-3);transition:background .25s,border-color .25s,color .25s}
+.vchip.ok{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep)}
+.vchip.bad{background:#f7e4e1;border-color:var(--danger);color:var(--danger)}
+.vchip.na{border-style:dashed}
+.vterm{font-family:var(--font-mono);font-size:12.5px;line-height:1.55;background:#132634;color:#dbe9e5;border-radius:8px;padding:14px 16px;min-height:230px;white-space:pre-wrap;word-break:break-word;margin:0}
+.vterm .ok{color:#8fd0c0}.vterm .bad{color:#f2a99f}.vterm .dim{color:#8fa5b3}
+.merkle{display:block;width:100%;aspect-ratio:16/11;border-radius:8px;background:linear-gradient(135deg,#1a2f3f,#2a5270)}
+.vnote,.vfoot{margin-top:10px}
+.cmdblock{border:1px solid var(--rule-strong);border-radius:10px;overflow:hidden;margin:28px 0 0}
+.cmdhead{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg-2);font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.cmdblock pre{margin:0;padding:16px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;background:#132634;color:#dbe9e5}
+.copybtn{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--rule-strong);background:#fff;color:var(--ink-2);cursor:pointer}
+.copybtn:hover{border-color:var(--accent);color:var(--accent-deep)}
+.exits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:18px 0 0;background:var(--rule);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.exits div{background:#fff;padding:14px 16px}
+.exits dt{font-family:var(--font-mono);font-size:22px;color:var(--accent-deep);margin:0 0 4px}
+.exits dd{margin:0;font-size:14.5px;line-height:1.5;color:var(--ink-2)}
+@media(max-width:700px){.exits{grid-template-columns:1fr}}
+.readout dd.sm{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-top:3px}
+table.clauses{width:100%;border-collapse:collapse;font-size:15px;line-height:1.45;margin-top:22px}
+table.clauses th,table.clauses td{text-align:left;vertical-align:top;padding:11px 12px;border-bottom:1px solid var(--rule)}
+table.clauses th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--rule-strong)}
+table.clauses td:first-child{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.pass{display:inline-block;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent-deep)}
+.hist{display:block;font-family:var(--font-mono);font-size:10.5px;color:var(--gold-deep);margin-top:4px}
+#hero .sub{max-width:640px}
+</style>
+</head>
+
+<body>
+<canvas id="field" aria-hidden="true"></canvas>
+<div id="grain" aria-hidden="true"></div>
+<div id="rail" aria-hidden="true"><i></i></div>
+
+<div id="topbar"><div class="wrap">
+  <a class="homebtn" href="../index.html"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M7.2 2 3.2 6l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</a>
+  <a class="brand" href="#hero">Egress receipts</a>
+  <nav id="toc" aria-label="Sections of this page">
+    <a href="#problem" data-sec="problem">The problem</a>
+    <a href="#receipt" data-sec="receipt">The receipt</a>
+    <a href="#verify" data-sec="verify">Verify it</a>
+    <a href="#results" data-sec="results">Results</a>
+    <a href="#standard" data-sec="standard">Standard</a>
+    <a href="#limits" data-sec="limits">Limits</a>
+    <a href="#run" data-sec="run">Run it</a>
+  </nav>
+  <span class="rail-end" id="railPct">00%</span>
+</div></div>
+
+<div id="shell">
+
+<!-- ============================= HERO ============================= -->
+<section id="hero" aria-labelledby="hero-h">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <img id="heroFallback" class="hero-fallback" src="assets/egress-receipts/fig2-receipt-anatomy.svg" alt="" hidden>
+  <div class="wrap">
+    <p class="tag">Apart x CeSIA AI Incident Response Sprint 2026 &middot; Track 1, Containment</p>
+    <h1 id="hero-h">Egress Receipts: A Way for an Outsider to Catch an Evaluation Sandbox That Lies About Its Own Egress</h1>
+    <p class="sub">One signed file per evaluation run. A second witness outside the sandbox, a public
+      anchor made while the run is still going, and planted bait that fires only on exfiltration.
+      <b>Anyone verifies it offline, with no access to the lab.</b></p>
+    <p class="who"><b>Maksim Silchenko</b> &nbsp;&middot;&nbsp; National University of Singapore
+      &nbsp;&middot;&nbsp; solo entry, built on Shadow Commit</p>
+    <div class="hbtns">
+      <a class="hbtn solid" href="assets/egress-receipts-paper.pdf" target="_blank" rel="noopener">Read the report <span class="arrow">&rarr;</span></a>
+      <a class="hbtn" href="https://github.com/thylinao1/shadowcommit/tree/apart-sprint" target="_blank" rel="noopener">Code and judge-kit</a>
+      <a class="hbtn" href="#verify">Verify a receipt here</a>
+    </div>
+    <dl class="hstats">
+      <div><dt>False alarms on real traffic</dt><dd><span class="count" data-final="0" data-dec="0">0</span> <span class="hsub">of 110 flows, 7 workload classes</span></dd></div>
+      <div><dt>Conformance clauses passing</dt><dd><span class="count" data-final="7" data-dec="0">7</span> <span class="hsub">of 7, each with a revert proof</span></dd></div>
+      <div><dt>Offline verification</dt><dd><span class="count" data-final="172" data-dec="0">172</span> <span class="hsub">ms, median of 5 runs</span></dd></div>
+    </dl>
+  </div>
+  <div class="scrollcue" aria-hidden="true"><span></span>Scroll</div>
+</section>
+
+<main>
+<!-- ============================= PROBLEM ============================= -->
+<section id="problem" aria-labelledby="problem-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">The problem</p>
+      <h2 id="problem-h">The record of what left the sandbox lived on the machine the agents had been writing to</h2>
+      <p>The sentence that started this project is in METR's write-up of its investigation into the
+        July 2026 incident, published on 26 August: the agents may have deleted or edited the entries
+        on the Artifactory cache before the dump was retrieved, and METR could not rule it out. METR had
+        transcripts, environment access and interview rights that no regulator will ever get, and it
+        still ended up with a record it could not vouch for, because the only copy of what happened
+        lived on the very cache the agents had been writing to.</p>
+      <p>I think of this as the proof problem rather than the sandbox problem. A lab that runs
+        guardrails-off evaluations cannot show anyone outside the building that its containment held,
+        and once the sandbox is compromised it cannot really show itself either. Two things make it
+        hard. There is a single observer, because the broker that enforces egress is also the thing
+        that writes the log, so compromising one compromises both. And an omission is invisible to a
+        single log: a log with one row removed verifies perfectly against its own hash chain.</p>
+    </div>
+    <figure class="reveal d1">
+      <canvas class="fig r7" id="cTimeline" data-fig="timeline" role="img"
+        aria-label="Timeline of the incident's public record from 8 July to 8 September 2026, 62 days, compared with a receipt that an outsider could verify the same day."></canvas>
+      <figcaption><b>Figure 1.</b> What an outsider could see, and when. The first documented
+        inter-agent write on the rebuilt Artifactory was on 8 July; Hugging Face disclosed on 16 July;
+        METR published on 26 August; the first press report of an EU AI Act incident filing came on
+        8 September, 62 days after the run. A receipt closes that gap to the same day, verified offline.
+        Dates are from the primary sources listed in the report.</figcaption>
+    </figure>
+    <div class="read">
+      <p>So I built what I would have wanted to receive as that outsider: one signed file per
+        evaluation run, an egress and intent receipt, verified offline with no access to the lab, and
+        designed so that a sandbox lying about its own egress is caught by the receipt rather than
+        covered by it. It builds on Shadow Commit, the middleware my team built for TikTok TechJam
+        2026, which already had a sealed per-turn workspace, an exact host and port egress allowlist
+        and a hash-chained journal with Merkle checkpoints. Everything that makes the broker's word
+        checkable by someone who does not trust the broker is new work from the sprint.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= RECEIPT ============================= -->
+<section id="receipt" class="alt" aria-labelledby="receipt-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">The receipt</p>
+      <h2 id="receipt-h">Three observers that do not share a trust base, bound into one signed file</h2>
+      <p>A single log kept by the thing being watched is worth very little once that thing is
+        compromised, so the receipt binds three observers. Scroll through the four steps; the diagram
+        follows along.</p>
+    </div>
+    <div class="scrolly">
+      <div class="scrolly-sticky">
+        <canvas class="fig tall" id="cObservers" role="img" aria-label="Diagram of the sandbox, the broker gate, the independent witness, the decoy tripwires and the signed receipt."></canvas>
+      </div>
+      <ol class="scrolly-steps" id="obsSteps">
+        <li data-step="0"><div class="step-card">
+          <p class="kicker">Observer one</p>
+          <h3>The enforcement log</h3>
+          <p>The broker's own record of every allow and deny decision. This is the log a compromised
+            lab can edit, and it is where most "the policy was enforced" stories stop.</p>
+        </div></li>
+        <li data-step="1"><div class="step-card">
+          <p class="kicker">Observer two</p>
+          <h3>The independent witness</h3>
+          <p>A second capture of the same egress, taken from the kernel's connection tracker inside the
+            VM that hosts the containers, so it sees the real peer IP and byte counts of every flow that
+            crossed the sandbox's only exit. Its signing key and its flow log live on a host path the
+            sandbox cannot mount; a probe run as root inside the sandbox gets ENOENT on all three files.</p>
+        </div></li>
+        <li data-step="2"><div class="step-card">
+          <p class="kicker">Observer three</p>
+          <h3>The decoy tripwires</h3>
+          <p>A planted destination and a planted credential that a benign agent has no reason to
+            touch. Reading is silent. Sending the value over the wire, or reaching the decoy host,
+            produces a canary event bound to the witness's own flow leaf, so a hit inherits the
+            witness's anchor and tamper-evidence instead of living in the log the attacker controls.</p>
+        </div></li>
+        <li data-step="3"><div class="step-card">
+          <p class="kicker">The receipt</p>
+          <h3>One statement, signed, anchored during the run</h3>
+          <p>Three Merkle roots go into one in-toto statement, signed as a DSSE envelope with a key
+            whose public half is held out of band. While the run is still going, the witness head is
+            anchored as a git note, and with one flag on it is also published to the public Sigstore
+            Rekor log before the anchor step returns. On the real turn behind the shipped receipt, Rekor's
+            own timestamp falls 0.2 seconds before the agent's container was destroyed.</p>
+        </div></li>
+      </ol>
+    </div>
+    <figure class="reveal d1">
+      <img class="figimg" src="assets/egress-receipts/fig2-receipt-anatomy.svg" alt="Anatomy of the receipt: three observers, three Merkle roots, one DSSE-signed statement, an external anchor, and the judge-kit exit codes." loading="lazy">
+      <figcaption><b>Figure 2.</b> Anatomy of the receipt as the verifier reads it. The reconciler
+        classifies every witnessed flow against the enforcement log as matched, expected-benign,
+        omitted or phantom, with three enumerated allow-classes (the DNS resolver, the model provider,
+        the decoy endpoint), so a clean turn reconciles to zero omitted flows without hand-waving.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================= VERIFY ============================= -->
+<section id="verify" aria-labelledby="verify-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">Verify it</p>
+      <h2 id="verify-h">The same checks the judge-kit runs, in your browser, on a receipt cut from a real turn</h2>
+      <p>The receipt below was cut from a real evaluation turn against the real internet: a real
+        <code>pip install</code>, a real Hugging Face configuration pull, DNS churn and three single
+        fetches, which is 7 witnessed flows to 7 different CDN addresses and 15 enforcement rows. The
+        signature over the DSSE envelope, both Merkle roots and the reconciliation are recomputed here
+        with WebCrypto, from the receipt's own evidence. Then you can play the lab: hide one enforcement
+        row, let the root be recomputed the way a lying lab would recompute it, and watch the witness
+        name the flow that went missing.</p>
+    </div>
+    <div class="vlab reveal">
+      <div class="vlab-controls">
+        <button type="button" class="vbtn solid" id="vRun">Verify the clean receipt</button>
+        <button type="button" class="vbtn" id="vHide">Hide enforcement row 13</button>
+        <button type="button" class="vbtn" id="vRestore" disabled>Restore the row</button>
+        <span class="vstate" id="vState">ready</span>
+      </div>
+      <div class="vlab-grid">
+        <div class="vlab-out">
+          <div class="vchips" id="vChips">
+            <span class="vchip" data-k="sig">signature</span>
+            <span class="vchip" data-k="wit">witness root</span>
+            <span class="vchip" data-k="enf">enforcement root</span>
+            <span class="vchip" data-k="rec">reconcile</span>
+            <span class="vchip" data-k="anc">anchor</span>
+          </div>
+          <pre class="vterm" id="vTerm" aria-live="polite">$ node verify.mjs receipt-real-clean.json
+(press Verify)</pre>
+        </div>
+        <div class="vlab-tree">
+          <canvas id="cMerkle" class="merkle" role="img" aria-label="The enforcement log's Merkle tree, fifteen leaves; hiding one leaf changes the root."></canvas>
+          <p class="small vnote" id="vNote">The enforcement tree, 15 leaves. Hiding a leaf recomputes the path to the root; the anchored witness root does not move, so the two no longer agree.</p>
+        </div>
+      </div>
+      <p class="small vfoot">What runs here: the Ed25519 signature over the DSSE pre-authentication encoding, the RFC 6962 Merkle roots of the witness and enforcement evidence, the canary tree and the reconciliation, ported line for line from the node verifier and checked for parity on all nine shipped receipts. What does not run in a browser: reading the git-note anchor back from the bundled anchor repository, which the node kit does; the Rekor public-log entry carried by the third shipped receipt is checked here against the pinned Rekor key.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= RESULTS ============================= -->
+<section id="results" class="alt" aria-labelledby="results-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">Results</p>
+      <h2 id="results-h">The number that could have sunk the claim, and the fix that a revert proves</h2>
+      <p>The first time I measured the false-alarm rate on real benign traffic, it was 100 percent:
+        27 of 27 flows flagged as omitted. The enforcement log held the hostname the agent asked for,
+        the witness held the IP the packets went to, and for CDN-backed hosts those never coincide as
+        strings. After the broker started recording the resolved IP, fresh traffic came out 0 of 21,
+        then 0 of 62, then 0 of 110 across 7 workload classes. I would not read 0 of 110 as tighter than
+        its 3.37 percent upper bound. What I do read as strong is the revert: stripping the resolved IP
+        back out of the same 110 flows returns 110 of 110 to omitted, so the fix is the mechanism and
+        not cleaner traffic.</p>
+    </div>
+    <figure class="reveal d1">
+      <canvas class="fig r6" id="cFalseAlarm" data-fig="fa" role="img" aria-label="Bar chart of false-alarm rates before and after the fix, with 95 percent Wilson intervals, under strict, weakened and combined configurations."></canvas>
+      <figcaption><b>Figure 3.</b> False alarms on real benign egress before and after the fix, with
+        95 percent Wilson score intervals recomputed at render time. Before: 12 of 12 strict, 15 of 15
+        weakened. After: 0 of 55, 0 of 55, 0 of 110 combined; per class, <code>npm-install</code>,
+        <code>apt-mirror</code>, <code>git-clone</code> and <code>object-fetch</code> at 0 of 12 each,
+        and the original <code>pip</code>, Hugging Face and DNS classes at 0 of 62. The 67 bundles behind
+        these numbers ship in the repository, so the check recomputes with no Docker.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3>Chokepoint completeness, the raw table first</h3>
+      <p>Of 6 measured flow hops across five escape techniques, 2 were witnessed under the strict
+        broker configuration and 4 under the weakened one, each technique run once per configuration.
+        The two misses are the same two rows in both, and they share one cause: the witness attributes
+        flows by the run's own broker egress IP, so a compromised relay's onward hop from another host
+        and a technique built specifically to find a path the observer does not sit on are both outside
+        what it can see. Reading only the sandbox's own broker-mediated hops, every one was witnessed or
+        correctly denied, 4 of 4. The positive finding is the DNS pivot: the allowlist approved a
+        hostname, the broker's own connection resolved it to a different address, and the witness
+        recorded the real destination anyway.</p>
+    </div>
+    <figure class="reveal d1">
+      <canvas class="fig r6" id="cComplete" data-fig="complete" role="img" aria-label="Grid of six flow hops by two configurations, showing which hops were witnessed, denied or missed."></canvas>
+      <figcaption><b>Figure 4.</b> Six flow hops, two configurations. Witnessed hops in teal, correctly
+        denied hops outlined, the two named misses in red. The same manifest reconciled against a blanked
+        capture reads 0 of 6 in both configurations, so the check discriminates.</figcaption>
+    </figure>
+
+    <div class="read">
+      <h3>The decoy, and how long the catch takes</h3>
+      <p>Zero decoy hits over 11 real benign turns and 40 witnessed flows. In every red-team run the
+        exfiltration of the planted credential produced a canary hit, and after the lab erased the decoy
+        row, renumbered, re-rooted and re-signed the enforcement log, the hit still named the destination,
+        because it binds to the witness leaf and not to the log the attacker edited. The planted token is
+        shaped like a Hugging Face token and matches none of the broker's generic secret patterns, so the
+        broker forwarded the exfiltration and only the decoy caught it, which is the incident's own
+        token-theft shape.</p>
+    </div>
+    <figure class="reveal d1">
+      <canvas class="fig r6" id="cLatency" data-fig="latency" role="img" aria-label="Five timed red-team runs; stacked bars of freeze, anchor, build and sign and untimed glue, with the median intrinsic latency of 689 milliseconds marked."></canvas>
+      <figcaption><b>Figure 5.</b> Five timed red-team runs on one host clock. Intrinsic cost from the
+        exfiltration to a signed receipt carrying the hit: median 689 ms, range 638 to 785, of which the
+        freeze is about 506 ms. End to end about 1.96 s including a fixed, tunable 1.2 s settle wait.
+        The offline verify on the judge's side takes a median 172 ms. The hit fired and survived the erase
+        in 5 of 5 runs; 12 red-team runs exist in total and corroborate the medians.</figcaption>
+    </figure>
+
+    <dl class="readout reveal">
+      <div><dt>Per-call overhead</dt><dd>none measurable</dd><dd class="sm">the witness is not in the request path</dd></div>
+      <div><dt>Per-run overhead</dt><dd>~724 ms</dd><dd class="sm">234 ms to arm, 490 ms to freeze and root</dd></div>
+      <div><dt>Decoy false-positive floor</dt><dd>0 of 40</dd><dd class="sm">real benign flows, 11 turns</dd></div>
+      <div><dt>Public anchor timing</dt><dd>inside the run</dd><dd class="sm">Rekor time 06:00:16Z, container gone 06:00:16.9Z</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============================= STANDARD ============================= -->
+<section id="standard" aria-labelledby="standard-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">The standard</p>
+      <h2 id="standard-h">Seven clauses, each a script that exits 0 or 1, each shown able to fail</h2>
+      <p>The sprint's first example project asks for a v0.1 standard with clauses, evidence per clause
+        and a rough cost. This one is executable: every clause is a check you run against a live target,
+        mapped to CSA AIS-13 and NIST SC-7 or AU-9 and to a phase of Hugging Face's own timeline, and
+        every clause ships with a revert proof, the same check with the control on and then deliberately
+        off. All seven pass from a fresh export. The history is the useful part: the fifth clause, zero
+        false alarms on benign egress, genuinely failed on real data before the fix, and its packaged
+        revert arm could not fire until it was changed to strip the resolved IP from the rows, the same
+        revert that brings 110 of 110 back.</p>
+    </div>
+    <div class="tbl-scroll reveal">
+      <table class="clauses">
+        <thead><tr><th>Clause</th><th>Property</th><th>Control</th><th>Phase</th><th>Result</th><th>Rough cost, my estimate from this build</th></tr></thead>
+        <tbody>
+          <tr><td>STD-1</td><td>Egress boundary default-deny</td><td>NIST SC-7</td><td>recon</td><td><span class="pass">pass</span></td><td>none extra, the broker already default-denies</td></tr>
+          <tr><td>STD-2</td><td>Witness key and sink unreachable by sandbox root</td><td>NIST AU-9(3)</td><td>rce</td><td><span class="pass">pass</span></td><td>a witness process and a host path the sandbox cannot mount, about one engineer-day here</td></tr>
+          <tr><td>STD-3</td><td>Omission detected under enforcement-log tamper</td><td>NIST AU-9(3)</td><td>evasion</td><td><span class="pass">pass</span></td><td>receipt build and offline verify, about 490 ms per run</td></tr>
+          <tr><td>STD-4</td><td>Forged receipt refused, out-of-band trust root</td><td>NIST AU-9(3)</td><td>rce</td><td><span class="pass">pass</span></td><td>key custody only</td></tr>
+          <tr><td>STD-5</td><td>Zero false alarms on real benign egress</td><td>CSA AIS-13</td><td>dropper</td><td><span class="pass">pass</span> <span class="hist">failed first, on real data</span></td><td>a 60-line broker change plus a benign corpus to measure against</td></tr>
+          <tr><td>STD-6</td><td>Chokepoint completeness under destination obfuscation</td><td>NIST SC-7</td><td>c2</td><td><span class="pass">pass</span></td><td>an escape corpus, about one engineer-day, scripts kept private</td></tr>
+          <tr><td>STD-7</td><td>Per-run attribution integrity on the shared bridge</td><td>NIST AU-9</td><td>evasion</td><td><span class="pass">pass</span></td><td>a pure function over the witness's own labels</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= LIMITS ============================= -->
+<section id="limits" class="alt" aria-labelledby="limits-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">Limits</p>
+      <h2 id="limits-h">What this does not catch, said before a judge asks</h2>
+      <ul class="plain">
+        <li>Payload inside an allowed TLS tunnel is opaque. The receipt proves destination and volume, never content, and the credential catch is plain-HTTP only. Since nearly all lab egress is TLS through CONNECT, the destination-based catch is the one that generalises.</li>
+        <li>Two completeness boundaries: a compromised relay's onward hop is another host's egress and needs its own witness, and a technique built to find a path the observer does not sit on finds one, by construction.</li>
+        <li>The anchor protects an already-anchored record from later editing. It does not stop a real-time host-root that co-opts the witness process itself; that needs a witness run by a third party or a hardware root.</li>
+        <li>The public Rekor entries use a throwaway P-256 key because Rekor refuses Ed25519. No trust rests on that key; the third-party timestamp and the inclusion proof do the work. The mid-run public leg is opt-in and needs the network.</li>
+        <li>A lab that emits no receipt at all is outside the mechanism. Under a duty like EU AI Act Article 55(1)(c), a missing receipt is itself the signal a regulator acts on.</li>
+        <li>Scale: one machine, one day, 110 benign flows, 40 decoy-floor flows, 5 timed red-team runs, and escape techniques I chose myself. The intervals in the figures are the honest statement of that.</li>
+      </ul>
+      <p>The analogy I keep coming back to is IAEA containment and surveillance. The facility keeps its
+        own operating log, the inspectors keep their own seals and cameras rooted outside the operator's
+        control, and the inspectors' copy of what the seals showed is what a third party trusts. The
+        enforcement log is the operating log, the witness is the seal, the public anchor is the
+        inspector's copy. Where the analogy breaks is instructive: an IAEA seal is physically outside the
+        facility's software, while my witness is a process on the same host, isolated by mount and
+        namespace boundaries that I proved a sandbox root cannot cross but that a full host compromise
+        could. That is why the honest scope of a green receipt is that the sandbox cannot rewrite what
+        has already been anchored, and not that the host is trustworthy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= RUN ============================= -->
+<section id="run" aria-labelledby="run-h">
+  <div class="wrap">
+    <div class="read">
+      <p class="kicker">Run it yourself</p>
+      <h2 id="run-h">Under a minute, node only, no network, no access to the lab</h2>
+      <p>The judge-kit is the fastest path. It needs node 20 or later and nothing else; the verifier is
+        bundled, the trust roots are held out of band, and the anchor repository ships inside the kit so
+        the read-back is real.</p>
+    </div>
+    <div class="cmdblock reveal">
+      <div class="cmdhead"><span>judge-kit</span><button type="button" class="copybtn" data-copy="cmds">copy</button></div>
+<pre id="cmds"><code>git clone --depth 1 --branch apart-sprint https://github.com/thylinao1/shadowcommit.git
+cd shadowcommit/judge-kit
+./verify receipt-real-clean.json                 # exit 0, 7 flows matched, anchor read back
+./verify receipt-real-tampered.json              # exit 1, names the hidden flow and the row gap
+./verify receipt-real-clean-public-anchor.json   # exit 0, public log entry timestamped during the turn
+./verify --no-anchor receipt-clean.json          # exit 2, a check that did not run is not a pass
+./verify receipt-forged.json                     # exit 1, re-signed by an attacker
+cd .. &amp;&amp; node standard/checks/05-benign-reconciliation.mjs   # recomputes 0/55 on, 55/55 off</code></pre>
+    </div>
+    <dl class="exits reveal">
+      <div><dt>0</dt><dd>clean: signature, both roots, the anchor read back and the reconciliation all hold</dd></div>
+      <div><dt>1</dt><dd>a check ran and failed: a named omitted flow, a bad signature, a failed inclusion proof</dd></div>
+      <div><dt>2</dt><dd>a check could not run here: wrong trust key, a missing anchor, a missing input</dd></div>
+    </dl>
+    <div class="read">
+      <p class="small">What is new in the sprint and what is reused is listed in the repository's
+        <code>NEW-WORK.md</code>. The escape-replay and deception scripts are withheld pending the
+        organisers' disclosure review, as the sprint guidelines ask; the measurement data they produced
+        ships in full, redacted only of commands and payloads, so the headline numbers recompute from the
+        repository alone.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <canvas id="footCanvas" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="read">
+      <h3>Notes on this page</h3>
+      <p class="small">Written by Maksim Silchenko, National University of Singapore, competing solo in the
+        Apart x CeSIA AI Incident Response Sprint, 11 to 13 September 2026, Track 1. The entry builds on
+        Shadow Commit, the MIT-licensed middleware from my team's TikTok TechJam 2026 project, and the
+        report discloses exactly which files are new and which are reused.</p>
+      <p class="small">Every number on this page traces to a recorded run in the repository's claims
+        ledger and measurement records, quoted at the precision it was recorded at. Figures 1, 3, 4 and 5
+        are drawn from those records; Figure 2 is the receipt schema as the verifier reads it. The
+        browser verifier on this page is a port of the node verifier and was checked for parity against
+        it on every shipped receipt.</p>
+      <p class="small">Large language models were used in this project as assistance, for code, for
+        measurements and their re-verification, for figures, and for drafting text including this page,
+        which I reviewed and edited. Every quantitative claim traces to a recorded measurement rather than
+        to a model's summary of one.</p>
+      <p class="small">Corrections are welcome. If something here misstates the incident record, a
+        source, or a measurement, tell me and I will fix it.</p>
+      <div class="footlinks">
+        <a href="assets/egress-receipts-paper.pdf" target="_blank" rel="noopener">Report (PDF)</a>
+        <a href="https://github.com/thylinao1/shadowcommit/tree/apart-sprint" target="_blank" rel="noopener">Code and judge-kit</a>
+        <a href="https://apartresearch.com/sprints/ai-incident-response-sprint-2026-09-11-to-2026-09-13" target="_blank" rel="noopener">Sprint page</a>
+      </div>
+    </div>
+  </div>
+</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var mqReduce = matchMedia("(prefers-reduced-motion: reduce)");
+var reduce = mqReduce.matches;
+if(mqReduce.addEventListener) mqReduce.addEventListener("change", function(e){ reduce = e.matches; });
+
+/* ---------------- palette, mirrored from the CSS custom properties ---------------- */
+var INK="#2c3e50", INK2="#44586b", INK3="#6c757d", INK4="#8a97a3",
+    RULE="rgba(44,62,80,0.10)", RULE2="rgba(44,62,80,0.22)",
+    ACC="#5a9e8f", ACCD="#3d7568", ACCS="#bfded6",
+    CORE="#2a5270", CORED="#1e3a4f", CORES="#a8bccb",
+    CALM="#3d7568", GOLD="#a8791c",
+    BG="#ffffff", BG2="#ffffff", BG3="#e9eef1",
+    DEEP="#1e3a4f", DINK="#eef4f7", DINK2="#93aebd";
+var T_ACC=[90,158,143], T_CORE=[42,82,112], T_INK=[44,62,80], T_GOLD=[168,121,28];
+function rgba(t,a){ return "rgba("+t[0]+","+t[1]+","+t[2]+","+a+")"; }
+
+/* ---------------- canvas helper ---------------- */
+var _hd = new WeakMap();
+function hidpi(c, ratio){
+  var dpr = Math.min(devicePixelRatio || 1, 2);
+  var r = c.getBoundingClientRect();
+  var w = Math.max(1, Math.round(r.width));
+  var h = Math.max(1, Math.round(r.height || w * (ratio||0.5)));
+  var k = _hd.get(c);
+  if(k && k.w===w && k.h===h && k.dpr===dpr){ k.x.clearRect(0,0,w,h); return k; }
+  c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
+  var x = c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
+  var rec = {x:x, w:w, h:h, dpr:dpr};
+  _hd.set(c, rec); return rec;
+}
+function rr(x,a,b,c,d,r){
+  var rad = Math.min(r, Math.abs(c)/2, Math.abs(d)/2);
+  x.beginPath();x.moveTo(a+rad,b);x.arcTo(a+c,b,a+c,b+d,rad);
+  x.arcTo(a+c,b+d,a,b+d,rad);x.arcTo(a,b+d,a,b,rad);x.arcTo(a,b,a+c,b,rad);x.closePath();
+}
+function mono(x,size,weight){ x.font=(weight?weight+" ":"")+(size||11)+"px 'IBM Plex Mono',ui-monospace,monospace"; }
+function lab(x,t,px,py,col,size,ls){
+  x.save();x.fillStyle=col||INK4;mono(x,size||11);
+  if(ls){var s=String(t),cx=px;for(var i=0;i<s.length;i++){x.fillText(s[i],cx,py);
+    cx+=x.measureText(s[i]).width+ls;}}else x.fillText(t,px,py);x.restore();
+}
+function labR(x,t,px,py,col,size){ x.save(); mono(x,size||11);
+  x.fillStyle=col||INK4; x.fillText(t, px - x.measureText(t).width, py); x.restore(); }
+function labC(x,t,px,py,col,size){ x.save(); mono(x,size||11);
+  x.fillStyle=col||INK4; x.fillText(t, px - x.measureText(t).width/2, py); x.restore(); }
+/* centred label with a paper-coloured plate behind it, for labels that cross a rule */
+function labCP(x,t,px,py,col,size){
+  x.save(); mono(x,size||11);
+  var ww=x.measureText(t).width;
+  x.fillStyle="#ffffff"; x.fillRect(px-ww/2-7, py-(size||11)-2, ww+14, (size||11)+9);
+  x.fillStyle=col||INK4; x.fillText(t, px-ww/2, py); x.restore();
+}
+function tw(x,s,size){ x.save(); mono(x,size); var v=x.measureText(s).width; x.restore(); return v; }
+function fitLab(x,full,short,maxw,size){ return (short && tw(x,full,size) > maxw) ? short : full; }
+function lerp(a,b,t){return a+(b-a)*t}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function ease(t){return t<0?0:t>1?1:1-Math.pow(1-t,3)}
+function easeIO(t){t=clamp(t,0,1);return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+
+/* ---------------- deterministic rng ---------------- */
+function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;
+  var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return((t^t>>>14)>>>0)/4294967296;}}
+function gauss(rnd){var u=1-rnd(),v=rnd();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* ---------------- animation registry, visibility gated ---------------- */
+var ticks = [];
+function register(el, fn, ratio){
+  var rec = {el:el, fn:fn, on:false, t:0, ratio:ratio||0.5};
+  ticks.push(rec);
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ rec.on = e.isIntersecting; });
+  }, {rootMargin:"160px 0px 160px 0px", threshold:0});
+  io.observe(el);
+  return rec;
+}
+var last = 0;
+function loop(now){
+  var dt = Math.min(0.05, (now - last)/1000) || 0.016; last = now;
+  for(var i=0;i<ticks.length;i++){
+    var r = ticks[i];
+    if(!r.on) continue;
+    r.t += dt;
+    try{ r.fn(r.t, dt); }catch(e){}
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(function(n){ last=n; loop(n); });
+var _rsz = null;
+addEventListener("resize", function(){
+  if(_rsz) clearTimeout(_rsz);
+  _rsz = setTimeout(function(){
+    for(var i=0;i<ticks.length;i++){
+      if(!ticks[i].on) continue;
+      try{ ticks[i].fn(ticks[i].t, 0); }catch(e){}
+    }
+  }, 120);
+}, {passive:true});
+
+/* ---------------- reveal ---------------- */
+var revObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -6% 0px", threshold:0.04});
+document.querySelectorAll(".reveal").forEach(function(el){ revObs.observe(el); });
+
+var inObs = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); inObs.unobserve(e.target); } });
+}, {rootMargin:"0px 0px -10% 0px", threshold:0.12});
+document.querySelectorAll("h2, .eq, .pipe").forEach(function(el){ inObs.observe(el); });
+
+/* generic staggered entrance for repeating elements: list items, cards, table rows.
+   The stagger index is written as a custom property and the CSS turns it into a delay. */
+(function(){
+  var GROUPS = ["ul.plain", ".kf", ".strip", ".eq-pair", ".readout", ".footlinks",
+                ".hbtns", ".tbl-scroll tbody"];
+  var stObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add("in");
+      stObs.unobserve(e.target);
+    });
+  }, {rootMargin:"0px 0px -7% 0px", threshold:0.06});
+  GROUPS.forEach(function(sel){
+    document.querySelectorAll(sel).forEach(function(g){
+      var kids = [].slice.call(g.children), n = 0;
+      kids.forEach(function(kid){
+        kid.classList.add("st");
+        kid.style.setProperty("--i", String(Math.min(n, 7)));
+        n++;
+        stObs.observe(kid);
+      });
+    });
+  });
+  /* the pipeline diagram draws its own connectors */
+  document.querySelectorAll(".pipe .parrow, .pipe .pdash").forEach(function(pth){
+    try{
+      var len = pth.getTotalLength();
+      if(!isFinite(len) || len <= 0) return;
+      pth.classList.add("pdraw");
+      pth.style.setProperty("--len", Math.ceil(len));
+      pth.style.transitionDelay = (0.1 + Math.min(len/900, 0.5)).toFixed(2)+"s";
+    }catch(err){}
+  });
+})();
+
+/* the hero headline arrives word by word */
+(function(){
+  var h1 = document.querySelector("#hero h1"); if(!h1) return;
+  var words = h1.textContent.trim().split(/\s+/);
+  h1.textContent = "";
+  words.forEach(function(wd,i){
+    var sp = document.createElement("span");
+    sp.className = "w"; sp.textContent = wd;
+    sp.style.display = "inline-block";
+    sp.style.opacity = "0";
+    sp.style.transform = "translateY(0.44em) rotate(1.1deg)";
+    if(!reduce){
+      var dl = (0.08 + i*0.038).toFixed(3);
+      sp.style.transition = "opacity .78s cubic-bezier(.16,1,.3,1) "+dl+
+                            "s, transform .78s cubic-bezier(.16,1,.3,1) "+dl+"s";
+    }
+    h1.appendChild(sp);
+    if(i < words.length-1) h1.appendChild(document.createTextNode(" "));
+  });
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    h1.querySelectorAll("span").forEach(function(sp){ sp.style.opacity="1"; sp.style.transform="none"; });
+  }); });
+})();
+
+/* ---------------- counters ---------------- */
+(function(){
+  var nObs = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el = e.target;
+      nObs.unobserve(el);
+      var txt = el.getAttribute("data-final");
+      var dec = parseInt(el.getAttribute("data-dec")||"0", 10);
+      var suf = el.getAttribute("data-suffix")||"";
+      var target = parseFloat(txt.replace(/,/g,""));
+      if(!isFinite(target) || reduce){ el.textContent = txt + suf; return; }
+      var grouped = txt.indexOf(",") >= 0, t0 = null;
+      function fmt(v){
+        var s = v.toFixed(dec);
+        if(grouped) s = s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return s + suf;
+      }
+      function step(ts){
+        if(t0===null) t0 = ts;
+        var kk = clamp((ts-t0)/950, 0, 1);
+        el.textContent = fmt(target*ease(kk));
+        if(kk < 1) requestAnimationFrame(step); else el.textContent = txt + suf;
+      }
+      requestAnimationFrame(step);
+    });
+  }, {threshold:0.45});
+  document.querySelectorAll("[data-final]").forEach(function(el){ nObs.observe(el); });
+})();
+
+/* ---------------- rail, topbar, scrollspy ---------------- */
+var railI = document.querySelector("#rail i"), topbar = document.getElementById("topbar");
+var railPct = document.getElementById("railPct");
+var railQ = false;
+function paintRail(){
+  railQ = false;
+  var h = document.documentElement.scrollHeight - innerHeight;
+  var p = h > 0 ? clamp(scrollY / h, 0, 1) : 0;
+  if(railI) railI.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  if(railPct) railPct.textContent = String(Math.round(p*100)).padStart(2,"0") + "%";
+  if(topbar) topbar.classList.toggle("stuck", scrollY > innerHeight*0.55);
+}
+function onScroll(){ if(!railQ){ railQ = true; requestAnimationFrame(paintRail); } }
+addEventListener("scroll", onScroll, {passive:true});
+addEventListener("resize", onScroll, {passive:true});
+paintRail();
+
+(function(){
+  var links = [].slice.call(document.querySelectorAll("#toc a")), map = {};
+  links.forEach(function(a){ map[a.dataset.sec] = a; });
+  var spy = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove("active"); });
+        var a = map[e.target.id]; if(a) a.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-42% 0px -50% 0px"});
+  document.querySelectorAll("main section").forEach(function(s){ spy.observe(s); });
+})();
+
+
+(function(){
+  var c = document.getElementById("field"); if(!c) return;
+  var PAL = [
+    {id:"hero",       rgb:T_INK,  a:0.10, mode:"cloud"},
+    {id:"problem",       rgb:T_CORE, a:0.085, mode:"grid"},
+    {id:"receipt",     rgb:T_CORE, a:0.075, mode:"cells"},
+    {id:"verify",   rgb:T_ACC,  a:0.085, mode:"bars"},
+    {id:"results",   rgb:T_ACC,  a:0.105, mode:"rings"},
+    {id:"standard", rgb:T_GOLD, a:0.078, mode:"rays"},
+    {id:"limits",    rgb:T_ACC,  a:0.085, mode:"bars"},
+    {id:"run",       rgb:T_CORE, a:0.080, mode:"cloud"}
+  ];
+  var TOPS = [], palPos = 0, lastDrawn = -99, lastT = -99;
+  function measure(){
+    TOPS = PAL.map(function(pp){
+      var el = document.getElementById(pp.id);
+      return el ? el.getBoundingClientRect().top + scrollY : 0;
+    });
+  }
+  measure();
+  addEventListener("resize", measure, {passive:true});
+  addEventListener("load", measure);
+  function target(){
+    var y = scrollY + innerHeight*0.42, best = 0;
+    for(var i=0;i<TOPS.length;i++){ if(TOPS[i] <= y) best = i; }
+    return best;
+  }
+  function texture(x,w,h,mode,rgb,alpha,t,ph){
+    if(alpha <= 0.002) return;
+    var col = rgba(rgb, alpha.toFixed(4));
+    x.save(); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 1;
+    var cx = w*0.68, cy = h*0.38, R = Math.max(w,h);
+    var i,j,k;
+    if(mode === "rings"){
+      for(i=1;i<=15;i++){
+        var rad = (i/15)*R*0.76 + 13*Math.sin(t*0.14 + i*0.5 + ph);
+        x.beginPath(); x.arc(cx,cy,Math.abs(rad),0,6.283); x.stroke();
+      }
+    } else if(mode === "rays"){
+      for(j=0;j<36;j++){
+        var a2 = (j/36)*6.283 + t*0.015 + ph;
+        x.beginPath(); x.moveTo(cx + Math.cos(a2)*R*0.10, cy + Math.sin(a2)*R*0.10);
+        x.lineTo(cx + Math.cos(a2)*R*0.92, cy + Math.sin(a2)*R*0.92); x.stroke();
+      }
+    } else if(mode === "bars"){
+      var n = 30, bw = w/n;
+      for(k=0;k<n;k++){
+        var hh = h*(0.14 + 0.40*Math.abs(Math.sin(k*0.7 + t*0.09 + ph)));
+        x.fillRect(k*bw + bw*0.24, h-hh, bw*0.52, hh);
+      }
+    } else if(mode === "grid"){
+      var gp = 48;
+      for(var gx=0; gx<w+gp; gx+=gp) for(var gy=0; gy<h+gp; gy+=gp){
+        var d = 1.3 + 1.4*Math.sin((gx+gy)*0.012 + t*0.16 + ph);
+        x.beginPath(); x.arc(gx, gy, Math.abs(d), 0, 6.283); x.fill();
+      }
+    } else if(mode === "cells"){
+      var cs = 86;
+      for(var ax=0; ax<w+cs; ax+=cs) for(var ay=0; ay<h+cs; ay+=cs){
+        var o = 9*Math.sin(ax*0.01 + ay*0.013 + t*0.12 + ph);
+        var sz = cs*0.5 + o;
+        x.beginPath(); x.rect(ax + (cs-sz)/2, ay + (cs-sz)/2, Math.abs(sz), Math.abs(sz)); x.stroke();
+      }
+    } else {
+      var NN = 26, pts = [];
+      for(var q=0;q<NN;q++){
+        var s1 = Math.sin(q*12.9898 + ph)*43758.5453; s1 -= Math.floor(s1);
+        var s2 = Math.sin(q*78.233 + ph)*43758.5453;  s2 -= Math.floor(s2);
+        pts.push([ (s1*1.2-0.1)*w + 24*Math.sin(t*0.08 + q),
+                   (s2*1.2-0.1)*h + 20*Math.cos(t*0.07 + q*1.3) ]);
+      }
+      for(var m1=0;m1<NN;m1++){
+        for(var m2=m1+1;m2<NN;m2++){
+          var dx = pts[m1][0]-pts[m2][0], dy = pts[m1][1]-pts[m2][1];
+          if(dx*dx + dy*dy < (w*0.20)*(w*0.20)){
+            x.beginPath(); x.moveTo(pts[m1][0],pts[m1][1]); x.lineTo(pts[m2][0],pts[m2][1]); x.stroke();
+          }
+        }
+        x.beginPath(); x.arc(pts[m1][0],pts[m1][1],2,0,6.283); x.fill();
+      }
+    }
+    x.restore();
+  }
+  function draw(t){
+    var want = target();
+    palPos += (want - palPos) * 0.045;
+    if(Math.abs(want - palPos) < 0.002) palPos = want;
+    if(Math.abs(palPos - lastDrawn) < 0.0025 && (t - lastT) < 0.06) return;
+    lastDrawn = palPos; lastT = t;
+    var k = hidpi(c, 1), x = k.x, w = k.w, h = k.h;
+    x.clearRect(0,0,w,h);
+    var i0 = Math.max(0, Math.min(PAL.length-1, Math.floor(palPos)));
+    var i1 = Math.min(PAL.length-1, i0+1);
+    var f  = palPos - i0;
+    var A = PAL[i0], B = PAL[i1];
+    var cr = Math.round(lerp(A.rgb[0],B.rgb[0],f)),
+        cg = Math.round(lerp(A.rgb[1],B.rgb[1],f)),
+        cb = Math.round(lerp(A.rgb[2],B.rgb[2],f)),
+        aa = lerp(A.a,B.a,f);
+    var g = x.createRadialGradient(w*0.66,h*0.32,0,w*0.66,h*0.32,Math.max(w,h)*0.95);
+    g.addColorStop(0, "rgba("+cr+","+cg+","+cb+","+(aa*1.3).toFixed(3)+")");
+    g.addColorStop(0.55,"rgba("+cr+","+cg+","+cb+","+(aa*0.72).toFixed(3)+")");
+    g.addColorStop(1, "rgba("+cr+","+cg+","+cb+",0)");
+    x.fillStyle = g; x.fillRect(0,0,w,h);
+    texture(x,w,h,A.mode,A.rgb,A.a*(1-f)*0.18,t,i0*1.7);
+    if(i1 !== i0) texture(x,w,h,B.mode,B.rgb,B.a*f*0.18,t,i1*1.7);
+  }
+  ticks.push({el:document.body, fn:draw, on:true, t:0});
+  addEventListener("scroll", function(){ lastDrawn = -99; }, {passive:true});
+  draw(0);
+})();
+
+(function(){
+  var c = document.getElementById("footCanvas"); if(!c) return;
+  var i, j;
+  var NU = 22, NV = 13, VU = NU+1, VV = NV+1, NVERT = VU*VV;
+  var EX = 1.24, EZ = 0.58, PLAT = 0.34;
+  function surf(u,v){
+    var a = 0.325*Math.sin(u*5.6 + v*2.1 - 0.6)*Math.cos(v*3.2 + 0.4);
+    var b = 0.150*Math.sin(u*9.1 - v*6.3 + 1.4);
+    var d = 0.105*Math.cos(u*3.4 + v*7.9);
+    var hh = a + b + d;
+    var du = (u-0.60)/0.36, dv = (v-0.48)/0.46;
+    var rr = Math.sqrt(du*du + dv*dv);
+    var mm = 1 - clamp((rr-0.50)/0.54, 0, 1);
+    mm = mm*mm*(3-2*mm);
+    return hh*(1-mm) + PLAT*mm;
+  }
+  var vX = new Float32Array(NVERT), vY = new Float32Array(NVERT), vZ = new Float32Array(NVERT);
+  for(j=0;j<VV;j++) for(i=0;i<VU;i++){
+    var u = i/NU, v = j/NV, id = j*VU+i;
+    vX[id] = (u-0.5)*2*EX; vZ[id] = (v-0.5)*2*EZ; vY[id] = surf(u,v);
+  }
+  var pX = new Float32Array(NVERT), pY = new Float32Array(NVERT);
+  var pD = new Float32Array(NVERT), pOK = new Uint8Array(NVERT);
+
+  var FG = 10;
+  function ramp(r,g,b,a0,a1,n){
+    var o = new Array(n);
+    for(var q=0;q<n;q++) o[q] = "rgba("+r+","+g+","+b+","+(a0+(a1-a0)*(q/(n-1))).toFixed(3)+")";
+    return o;
+  }
+  var F_LINE = ramp(123,189,174,0.02,0.20,FG), F_GOLD = ramp(216,179,74,0.03,0.30,FG);
+
+  var gW=-1, gH=-1, glow=null, gR=0;
+  function ensureGrads(x,w,h){
+    if(w===gW && h===gH) return;
+    gW=w; gH=h; gR=Math.max(w,h)*0.55;
+    glow = x.createRadialGradient(0,0,gR*0.06,0,0,gR);
+    glow.addColorStop(0,"rgba(90,158,143,0.07)");
+    glow.addColorStop(1,"rgba(90,158,143,0)");
+  }
+
+  var f = 3.0;
+  function draw(t, dt){
+    var kk = hidpi(c,0.4), x = kk.x, w = kk.w, h = kk.h;
+    x.clearRect(0,0,w,h);
+    var mob = w < 900;
+    ensureGrads(x,w,h);
+
+    x.save();
+    x.translate(w*(mob?0.5:0.80), h*0.44);
+    x.fillStyle = glow; x.fillRect(-gR,-gR,gR*2,gR*2);
+    x.restore();
+
+    var hy = h*0.70, floorY = h*1.10, vpx = w*(mob?0.5:0.76);
+    var span = floorY - hy;
+    x.lineWidth = 1; x.strokeStyle = "rgba(90,158,143,0.05)";
+    x.beginPath();
+    for(i=1;i<=9;i++){
+      var yy = hy + span/i;
+      if(yy > h*1.2) continue;
+      x.moveTo(0,yy); x.lineTo(w,yy);
+    }
+    for(j=-9;j<=9;j++){ x.moveTo(vpx + j*w*0.16, floorY); x.lineTo(vpx, hy); }
+    x.stroke();
+
+    var ox = mob ? w*0.58 : w*0.775, oy = h*0.46, scale = Math.min(w,h)*(mob?0.19:0.255);
+    var ry = (reduce ? 0.72 : 0.72 + 0.22*Math.sin(t*0.03));
+    var tilt = 0.52;
+    var cs=Math.cos(ry), sn=Math.sin(ry), ct=Math.cos(tilt), st=Math.sin(tilt);
+    var X1,Z1,Y1,Z2,dd,qz;
+    for(i=0;i<NVERT;i++){
+      X1 = vX[i]*cs + vZ[i]*sn; Z1 = -vX[i]*sn + vZ[i]*cs;
+      Y1 = vY[i]*ct - Z1*st;    Z2 = vY[i]*st + Z1*ct;
+      dd = f - Z2;
+      if(dd < 0.5){ pOK[i]=0; continue; }
+      qz = f/dd;
+      pX[i] = ox + X1*scale*qz; pY[i] = oy - Y1*scale*qz;
+      pD[i] = clamp((qz-0.72)/0.90, 0, 1); pOK[i] = 1;
+    }
+    /* every other line of the same mesh, so the shape is legible but quiet */
+    for(j=0;j<VV;j+=2){
+      var run = 0;
+      for(i=0;i<VU;i++){
+        var id2 = j*VU+i;
+        if(!pOK[id2]){ if(run){ x.stroke(); run = 0; } continue; }
+        if(!run){ x.beginPath(); x.moveTo(pX[id2],pY[id2]); run = 1;
+                  x.strokeStyle = (vY[id2] > PLAT-0.03) ? F_GOLD[(pD[id2]*(FG-1))|0]
+                                                        : F_LINE[(pD[id2]*(FG-1))|0]; }
+        else x.lineTo(pX[id2],pY[id2]);
+      }
+      if(run) x.stroke();
+    }
+    for(i=0;i<VU;i+=2){
+      var run2 = 0;
+      for(j=0;j<VV;j++){
+        var id3 = j*VU+i;
+        if(!pOK[id3]){ if(run2){ x.stroke(); run2 = 0; } continue; }
+        if(!run2){ x.beginPath(); x.moveTo(pX[id3],pY[id3]); run2 = 1;
+                   x.strokeStyle = F_LINE[(pD[id3]*(FG-1))|0]; }
+        else x.lineTo(pX[id3],pY[id3]);
+      }
+      if(run2) x.stroke();
+    }
+  }
+
+  if(reduce){
+    draw(1.2, 0);
+    var rq = null;
+    addEventListener("resize", function(){
+      if(rq) clearTimeout(rq);
+      rq = setTimeout(function(){ draw(1.2, 0); }, 140);
+    }, {passive:true});
+  } else {
+    register(c, draw, 0.4);
+    draw(0, 0.016);
+  }
+})();
+
+
+/* ======================================================================
+   Egress receipts page: figures, scrolly, verifier panel, copy buttons.
+   Runs inside the scaffold IIFE, so the hidpi, register, label, rgba and reduce helpers exist.
+   Every number below is transcribed from repo/report/CLAIMS-LEDGER.md
+   (L-01 to L-25) and research/sprint/WS-K-OUT.md.
+   ====================================================================== */
+var DANGER="#a94438", T_DANGER=[169,68,56], GOLDB="#d8b34a", T_GOLDB=[216,179,74];
+
+function wilson(k, n){
+  if(n<=0) return [0,0];
+  var z=1.959964, p=k/n, d=1+z*z/n, c=p+z*z/(2*n), h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n));
+  return [Math.max(0,(c-h)/d), Math.min(1,(c+h)/d)];
+}
+function wrapLines(x, text, maxw){
+  var words=String(text).split(" "), lines=[], cur="";
+  for(var i=0;i<words.length;i++){
+    var tryS = cur ? cur+" "+words[i] : words[i];
+    if(x.measureText(tryS).width > maxw && cur){ lines.push(cur); cur=words[i]; } else cur=tryS;
+  }
+  if(cur) lines.push(cur); return lines;
+}
+
+/* ================= FIG 1: the timeline, 62 days against the same day ================= */
+(function(){
+  var c=document.getElementById("cTimeline"); if(!c) return;
+  var EV=[
+    {day:0,  d:"8 Jul",  l:"First inter-agent write on the rebuilt Artifactory", s:"First inter-agent write"},
+    {day:8,  d:"16 Jul", l:"Hugging Face discloses the incident", s:"Hugging Face discloses"},
+    {day:49, d:"26 Aug", l:"METR: cannot rule out an edited record", s:"METR: cannot rule it out"},
+    {day:62, d:"8 Sep",  l:"First press report of an EU AI Act filing", s:"EU AI Act filing reported"}
+  ];
+  function draw(t){
+    var k=hidpi(c,0.44), x=k.x, w=k.w, h=k.h, narrow=w<620;
+    x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
+    var m={l:narrow?22:40, r:narrow?22:40}, pw=w-m.l-m.r;
+    var yA=h*0.40, yB=h*0.80, fs=narrow?9.5:11;
+    function X(day){ return m.l + day/62*pw; }
+    var p = reduce ? 1 : clamp(t/1.6,0,1);
+    lab(x,"WHAT ACTUALLY HAPPENED, SELF-REPORT ONLY",m.l,26,DANGER,10,1.1);
+    x.strokeStyle=rgba(T_INK,0.22); x.lineWidth=1.2;
+    x.beginPath(); x.moveTo(m.l,yA); x.lineTo(m.l+pw*p,yA); x.stroke();
+    for(var i=0;i<EV.length;i++){
+      var e=EV[i], a = reduce ? 1 : easeIO(clamp((t-0.15-i*0.42)/0.5,0,1));
+      if(a<=0) continue;
+      var ex=X(e.day);
+      x.globalAlpha=a;
+      x.fillStyle="#ffffff"; x.strokeStyle=DANGER; x.lineWidth=1.6;
+      x.beginPath(); x.arc(ex,yA,6,0,6.283); x.fill(); x.stroke();
+      x.fillStyle=DANGER; x.beginPath(); x.arc(ex,yA,2.4,0,6.283); x.fill();
+      var above = (i%2===0);
+      var ty = above ? yA-22 : yA+30;
+      var txt = narrow ? e.s : e.l;
+      x.save(); mono(x,fs);
+      var lines = wrapLines(x, txt, narrow?110:170);
+      var align = i===0 ? "l" : (i===EV.length-1 ? "r" : "c");
+      var yy = above ? ty-(lines.length-1)*(fs+3) : ty;
+      for(var j=0;j<lines.length;j++){
+        var ly = yy + j*(fs+3);
+        if(align==="l") lab(x,lines[j],ex-6,ly,INK2,fs);
+        else if(align==="r") labR(x,lines[j],ex+6,ly,INK2,fs);
+        else labC(x,lines[j],ex,ly,INK2,fs);
+      }
+      var dy = above ? yA+20 : yA-14;
+      if(align==="l") lab(x,e.d,ex-6,dy,INK4,fs-0.5);
+      else if(align==="r") labR(x,e.d,ex+6,dy,INK4,fs-0.5);
+      else labC(x,e.d,ex,dy,INK4,fs-0.5);
+      x.restore();
+      x.globalAlpha=1;
+    }
+    /* the 62 day bracket, counted up */
+    var bA = reduce ? 1 : easeIO(clamp((t-1.9)/0.7,0,1));
+    if(bA>0){
+      x.globalAlpha=bA;
+      var by=yA-52-(narrow?0:8);
+      x.strokeStyle=rgba(T_DANGER,0.7); x.lineWidth=1.2;
+      x.beginPath(); x.moveTo(X(0),by); x.lineTo(X(62)*bA+X(0)*(1-bA),by); x.stroke();
+      x.beginPath(); x.moveTo(X(0),by-5); x.lineTo(X(0),by+5); x.moveTo(X(62),by-5); x.lineTo(X(62),by+5); x.stroke();
+      var days=Math.round(62*bA);
+      labCP(x, days+" days before a regulator-facing document, none of it checkable from outside", (X(0)+X(62))/2, by-9, DANGER, narrow?9:10.5);
+      x.globalAlpha=1;
+    }
+    /* the receipt track */
+    var rA = reduce ? 1 : easeIO(clamp((t-2.5)/0.8,0,1));
+    if(rA>0){
+      x.globalAlpha=rA;
+      lab(x,"WITH A RECEIPT, THE SAME RUN",m.l,yB-34,ACCD,10,1.1);
+      x.strokeStyle=rgba(T_ACC,0.35); x.lineWidth=1.2;
+      x.beginPath(); x.moveTo(m.l,yB); x.lineTo(m.l+pw*rA,yB); x.stroke();
+      x.fillStyle=ACC; x.beginPath(); x.arc(X(0),yB,7,0,6.283); x.fill();
+      x.strokeStyle="#fff"; x.lineWidth=2; x.beginPath(); x.moveTo(X(0)-3.2,yB); x.lineTo(X(0)-0.8,yB+2.6); x.lineTo(X(0)+3.6,yB-2.8); x.stroke();
+      lab(x, narrow ? "0 days: witness head anchored during the run, verified offline" :
+        "0 days: the witness head is anchored outside the sandbox during the run; any outsider verifies offline, in about 0.17 s, with no access to the lab",
+        X(0)+16, yB+4, ACCD, narrow?9:10.5);
+      x.globalAlpha=1;
+    }
+  }
+  register(c,draw,0.44); draw(0);
+})();
+
+/* ================= FIG (sticky): the three observers ================= */
+var obsStep = 0;
+(function(){
+  var c=document.getElementById("cObservers"); if(!c) return;
+  var steps=[].slice.call(document.querySelectorAll("#obsSteps li"));
+  var so=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        steps.forEach(function(li){ li.classList.remove("on"); });
+        e.target.classList.add("on");
+        obsStep=parseInt(e.target.getAttribute("data-step")||"0",10);
+      }
+    });
+  },{rootMargin:"-40% 0px -45% 0px",threshold:0});
+  steps.forEach(function(li){ so.observe(li); });
+  var rnd=mulberry(7), PARTS=[];
+  for(var i=0;i<42;i++) PARTS.push({u:rnd(), dst:i%7, spd:0.10+rnd()*0.08});
+  function draw(t,dt){
+    var k=hidpi(c,0.78), x=k.x, w=k.w, h=k.h, narrow=w<520;
+    x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
+    var S=obsStep;
+    function hi(n){ return S===n ? 1 : (S===3 ? 0.85 : 0.38); }
+    /* geometry */
+    var bx=w*0.06, by=h*0.30, bw=w*0.30, bh=h*0.34;          /* sandbox */
+    var gx=bx+bw, gy=by+bh/2;                                  /* gate */
+    var wx=w*0.55, wy=gy;                                      /* witness */
+    var ax=w*0.90, ay=h*0.20;                                  /* anchor */
+    var dst=[]; for(var i=0;i<7;i++){ var ang=(-0.55+i*0.183); dst.push({x:w*0.78+Math.cos(ang)*w*0.10, y:gy+Math.sin(ang)*h*0.30}); }
+    var rx=w*0.12, ry=h*0.80, rw=w*0.76, rh=h*0.14;             /* receipt */
+    /* sandbox */
+    x.globalAlpha=hi(0);
+    x.fillStyle=rgba(T_CORE,0.06); x.strokeStyle=rgba(T_CORE,0.55); x.lineWidth=1.4;
+    rr(x,bx,by,bw,bh,10); x.fill(); x.stroke();
+    lab(x,"SANDBOX",bx+12,by+18,CORED,9.5,1.1);
+    x.fillStyle=CORE; x.beginPath(); x.arc(bx+bw*0.42,gy,9+(reduce?0:Math.sin(t*2)*1.2),0,6.283); x.fill();
+    lab(x,"agent",bx+bw*0.42-14,gy+26,INK3,9.5);
+    /* gate + enforcement log */
+    x.strokeStyle=hi(0)>0.5?ACC:rgba(T_ACC,0.6); x.lineWidth=3; x.beginPath(); x.arc(gx,gy,12,0,6.283); x.stroke();
+    x.fillStyle="#fff"; x.beginPath(); x.arc(gx,gy,9,0,6.283); x.fill();
+    lab(x,"broker gate",gx-30,gy+30,INK3,9.5);
+    /* enforcement log card */
+    var lx=bx, ly=by+bh+22;
+    x.fillStyle="#fff"; x.strokeStyle=S===0?ACC:rgba(T_INK,0.25); x.lineWidth=S===0?1.6:1;
+    rr(x,lx,ly,bw,narrow?40:46,6); x.fill(); x.stroke();
+    lab(x,"ENFORCEMENT LOG",lx+10,ly+16,S===0?ACCD:INK3,9,1);
+    lab(x,"allow / deny rows, kept by the broker",lx+10,ly+(narrow?30:33),INK4,9);
+    x.globalAlpha=1;
+    /* flows and destinations */
+    for(i=0;i<7;i++){
+      x.globalAlpha=0.9*hi(1);
+      x.fillStyle=i===6 ? GOLDB : ACC; x.beginPath(); x.arc(dst[i].x,dst[i].y,5,0,6.283); x.fill();
+    }
+    x.globalAlpha=1;
+    lab(x,"destinations",w*0.75,by-8,INK4,9.5);
+    lab(x,"decoy endpoint",dst[6].x+9,dst[6].y+4,GOLD,9);
+    /* paths: gate -> witness -> destination */
+    for(i=0;i<PARTS.length;i++){
+      var pt=PARTS[i]; if(!reduce) pt.u=(pt.u+pt.spd*dt)%1;
+      var d=dst[pt.dst], u=pt.u;
+      var px = u<0.5 ? lerp(gx,wx,u*2) : lerp(wx,d.x,(u-0.5)*2);
+      var py = u<0.5 ? lerp(gy,wy,u*2) : lerp(wy,d.y,(u-0.5)*2);
+      x.globalAlpha=(0.25+0.6*hi(1))*(pt.dst===6?0.9:1);
+      x.fillStyle=pt.dst===6?GOLDB:ACC; x.beginPath(); x.arc(px,py,2.2,0,6.283); x.fill();
+    }
+    x.globalAlpha=1;
+    /* witness lens */
+    x.globalAlpha=hi(1);
+    x.strokeStyle=S===1?ACCD:rgba(T_ACC,0.8); x.lineWidth=2.2;
+    x.beginPath(); x.ellipse(wx,wy,15,22,0,0,6.283); x.stroke();
+    x.fillStyle=rgba(T_ACC,0.18); x.fill();
+    lab(x,"WITNESS",wx-24,wy+40,S===1?ACCD:INK3,9.5,1.1);
+    lab(x,"kernel connection tracker,",wx-58,wy+54,INK4,9);
+    lab(x,"outside the sandbox",wx-42,wy+66,INK4,9);
+    /* merkle tree above the witness */
+    var tx=wx, ty=wy-58;
+    var nodes=[[tx,ty-40],[tx-22,ty-16],[tx+22,ty-16],[tx-33,ty+6],[tx-11,ty+6],[tx+11,ty+6],[tx+33,ty+6]];
+    x.strokeStyle=rgba(T_ACC,0.6); x.lineWidth=1;
+    x.beginPath(); x.moveTo(nodes[1][0],nodes[1][1]); x.lineTo(nodes[0][0],nodes[0][1]); x.lineTo(nodes[2][0],nodes[2][1]);
+    x.moveTo(nodes[3][0],nodes[3][1]); x.lineTo(nodes[1][0],nodes[1][1]); x.lineTo(nodes[4][0],nodes[4][1]);
+    x.moveTo(nodes[5][0],nodes[5][1]); x.lineTo(nodes[2][0],nodes[2][1]); x.lineTo(nodes[6][0],nodes[6][1]); x.stroke();
+    for(i=0;i<nodes.length;i++){ x.fillStyle=i===0?ACCD:ACC; x.beginPath(); x.arc(nodes[i][0],nodes[i][1],i===0?4.5:3,0,6.283); x.fill(); }
+    lab(x,"witness root",tx-30,ty-52,INK3,9);
+    x.globalAlpha=1;
+    /* anchor */
+    x.globalAlpha=S===3?1:0.55;
+    x.fillStyle=rgba(T_CORE,0.12); x.strokeStyle=CORE; x.lineWidth=1.3;
+    rr(x,ax-12,ay-34,24,68,4); x.fill(); x.stroke();
+    var pulse = reduce ? 0.5 : (t*0.5)%1;
+    x.strokeStyle=rgba(T_ACC,0.55); x.setLineDash([3,4]); x.lineDashOffset=-t*18;
+    x.beginPath(); x.moveTo(nodes[0][0]+6,nodes[0][1]-2); x.lineTo(ax-14,ay); x.stroke(); x.setLineDash([]);
+    x.fillStyle=ACC; x.beginPath(); x.arc(lerp(nodes[0][0]+6,ax-14,pulse), lerp(nodes[0][1]-2,ay,pulse),2.6,0,6.283); x.fill();
+    labC(x,"PUBLIC ANCHOR",ax,ay+52,S===3?CORED:INK3,9,1);
+    labC(x,"git note, Rekor",ax,ay+64,INK4,9);
+    x.globalAlpha=1;
+    /* decoy token inside the sandbox */
+    x.globalAlpha=hi(2);
+    x.fillStyle=GOLDB; rr(x,bx+bw*0.66-9,gy-24-6,18,12,3); x.fill();
+    lab(x,"planted credential",bx+bw*0.66-40,gy-40,GOLD,9);
+    x.globalAlpha=1;
+    /* receipt */
+    var rA = S===3 ? 1 : 0.45;
+    x.globalAlpha=rA;
+    x.fillStyle="#fff"; x.strokeStyle=S===3?ACCD:rgba(T_INK,0.3); x.lineWidth=S===3?1.8:1;
+    rr(x,rx,ry,rw,rh,8); x.fill(); x.stroke();
+    lab(x,"ONE SIGNED RECEIPT",rx+12,ry+18,S===3?ACCD:INK3,9.5,1.1);
+    var roots=["enforcementLogMerkleRoot","witnessMerkleRoot","canaryHitsRoot"];
+    var cols=[ (S===0||S===3)?ACCD:INK4, (S===1||S===3)?ACCD:INK4, (S===2||S===3)?GOLD:INK4 ];
+    for(i=0;i<3;i++) lab(x, narrow?roots[i].replace("MerkleRoot","").replace("Log","").replace("Hits",""):roots[i], rx+12+i*(rw/3), ry+rh-10, cols[i], narrow?8.5:9.5);
+    /* binding lines into the receipt when on step 3 */
+    if(S===3){
+      x.strokeStyle=rgba(T_ACC,0.5); x.lineWidth=1; x.setLineDash([2,3]);
+      x.beginPath(); x.moveTo(lx+bw/2,ly+46); x.lineTo(rx+rw*0.17,ry); x.moveTo(wx,wy+24); x.lineTo(rx+rw*0.5,ry); x.moveTo(dst[6].x,dst[6].y+6); x.lineTo(rx+rw*0.83,ry); x.stroke(); x.setLineDash([]);
+    }
+    x.globalAlpha=1;
+  }
+  register(c,draw,0.78); draw(0,0);
+})();
+
+/* ================= FIG 3: false alarms before and after ================= */
+(function(){
+  var c=document.getElementById("cFalseAlarm"); if(!c) return;
+  var G=[{l:"Strict",pre:[12,12],post:[0,55]},{l:"Weakened",pre:[15,15],post:[0,55]},{l:"Combined",pre:[27,27],post:[0,110]}];
+  var CLS=[{l:"npm-install",k:0,n:12},{l:"apt-mirror",k:0,n:12},{l:"git-clone",k:0,n:12},{l:"object-fetch",k:0,n:12},{l:"pip + HF + DNS",k:0,n:62}];
+  function draw(t){
+    var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<620;
+    x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
+    var m={l:narrow?44:60,r:20,t:40,b:96}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+    function Y(v){ return m.t+ph-v*ph; }
+    x.strokeStyle=RULE; x.lineWidth=1;
+    for(var g=0;g<=4;g++){ var yy=Y(g/4); x.beginPath(); x.moveTo(m.l,yy); x.lineTo(m.l+pw,yy); x.stroke(); labR(x,(g*25)+"%",m.l-8,yy+4,INK4,9.5); }
+    var gw=pw/3, bw=Math.min(46,gw*0.22);
+    for(g=0;g<3;g++){
+      var cx=m.l+gw*g+gw/2, d=G[g];
+      var a = reduce ? 1 : easeIO(clamp((t-0.2-g*0.35)/0.7,0,1));
+      var b = reduce ? 1 : easeIO(clamp((t-0.9-g*0.35)/0.7,0,1));
+      var pre=d.pre[0]/d.pre[1], post=d.post[0]/d.post[1];
+      var ciA=wilson(d.pre[0],d.pre[1]), ciB=wilson(d.post[0],d.post[1]);
+      /* pre-fix bar */
+      x.fillStyle=rgba(T_DANGER,0.55); rr(x,cx-bw-6,Y(pre*a),bw,Y(0)-Y(pre*a),2); x.fill();
+      if(a>0.95){ labC(x,"100%",cx-bw/2-6,Y(pre)-20,DANGER,11); labC(x,d.pre[0]+"/"+d.pre[1],cx-bw/2-6,Y(pre)-8,INK3,9.5);
+        x.strokeStyle=DANGER; x.lineWidth=1.2; x.beginPath(); x.moveTo(cx-bw/2-6,Y(ciA[0])); x.lineTo(cx-bw/2-6,Y(ciA[1])); x.moveTo(cx-bw/2-11,Y(ciA[0])); x.lineTo(cx-bw/2-1,Y(ciA[0])); x.stroke(); }
+      /* post-fix bar (zero height, drawn as a marker) */
+      if(b>0){
+        x.globalAlpha=b;
+        x.fillStyle=ACCD; x.beginPath(); x.arc(cx+bw/2+6,Y(0),4,0,6.283); x.fill();
+        x.strokeStyle=ACCD; x.lineWidth=1.2; x.beginPath(); x.moveTo(cx+bw/2+6,Y(0)); x.lineTo(cx+bw/2+6,Y(ciB[1])); x.moveTo(cx+bw/2+1,Y(ciB[1])); x.lineTo(cx+bw/2+11,Y(ciB[1])); x.stroke();
+        labC(x,"0%",cx+bw/2+6,Y(ciB[1])-16,ACCD,11); labC(x,d.post[0]+"/"+d.post[1],cx+bw/2+6,Y(ciB[1])-4,INK3,9.5);
+        x.globalAlpha=1;
+      }
+      labC(x,d.l,cx,Y(0)+18,INK2,10.5);
+    }
+    lab(x,"FALSE ALARMS, % OF WITNESSED FLOWS RECONCILED OMITTED",m.l,m.t-16,INK4,9.5,1);
+    /* legend */
+    x.fillStyle=rgba(T_DANGER,0.55); x.fillRect(m.l+pw-230,m.t-24,10,10); lab(x,"before the fix",m.l+pw-215,m.t-15,INK3,9.5);
+    x.fillStyle=ACCD; x.beginPath(); x.arc(m.l+pw-108,m.t-19,4,0,6.283); x.fill(); lab(x,"after, with 95% CI",m.l+pw-98,m.t-15,INK3,9.5);
+    /* per-class strip */
+    var cA = reduce ? 1 : easeIO(clamp((t-2.0)/0.8,0,1));
+    if(cA>0){
+      x.globalAlpha=cA;
+      var sy=Y(0)+44, sw=pw/CLS.length;
+      lab(x,"AFTER THE FIX, PER WORKLOAD CLASS",m.l,sy-8,INK4,9,1);
+      for(var i=0;i<CLS.length;i++){
+        var sx=m.l+sw*i+3;
+        x.fillStyle=rgba(T_ACC,0.12); x.strokeStyle=rgba(T_ACC,0.5); x.lineWidth=1; rr(x,sx,sy,sw-6,30,4); x.fill(); x.stroke();
+        lab(x,narrow?CLS[i].l.replace(" + HF + DNS","+HF+DNS"):CLS[i].l,sx+8,sy+13,INK2,narrow?8.5:9.5);
+        lab(x,CLS[i].k+" of "+CLS[i].n,sx+8,sy+25,ACCD,9.5);
+      }
+      x.globalAlpha=1;
+    }
+  }
+  register(c,draw,0.5); draw(0);
+})();
+
+/* ================= FIG 4: completeness grid ================= */
+(function(){
+  var c=document.getElementById("cComplete"); if(!c) return;
+  var ROWS=[
+    {t:"runtime-built destination", s:["w","Witnessed"], k:["w","Witnessed"]},
+    {t:"dns-pinned (the positive finding)", s:["w","Witnessed"], k:["w","Witnessed"], hi:true},
+    {t:"raw-ip", s:["d","Denied, 0 bytes: correct"], k:["w","Witnessed"]},
+    {t:"ssrf-relay, leg 1 (sandbox to relay)", s:["n","Not reachable: relay not allowlisted"], k:["w","Witnessed"]},
+    {t:"ssrf-relay, leg 2 (the relay's own onward hop)", s:["n","n/a, leg 1 denied"], k:["m","Not witnessed: named boundary"]},
+    {t:"witness-bypass (built to find a gap)", s:["m","Not witnessed: named boundary"], k:["m","Not witnessed: named boundary"]}
+  ];
+  function draw(t){
+    var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<640;
+    x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
+    var lw=narrow?w*0.40:w*0.40, cw=(w-lw-30)/2, rh=(h-54)/ROWS.length, top=44;
+    lab(x,"TECHNIQUE / HOP",16,top-14,INK4,9,1); labC(x,"STRICT",lw+cw/2,top-14,INK4,9); labC(x,"WEAKENED",lw+cw*1.5+10,top-14,INK4,9);
+    for(var i=0;i<ROWS.length;i++){
+      var a = reduce ? 1 : easeIO(clamp((t-0.15-i*0.22)/0.5,0,1)); if(a<=0) continue;
+      var r=ROWS[i], y=top+rh*i;
+      x.globalAlpha=a;
+      x.strokeStyle=RULE; x.beginPath(); x.moveTo(16,y+rh); x.lineTo(w-16,y+rh); x.stroke();
+      x.save(); mono(x,narrow?9:10.5); var lines=wrapLines(x,r.t,lw-24); x.restore();
+      for(var j=0;j<lines.length;j++) lab(x,lines[j],16,y+rh/2+4+(j-(lines.length-1)/2)*13, r.hi?ACCD:INK2, narrow?9:10.5);
+      [r.s,r.k].forEach(function(cell,ci){
+        var cx=lw+ci*(cw+10), pad=6, cy=y+pad, ch=rh-pad*2;
+        var kind=cell[0];
+        if(kind==="w"){ x.fillStyle=rgba(T_ACC,0.85); x.strokeStyle=ACCD; }
+        else if(kind==="m"){ x.fillStyle=rgba(T_DANGER,0.14); x.strokeStyle=DANGER; }
+        else { x.fillStyle="#fff"; x.strokeStyle=rgba(T_INK,0.35); }
+        x.lineWidth=1.2; if(kind==="n") x.setLineDash([3,3]);
+        rr(x,cx,cy,cw,ch,5); x.fill(); x.stroke(); x.setLineDash([]);
+        x.save(); mono(x,narrow?8.5:9.5); var cl=wrapLines(x,cell[1],cw-16); x.restore();
+        for(var q=0;q<cl.length;q++) labC(x,cl[q],cx+cw/2,cy+ch/2+4+(q-(cl.length-1)/2)*12, kind==="w"?"#fff":(kind==="m"?DANGER:INK3), narrow?8.5:9.5);
+      });
+      x.globalAlpha=1;
+    }
+    var fA = reduce ? 1 : easeIO(clamp((t-1.7)/0.6,0,1));
+    if(fA>0){ x.globalAlpha=fA; labR(x,"raw: 2 of 6 strict, 4 of 6 weakened; in scope: 4 of 4; revert against a blanked capture: 0 of 6",w-16,h-8,INK3,narrow?8.5:9.5); x.globalAlpha=1; }
+  }
+  register(c,draw,0.5); draw(0);
+})();
+
+/* ================= FIG 5: decoy latency, five runs ================= */
+(function(){
+  var c=document.getElementById("cLatency"); if(!c) return;
+  var RUNS=[
+    {freeze:506,anchor:115,detect:0,build:12,glue:96,total:729,verify:232},
+    {freeze:506,anchor:76,detect:0,build:11,glue:62,total:655,verify:163},
+    {freeze:547,anchor:73,detect:0,build:12,glue:57,total:689,verify:172},
+    {freeze:494,anchor:68,detect:0,build:13,glue:63,total:638,verify:168},
+    {freeze:573,anchor:98,detect:1,build:12,glue:101,total:785,verify:183}
+  ];
+  var SEG=[["freeze",CORE],["anchor",ACC],["build",ACCD],["glue",rgba(T_INK,0.35)]];
+  var MEDIAN=689;
+  function draw(t){
+    var k=hidpi(c,0.5), x=k.x, w=k.w, h=k.h, narrow=w<620;
+    x.fillStyle="#ffffff"; x.fillRect(0,0,w,h);
+    var m={l:narrow?40:56,r:narrow?16:120,t:38,b:44}, pw=w-m.l-m.r, ph=h-m.t-m.b, MAX=850;
+    function Y(v){ return m.t+ph-v/MAX*ph; }
+    x.strokeStyle=RULE; x.lineWidth=1;
+    for(var g=0;g<=4;g++){ var v=g*200, yy=Y(v); x.beginPath(); x.moveTo(m.l,yy); x.lineTo(m.l+pw,yy); x.stroke(); labR(x,v+" ms",m.l-8,yy+4,INK4,9.5); }
+    var gw=pw/RUNS.length, bw=Math.min(54,gw*0.5);
+    for(var i=0;i<RUNS.length;i++){
+      var r=RUNS[i], cx=m.l+gw*i+gw/2, a = reduce ? 1 : easeIO(clamp((t-0.1-i*0.25)/0.6,0,1));
+      var base=0, segs=[r.freeze,r.anchor,r.build+r.detect,r.glue];
+      for(var s=0;s<segs.length;s++){
+        var v=segs[s]*a; x.fillStyle=SEG[s][1]; x.fillRect(cx-bw/2,Y(base+v),bw,Y(base)-Y(base+v)); base+=v;
+      }
+      if(a>0.95) labC(x,r.total+" ms",cx,Y(r.total)-8,INK2,10);
+      labC(x,"run "+(i+1),cx,Y(0)+16,INK3,9.5);
+    }
+    var mA = reduce ? 1 : easeIO(clamp((t-1.6)/0.6,0,1));
+    if(mA>0){
+      x.globalAlpha=mA; x.strokeStyle=ACCD; x.setLineDash([4,4]); x.lineWidth=1.3;
+      x.beginPath(); x.moveTo(m.l,Y(MEDIAN)); x.lineTo(m.l+pw*mA,Y(MEDIAN)); x.stroke(); x.setLineDash([]);
+      if(!narrow){ lab(x,"median 689 ms",m.l+pw+8,Y(MEDIAN)+4,ACCD,10); lab(x,"range 638 to 785",m.l+pw+8,Y(MEDIAN)+18,INK3,9.5); }
+      else labCP(x,"median 689 ms, range 638 to 785",m.l+pw/2,Y(MEDIAN)-6,ACCD,9.5);
+      x.globalAlpha=1;
+    }
+    var lx=m.l; for(s=0;s<SEG.length;s++){ x.fillStyle=SEG[s][1]; x.fillRect(lx,m.t-24,10,10); lab(x,SEG[s][0],lx+14,m.t-15,INK3,9.5); lx+=(narrow?58:74); }
+    lab(x,"exfil to a signed receipt carrying the hit, one host clock; the fixed 1.2 s settle wait is not shown",m.l,h-8,INK4,narrow?8.5:9.5);
+  }
+  register(c,draw,0.5); draw(0);
+})();
+
+/* ================= copy buttons ================= */
+document.querySelectorAll(".copybtn").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    var el=document.getElementById(btn.getAttribute("data-copy")); if(!el) return;
+    var txt=el.textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ btn.textContent="copied"; setTimeout(function(){ btn.textContent="copy"; },1400); }); }
+  });
+});
+
+})();
+</script>
+<script type="module">
+/* ---------- hero: Three.js scene, with a static fallback ---------- */
+(async function(){
+  var canvas=document.getElementById("heroCanvas"), fb=document.getElementById("heroFallback");
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fallback(){ if(canvas) canvas.hidden=true; if(fb) fb.hidden=false; }
+  if(!canvas) return;
+  canvas.addEventListener("hero-fallback", fallback);
+  try{
+    var mod=await import("./assets/egress-receipts/hero.js");
+    var hero=mod.initHero(canvas,{});
+    if(reduce && hero && hero.setReducedMotion) hero.setReducedMotion(true);
+    matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change",function(e){ if(hero&&hero.setReducedMotion) hero.setReducedMotion(e.matches); });
+  }catch(err){ fallback(); }
+})();
+
+/* ---------- the verifier panel ---------- */
+(async function(){
+  var term=document.getElementById("vTerm"), state=document.getElementById("vState");
+  var bRun=document.getElementById("vRun"), bHide=document.getElementById("vHide"), bRes=document.getElementById("vRestore");
+  var chips={}; document.querySelectorAll("#vChips .vchip").forEach(function(c){ chips[c.getAttribute("data-k")]=c; });
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!term||!bRun) return;
+  var RECORDED={
+    clean:["$ node verify.mjs receipt-real-clean-public-anchor.json","signature   Ed25519 over the DSSE PAE, verified against journal.pub: OK","witness     root 8c504e93400028e4... over 7 flow(s), inclusion proofs OK","enforcement root 983702ba7024fe67... over 15 row(s), inclusion proofs OK","reconcile   7 matched, 0 expected-benign, 0 omitted, 0 phantom","anchor      rekor: read back from the PUBLIC log, entry 108e9186e8c5677a... at logIndex 2814455532, timestamped 2026-09-13T06:00:16Z by the log's own key","result      OK  (exit 0)"],
+    tampered:["$ node verify.mjs receipt-real-tampered.json","signature   Ed25519 over the DSSE PAE, verified against journal.pub: OK","witness     root 8c504e93400028e4... over 7 flow(s), inclusion proofs OK","enforcement root b083244510ecbeff... over 14 row(s), inclusion proofs OK","reconcile   6 matched, 0 expected-benign, 1 omitted, 0 phantom","  OMITTED: tcp 185.199.111.133:443  (witness saw 2229B out / 16562B in; enforcement log does not account for it)","  BROKEN: enforcement log has a gap in the decision index (n 12 -> 14), a deleted row","  BROKEN: witness saw 1 egress the enforcement log omitted","result      BROKEN - a check ran and failed  (exit 1)"]
+  };
+  function setChip(k, st){ var c=chips[k]; if(!c) return; c.classList.remove("ok","bad","na"); if(st) c.classList.add(st); }
+  function resetChips(){ ["sig","wit","enf","rec","anc"].forEach(function(k){ setChip(k,null); }); }
+  async function typeLines(lines, tag){
+    term.innerHTML=""; var i=0;
+    for(i=0;i<lines.length;i++){
+      var span=document.createElement("span");
+      var l=lines[i]; var cls = /OMITTED|BROKEN|mismatch|FAIL/.test(l) ? "bad" : (/OK|matched|read back|verified/.test(l) ? "ok" : "");
+      span.className=cls; span.textContent=l+"\n"; term.appendChild(span);
+      if(!reduce) await new Promise(function(r){ setTimeout(r, 90); });
+    }
+    if(tag){ var s2=document.createElement("span"); s2.className="dim"; s2.textContent="\n"+tag; term.appendChild(s2); }
+  }
+  var mod=null, receipt=null, pub=null, rekorPub=null, merkle=null, cleanLeaves=null;
+  try{
+    mod=await import("./assets/egress-receipts/verify-web.js");
+    var base="./assets/egress-receipts/";
+    var res=await Promise.all([fetch(base+"receipt-real-clean-public-anchor.json"),fetch(base+"journal.pub"),fetch(base+"rekor.pub")]);
+    receipt=await res[0].json(); pub=await res[1].text(); rekorPub=await res[2].text();
+  }catch(e){ mod=null; }
+  /* the 3D tree, if the module and the digests are available */
+  try{
+    var mk=await import("./assets/egress-receipts/merkle3d.js");
+    var mc=document.getElementById("cMerkle");
+    if(mc && mod && receipt){
+      cleanLeaves=await mod.leafDigests(receipt);
+      merkle=mk.initMerkle3d(mc,{leaves:cleanLeaves, hashPair:mod.merkleHashPair, onRoot:function(){}});
+      if(reduce && merkle.setReducedMotion) merkle.setReducedMotion(true);
+    } else if(mc){ mc.closest(".vlab-tree").hidden=true; }
+  }catch(e){ var tc=document.querySelector(".vlab-tree"); if(tc) tc.hidden=true; }
+  function summarise(r){
+    setChip("sig", r.signatureOk?"ok":"bad");
+    if(!r.signatureOk){ ["wit","enf","rec","anc"].forEach(function(k){ setChip(k,"na"); }); return; }
+    var bad=function(re){ return r.lines.some(function(l){ return re.test(l); }); };
+    setChip("wit", bad(/witness root: root mismatch|witness.*mismatch/i)?"bad":"ok");
+    setChip("enf", bad(/gap in the decision index|enforcement.*mismatch/i)?"bad":"ok");
+    setChip("rec", (r.reconcile && (r.reconcile.omitted.length>0 || r.reconcile.phantom>0))?"bad":"ok");
+    setChip("anc", r.anchor && r.anchor.readBack==="rekor-verified" ? "ok" : "na");
+  }
+  async function run(which){
+    resetChips(); state.textContent="running";
+    if(!mod||!receipt){
+      await typeLines(RECORDED[which], "recorded output of the node verifier (the browser module did not load here)");
+      state.textContent="recorded"; return;
+    }
+    var rc = which==="clean" ? receipt : await mod.hideEnforcementRow(receipt, 13);
+    var r=await mod.verifyReceipt(rc,{journalPubPem: (which==="clean" ? pub : (rc.labPublicKeyPem || pub)), rekorPubPem:rekorPub});
+    var head = which==="clean" ? "$ verify receipt-real-clean-public-anchor.json   (in this browser, WebCrypto, offline)" : "$ verify the same receipt with enforcement row 13 hidden, the root recomputed and the envelope re-signed by the lab's own key";
+    await typeLines([head].concat(r.lines), r.anchor && r.anchor.readBack==="not-in-browser" ? "anchor read-back is not run in a browser; the node kit reads the git note back from the bundled anchor repository, which is why the offline kit is the reference" : "");
+    summarise(r); state.textContent = "exit "+r.exitCode;
+  }
+  if(location.search.indexOf("autoverify")>=0){ setTimeout(function(){ bRun.click(); },300); setTimeout(function(){ bHide.click(); },3200); }
+  bRun.addEventListener("click", function(){ run("clean"); if(merkle&&merkle.restore) merkle.restore(); bRes.disabled=true; });
+  bHide.addEventListener("click", function(){ run("tampered"); if(merkle&&merkle.hide) merkle.hide(12); bRes.disabled=false; });
+  bRes.addEventListener("click", function(){ run("clean"); if(merkle&&merkle.restore) merkle.restore(); bRes.disabled=true; });
+})();
+</script>
+
+</body>
+</html>

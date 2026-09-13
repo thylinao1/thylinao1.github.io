@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="872" viewBox="0 0 1000 872" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <title>Three observers, one anchored receipt</title>
+  <desc>Track 1 judging criterion, quoted from the sprint page</desc>
+  <rect x="0" y="0" width="1000" height="872" fill="#fcfcfb"/>
+<text x="40" y="44" font-size="28" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="40" dy="0">Three observers, one anchored receipt</tspan></text>
+<text x="40" y="82" font-size="17" font-weight="400" font-style="italic" fill="#52514e" text-anchor="start"><tspan x="40" dy="0">Track 1 judging criterion, quoted from the sprint page</tspan></text>
+<rect x="40" y="104" width="290.67" height="240.2" rx="10" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1"/>
+<rect x="40" y="104" width="290.67" height="6" rx="0" fill="#2a78d6" stroke="none" stroke-width="1"/>
+<rect x="58" y="126" width="254.67" height="59.9" rx="29.950000000000003" fill="#2a78d61f" stroke="none" stroke-width="1"/>
+<text x="185.33" y="161.45" font-size="17" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="middle"><tspan x="185.33" dy="0">What did the policy</tspan><tspan x="185.33" dy="22.95">allow?</tspan></text>
+<text x="58" y="211.9" font-size="19" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="58" dy="0">Enforcement log</tspan></text>
+<text x="58" y="245.55" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="58" dy="0">produces</tspan></text>
+<text x="58" y="275.15" font-size="17" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="58" dy="0">enforcementLogMerkleRoot</tspan></text>
+<rect x="354.67" y="104" width="290.67" height="240.2" rx="10" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1"/>
+<rect x="354.67" y="104" width="290.67" height="6" rx="0" fill="#eb6834" stroke="none" stroke-width="1"/>
+<rect x="372.67" y="126" width="254.67" height="59.9" rx="29.950000000000003" fill="#eb68341f" stroke="none" stroke-width="1"/>
+<text x="500" y="161.45" font-size="17" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="middle"><tspan x="500" dy="0">What actually crossed the</tspan><tspan x="500" dy="22.95">wire?</tspan></text>
+<text x="372.67" y="211.9" font-size="19" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="372.67" dy="0">Independent egress</tspan><tspan x="372.67" dy="25.65">witness</tspan></text>
+<text x="372.67" y="271.2" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="372.67" dy="0">produces</tspan></text>
+<text x="372.67" y="300.8" font-size="17" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="372.67" dy="0">witnessMerkleRoot</tspan></text>
+<rect x="669.33" y="104" width="290.67" height="240.2" rx="10" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1"/>
+<rect x="669.33" y="104" width="290.67" height="6" rx="0" fill="#1baf7a" stroke="none" stroke-width="1"/>
+<rect x="687.33" y="126" width="254.67" height="59.9" rx="29.950000000000003" fill="#1baf7a1f" stroke="none" stroke-width="1"/>
+<text x="814.67" y="161.45" font-size="17" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="middle"><tspan x="814.67" dy="0">What did it reach for?</tspan></text>
+<text x="687.33" y="211.9" font-size="19" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="687.33" dy="0">Decoy tripwires</tspan></text>
+<text x="687.33" y="245.55" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="687.33" dy="0">produces</tspan></text>
+<text x="687.33" y="275.15" font-size="17" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="687.33" dy="0">canaryHitsRoot</tspan></text>
+<rect x="60" y="374.2" width="880" height="308.75" rx="12" fill="#f9f9f7" stroke="#0b0b0b" stroke-width="1.5"/>
+<line x1="185.33" y1="347.2" x2="350" y2="371.2" stroke="#2a78d6" stroke-width="2" stroke-linecap="round"/><path d="M 350 371.2 L 343.32112335878844 373.29585467327263 M 350 371.2 L 344.1971833600898 367.28498798934396" stroke="#2a78d6" stroke-width="2" stroke-linecap="round" fill="none"/>
+<line x1="500" y1="347.2" x2="500" y2="371.2" stroke="#eb6834" stroke-width="2" stroke-linecap="round"/><path d="M 500 371.2 L 496.96281382617707 364.89321792468303 M 500 371.2 L 503.03718617382293 364.89321792468303" stroke="#eb6834" stroke-width="2" stroke-linecap="round" fill="none"/>
+<line x1="814.67" y1="347.2" x2="650" y2="371.2" stroke="#1baf7a" stroke-width="2" stroke-linecap="round"/><path d="M 650 371.2 L 655.8028166399102 367.28498798934396 M 650 371.2 L 656.6788766412116 373.29585467327263" stroke="#1baf7a" stroke-width="2" stroke-linecap="round" fill="none"/>
+<text x="86" y="415.2" font-size="21" font-weight="700" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="86" dy="0">One signed, anchored receipt</tspan></text>
+<text x="86" y="449.55" font-size="16" font-weight="400" font-style="italic" fill="#52514e" text-anchor="start"><tspan x="86" dy="0">https://shadow-commit/egress-receipt/v0.3</tspan></text>
+<text x="86" y="477.15" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="86" dy="0">runId, policyAllowlist, 3× imageDigest</tspan></text>
+<text x="86" y="504.75" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="86" dy="0">enforcementLogMerkleRoot, witnessMerkleRoot, canaryHitsRoot, treeSizes</tspan></text>
+<text x="86" y="532.35" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="86" dy="0">externalAnchor { type, commits: &quot;witnessMerkleRoot&quot;, submission, receipt }</tspan></text>
+<text x="86" y="559.95" font-size="16" font-weight="400" font-style="normal" fill="#52514e" text-anchor="start"><tspan x="86" dy="0">producedAt, receiptVersion &quot;0.3&quot;</tspan></text>
+<text x="86" y="587.55" font-size="16" font-weight="400" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="86" dy="0">externalAnchor.commits == witnessMerkleRoot, submitted DURING the run (git-note / Rekor / OTS) - a</tspan><tspan x="86" dy="21.6">post-hoc host compromise cannot rewrite an already-anchored head.</tspan></text>
+<text x="86" y="636.75" font-size="16" font-weight="400" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="86" dy="0">DSSE envelope, Ed25519 over the PAE, verified against journal.pub - an out-of-band trust root, never a</tspan><tspan x="86" dy="21.6">key carried inside the receipt itself.</tspan></text>
+<rect x="40" y="712.95" width="920" height="130.85" rx="10" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1"/>
+<line x1="500" y1="685.95" x2="500" y2="709.95" stroke="#52514e" stroke-width="2" stroke-linecap="round"/><path d="M 500 709.95 L 496.96281382617707 703.6432179246831 M 500 709.95 L 503.03718617382293 703.6432179246831" stroke="#52514e" stroke-width="2" stroke-linecap="round" fill="none"/>
+<text x="66" y="749.95" font-size="19" font-weight="700" font-style="normal" fill="#008300" text-anchor="start"><tspan x="66" dy="0">Any third party verifies this offline - no network, no lab access</tspan></text>
+<text x="66" y="785.6" font-size="16" font-weight="400" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="66" dy="0">./verify receipt-clean.json # exit 0 - reconciles, 0 omitted</tspan></text>
+<text x="66" y="817.2" font-size="16" font-weight="400" font-style="normal" fill="#0b0b0b" text-anchor="start"><tspan x="66" dy="0">./verify receipt-tampered.json # exit 1 - names the hidden flow</tspan></text>
+</svg>

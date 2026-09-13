@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>gl probe</title>
+<script>
+const c=document.createElement('canvas');
+const g2=c.getContext('webgl2'); const c2=document.createElement('canvas'); const g1=c2.getContext('webgl');
+console.log('PROBE webgl2='+!!g2+' webgl1='+!!g1+' renderer='+(g2?g2.getParameter(g2.RENDERER):(g1?g1.getParameter(g1.RENDERER):'none')));
+</script>

@@ -2326,7 +2326,7 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
   try{
     var mod=await import("./assets/egress-receipts/hero.js");
     var narrow=innerWidth<900, shot=location.search.indexOf("shot=1")>=0;
-    var hero=mod.initHero(canvas,{ offset: narrow ? [0,-0.15] : [0.22,0.02], preserveDrawingBuffer: shot });
+    var hero=mod.initHero(canvas,{ offset: narrow ? [0,-0.15] : [0.53,-0.08], framePadding: narrow ? 1.1 : 2.4, preserveDrawingBuffer: shot });
     if(reduce && hero && hero.setReducedMotion) hero.setReducedMotion(true);
     matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change",function(e){ if(hero&&hero.setReducedMotion) hero.setReducedMotion(e.matches); });
   }catch(err){ fallback(); }

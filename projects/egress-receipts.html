@@ -1712,6 +1712,10 @@ var obsStep = 0;
     x.fillStyle="#fff"; x.strokeStyle=S===3?ACCD:rgba(T_INK,0.3); x.lineWidth=S===3?1.8:1;
     rr(x,rx,ry,rw,rh,8); x.fill(); x.stroke();
     lab(x,"ONE SIGNED RECEIPT",rx+12,ry+18,S===3?ACCD:INK3,9.5,1.1);
+    if(!narrow){
+      lab(x,"in-toto statement, predicate egress-receipt/v0.3, DSSE envelope signed with Ed25519; the public key is held out of band, never inside the receipt",rx+12,ry+rh*0.42,INK3,9);
+      lab(x,"externalAnchor commits the witness root, submitted during the run: a git note always, the public Rekor log with one flag on",rx+12,ry+rh*0.42+13,INK3,9);
+    }
     var roots=["enforcementLogMerkleRoot","witnessMerkleRoot","canaryHitsRoot"];
     var cols=[ (S===0||S===3)?ACCD:INK4, (S===1||S===3)?ACCD:INK4, (S===2||S===3)?GOLD:INK4 ];
     for(i=0;i<3;i++) lab(x, narrow?roots[i].replace("MerkleRoot","").replace("Log","").replace("Hits",""):roots[i], rx+12+i*(rw/3), ry+rh-10, cols[i], narrow?8.5:9.5);
@@ -1887,7 +1891,7 @@ document.querySelectorAll(".copybtn").forEach(function(btn){
   try{
     var mod=await import("./assets/egress-receipts/hero.js");
     var narrow=innerWidth<900, shot=location.search.indexOf("shot=1")>=0;
-    var hero=mod.initHero(canvas,{ offset: narrow ? [0,-0.15] : [0,0], preserveDrawingBuffer: shot });
+    var hero=mod.initHero(canvas,{ offset: narrow ? [0,-0.15] : [0.22,0.02], preserveDrawingBuffer: shot });
     if(reduce && hero && hero.setReducedMotion) hero.setReducedMotion(true);
     matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change",function(e){ if(hero&&hero.setReducedMotion) hero.setReducedMotion(e.matches); });
   }catch(err){ fallback(); }

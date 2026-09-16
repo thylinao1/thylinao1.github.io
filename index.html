@@ -346,7 +346,7 @@
 
   /* featured band: latest essay + funded research (two cards, one skeleton) */
   .research-feature{padding:52px 0 4px; border-top:none}
-  .feature-row{display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:18px; align-items:stretch}
+  .feature-row{display:grid; grid-template-columns:minmax(0,4fr) minmax(0,4fr) minmax(0,5fr); gap:18px; align-items:stretch}
   .fcard{
     --fcard-px:24px; --fcard-py:18px;
     position:relative; display:flex; flex-direction:column; min-width:0;
@@ -420,18 +420,26 @@
   .feature-grant:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
   /* narrow research card: figure drops under the text, grant pill flows below the link */
   @container fcard (max-width:479px){
-    .fcard--research .fcard-body{flex-direction:column; align-items:flex-start; gap:16px}
-    .fcard--research .fcard-figure{flex:none; width:min(100%, 250px); justify-content:flex-start}
+    .fcard--research .fcard-body{flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:12px}
+    .fcard--research .fcard-figure{flex:none; width:min(100%, 190px); justify-content:flex-start}
     .fcard--research .fcard-foot{padding-right:0}
     .fcard--research .fcard-link{padding-bottom:12px}
     .fcard--research .feature-grant{position:static; align-self:flex-start; margin:0 var(--fcard-px) var(--fcard-py)}
+  }
+  /* mid-width research card (the three-card band): the pill stays in the footer row */
+  @container fcard (min-width:380px) and (max-width:479px){
+    .fcard--research .fcard-foot{padding-right:190px}
+    .fcard--research .fcard-cta{font-size:11px}
+    .fcard--research .fcard-link{padding-bottom:var(--fcard-py)}
+    .fcard--research .feature-grant{position:absolute; margin:0; font-size:11px; padding:6px 12px}
   }
   @media(prefers-reduced-motion:reduce){
     .fcard, .fcard-cta .arrow{transition:none}
     .fcard:hover{transform:none}
     .feature-tag.live .dot::after{animation:none; opacity:.35; transform:none}
   }
-  @media(max-width:900px){ .feature-row{grid-template-columns:1fr} }
+  @media(max-width:1100px){ .feature-row{grid-template-columns:1fr 1fr} .fcard--research{grid-column:1 / -1} }
+  @media(max-width:680px){ .feature-row{grid-template-columns:1fr} .fcard--research{grid-column:auto} }
   @media(max-width:680px){ .fcard{--fcard-px:18px; --fcard-py:16px} }
 
   /* blog */
@@ -819,9 +827,28 @@
   <div class="wrap">
     <div class="feature-row">
       <div class="fcard fcard--essay">
-        <a class="fcard-link" href="projects/leaderboards.html" target="_blank" rel="noopener">
+        <a class="fcard-link" href="projects/model-as-judge.html" target="_blank" rel="noopener">
           <div class="fcard-head">
             <span class="feature-tag"><span class="dot"></span>Latest blog</span>
+            <span class="fcard-meta"><span>2026</span><span class="type">Essay</span></span>
+          </div>
+          <div class="fcard-body">
+            <div class="fcard-text">
+              <h2 class="fcard-title">When the Judge Is a Language Model</h2>
+              <p class="fcard-desc">What the published research says about language models that screen applications, why the safeguards in use do not remove the documented failures, and where the same instrument is heading next.</p>
+            </div>
+          </div>
+          <div class="fcard-foot">
+            <span class="fcard-cta">Read the essay <span class="arrow">&rarr;</span></span>
+            <span class="fcard-note">Interactive &middot; ~55 min read</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="fcard fcard--essay">
+        <a class="fcard-link" href="projects/leaderboards.html" target="_blank" rel="noopener">
+          <div class="fcard-head">
+            <span class="feature-tag"><span class="dot"></span>Blog</span>
             <span class="fcard-meta"><span>2026</span><span class="type">Essay</span></span>
           </div>
           <div class="fcard-body">
@@ -1529,30 +1556,32 @@
 
     <div class="blog-list">
 
-      <!-- Ongoing: LLM evaluator translation failures (extends WMT26 / EMNLP 2026 paper) -->
-      <div class="blog-entry is-forthcoming">
+      <!-- Language models as screeners: failures, safeguards, governance (published 16 Sep 2026) -->
+      <a class="blog-entry" href="projects/model-as-judge.html" target="_blank" rel="noopener">
         <div class="exp-meta">
-          <span class="date">2026 · ongoing</span>
-          <span class="type forthcoming">Ongoing</span>
+          <span class="date">2026 · ~55 min read</span>
+          <span class="type essay">Essay</span>
         </div>
         <div class="blog-body">
-          <h3 class="blog-title">Where State-of-the-Art LLM Evaluators Fail at Translation</h3>
-          <p class="sub">Extending the WMT26 QEbreak findings (EMNLP 2026) beyond the challenge set</p>
+          <h3 class="blog-title">When the Judge Is a Language Model</h3>
+          <p class="sub">The evidence on automated screening, the safeguards in use, and the gap in governance</p>
           <p class="blog-excerpt">
-            The QEbreak paper measured one thing: learned quality metrics punish added text far
-            more than missing text. This write-up asks the wider question of what else the current
-            LLM-based evaluators get wrong about translation quality, and why the same blind spots
-            keep showing up across systems.
+            Language models now read applications and return a number. Thirteen published failures
+            of that number, fourteen safeguards that deployers and regulators rely on, the evidence
+            that none of them removes the failure it targets, the state of regulation in 2026, and
+            the other domains where the same instrument is arriving: admissions, credit, insurance,
+            public benefits, peer review and the courts.
           </p>
           <div class="tags">
-            <span class="tag">Machine Translation</span>
             <span class="tag">LLM-as-a-Judge</span>
-            <span class="tag">Quality Estimation</span>
-            <span class="tag">WMT26</span>
+            <span class="tag">Hiring</span>
+            <span class="tag">AI Governance</span>
+            <span class="tag">Fairness</span>
+            <span class="tag">Interactive</span>
           </div>
-          <span class="blog-forthcoming-note"><span class="dot"></span>Ongoing</span>
+          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
         </div>
-      </div>
+      </a>
 
       <!-- Critique of public frontier-model evaluation metrics (published 6 Sep 2026) -->
       <a class="blog-entry" href="projects/leaderboards.html" target="_blank" rel="noopener">
@@ -1634,6 +1663,31 @@
           <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
         </div>
       </a>
+
+      <!-- Ongoing: LLM evaluator translation failures (extends WMT26 / EMNLP 2026 paper) -->
+      <div class="blog-entry is-forthcoming">
+        <div class="exp-meta">
+          <span class="date">2026 · ongoing</span>
+          <span class="type forthcoming">Ongoing</span>
+        </div>
+        <div class="blog-body">
+          <h3 class="blog-title">Where State-of-the-Art LLM Evaluators Fail at Translation</h3>
+          <p class="sub">Extending the WMT26 QEbreak findings (EMNLP 2026) beyond the challenge set</p>
+          <p class="blog-excerpt">
+            The QEbreak paper measured one thing: learned quality metrics punish added text far
+            more than missing text. This write-up asks the wider question of what else the current
+            LLM-based evaluators get wrong about translation quality, and why the same blind spots
+            keep showing up across systems.
+          </p>
+          <div class="tags">
+            <span class="tag">Machine Translation</span>
+            <span class="tag">LLM-as-a-Judge</span>
+            <span class="tag">Quality Estimation</span>
+            <span class="tag">WMT26</span>
+          </div>
+          <span class="blog-forthcoming-note"><span class="dot"></span>Ongoing</span>
+        </div>
+      </div>
 
     </div>
   </div>

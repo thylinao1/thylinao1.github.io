@@ -1915,6 +1915,7 @@ document.querySelectorAll("h2, .pipe, .dots").forEach(function(el){ inObs.observ
   }, {rootMargin:"0px 0px -7% 0px", threshold:0.06});
   GROUPS.forEach(function(sel){
     document.querySelectorAll(sel).forEach(function(g){
+      if(g.closest("#defs, #domdefs")) return;
       var kids = [].slice.call(g.children), n = 0;
       kids.forEach(function(kid){
         kid.classList.add("st"); kid.style.setProperty("--i", String(Math.min(n, 11))); n++; stObs.observe(kid);
@@ -2040,6 +2041,8 @@ var Modal = (function(){
   function openHtml(html){
     lastFocus = document.activeElement;
     body.innerHTML = html;
+    /* content copied from a hidden container may carry the page's stagger classes; show it at once */
+    body.querySelectorAll(".st, .reveal").forEach(function(el){ el.classList.add("in"); });
     var h = body.querySelector("h3"); if(h){ h.id = "modal-title"; }
     scrim.hidden = false; modal.hidden = false;
     requestAnimationFrame(function(){ scrim.classList.add("on"); modal.classList.add("on"); });

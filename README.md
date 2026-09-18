@@ -28,7 +28,7 @@ in between.
 | --- | --- |
 | `index.html` | Landing page: bio, distinctions, competition results, internships, projects, blog, education, skills |
 | `projects/` | One HTML file per case study or essay |
-| `projects/assets/` | Figures, two paper PDFs, and a captioned video used by individual project pages |
+| `projects/assets/` | Figures, four paper PDFs, and a captioned video used by individual project pages |
 | `assets/` | Institution logos, a certificate scan, two competition result images, and the social-card image for the masked-distress page |
 | `cv-applied-ai-ds.pdf`, `cv-agentic-genai.pdf`, `cv-mlops-rl.pdf` | Three CV variants linked from the landing page |
 | `photo.jpg` | Portrait used in the hero section |

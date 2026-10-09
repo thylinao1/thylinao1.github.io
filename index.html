@@ -3,1312 +3,241 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maksim Silchenko · Statistics, Machine Learning & Causal Inference</title>
-<meta name="description" content="Personal portfolio of Maksim Silchenko. Applied statistics, causal inference, experimentation, and machine learning systems.">
+<title>Maksim Silchenko</title>
+<meta name="description" content="Maksim Silchenko. MSc student at the NUS School of Computing and SPAR Research Fellow working on AI evaluation, causal inference and interpretability.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f4efe6; --bg-2:#ece6d8; --bg-3:#e2dac8; --bg-dark:#15110b;
-    --ink:#15110b; --ink-2:#3b3527; --ink-3:#6b6452; --ink-4:#968d77;
-    --rule:rgba(21,17,11,.12); --rule-strong:rgba(21,17,11,.28);
-    --accent:#c8421f; --accent-soft:#e5a892; --accent-bg:rgba(200,66,31,.08);
-    --good:#1f6b3a;
-    --font-display:"Instrument Serif", Georgia, serif;
-    --font-body:"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-mono:"IBM Plex Mono", ui-monospace, "SF Mono", monospace;
-    --maxw:1180px; --maxw-narrow:820px;
+    --bg:#ffffff; --bg-hover:#f3f5f8;
+    --ink:#1c2024; --ink-2:#434a52; --muted:#69727c;
+    --rule:#e2e5e9;
+    --link:#1d5bbf; --link-hover:#0e3d87;
+    --gold:#946500; --silver:#58646f;
+    --font:"Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --maxw:1000px;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
+  html,body{margin:0; padding:0}
   body{
     background:var(--bg); color:var(--ink);
-    font-family:var(--font-body); font-size:16.5px; line-height:1.55;
-    -webkit-font-smoothing:antialiased; font-feature-settings:"ss01","cv11";
-    overflow-wrap:break-word;
+    font-family:var(--font); font-size:15.5px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; overflow-wrap:break-word;
   }
-  ::selection{background:var(--accent-bg); color:var(--ink)}
-  a{color:var(--ink); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px}
-  a:hover{color:var(--accent)}
-  .wrap{max-width:var(--maxw); padding:0 32px; margin:0 auto}
-  .wrap-n{max-width:var(--maxw-narrow); padding:0 32px; margin:0 auto}
+  a{color:var(--link); text-decoration:none}
+  a:hover{color:var(--link-hover); text-decoration:underline; text-underline-offset:2px}
+  a:focus-visible, button:focus-visible, summary:focus-visible, .project-card:focus-visible{outline:2px solid var(--link); outline-offset:2px; border-radius:3px}
+  .linkish{background:none; border:none; padding:0; font:inherit; color:var(--link); cursor:pointer}
+  .linkish:hover{color:var(--link-hover); text-decoration:underline; text-underline-offset:2px}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px}
 
-  /* topbar */
-  .topbar{
-    position:sticky; top:0; z-index:50;
-    padding:14px 0;
-    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-    background:rgba(244,239,230,.88);
-    border-bottom:1px solid var(--rule);
-    font-family:var(--font-mono); font-size:12px;
-  }
-  .topbar-inner{
-    display:grid; grid-template-columns:auto 1fr auto;
-    align-items:center; gap:20px;
-    padding:0 32px; max-width:var(--maxw); margin:0 auto;
-  }
-  .topbar .brand{font-family:var(--font-display); font-style:italic; font-size:17px; color:var(--ink); text-decoration:none; white-space:nowrap; justify-self:start}
-  .topbar nav{display:flex; gap:17px; color:var(--ink-3); justify-self:center}
-  .topbar nav a{color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:600; letter-spacing:.02em}
-  .topbar nav a:hover{color:var(--accent)}
-  .topbar .pill{border:1px solid var(--rule-strong); border-radius:999px; padding:4px 12px; text-decoration:none; color:var(--ink-2)}
-  .topbar .pill:hover{color:var(--accent); border-color:var(--accent)}
-  .topbar .right{display:flex; gap:8px; flex-wrap:wrap; justify-self:end}
-  @media(max-width:1100px){
-    .topbar-inner{grid-template-columns:1fr auto; gap:14px}
-    .topbar nav{display:none}
-    .topbar .right{display:none}
-    .topbar .hamburger{display:flex}
-  }
+  /* intro */
+  .intro{display:grid; grid-template-columns:105px 1fr; grid-template-rows:auto auto 1fr; column-gap:28px; align-items:start; padding-top:44px}
+  .photo{grid-row:1 / 4; width:105px; height:140px; object-fit:cover; border-radius:4px; display:block}
+  .intro > :not(.photo){grid-column:2}
+  .intro h1{font-size:30px; line-height:1.15; font-weight:700; margin:0 0 2px; letter-spacing:-.01em}
+  .role{margin:0 0 10px; color:var(--muted)}
+  .interests{display:flex; flex-wrap:wrap; align-items:baseline; margin:0 0 10px; color:var(--ink)}
+  .interests .label{color:var(--muted); font-size:13.5px; font-weight:600; margin-right:12px}
+  .interests .label ~ span:not(:last-child)::after{content:"\00b7"; color:var(--muted); margin:0 9px}
+  .links{display:flex; flex-wrap:wrap; gap:4px 18px; font-weight:600}
 
-  /* mobile nav drawer */
-  .hamburger{
-    display:none; align-items:center; justify-content:center;
-    width:40px; height:36px; padding:0; cursor:pointer; justify-self:end;
-    background:none; border:1px solid var(--rule-strong); border-radius:8px;
-    color:var(--ink);
-  }
-  .hamburger:hover{border-color:var(--accent); color:var(--accent)}
-  .drawer-backdrop{
-    position:fixed; inset:0; background:rgba(21,17,11,.5);
-    opacity:0; pointer-events:none; transition:opacity .26s; z-index:310;
-  }
-  body.nav-open .drawer-backdrop{opacity:1; pointer-events:auto}
-  .nav-drawer{
-    position:fixed; top:0; right:0; height:100%; width:min(286px,82vw);
-    background:var(--bg); border-left:1px solid var(--rule);
-    box-shadow:-14px 0 44px rgba(21,17,11,.22);
-    transform:translateX(100%); transition:transform .26s ease;
-    z-index:320; padding:58px 24px 26px; overflow-y:auto;
-    display:flex; flex-direction:column;
-  }
-  body.nav-open .nav-drawer{transform:translateX(0)}
-  .nav-drawer .drawer-links{display:flex; flex-direction:column}
-  .nav-drawer a, .nav-drawer .drawer-cv{
-    font-family:var(--font-body); font-size:16px; color:var(--ink);
-    text-decoration:none; padding:12px 2px; cursor:pointer;
-    border:none; background:none; text-align:left;
-    border-bottom:1px solid var(--rule);
-  }
-  .nav-drawer a:hover, .nav-drawer .drawer-cv:hover{color:var(--accent)}
-  .drawer-sep{height:16px}
-  .drawer-close{
-    position:absolute; top:12px; right:14px; width:34px; height:34px;
-    border:1px solid var(--rule-strong); border-radius:50%;
-    background:none; color:var(--ink-3); font-size:20px; cursor:pointer; padding:0;
-  }
-  .drawer-close:hover{color:var(--accent); border-color:var(--accent)}
+  /* two columns */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:0 48px; padding-top:30px; padding-bottom:48px}
+  section + section{margin-top:26px}
+  h2{font-size:17px; font-weight:700; margin:0 0 6px; padding-bottom:5px; border-bottom:1px solid var(--rule)}
+  ul.list{list-style:none; margin:0; padding:0}
 
-  /* hero */
-  .hero{padding:56px 0 0}
-  .hero .meta{
-    font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3);
-    margin-bottom:28px; display:flex; flex-wrap:wrap; gap:28px;
-    letter-spacing:.04em;
-  }
-  .hero .meta strong{color:var(--ink); font-weight:500}
-  .kicker{display:flex; align-items:center; gap:10px; margin-bottom:12px}
-  .kicker::before{content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent)}
-  .eyebrow{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.18em;
-    text-transform:uppercase; color:var(--ink-3);
-  }
-  .display{font-family:var(--font-display); font-weight:400; letter-spacing:-.005em; line-height:.98; margin:0; color:var(--ink)}
-  .display-xxl{font-size:clamp(56px, 8.4vw, 124px)}
-  .display-xl{font-size:clamp(40px, 5.4vw, 64px)}
-  .display-l{font-size:clamp(32px, 3.8vw, 48px); line-height:1.05}
-  .display-m{font-size:clamp(24px, 2.6vw, 32px); line-height:1.15}
-  .italic{font-style:italic}
-  .hero-sub{
-    font-family:var(--font-display); font-style:italic;
-    font-size:clamp(20px, 2.4vw, 26px); line-height:1.4;
-    max-width:36em; color:var(--ink-2); margin:32px 0 0;
-  }
-  .hero-bio{
-    max-width:none; font-size:16px; line-height:1.6;
-    color:var(--ink-2);
-  }
-  .hero-bio p{margin:0}
-  .hero-bio p + p{margin-top:.85em}
-  .hero-bio em{color:var(--ink); font-style:italic}
+  /* results: rank + name */
+  .ranked li{display:grid; grid-template-columns:5.6em 1fr; gap:10px; padding:3px 0}
+  .rk{font-weight:600; color:var(--muted); white-space:nowrap}
+  .rk.gold{color:var(--gold)}
+  .rk.silver{color:var(--silver)}
+  .note{color:var(--muted)}
+  details.more{margin-top:4px}
+  details.more summary{cursor:pointer; color:var(--link); list-style:none; padding:3px 0; display:inline-block}
+  details.more summary::-webkit-details-marker{display:none}
+  details.more summary::before{content:"+"; display:inline-block; width:1em; font-weight:700}
+  details.more[open] summary::before{content:"\2212"}
+  details.more summary:hover{color:var(--link-hover); text-decoration:underline; text-underline-offset:2px}
+  details.more > ul, details.more > div{margin-top:2px}
 
-  .hero-card{
-    display:grid; grid-template-columns:200px 1fr;
-    gap:36px; align-items:center;
-  }
-  .hero-card h1{margin:0 0 12px; line-height:1.02}
-  .hero-photo-wrap{display:flex; justify-content:flex-start; align-items:center}
-  .hero-photo{
-    width:100%; height:auto; max-width:200px; display:block;
-    border-radius:8px;
-    box-shadow:0 6px 24px rgba(21,17,11,.10);
-  }
-  @media(max-width:760px){
-    .hero-card{grid-template-columns:1fr; gap:20px}
-    .hero-photo{max-width:160px; margin:0 auto}
-    .hero-photo-wrap{justify-content:center}
-  }
+  /* papers */
+  .papers li{padding:5px 0}
+  .papers li + li{border-top:1px solid var(--rule)}
+  .papers .ptitle{display:block; line-height:1.35}
+  .papers .venue{display:block; font-size:14px; color:var(--muted); margin-top:1px}
 
-  .stats{
-    display:grid; grid-template-columns:repeat(4,1fr);
-    border-top:1px solid var(--rule-strong);
-    border-bottom:1px solid var(--rule);
-    margin-top:64px;
-  }
-  .stat{padding:28px 22px; border-right:1px solid var(--rule)}
-  .stat:last-child{border-right:none}
-  .stat .val{font-family:var(--font-display); font-size:42px; line-height:1; color:var(--ink)}
-  .stat .lbl{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.16em;
-    text-transform:uppercase; color:var(--ink-3); margin-top:10px;
-  }
-  @media(max-width:760px){
-    .stats{grid-template-columns:repeat(2,1fr)}
-    .stat:nth-child(2){border-right:none}
-    .stat:nth-child(-n+2){border-bottom:1px solid var(--rule)}
-  }
-
-  /* sections */
-  section.s{padding:44px 0; border-top:1px solid var(--rule)}
-  section.alt{background:var(--bg-2)}
-  section.dark{background:var(--ink); color:#f3ede0; border-top-color:rgba(243,237,224,.08)}
-  section.dark .eyebrow,
-  section.dark .corner{color:rgba(243,237,224,.6)}
-  section.dark .display,
-  section.dark h2, section.dark h3{color:#f3ede0}
-  section.dark a{color:#f3ede0}
-  section.dark a:hover{color:var(--accent-soft)}
-  .section-num{font-family:var(--font-mono); font-size:20px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); font-weight:600; margin-bottom:30px}
-  .section-title{margin-bottom:26px}
-  .section-title-tight{margin-bottom:18px}
-  p.lede{
-    font-family:var(--font-display); font-style:italic;
-    font-size:clamp(22px, 2.4vw, 28px); line-height:1.4;
-    max-width:34em; color:var(--ink-2); margin:0 0 28px;
-  }
-
-  /* experience cards (shared by internships + projects) */
-  .exp-list{display:flex; flex-direction:column; gap:0}
-  .exp{
-    padding:24px 0; border-top:1px solid var(--rule);
-    display:grid; grid-template-columns:200px 1fr; gap:36px;
-  }
-  .exp:first-child{border-top:none}
-  .exp-meta{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3); letter-spacing:.04em}
-  .exp-meta .date{display:block; color:var(--ink-2); margin-bottom:8px}
-  .exp-meta .type{
-    display:inline-block; padding:3px 9px; border-radius:999px;
-    font-size:10px; letter-spacing:.14em; text-transform:uppercase;
-  }
-  .exp-meta .type.internship{background:var(--ink); color:var(--bg)}
-  .exp-meta .type.project{border:1px solid var(--rule-strong); color:var(--ink-2)}
-  .exp-meta .type.research{border:1px solid var(--accent); color:var(--accent)}
-  section.alt .exp{border-top-color:rgba(21,17,11,.10)}
-  .exp-body h3{
-    font-family:var(--font-display); font-size:clamp(26px, 3vw, 36px);
-    font-weight:400; line-height:1.1; margin:0 0 6px; color:var(--ink);
-  }
-  .exp-body .sub{
-    font-family:var(--font-body); font-style:normal;
-    color:var(--ink-2); font-size:15px; margin:0 0 16px;
-  }
-  .exp-body ul{margin:0 0 18px; padding:0; list-style:none}
-  .exp-body li{
-    position:relative; padding-left:22px; margin:0 0 12px;
-    color:var(--ink-2); line-height:1.55;
-  }
-  .exp-body li::before{
-    content:""; position:absolute; left:0; top:.62em;
-    width:8px; height:1px; background:var(--accent);
-  }
-  .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
-  .tag{
-    display:inline-block; font-family:var(--font-mono); font-size:10.5px;
-    letter-spacing:.08em; padding:4px 10px; border-radius:999px;
-    border:1px solid var(--rule-strong); color:var(--ink-2);
-    background:rgba(255,255,255,.35);
-  }
-  section.alt .tag{background:rgba(255,255,255,.55)}
-  .case-link{
-    display:inline-flex; align-items:center; gap:6px; margin-top:18px;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
-    color:var(--accent); text-decoration:none; padding:6px 12px;
-    border:1px solid var(--accent); border-radius:999px;
-    transition:background .15s;
-  }
-  .case-link:hover{background:var(--accent-bg); color:var(--accent)}
-  @media(max-width:760px){
-    .exp{grid-template-columns:1fr; gap:14px}
-  }
-
-  /* clickable project cards + modal */
-  .project-card{cursor:pointer}
-  .project-card .project-title{
-    text-decoration:underline; text-decoration-thickness:1px;
-    text-underline-offset:5px; text-decoration-color:var(--rule-strong);
-    transition:color .15s, text-decoration-color .15s;
-  }
-  .project-card .sub{transition:color .15s}
-  .project-card:hover .project-title,
-  .project-card:focus-visible .project-title{color:var(--accent); text-decoration-color:var(--accent)}
-  .project-card:hover .sub{color:var(--ink)}
+  /* rows: title left, meta right (experience, projects, writing, education) */
+  .rows li, .project-card{display:grid; grid-template-columns:1fr auto; gap:0 14px; align-items:baseline; padding:3px 0}
+  .rows li.card-li{display:block; padding:0}
+  .rows .meta{color:var(--muted); white-space:nowrap; font-size:14.5px}
+  .project-card{cursor:pointer; margin:0 -6px; padding:3px 6px; border-radius:3px}
+  .project-card > .sub, .project-card > .project-detail, .rows .desc{grid-column:1 / -1}
+  .desc{color:var(--ink-2); font-size:14.5px; line-height:1.45; margin:1px 0 4px}
+  .project-card:hover{background:var(--bg-hover)}
   .project-card:focus{outline:none}
-  .project-card:focus-visible{outline:2px solid var(--accent); outline-offset:6px; border-radius:4px}
-  .js-on .project-detail{display:none}
+  .project-title{font-size:inherit; font-weight:400; margin:0; color:var(--link)}
+  .project-card:hover .project-title{color:var(--link-hover); text-decoration:underline; text-underline-offset:2px}
+  .js-on .project-card .sub, .js-on .project-detail{display:none}
+  .edu-extra{list-style:none; margin:2px 0 0; padding:0; color:var(--ink-2); font-size:14.5px}
+  .edu-extra li{padding:2px 0 2px 14px; position:relative}
+  .edu-extra li::before{content:""; position:absolute; left:2px; top:.72em; width:5px; height:1px; background:var(--muted)}
 
-  .modal-overlay{
-    position:fixed; inset:0; z-index:200;
-    background:rgba(21,17,11,.55);
-    -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
-    display:flex; align-items:center; justify-content:center; padding:28px;
-  }
+  /* modals (project details, CV chooser, image lightbox) */
+  .modal-overlay{position:fixed; inset:0; z-index:200; background:rgba(20,24,28,.5); display:flex; align-items:center; justify-content:center; padding:24px}
   .modal-overlay[hidden]{display:none}
-  .modal-card{
-    position:relative; background:var(--bg); color:var(--ink);
-    max-width:780px; width:100%; max-height:86vh;
-    display:flex; flex-direction:column; overflow:hidden;
-    border:1px solid var(--rule); border-radius:10px;
-    box-shadow:0 24px 70px rgba(21,17,11,.34);
-  }
-  .modal-scroll{overflow-y:auto; padding:44px 44px 28px}
-  .modal-foot{
-    flex-shrink:0; padding:18px 44px;
-    border-top:1px solid var(--rule); background:var(--bg);
-  }
+  .modal-card{position:relative; background:#fff; max-width:720px; width:100%; max-height:86vh; display:flex; flex-direction:column; overflow:hidden; border-radius:8px; box-shadow:0 18px 50px rgba(20,24,28,.3)}
+  .modal-scroll{overflow-y:auto; padding:30px 34px 22px}
+  .modal-scroll .project-title{font-size:21px; font-weight:700; color:var(--ink); margin:0 34px 4px 0; line-height:1.25; text-decoration:none}
+  .modal-scroll .sub{color:var(--muted); margin:0 0 14px}
+  .modal-scroll ul{margin:0; padding:0 0 0 18px; color:var(--ink-2)}
+  .modal-scroll li{margin:0 0 9px}
+  .modal-foot{flex-shrink:0; padding:14px 34px; border-top:1px solid var(--rule)}
   .modal-foot[hidden]{display:none}
-  .modal-foot .detail-actions{display:flex; gap:10px; flex-wrap:wrap}
-  .modal-foot .case-link{
-    margin-top:0; font-weight:600; font-size:13px;
-    background:var(--accent); color:#fff; border-color:var(--accent);
-    padding:10px 18px;
-  }
-  .modal-foot .case-link:hover{background:#a8341a; color:#fff; border-color:#a8341a}
-  .modal-foot .repo-link{
-    background:transparent; color:var(--accent); border-color:var(--accent);
-  }
-  .modal-foot .repo-link:hover{background:var(--accent-bg); color:var(--accent); border-color:var(--accent)}
-  .modal-card .project-title{text-decoration:none}
-  .modal-card h3{margin-top:0}
-  .modal-card .sub{margin-bottom:18px}
-  .modal-close{
-    position:absolute; top:14px; right:16px;
-    width:34px; height:34px; padding:0;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--bg); border:1px solid var(--rule-strong); border-radius:50%;
-    color:var(--ink-3); font-size:20px; line-height:1; cursor:pointer;
-    font-family:var(--font-body); z-index:2;
-  }
-  .modal-close:hover{color:var(--accent); border-color:var(--accent)}
-  @media(max-width:600px){
-    .modal-scroll{padding:42px 22px 24px}
-    .modal-foot{padding:16px 22px}
-  }
+  .detail-actions{display:flex; gap:20px; flex-wrap:wrap; font-weight:600}
+  .modal-close{position:absolute; top:12px; right:14px; width:32px; height:32px; padding:0; border:none; border-radius:50%; background:none; color:var(--muted); font-size:24px; line-height:1; cursor:pointer; z-index:2}
+  .modal-close:hover{background:var(--bg-hover); color:var(--ink)}
+  .lightbox-card{position:relative; background:#fff; max-width:900px; width:100%; max-height:88vh; display:flex; flex-direction:column; overflow:hidden; border-radius:8px}
+  .lightbox-head{padding:14px 56px 12px 20px; font-weight:700; border-bottom:1px solid var(--rule)}
+  .lightbox-scroll{overflow-y:auto; padding:16px}
+  .lb-fig{margin:0}
+  .lb-fig img{width:100%; height:auto; display:block}
+  .lb-fig figcaption{font-size:13.5px; color:var(--muted); margin-top:8px; text-align:center}
+  .lb-missing{padding:40px 20px; text-align:center; color:var(--muted)}
 
-  /* skills */
-  .skills-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:32px 48px}
-  .skill-group h4{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.18em;
-    text-transform:uppercase; color:var(--ink-3);
-    margin:0 0 14px; font-weight:500;
+  @media(max-width:780px){
+    .cols{grid-template-columns:1fr; row-gap:26px}
+    .cols > div{display:contents}
+    .cols section{margin:0}
+    #s-results{order:1} #s-papers{order:2} #s-exp{order:3} #s-blogs{order:4} #s-projects{order:5} #s-edu{order:6}
   }
-  .skill-group p{margin:0; line-height:1.65; color:var(--ink-2); font-size:15.5px}
-  .skill-group strong{color:var(--ink); font-weight:500}
-  @media(max-width:760px){ .skills-grid{grid-template-columns:1fr; gap:32px} }
-
-  /* awards (compact, dark) */
-  section.awards-section{padding:38px 0 44px; margin-top:12px}
-  .awards{display:grid; grid-template-columns:repeat(3,1fr); gap:0; border-top:1px solid rgba(243,237,224,.18); margin-top:24px}
-  .award{position:relative; padding:22px 22px; border-right:1px solid rgba(243,237,224,.18); border-bottom:1px solid rgba(243,237,224,.18)}
-  .award-head{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:10px}
-  .award-head h4{margin:0}
-  /* honours card: title stays on one line, smaller school chips beside it (they wrap under it only when the column is narrow) */
-  .award-head.tight{flex-wrap:wrap; gap:8px 10px}
-  .award-head.tight h4{white-space:nowrap}
-  .award-head.tight .award-logos{gap:5px; top:-3px}
-  .award-head.tight .chip{width:23px; height:23px; border-radius:6px}
-  .award-head.tight .chip img{width:17px; height:17px}
-  .award-head.tight .chip.wide{width:auto; padding:0 5px}
-  .award-head.tight .chip.wide img{width:auto; height:11px}
-  .award-logos{display:flex; gap:7px; align-items:center; flex-shrink:0; position:relative; top:-6px}
-  .award-logos .chip{width:30px; height:30px; border-radius:7px; background:#f4efe6; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.28)}
-  .award-logos .chip.wide{width:auto; padding:0 8px}
-  .award-logos .chip img{width:22px; height:22px; object-fit:contain; display:block}
-  .award-logos .chip.wide img{width:auto; height:15px}
-  .award:nth-child(3n){border-right:none}
-  .award .ord{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; color:rgba(243,237,224,.6); margin-bottom:10px}
-  .award h4{font-family:var(--font-display); font-size:22px; font-weight:400; line-height:1.2; margin:0 0 10px; color:#f3ede0}
-  .award p{margin:0; color:rgba(243,237,224,.75); font-size:14.5px; line-height:1.55}
-  @media(max-width:760px){
-    .awards{grid-template-columns:1fr}
-    .award, .award:nth-child(3n){border-right:none}
+  @media(max-width:520px){
+    .wrap{padding:0 16px}
+    .intro{grid-template-columns:72px 1fr; column-gap:16px; padding-top:28px}
+    .photo{grid-row:1; width:72px; height:96px}
+    .intro-head{align-self:center}
+    .intro > .interests, .intro > .links{grid-column:1 / -1}
+    .intro > .interests{margin-top:14px}
+    .interests .label{flex-basis:100%; margin:0 0 1px}
+    .cols{padding-top:26px}
+    .intro h1{font-size:25px}
+    .modal-overlay{padding:10px}
+    .modal-scroll{padding:26px 20px 18px}
+    .modal-foot{padding:12px 20px}
   }
-
-  /* featured band: latest essay + funded research (two cards, one skeleton) */
-  .research-feature{padding:52px 0 4px; border-top:none}
-  .feature-row{display:grid; grid-template-columns:minmax(0,4fr) minmax(0,4fr) minmax(0,5fr); gap:18px; align-items:stretch}
-  .fcard{
-    --fcard-px:24px; --fcard-py:18px;
-    position:relative; display:flex; flex-direction:column; min-width:0;
-    border:1px solid var(--rule-strong); border-radius:12px;
-    background:linear-gradient(180deg, var(--bg-2), var(--bg));
-    transition:border-color .18s, box-shadow .18s, transform .18s;
-  }
-  .fcard:hover{box-shadow:0 12px 34px rgba(21,17,11,.10); transform:translateY(-2px)}
-  .fcard--essay:hover{border-color:var(--accent)}
-  .fcard--research{border-color:rgba(31,107,58,.38); container:fcard / inline-size}
-  .fcard--research:hover{border-color:var(--good)}
-  .fcard-link{
-    flex:1 1 auto; display:flex; flex-direction:column; min-width:0;
-    padding:var(--fcard-py) var(--fcard-px); color:var(--ink); text-decoration:none; border-radius:12px;
-  }
-  .fcard-link:focus{outline:none}
-  .fcard-link:focus-visible{outline:2px solid var(--accent); outline-offset:-1px}
-  .fcard-head{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px 16px; margin-bottom:12px}
-  .feature-tag{
-    display:inline-flex; align-items:center; gap:9px; line-height:1.3;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.12em;
-    text-transform:uppercase; font-weight:600; color:var(--accent); white-space:nowrap;
-  }
-  .feature-tag .dot{position:relative; width:8px; height:8px; border-radius:50%; background:currentColor; flex:none; box-shadow:0 0 0 4px var(--accent-bg)}
-  .feature-tag.live{color:var(--good)}
-  .feature-tag.live .dot{box-shadow:0 0 0 4px rgba(31,107,58,.14)}
-  .feature-tag.live .dot::after{
-    content:""; position:absolute; inset:-4px; border-radius:50%;
-    border:1.5px solid var(--good); opacity:0; animation:fcard-ring 2.6s ease-out infinite;
-  }
-  @keyframes fcard-ring{0%{transform:scale(.55); opacity:.75} 100%{transform:scale(1.7); opacity:0}}
-  .fcard-meta{display:inline-flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink-3); white-space:nowrap}
-  .fcard-meta .type{
-    display:inline-block; padding:3px 9px; border-radius:999px; border:1px solid var(--rule-strong);
-    font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-2);
-  }
-  .fcard-body{display:flex; align-items:center; gap:22px; margin-bottom:16px}
-  .fcard-text{flex:1 1 auto; min-width:0}
-  .fcard-title{
-    font-family:var(--font-display); font-weight:400; font-size:clamp(23px, 1.95vw, 28px);
-    line-height:1.1; letter-spacing:-.005em; margin:0 0 8px; color:var(--ink);
-    transition:color .15s, text-decoration-color .15s;
-  }
-  .fcard--essay .fcard-title{text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:5px; text-decoration-color:var(--rule-strong)}
-  .fcard-link:hover .fcard-title{color:var(--accent); text-decoration-color:var(--accent)}
-  .fcard-title .u{text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:5px}
-  .fcard-desc{color:var(--ink-2); font-size:14px; line-height:1.5; margin:0}
-  .fcard-figure{flex:0 0 clamp(150px, 34cqw, 220px); display:flex; justify-content:flex-end}
-  .fcard-figure svg{width:100%; height:auto; display:block}
-  .fcard-foot{
-    margin-top:auto; padding-top:12px; border-top:1px solid var(--rule);
-    display:flex; align-items:center; justify-content:space-between; gap:8px 12px; flex-wrap:wrap;
-  }
-  .fcard-cta{
-    display:inline-flex; align-items:center; gap:8px; min-height:32px;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; color:var(--accent); font-weight:600;
-  }
-  .fcard-cta .arrow{transition:transform .18s}
-  .fcard-link:hover .fcard-cta .arrow{transform:translateX(4px)}
-  .fcard-note{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink-3); white-space:nowrap}
-  .fcard--research .fcard-foot{padding-right:200px}
-  .feature-grant{
-    position:absolute; right:calc(var(--fcard-px) - 1px); bottom:var(--fcard-py);
-    display:inline-flex; align-items:center; gap:7px;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; font-weight:600;
-    color:var(--accent); background:transparent; border:1px solid var(--accent);
-    border-radius:999px; padding:7px 15px; text-decoration:none; transition:background .15s, color .15s;
-  }
-  .feature-grant:hover{background:var(--accent-bg); color:var(--accent)}
-  .feature-grant:focus{outline:none}
-  .feature-grant:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-  /* narrow research card: figure drops under the text, grant pill flows below the link */
-  @container fcard (max-width:479px){
-    .fcard--research .fcard-body{flex-direction:column; align-items:flex-start; gap:10px; margin-bottom:12px}
-    .fcard--research .fcard-figure{flex:none; width:min(100%, 190px); justify-content:flex-start}
-    .fcard--research .fcard-foot{padding-right:0}
-    .fcard--research .fcard-link{padding-bottom:12px}
-    .fcard--research .feature-grant{position:static; align-self:flex-start; margin:0 var(--fcard-px) var(--fcard-py)}
-  }
-  /* mid-width research card (the three-card band): the pill stays in the footer row */
-  @container fcard (min-width:380px) and (max-width:479px){
-    .fcard--research .fcard-foot{padding-right:190px}
-    .fcard--research .fcard-cta{font-size:11px}
-    .fcard--research .fcard-link{padding-bottom:var(--fcard-py)}
-    .fcard--research .feature-grant{position:absolute; margin:0; font-size:11px; padding:6px 12px}
-  }
-  @media(prefers-reduced-motion:reduce){
-    .fcard, .fcard-cta .arrow{transition:none}
-    .fcard:hover{transform:none}
-    .feature-tag.live .dot::after{animation:none; opacity:.35; transform:none}
-  }
-  @media(max-width:1100px){ .feature-row{grid-template-columns:1fr 1fr} .fcard--research{grid-column:1 / -1} }
-  @media(max-width:680px){ .feature-row{grid-template-columns:1fr} .fcard--research{grid-column:auto} }
-  @media(max-width:680px){ .fcard{--fcard-px:18px; --fcard-py:16px} }
-
-  /* blog */
-  .blog-list{display:flex; flex-direction:column}
-  .blog-entry{
-    display:grid; grid-template-columns:200px 1fr; gap:36px;
-    padding:24px 0; border-top:1px solid var(--rule);
-    text-decoration:none; color:var(--ink);
-  }
-  .blog-entry:first-child{border-top:none}
-  .exp-meta .type.essay{border:1px solid var(--rule-strong); color:var(--ink-2)}
-  .blog-title{
-    font-family:var(--font-display); font-size:clamp(26px, 3vw, 36px);
-    font-weight:400; line-height:1.1; margin:0 0 6px; color:var(--ink);
-    text-decoration:underline; text-decoration-thickness:1px;
-    text-underline-offset:5px; text-decoration-color:var(--rule-strong);
-    transition:color .15s, text-decoration-color .15s;
-  }
-  .blog-entry:hover .blog-title,
-  .blog-entry:focus-visible .blog-title{color:var(--accent); text-decoration-color:var(--accent)}
-  .blog-body .sub{
-    font-family:var(--font-body); color:var(--ink-2);
-    font-size:15px; margin:0 0 14px;
-  }
-  .blog-excerpt{color:var(--ink-2); line-height:1.6; margin:0 0 14px; max-width:46em}
-  .blog-read{
-    display:inline-flex; align-items:center; gap:7px; margin-top:4px;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
-    color:var(--accent); font-weight:600;
-  }
-  .blog-read .arrow{transition:transform .15s}
-  .blog-entry:hover .blog-read .arrow{transform:translateX(4px)}
-  .blog-entry:focus{outline:none}
-  .blog-entry:focus-visible{outline:2px solid var(--accent); outline-offset:6px; border-radius:4px}
-  @media(max-width:760px){ .blog-entry{grid-template-columns:1fr; gap:14px} }
-
-  /* education */
-  .edu-list{display:flex; flex-direction:column; gap:0}
-  .edu{
-    padding:20px 0; border-top:1px solid var(--rule);
-    display:grid; grid-template-columns:200px 1fr; gap:36px;
-  }
-  .edu:first-child{border-top:none}
-  .edu-meta{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3)}
-  .edu-body h3{
-    font-family:var(--font-display); font-size:24px; font-weight:400;
-    line-height:1.2; margin:0 0 4px;
-  }
-  .edu-body .role{font-style:italic; color:var(--ink-2); margin:0 0 10px}
-  .edu-body p{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.55}
-  .edu-body ul.exchanges{margin:10px 0 0; padding:0; list-style:none}
-  .edu-body ul.exchanges li{
-    position:relative; padding-left:20px; margin:0 0 6px;
-    color:var(--ink-2); font-size:14.5px;
-  }
-  .edu-body ul.exchanges li::before{
-    content:""; position:absolute; left:0; top:.7em;
-    width:8px; height:1px; background:var(--accent);
-  }
-  @media(max-width:760px){
-    .edu{grid-template-columns:1fr; gap:8px}
-  }
-
-  /* footer */
-  footer{
-    padding:40px 0 40px;
-    border-top:1px solid var(--rule);
-    text-align:center;
-  }
-  footer .name{
-    font-family:var(--font-display); font-style:italic;
-    font-size:24px; color:var(--ink); display:block;
-  }
-  footer .contact-links{
-    margin-top:20px; display:flex; justify-content:center; gap:24px;
-    flex-wrap:wrap; font-family:var(--font-mono);
-    font-size:13px; letter-spacing:.04em;
-  }
-  footer .contact-links a{ color:var(--ink-2); text-decoration:none; }
-  footer .contact-links a:hover{ color:var(--accent); }
-  footer .contact-links button{
-    background:none; border:none; padding:0; cursor:pointer;
-    font-family:var(--font-mono); font-size:13px; letter-spacing:.04em;
-    color:var(--ink-2);
-  }
-  footer .contact-links button:hover{color:var(--accent)}
-
-  /* CV chooser modal */
-  .topbar button.pill{
-    background:transparent; cursor:pointer;
-    font-family:var(--font-mono); font-size:12px;
-  }
-  .modal-card.cv-card{display:block; overflow-y:auto; max-width:520px}
-  .cv-card-body{padding:44px 40px 38px}
-  .cv-card-title{
-    font-family:var(--font-display); font-weight:400; font-size:27px;
-    line-height:1.2; margin:0 0 22px; color:var(--ink);
-  }
-  .cv-choices{display:flex; flex-direction:column; gap:10px}
-  .cv-choice{
-    display:block; text-decoration:none; padding:14px 16px;
-    border:1px solid var(--rule-strong); border-radius:8px;
-    transition:border-color .15s, background .15s;
-  }
-  .cv-choice:hover{border-color:var(--accent); background:var(--accent-bg)}
-  .cv-choice-name{
-    display:block; font-family:var(--font-body); font-weight:600;
-    font-size:15px; color:var(--ink);
-  }
-  .cv-choice:hover .cv-choice-name{color:var(--accent)}
-  .cv-choice-desc{display:block; font-size:13px; color:var(--ink-3); margin-top:3px}
-  @media(max-width:600px){ .cv-card-body{padding:42px 22px 30px} }
-
-  /* ---- mobile polish ---- */
-  @media(max-width:640px){
-    .wrap, .wrap-n{padding:0 20px}
-    .topbar{padding:11px 0}
-    .topbar-inner{padding:0 20px; gap:10px}
-    .topbar .brand{font-size:15px}
-    .topbar .pill{padding:4px 9px; font-size:11px}
-    .topbar .right{gap:7px}
-    .hero{padding:36px 0 0}
-    .hero .meta{gap:7px 16px; margin-bottom:20px}
-    section.s{padding:38px 0}
-    section.awards-section{padding:32px 0 36px}
-    .modal-overlay{padding:12px}
-    .modal-foot .detail-actions{width:100%}
-    .modal-foot .case-link{flex:1; justify-content:center; text-align:center}
-    .award{padding:20px 18px}
-    .exp-body h3{font-size:24px}
-    .display-l{font-size:30px}
-  }
-
-  /* ================= featured band: two equal hero cards ================= */
-  .feature-band{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:stretch}
-  .feature-band .feature-card{display:flex; flex-direction:column; height:100%; padding:22px 26px 20px}
-  .feature-band .feature-grid{display:block}
-  .feature-band .feature-title{font-size:clamp(19px, 1.85vw, 25px); margin:0 0 8px}
-  .feature-band .feature-desc{margin:0 0 12px; max-width:none}
-  .feature-stat{font-family:var(--font-mono); font-size:12px; letter-spacing:.03em; color:var(--ink-2); margin:0 0 14px}
-  .feature-stat b{color:var(--accent); font-weight:600}
-  .feature-figure{margin:auto 0 16px; display:flex; justify-content:center}
-  .feature-figure svg{width:100%; height:auto; max-width:340px}
-  .feature-band .feature-cta{margin-top:0}
-  .feature-tag.win{color:var(--ink)}
-  .feature-tag.win .dot{background:var(--ink); box-shadow:0 0 0 4px rgba(21,17,11,.10)}
-  .feature-card--flat .feature-cta{margin-top:auto}
-  .feature-card--flat .feature-stat{margin-bottom:0}
-  /* Google wordmark (logo colours + sans-serif) */
-  .google-wm{font-family:Arial, "Helvetica Neue", Helvetica, sans-serif; font-weight:500; letter-spacing:0; position:relative; top:-0.12em}
-  /* BlueDot wordmark (brand blue + bold) */
-  .bluedot-wm{color:#3d6dff; font-weight:700}
-  @media(max-width:900px){ .feature-band{grid-template-columns:1fr} }
-  @media(max-width:680px){ .feature-band .feature-card{padding:18px 18px 16px} }
-
-  /* ================= recent-results ledger ================= */
-  .ledger{margin-top:18px}
-  .led-row{
-    display:grid; grid-template-columns:118px 1fr auto; gap:10px 22px;
-    align-items:baseline; padding:16px 0; border-bottom:1px solid var(--rule);
-  }
-  .led-date{font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
-  .led-main{min-width:0}
-  .led-title{font-weight:600; color:var(--ink); font-size:16.5px; line-height:1.3}
-  .led-note{color:var(--ink-2); font-size:14.5px; margin-top:4px; line-height:1.55}
-  .led-note a, .led-title a{color:inherit}
-  .led-side{display:grid; grid-template-columns:100px 168px; column-gap:32px; align-items:center; justify-items:start}
-  .led-side > .res-badge:not(.glow){grid-column:1}
-  .led-side > .solution-btn, .led-side > .res-badge.glow{grid-column:2}
-  .led-side > .lh-result{grid-column:1}
-  .led-side > .lh-solutions{grid-column:2}
-  /* column headings for the ledger */
-  .led-head{display:grid; grid-template-columns:118px 1fr auto; gap:10px 22px; align-items:end; padding:0 0 8px; border-bottom:1px solid var(--rule-strong)}
-  .lh-label{font-family:var(--font-mono); font-size:14px; letter-spacing:.01em; color:var(--ink-2)}
-  .res-badge{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap}
-  .res-badge.win{background:var(--accent); color:#fff}
-  .res-badge.finalist{border:1px solid var(--rule-strong); color:var(--ink-2)}
-  .res-badge.ongoing{border:1px solid var(--good); color:var(--good)}
-  a.res-badge{text-decoration:none; cursor:pointer; transition:filter .18s ease, transform .18s ease}
-  a.res-badge:hover{filter:brightness(1.08); transform:translateY(-1px)}
-  a.res-badge:active{transform:translateY(0) scale(.98)}
-  /* glowing "Correct solution found" button (matches the BAREC solution-btn glow) */
-  .res-badge.win.glow{box-shadow:0 0 10px 1px rgba(200,66,31,.45), 0 6px 18px -8px rgba(200,66,31,.7); animation:solutionGlow 2.4s ease-in-out infinite}
-  .res-badge.win.glow:hover{box-shadow:0 0 22px 3px rgba(200,66,31,.6), 0 10px 24px -6px rgba(200,66,31,.85)}
-  @media(prefers-reduced-motion:reduce){.res-badge.win.glow{animation:none}}
-  /* BAREC badge: keep the label, drop the solid fill */
-  .res-badge.win-plain{background:none; color:var(--accent); border:1px solid var(--accent-soft)}
-  /* orange glowing button that links to the BAREC solution write-up */
-  .solution-btn{
-    display:inline-flex; align-items:center; gap:7px;
-    font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
-    color:#fff; text-decoration:none; white-space:nowrap;
-    padding:6px 14px; border-radius:999px;
-    background:var(--accent); border:1px solid var(--accent);
-    box-shadow:0 0 10px 1px rgba(200,66,31,.45), 0 6px 18px -8px rgba(200,66,31,.7);
-    transition:box-shadow .25s ease, transform .18s ease, background .2s ease;
-    animation:solutionGlow 2.4s ease-in-out infinite;
-  }
-  .solution-btn svg{display:block; transition:transform .2s ease}
-  .solution-btn:hover{background:#e2551f; color:#fff; transform:translateY(-1px); box-shadow:0 0 22px 3px rgba(200,66,31,.6), 0 10px 24px -6px rgba(200,66,31,.85)}
-  .solution-btn:hover svg{transform:translateX(3px)}
-  .solution-btn:active{transform:translateY(0) scale(.98)}
-  @keyframes solutionGlow{0%,100%{box-shadow:0 0 8px 0 rgba(200,66,31,.38), 0 6px 18px -8px rgba(200,66,31,.6)} 50%{box-shadow:0 0 20px 3px rgba(200,66,31,.62), 0 8px 22px -6px rgba(200,66,31,.82)}}
-  @media(prefers-reduced-motion:reduce){.solution-btn{animation:none}}
-  .proof{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.02em; color:var(--ink-4);
-    text-decoration:none; white-space:nowrap; border-bottom:1px dotted var(--rule-strong);
-    background:none; border-left:none; border-right:none; border-top:none; padding:0 0 1px; cursor:pointer;
-  }
-  .proof:hover{color:var(--accent); border-bottom-color:var(--accent)}
-  /* combined puzzles line + forthcoming note reuse the ledger grid */
-  .led-inline{color:var(--ink-2); font-size:14.5px; line-height:1.7}
-  .led-inline a{color:var(--ink); text-underline-offset:3px; margin-right:2px}
-  .led-inline .sep{color:var(--ink-4); margin:0 6px}
-  @media(max-width:640px){
-    .led-head{display:none}
-    .led-row{grid-template-columns:1fr; gap:8px}
-    .led-side{display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-start}
-  }
-
-  /* ================= incoming internship badge ================= */
-  .exp-meta .type.incoming{background:var(--accent); color:#fff}
-
-  /* ================= gold glow for 1st place ================= */
-  .gold-1st{color:#d8b34a; font-weight:inherit; animation:goldGlow 2.6s ease-in-out infinite}
-  @keyframes goldGlow{0%,100%{text-shadow:0 0 4px rgba(216,179,74,.35)} 50%{text-shadow:0 0 14px rgba(216,179,74,.75), 0 0 26px rgba(216,179,74,.35)}}
-  .res-badge.gold{background:none; color:#b8860b; border:1px solid #d8b34a; box-shadow:0 0 9px 1px rgba(216,179,74,.45); animation:goldBadgeGlow 2.6s ease-in-out infinite}
-  .res-badge.silver{background:none; color:#6e7a84; border:1px solid #aeb9c2; box-shadow:0 0 9px 1px rgba(150,165,178,.5); animation:silverBadgeGlow 2.6s ease-in-out infinite}
-  @keyframes silverBadgeGlow{0%,100%{box-shadow:0 0 7px 0 rgba(150,165,178,.4)} 50%{box-shadow:0 0 16px 3px rgba(150,165,178,.7)}}
-  @keyframes goldBadgeGlow{0%,100%{box-shadow:0 0 7px 0 rgba(216,179,74,.35)} 50%{box-shadow:0 0 16px 3px rgba(216,179,74,.65)}}
-  @media(prefers-reduced-motion:reduce){.gold-1st,.res-badge.gold,.res-badge.silver{animation:none}}
-
-  /* ================= image lightbox (rounded popup) ================= */
-  .lightbox-card{
-    position:relative; background:var(--bg); color:var(--ink);
-    max-width:940px; width:100%; max-height:88vh; display:flex; flex-direction:column; overflow:hidden;
-    border:1px solid var(--rule); border-radius:16px; box-shadow:0 30px 80px rgba(21,17,11,.4);
-  }
-  .lightbox-head{
-    flex-shrink:0; padding:16px 22px 15px; border-bottom:1px solid var(--rule);
-    font-family:var(--font-display); font-size:21px; padding-right:56px;
-  }
-  .lightbox-head small{display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-top:4px}
-  .lightbox-scroll{overflow-y:auto; padding:18px}
-  figure.lb-fig{margin:0 0 18px}
-  figure.lb-fig:last-child{margin-bottom:0}
-  .lb-fig img{width:100%; height:auto; display:block; border-radius:10px; border:1px solid var(--rule); background:#fff}
-  .lb-fig figcaption{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--ink-3); margin-top:9px; text-align:center}
-  .lb-missing{padding:44px 20px; text-align:center; font-family:var(--font-mono); font-size:12.5px; letter-spacing:.03em; color:var(--ink-3)}
-
-  /* inline lightbox link (inside ledger text) */
-  .lb-link{background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:500; color:var(--accent); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; text-decoration-color:var(--accent); animation:linkGlow 2.4s ease-in-out infinite}
-  .lb-link:hover{color:#a8341a; text-decoration-color:#a8341a}
-  @keyframes linkGlow{0%,100%{text-shadow:0 0 2px rgba(200,66,31,.1)} 50%{text-shadow:0 0 5px rgba(200,66,31,.28)}}
-  @media(prefers-reduced-motion:reduce){.lb-link{animation:none}}
-  /* ledger trailing note (e.g. ongoing paper submission) */
-  .led-tail{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--good)}
-  /* ledger group break: a gap and a stronger rule before and after the puzzles */
-  .led-break{width:140px; height:3px; margin:30px auto 26px; background:var(--accent); border-radius:999px; box-shadow:0 0 10px 1px rgba(200,66,31,.45), 0 4px 14px -4px rgba(200,66,31,.6)}
-  /* puzzles: one entry per line */
-  .led-inline .pz{display:block}
-  .led-inline .pz + .pz{margin-top:7px}
-
-  /* education: bootcamps subsection */
-  .edu-date{font-style:italic; color:var(--ink-3); font-size:13.5px; white-space:nowrap; font-weight:400}
-  ul.bc-dated li{display:flex; justify-content:space-between; align-items:baseline; gap:18px}
-  ul.bc-dated .bc-main{display:block}
-  .edu-ra{margin:14px 0 2px}
-  .edu-ra-head{display:flex; justify-content:space-between; align-items:baseline; gap:18px; margin:0 0 3px}
-  .edu-ra-head strong{color:var(--ink); font-weight:600; font-size:15.5px}
-  .edu-ra-role{margin:0 0 6px; font-style:italic; color:var(--ink-2); font-size:14px}
-  .edu-ra-desc{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.55}
-  ul.edu-ra-desc{padding:0; list-style:none}
-  ul.edu-ra-desc li{position:relative; padding-left:16px; margin-bottom:6px}
-  ul.edu-ra-desc li:last-child{margin-bottom:0}
-  ul.edu-ra-desc li::before{content:'\2014'; position:absolute; left:0; color:var(--ink-3)}
-  @media(max-width:640px){
-    ul.bc-dated li,.edu-ra-head{flex-direction:column; gap:2px}
-    .edu-date{font-size:12.5px}
-  }
-  .edu-subhead{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); font-weight:500; margin:0 0 14px}
-  .edu-bootcamps{margin:0; padding:0; list-style:none}
-  .edu-bootcamps li{position:relative; padding-left:20px; margin:0 0 16px; color:var(--ink-2); font-size:15px; line-height:1.55}
-  .edu-bootcamps li:last-child{margin-bottom:0}
-  .edu-bootcamps li::before{content:""; position:absolute; left:0; top:.62em; width:8px; height:1px; background:var(--accent)}
-  .edu-bootcamps strong{color:var(--ink); font-weight:600}
-  .edu-bootcamps .bc-meta{display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--ink-3); margin-top:3px}
-
-  /* ================= forthcoming blog entries ================= */
-  .exp-meta .type.forthcoming{border:1px dashed var(--rule-strong); color:var(--ink-3)}
-  .blog-entry.is-forthcoming{cursor:default}
-  .blog-entry.is-forthcoming .blog-title{text-decoration:none}
-  .blog-entry.is-forthcoming:hover .blog-title{color:var(--ink)}
-  .blog-forthcoming-note{display:inline-flex; align-items:center; gap:10px; margin-top:4px; font-family:var(--font-mono); font-size:12px; color:var(--ink-3); flex-wrap:wrap}
-  .blog-forthcoming-note .dot{width:7px; height:7px; border-radius:50%; background:var(--ink-4)}
 </style>
 </head>
 <body>
 
-<!-- ============ TOP BAR ============ -->
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="#top" class="brand">M. Silchenko</a>
-    <nav>
-      <a href="#awards">Distinctions</a>
-      <a href="#results">Results</a>
-      <a href="#internships">Experience</a>
-      <a href="#projects">Projects</a>
-      <a href="#blog">Blog</a>
-      <a href="#education">Education</a>
-      <a href="#skills">Skills</a>
-    </nav>
-    <div class="right">
-      <a class="pill" href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub ↗</a>
-      <a class="pill" href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn ↗</a>
-      <a class="pill" href="mailto:mthylinao@gmail.com">Email ↗</a>
-    </div>
-    <button type="button" class="hamburger" aria-label="Open menu" aria-expanded="false">
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
+<header class="wrap intro">
+  <img class="photo" src="photo.jpg" width="105" height="140" alt="Maksim Silchenko">
+  <div class="intro-head">
+    <h1>Maksim Silchenko</h1>
+    <p class="role">MSc student, NUS School of Computing &middot; SPAR Research Fellow &middot; Singapore</p>
   </div>
+    <p class="interests"><span class="label">Interests</span><span>AI evaluation</span><span>Causal inference</span><span>Interpretability</span></p>
+    <nav class="links" aria-label="Contact">
+      <a href="mailto:mthylinao@gmail.com">Email</a>
+      <a href="Maksim_Silchenko_CV.pdf" target="_blank" rel="noopener">CV</a>
+      <a href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn</a>
+    </nav>
 </header>
 
-<!-- ============ HERO ============ -->
-<section id="top" class="hero">
-  <div class="wrap">
-    <div class="meta">
-      <span><strong>Based</strong> · Singapore</span>
-      <span><strong>NUS</strong> · MSc, School of Computing</span>
-    </div>
+<main class="wrap cols">
+  <div>
+    <section id="s-results" aria-labelledby="h-results">
+      <h2 id="h-results">Selected results</h2>
+      <ul class="list ranked">
+        <li><span class="rk gold">1st place</span><span><a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">AKBC Shared Task @ EMNLP 2026</a></span></li>
+        <li><span class="rk gold">1st place</span><span><a href="projects/medlongtrust.html" target="_blank" rel="noopener">UbiComp 2026 Trustworthy Agentic AI Challenge</a></span></li>
+        <li><span class="rk gold">1st place</span><span><a href="projects/workrb-skill-ranking.html" target="_blank" rel="noopener">RecSys-HR 2026 WorkRB Challenge</a></span></li>
+        <li><span class="rk gold">1st place</span><span><a href="projects/barec.html" target="_blank" rel="noopener">BAREC Shared Task @ ArabicNLP 2026</a> <span class="note">2 tracks</span></span></li>
+        <li><span class="rk gold">1st place</span><span>Latent Probe Challenge: <a href="https://www.codabench.org/competitions/17670/" target="_blank" rel="noopener">toxicity</a>, <a href="https://www.codabench.org/competitions/17669/" target="_blank" rel="noopener">mental health</a></span></li>
+        <li><span class="rk gold">1st place</span><span><a href="https://devpost.com/software/autosre-the-autonomous-on-call-engineer" target="_blank" rel="noopener">Google Cloud Rapid Agent Hackathon</a> <span class="note">15,000 teams</span></span></li>
+        <li><span class="rk gold">Grant</span><span><a href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">BlueDot Impact (CoT faithfulness research)</a></span></li>
+        <li><span class="rk silver">2nd place</span><span><a href="https://car-bench.github.io/car-bench/reports/track_1/team-28.pdf" target="_blank" rel="noopener">CAR-Bench Challenge @ IJCAI-ECAI 2026</a></span></li>
+        <li><span class="rk">Top 7</span><span><a href="projects/white-box-estimation.html" target="_blank" rel="noopener">ARC White-Box Estimation Challenge</a></span></li>
+        <li><span class="rk">9th place</span><span><a href="https://www.alphanova.tech/competition/competition-5" target="_blank" rel="noopener">AlphaNova Quant Competition 5</a> <span class="note">of 873</span></span></li>
+        <li><span class="rk">Winner</span><span>Russian National Mathematics Olympiad <span class="note">top 0.015%</span></span></li>
+      </ul>
+      <details class="more">
+        <summary>9 more: puzzles, sprints, hackathons</summary>
+        <ul class="list ranked">
+          <li><span class="rk gold">1st place</span><span><button type="button" class="linkish lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">BUPT Agentic AI Bootcamp</button> <span class="note">final competition</span></span></li>
+          <li><span class="rk">Solved</span><span>Jane Street puzzles <span class="note">Feb, Jun, Jul 2026</span></span></li>
+          <li><span class="rk">Finalist</span><span><a href="https://www.wincentdragonbyte.com/scoreboard/qual2026" target="_blank" rel="noopener">Wincent DragonByte 2026</a> <span class="note">(qualifiers: <button type="button" class="linkish lightbox-open" data-img="assets/dragonbyte-quals.png" data-title="Wincent DragonByte 2026" data-cap="Qualification Round 2026 · results are final">top 5</button>, <button type="button" class="linkish lightbox-open" data-img="assets/dragonbyte-online.png" data-title="Wincent DragonByte 2026" data-cap="Online Round 2026 · 2nd, fastest solution time">top 2</button>)</span></span></li>
+          <li><span class="rk">Solved</span><span><a href="projects/bluedot-fold.html" target="_blank" rel="noopener">BlueDot Impact Technical AI Puzzle #1</a></span></li>
+          <li><span class="rk">Solved</span><span><a href="projects/ponder-superheroes.html" target="_blank" rel="noopener">IBM Research Ponder This</a></span></li>
+          <li><span class="rk">Submitted</span><span><a href="projects/egress-receipts.html" target="_blank" rel="noopener">Apart x CeSIA AI Incident Response Sprint</a></span></li>
+          <li><span class="rk">Submitted</span><span><a href="projects/masked-distress.html" target="_blank" rel="noopener">Apart Digital Minds Sprint: Masked Distress</a></span></li>
+          <li><span class="rk">Submitted</span><span><a href="projects/skill-lift.html" target="_blank" rel="noopener">BenchFlow Agent Skill Lift</a></span></li>
+          <li><span class="rk">Submitted</span><span><a href="https://thylinao1.github.io/oneloop-site-k7q2/" target="_blank" rel="noopener">American Express AI Hackathon: One Loop</a></span></li>
+        </ul>
+      </details>
+    </section>
 
-    <div class="hero-card">
-      <div class="hero-photo-wrap">
-        <img src="photo.jpg" alt="Maksim Silchenko" class="hero-photo">
-      </div>
-      <div class="hero-text">
-        <div class="kicker"><span class="eyebrow">Portfolio</span></div>
-        <h1 class="display display-l">Maksim Silchenko</h1>
-        <div class="hero-bio">
-          <p>
-            Hi! I'm currently an MSc student at the NUS School of Computing
-            and a SPAR Fellow, working at the intersection of causal
-            inference, machine learning, and AI safety.
-          </p>
-          <p>
-            This year, I've received the BlueDot AI Safety Grant
-            (Chain-of-Thought Interpretability), and won Google Cloud
-            Rapid&nbsp;Agent Hackathon (Gold), ACM UbiComp/ISWC (Gold), AKBC
-            @ EMNLP (Gold), WMT @ EMNLP, ArabicNLP @ EMNLP (Gold), the
-            CAR-Bench Challenge @ IJCAI-ECAI 2026 (Silver), the RecSys-HR
-            2026 WorkRB Challenge (Gold), AlphaNova Quant Competition (9th
-            out of 900). Previously, I was a winner of the National
-            Mathematics Olympiad in Russia, placing in the top 0.015%
-            nationally.
-          </p>
-          <p>
-            I've also finished the University of Oxford's 'ML
-            Representation Learning &amp; Generative AI' Bootcamp and the
-            Beijing University of Posts &amp; Telecommunications (BUPT)
-            'Agentic AI' Bootcamp, where I placed 1st in the final agentic
-            AI competition.
-          </p>
-          <p>
-            Currently, I'm working as a Research Assistant on recommender
-            systems at HONOR (China).
-            Alongside this, I'm completing the TARA (ARENA) and BlueDot
-            Technical AI Safety programmes, and will be attending the funded
-            ML4Good bootcamp in Hong Kong (Oct 2026).
-          </p>
-          <p>
-            My previous experience includes quantitative research at Orbuc,
-            a London-based boutique crypto trading and research firm, as
-            well as independent work in causal inference, Bayesian
-            experimentation, and ML systems.
-          </p>
-        </div>
-      </div>
-    </div>
+    <section id="s-papers" aria-labelledby="h-papers">
+      <h2 id="h-papers">Papers, 2026</h2>
+      <ul class="list papers">
+        <li><a class="ptitle" href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">Coverage Is Not Knowledge: Why Closed-Book Knowledge Base Construction Looks Selection Bound</a><span class="venue">AKBC @ EMNLP 2026 &middot; 1st place, featured paper &middot; <a href="projects/assets/akbc-lmkbc-paper.pdf" target="_blank" rel="noopener">PDF</a></span></li>
+        <li><a class="ptitle" href="projects/wmt26-qebreak.html" target="_blank" rel="noopener">QEbreak at WMT26: A Pre-Registered Audit of Omission and Addition Asymmetry in Machine Translation Quality Metrics</a><span class="venue">WMT26 @ EMNLP 2026 &middot; <a href="projects/assets/wmt26-qebreak-paper.pdf" target="_blank" rel="noopener">PDF</a></span></li>
+        <li><a class="ptitle" href="projects/barec.html" target="_blank" rel="noopener">thylinao at BAREC Shared Task 2026: Ensembling at the Noise Floor</a><span class="venue">ArabicNLP @ EMNLP 2026 &middot; 1st place &middot; <a href="projects/assets/barec-paper.pdf" target="_blank" rel="noopener">PDF</a></span></li>
+        <li><a class="ptitle" href="projects/assets/childsafeads-paper.pdf" target="_blank" rel="noopener">thylinao at ChildSafeAds 2026: A Six-Member Ensemble and What Each Level of Data Access Provided</a><span class="venue">NLLP @ EMNLP 2026 &middot; <a href="projects/assets/childsafeads-paper.pdf" target="_blank" rel="noopener">PDF</a></span></li>
+        <li><a class="ptitle" href="projects/medlongtrust.html" target="_blank" rel="noopener">A Tool-Grounded Verification Agent for Auditable Trust Assessment Over Longitudinal Electronic Health Records</a><span class="venue">TCSAUC @ UbiComp/ISWC 2026 &middot; 1st place &middot; <a href="projects/assets/medlongtrust-ehr-paper.pdf" target="_blank" rel="noopener">PDF</a></span></li>
+      </ul>
+    </section>
+
+    <section id="s-edu" aria-labelledby="h-edu">
+      <h2 id="h-edu">Education</h2>
+      <ul class="list rows">
+        <li><span>NUS &middot; MSc, School of Computing</span><span class="meta">2026 to 2027</span></li>
+        <li><span>City, University of London &middot; BSc, First-Class Honours</span><span class="meta">2022 to 2026</span></li>
+      </ul>
+      <details class="more">
+        <summary>Exchanges, scholarships and programmes</summary>
+        <ul class="edu-extra">
+          <li>Top of cohort at City in Quantitative Methods &amp; Analytics, AI &amp; Big Data and the Capstone Project</li>
+          <li>Exchanges at NUS (2025) and ESADE (2024) on full scholarships, and UT Austin (2023)</li>
+          <li>TARA and BlueDot Technical AI Safety programmes (2026); ML4Good bootcamp, Hong Kong (Oct 2026)</li>
+          <li>BUPT Agentic AI Bootcamp, full scholarship (2026); Oxford ML Representation Learning &amp; Generative AI Bootcamp (2026)</li>
+          <li>UCL Economics &amp; Mathematics Foundation, A* (2022)</li>
+        </ul>
+      </details>
+    </section>
   </div>
-</section>
 
-<!-- ============ FEATURED BAND: latest essay + funded research ============ -->
-<section id="research" class="s research-feature">
-  <div class="wrap">
-    <div class="feature-row">
-      <div class="fcard fcard--essay">
-        <a class="fcard-link" href="projects/model-as-judge.html" target="_blank" rel="noopener">
-          <div class="fcard-head">
-            <span class="feature-tag"><span class="dot"></span>Latest blog</span>
-            <span class="fcard-meta"><span>2026</span><span class="type">Essay</span></span>
-          </div>
-          <div class="fcard-body">
-            <div class="fcard-text">
-              <h2 class="fcard-title">When the Judge Is a Language Model</h2>
-              <p class="fcard-desc">What the published research says about language models that screen applications, why the safeguards in use do not remove the documented failures, and where the same instrument is heading next.</p>
-            </div>
-          </div>
-          <div class="fcard-foot">
-            <span class="fcard-cta">Read the essay <span class="arrow">&rarr;</span></span>
-            <span class="fcard-note">Interactive &middot; ~55 min read</span>
-          </div>
-        </a>
-      </div>
-
-      <div class="fcard fcard--essay">
-        <a class="fcard-link" href="projects/leaderboards.html" target="_blank" rel="noopener">
-          <div class="fcard-head">
-            <span class="feature-tag"><span class="dot"></span>Blog</span>
-            <span class="fcard-meta"><span>2026</span><span class="type">Essay</span></span>
-          </div>
-          <div class="fcard-body">
-            <div class="fcard-text">
-              <h2 class="fcard-title">What the Leaderboards Are Actually Measuring</h2>
-              <p class="fcard-desc">A critique of the public evaluation metrics for frontier AI models, using the launch week of Claude Fable 5.1 and GPT-6 Astra as the running case.</p>
-            </div>
-          </div>
-          <div class="fcard-foot">
-            <span class="fcard-cta">Read the essay <span class="arrow">&rarr;</span></span>
-            <span class="fcard-note">Also as a podcast &middot; 22 or 53 min</span>
-          </div>
-        </a>
-      </div>
-
-      <div class="fcard fcard--research">
-        <a class="fcard-link" href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">
-          <div class="fcard-head">
-            <span class="feature-tag live"><span class="dot"></span>Funded AI-safety research</span>
-            <span class="fcard-meta"><span>Ongoing</span><span class="type">BlueDot Impact Rapid Grant</span></span>
-          </div>
-          <div class="fcard-body">
-            <div class="fcard-text">
-              <h2 class="fcard-title">Does a language model's chain-of-thought <span class="u">actually cause</span> its answer?</h2>
-              <p class="fcard-desc">A Bayesian causal-mediation test of whether an LLM's stated reasoning drives its answer or is post-hoc, with calibrated uncertainty for scalable oversight.</p>
-            </div>
-            <div class="fcard-figure">
-              <svg viewBox="0 0 300 122" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Causal mediation diagram: the prompt X influences the answer Y through the chain-of-thought mediator M, with a faint direct path from X to Y that bypasses it">
-                <defs>
-                  <marker id="fm-acc" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#c8421f"/></marker>
-                  <marker id="fm-mut" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#968d77"/></marker>
-                </defs>
-                <path d="M44 92 Q150 120 256 92" fill="none" stroke="#968d77" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#fm-mut)"/>
-                <path d="M46.8 77.2 L127.4 48.1" fill="none" stroke="#c8421f" stroke-width="2.4" marker-end="url(#fm-acc)"/>
-                <path d="M172.6 48.1 L253.2 77.2" fill="none" stroke="#c8421f" stroke-width="2.4" marker-end="url(#fm-acc)"/>
-                <circle cx="28" cy="84" r="18" fill="#f4efe6" stroke="#15110b" stroke-width="1.6"/>
-                <circle cx="150" cy="40" r="20" fill="#c8421f"/>
-                <circle cx="272" cy="84" r="18" fill="#f4efe6" stroke="#15110b" stroke-width="1.6"/>
-                <text x="28" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">X</text>
-                <text x="150" y="46.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#fff">M</text>
-                <text x="272" y="90" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="17" fill="#15110b">Y</text>
-                <text x="28" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#6b6452">PROMPT</text>
-                <text x="150" y="12" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#6b6452">CoT</text>
-                <text x="272" y="118" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#6b6452">ANSWER</text>
-              </svg>
-            </div>
-          </div>
-          <div class="fcard-foot">
-            <span class="fcard-cta">Explore the research <span class="arrow">&rarr;</span></span>
-          </div>
-        </a>
-        <a class="feature-grant" href="https://app.grantmaking.ai/projects/efb4131f-820a-41ed-a4a7-88e7ec14c98d" target="_blank" rel="noopener">Ongoing fundraising &#8599;</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SELECTED DISTINCTIONS (replaces stats grid) ============ -->
-<section id="awards" class="s dark awards-section">
-  <div class="wrap">
-    <h2 class="display display-l section-title-tight">Selected <span class="italic">distinctions.</span></h2>
-
-    <div class="awards">
-      <div class="award">
-        <div class="ord">01</div>
-        <h4><span class="gold-1st">1st place</span> in 4 research competitions in 2026</h4>
-        <p>Knowledge base completion from LLMs (<a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">AKBC Shared Task</a> @ EMNLP 2026), trust assessment over patient health records (<a href="projects/medlongtrust.html" target="_blank" rel="noopener">UbiComp 2026</a>), Arabic readability (<a href="projects/barec.html" target="_blank" rel="noopener">BAREC</a> @ EMNLP 2026, 2 tracks) and skill-to-job ranking (<a href="projects/workrb-skill-ranking.html" target="_blank" rel="noopener">RecSys-HR 2026</a>), each with a system paper.</p>
-      </div>
-      <div class="award">
-        <div class="ord">02</div>
-        <div class="award-head">
-          <h4><span class="bluedot-wm">BlueDot Impact</span> Rapid Grant</h4>
-          <div class="award-logos"><span class="chip"><img src="assets/logos/bluedot.png" alt="BlueDot Impact" width="22" height="22"></span></div>
-        </div>
-        <p>Awarded a <a href="https://bluedot.org/programs/rapid-grants" target="_blank" rel="noopener">BlueDot Impact Rapid Grant</a> (Jun&nbsp;'26) to fund <a href="https://thylinao1.github.io/bayes-cot-faithfulness/site/" target="_blank" rel="noopener">Bayesian Causal Faithfulness for LLM Chain-of-Thought</a>: calibrated uncertainty for whether a model's reasoning is faithful or post-hoc.</p>
-      </div>
-      <div class="award">
-        <div class="ord">03</div>
-        <h4>4 papers @ EMNLP 2026</h4>
-        <p><a href="projects/wmt26-qebreak.html" target="_blank" rel="noopener">QEbreak</a> (WMT): reference-free metrics under-penalize omissions. <a href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">Coverage Is Not Knowledge</a> (AKBC): closed-book scores are knowledge bound, not selection bound. <a href="projects/barec.html" target="_blank" rel="noopener">Ensembling at the Noise Floor</a> (BAREC): late gains sit inside the noise. <a href="projects/assets/childsafeads-paper.pdf" target="_blank" rel="noopener">ChildSafeAds</a> (NLLP): the product-page crawl helps product identification but not, measurably, compliance.</p>
-      </div>
-      <div class="award">
-        <div class="ord">04</div>
-        <h4><span class="google-wm"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></span> Cloud Rapid Agent Hackathon · 1st Place <span style="color:#d8b34a">(Gold)</span></h4>
-        <p>1st place ($5k prize), 15,000 teams, for <a href="https://devpost.com/software/autosre-the-autonomous-on-call-engineer" target="_blank" rel="noopener">AutoSRE</a>, an autonomous on-call engineer that triages and resolves production incidents (Jul&nbsp;'26).</p>
-      </div>
-      <div class="award">
-        <div class="ord">05</div>
-        <h4>National Mathematics Olympiad Winner</h4>
-        <p>Winner of the Russian National Mathematics Olympiad (Moscow Institute of Physics &amp; Technology), top 0.015% nationally.</p>
-      </div>
-      <div class="award">
-        <div class="ord">06</div>
-        <div class="award-head tight">
-          <h4>First-Class Honours</h4>
-          <div class="award-logos">
-            <span class="chip"><img src="assets/logos/bayes.png" alt="Bayes Business School" width="22" height="22"></span>
-            <span class="chip"><img src="assets/logos/nus.png" alt="National University of Singapore" width="22" height="22"></span>
-            <span class="chip wide"><img src="assets/logos/esade.png" alt="ESADE"></span>
-            <span class="chip"><img src="assets/logos/bupt.png" alt="BUPT" width="22" height="22"></span>
-          </div>
-        </div>
-        <p>First-Class Honours from City, University of London, top of cohort in Quantitative Methods &amp; Analytics, AI &amp; Big Data and the Capstone Project. Full scholarships: NUS and ESADE exchanges and the BUPT Agentic AI Bootcamp (2026).</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ RECENT RESULTS (dated ledger) ============ -->
-<section id="results" class="s">
-  <div class="wrap">
-    <h2 class="display display-l section-title-tight">Other recent <span class="italic">results.</span></h2>
-
-    <div class="ledger">
-
-      <div class="led-head">
-        <div class="led-date"></div>
-        <div class="lh-label">Challenge</div>
-        <div class="led-side">
-          <span class="lh-label lh-result">Result</span>
-          <span class="lh-label lh-solutions">Solutions</span>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug to Sep 2026</div>
-        <div class="led-main">
-          <div class="led-title">AKBC 2026 Shared Task @ EMNLP · Knowledge Base Construction from Language Models</div>
-          <div class="led-note">1st place, 0.7060 macro F1 on the official test set. A 31B base model in completion mode, no training, no retrieval; the winning paper corrects how the field measures selection headroom. To appear at the AKBC workshop, EMNLP 2026 (Budapest). Selected as a featured paper.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <a class="res-badge win glow" href="projects/akbc-lmkbc.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">UbiComp 2026 · Trustworthy Agentic AI Challenge</div>
-          <div class="led-note">1st place in the workshop challenge on trustworthy tool-using LLM agents. Paper accepted at the TCSAUC workshop, UbiComp/ISWC 2026; presenting in person in Shanghai on 12 October 2026, supported by a SIGMOBILE student travel grant.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <a class="solution-btn" href="projects/medlongtrust.html" target="_blank" rel="noopener" aria-label="Read the MedLongTrust-EHR solution write-up">solution
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">May to Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">RecSys-HR 2026 WorkRB Challenge &middot; Skill Extraction at Taxonomy Scale</div>
-          <div class="led-note">1st place. Given one line of a job advert, name the skills it asks for by ranking all 13,891 skills in the EU's official catalogue, scored on how well the top of that ranking matches expert annotations. Built for TechWolf and hosted at the RecSys 2026 HR workshop.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <a class="res-badge win glow" href="projects/workrb-skill-ranking.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jul to Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">BAREC Shared Task · Sentence-level Readability Assessment</div>
-          <div class="led-note">1st place, Strict &amp; Open tracks (85.3 QWK on the blind test). System paper accepted; to appear at the BAREC Shared Task, ArabicNLP 2026 @ EMNLP 2026 (Budapest).</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <a class="solution-btn" href="projects/barec.html" target="_blank" rel="noopener" aria-label="Read the BAREC solution write-up">solution
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">CAR-Bench Challenge @ IJCAI-ECAI 2026 · Reliability of Tool-Using LLM Agents</div>
-          <div class="led-note">2nd place, Track 1 (Open). In-car assistant agents judged on consistency and limit-awareness under ambiguous requests, domain policies and unavailable tools. Technical report published by the organizers.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge silver">2nd Place</span>
-          <a class="solution-btn" href="https://car-bench.github.io/car-bench/reports/track_1/team-28.pdf" target="_blank" rel="noopener" aria-label="Read the CAR-Bench technical report published by the organizers">report
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">WMT26 · Automated Translation Quality Evaluation · Challenge Sets</div>
-          <div class="led-note">QEbreak: a pre-registered challenge set (2,886 segments, 10 language directions) accepted and run by the organizers over the task's metric submissions. System paper accepted; to appear as a poster at WMT26, EMNLP 2026 (Budapest).</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Accepted</span>
-          <a class="res-badge win glow" href="projects/wmt26-qebreak.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">ChildSafeAds 2026 Shared Task @ NLLP &middot; Advertising Compliance in Child-Facing YouTube Videos</div>
-          <div class="led-note">A six-member ensemble that labels sponsored segments in videos likely to reach children by offer type, product category and advertising-law concern (0.6537 mean macro F1 on the test set), with an ablation of what each level of data access adds. System paper accepted; to appear at the NLLP workshop, EMNLP 2026.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Accepted</span>
-          <a class="solution-btn" href="projects/assets/childsafeads-paper.pdf" target="_blank" rel="noopener" aria-label="Read the ChildSafeAds 2026 system paper">paper
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jun to Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">Beijing Agentic AI Bootcamp · Final Competition</div>
-          <div class="led-note">1st place in the final AI Agent Competition.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <button type="button" class="solution-btn lightbox-open" data-img="assets/beijing-certificate.jpg" data-title="Beijing Agentic AI Bootcamp" data-cap="TruFar AI Agent Development Bootcamp · First Prize · project: anxAIety">certificate
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">ARC White-Box Estimation Challenge &middot; Estimating a Random Network</div>
-          <div class="led-note">Predicting the expected activations of a random 32-layer ReLU MLP under a compute budget 15,000x smaller than the one that produced the answer key. Quasi-Monte Carlo sampler on 6 scrambled Sobol nets. Top 7 on the public leaderboard.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Top 7</span>
-          <a class="res-badge win glow" href="projects/white-box-estimation.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jul to Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">AlphaNova Quant Competition 5 · Alpha-Signal Research</div>
-          <div class="led-note">Ranked 9th of 873 quants; 3 of 10 submitted signals accepted into the platform's uncorrelated quality set. Live evaluation runs to Oct 2026.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">9th of 873</span>
-          <a class="solution-btn" href="https://www.alphanova.tech/competition/competition-5" target="_blank" rel="noopener" aria-label="Open the AlphaNova Quant Competition 5 page">competition
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Sep 2026</div>
-        <div class="led-main">
-          <div class="led-title">Latent Probe Challenge &middot; Toxicity Detection</div>
-          <div class="led-note">1st place, 95.6% accuracy on the hidden test set. A probe on Gemma 2 2B hidden states that flags harmful requests sent to an LLM; no training data was provided.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <a class="solution-btn" href="https://www.codabench.org/competitions/17670/" target="_blank" rel="noopener" aria-label="Open the Latent Probe Toxicity Detection competition page">competition
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Sep 2026</div>
-        <div class="led-main">
-          <div class="led-title">Latent Probe Challenge &middot; Mental Health Sentiment Classification</div>
-          <div class="led-note">1st place, 93.0% accuracy on the hidden test set. A linear probe on Gemma 2 2B hidden states that separates distressed from normal text; no training data was provided.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge gold">1st Place</span>
-          <a class="solution-btn" href="https://www.codabench.org/competitions/17669/" target="_blank" rel="noopener" aria-label="Open the Latent Probe Mental Health Sentiment Classification competition page">competition
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-break" aria-hidden="true"></div>
-
-
-      <div class="led-row">
-        <div class="led-date">2026</div>
-        <div class="led-main">
-          <div class="led-title">Jane Street Quantitative-Reasoning Puzzle</div>
-          <div class="led-note">Feb, Jun and Jul 2026.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Solved</span>
-          <span class="res-badge win glow">Correct solution</span>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">Wincent DragonByte 2026</div>
-          <div class="led-note">1st Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-quals.png" data-title="Wincent DragonByte 2026" data-cap="Qualification Round 2026 · results are final">Top 5</button>, &nbsp;2nd Quals: <button type="button" class="lb-link lightbox-open" data-img="assets/dragonbyte-online.png" data-title="Wincent DragonByte 2026" data-cap="Online Round 2026 · 2nd, fastest solution time">Top 2</button>.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Finalist</span>
-          <a class="solution-btn" href="https://www.wincentdragonbyte.com/scoreboard/qual2026" target="_blank" rel="noopener">quals
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">BlueDot Impact's Technical AI Puzzle #1</div>
-          <div class="led-note">Reverse-engineering a feature the network hid from linear probes.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Solved</span>
-          <a class="res-badge win glow" href="projects/bluedot-fold.html" target="_blank" rel="noopener">Correct solution &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Jul 2026</div>
-        <div class="led-main">
-          <div class="led-title">IBM Research 'Ponder This'</div>
-          <div class="led-note">A combinatorial optimization puzzle.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Solved</span>
-          <a class="res-badge win glow" href="projects/ponder-superheroes.html" target="_blank" rel="noopener">Correct solution &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-break" aria-hidden="true"></div>
-
-
-      <div class="led-row">
-        <div class="led-date">Sep 2026</div>
-        <div class="led-main">
-          <div class="led-title">Apart x CeSIA AI Incident Response Sprint &middot; Egress receipts for AI evaluation sandboxes</div>
-          <div class="led-note">Track 1, Containment. One signed receipt per evaluation run that an outsider verifies offline, backed by an independent witness, a public anchor made during the run, and decoy tripwires. 0 of 110 false alarms on real traffic, 7 of 7 conformance clauses with revert proofs, and a browser verifier on the write-up page.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge ongoing">Submitted</span>
-          <a class="res-badge win glow" href="projects/egress-receipts.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">American Express AI Hackathon 2026 &middot; One Loop</div>
-          <div class="led-note">One Loop: 1 transaction backbone serving 3 growth heads, answering who to sign, what to offer, and where growth comes next. A measurement layer puts a randomized holdout behind every partner campaign so lift is certified rather than asserted, validated on a real holdout of 4,193,878 rows.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Submitted</span>
-          <a class="solution-btn" href="https://thylinao1.github.io/oneloop-site-k7q2/" target="_blank" rel="noopener" aria-label="Open the One Loop submission site">website
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">Apart Research Digital Minds Sprint &middot; Masked Distress</div>
-          <div class="led-note">A system prompt with no affect words cut Gemma-3-12B-IT's expressed distress by 83.5% of its natural separation while a probe read before generation did not fall. Preregistered, 6 held-out scenarios, divergence 1.05 [0.73, 1.39].</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Submitted</span>
-          <a class="res-badge win glow" href="projects/masked-distress.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-      <div class="led-row">
-        <div class="led-date">Aug 2026</div>
-        <div class="led-main">
-          <div class="led-title">BenchFlow 'Agent Skill Lift' &middot; Static Skills and Meta-Skills</div>
-          <div class="led-note">A seven-pack skill library and a skill generator for SkillsBench, built by reading task verifiers rather than task prompts. 14 development tasks, 3 conversions, 0 regressions, mean delta +0.3095, over 154 paired rollouts.</div>
-        </div>
-        <div class="led-side">
-          <span class="res-badge win-plain">Submitted</span>
-          <a class="res-badge win glow" href="projects/skill-lift.html" target="_blank" rel="noopener">Write-up &#8599;</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ============ INTERNSHIPS ============ -->
-<section id="internships" class="s">
-  <div class="wrap">
-    <div class="section-num">§ 01 · Experience</div>
-
-    <div class="exp-list">
-
-      <!-- SPAR Research Fellowship -->
-      <article class="exp project-card" data-project-id="spar" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">Sep 2026 to Present</span>
-          <span class="type research">Research Fellowship</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">SPAR · Research Fellow, Agent Attribution</h3>
+  <div>
+    <section id="s-exp" aria-labelledby="h-exp">
+      <h2 id="h-exp">Experience</h2>
+      <ul class="list rows">
+        <li class="card-li"><div class="project-card" data-project-id="spar" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">SPAR · Research Fellow, Agent Attribution</span><span class="meta">Sep 2026 to now</span>
+          <span class="desc">Black-box behavioral profiling for the intent inference, prompt extraction and model attribution of an autonomous agent. Prof. Yiming Li.</span>
           <p class="sub">Black-box behavioral profiling for the intent inference, prompt extraction and model attribution of an autonomous agent · Mentor: Dr Yiming Li, Nanyang Technological University (NTU) · Singapore</p>
           <div class="project-detail">
             <ul>
               <li>Recasting agent attribution as Bayesian inverse planning: posterior inference over candidate configurations (model, scaffold, prompt, memory), scored by the likelihood each assigns to the observed actions, with open-set rejection.</li>
               <li>Building a unified testbed (open-set, EER/DET, cross-environment) against published behavioural-fingerprinting classifiers (&gt;95% closed-set), then intervention studies and activation probes to isolate which component carries the signal, toward a paper.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">Bayesian Inverse Planning</span>
-              <span class="tag">Agent Attribution</span>
-              <span class="tag">Open-Set Recognition</span>
-              <span class="tag">EER / DET</span>
-              <span class="tag">Activation Probes</span>
-              <span class="tag">AI Safety</span>
-            </div>
           </div>
-        </div>
-      </article>
-
-      <!-- HONOR ML Research Intern -->
-      <article class="exp project-card" data-project-id="honor-nus" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">Aug 2026 to Present</span>
-          <span class="type research">Research Internship</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">HONOR · ML Research Intern</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="honor-nus" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">HONOR · ML Research Intern</span><span class="meta">Aug 2026 to now</span>
+          <span class="desc">Researching alternatives to attention in ranking models and how prediction heads should share the layers.</span>
           <p class="sub">Recommendation systems and mitigation of information bubbles · Advisor: Prof. James Pang, NUS Business Analytics Centre · Singapore</p>
           <div class="project-detail">
             <ul>
               <li>Research with HONOR on its millions-user phone feed: generative ranking over long user histories (HSTU, MTGR, HPGR) and multi-task ranking that fixes rare conversion targets (PLE vs ESMM, AITM), with UniMixer for GPU optimisation and parameter scaling.</li>
               <li>Designing the filter-bubble study: whether a less repetitive lock-screen feed raises retention and user satisfaction, and ultimately keeps readers out of an information bubble.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">Generative Ranking</span>
-              <span class="tag">HSTU / MTGR / HPGR</span>
-              <span class="tag">Multi-Task Ranking</span>
-              <span class="tag">PLE / ESMM / AITM</span>
-              <span class="tag">GPU Optimisation</span>
-              <span class="tag">Filter Bubbles</span>
-            </div>
           </div>
-        </div>
-      </article>
-
-      <!-- Orbuc Research -->
-      <article class="exp project-card" data-project-id="orbuc" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">Feb 2026 to Apr 2026</span>
-          <span class="type internship">Internship</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">Orbuc Research · Quantitative Research Intern</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="orbuc" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">Orbuc Research · Quantitative Research Intern</span><span class="meta">Jan to May 2026</span>
+          <span class="desc">Quantitative research and ML engineering for crypto statistical-arbitrage trading strategies.</span>
           <p class="sub">Quantitative research and ML engineering for crypto statistical-arbitrage trading strategies · London, UK</p>
           <div class="project-detail">
             <ul>
@@ -1317,29 +246,14 @@
               <li>Hardened the surrounding Python pipeline for reliability with SQL (SQLite) persistence of every event and classification, batched API calls, rate-limit handling, and an automated test suite.</li>
               <li>Engineered the statistical analysis behind the firm's March 2026 research report, characterising 9 historical anomaly periods and identifying 4 statistically significant shifts in correlation structure.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">Hidden Markov Models</span>
-              <span class="tag">Anomaly Detection</span>
-              <span class="tag">LLM Agent</span>
-              <span class="tag">RAG</span>
-              <span class="tag">SQLite</span>
-              <span class="tag">Time-Series</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="https://catalyst-agent-six.vercel.app" target="_blank" rel="noopener">Catalyst Agent Snapshot ↗</a>
+              <a href="https://catalyst-agent-six.vercel.app" target="_blank" rel="noopener">Catalyst Agent snapshot ↗</a>
             </div>
           </div>
-        </div>
-      </article>
-
-      <!-- TCM Group -->
-      <article class="exp project-card" data-project-id="tcm" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">Jan 2026 to Apr 2026</span>
-          <span class="type internship">Internship</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">The TCM Group · Evaluation &amp; Causal Inference Intern</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="tcm" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">The TCM Group · Evaluation &amp; Causal Inference Intern</span><span class="meta">Feb to Apr 2026</span>
+          <span class="desc">Led the evaluation and measurement workstreams (RCTs, LLM evals) for conflict resolution.</span>
           <p class="sub">Led the evaluation and measurement workstreams (RCTs, LLM evals) for conflict resolution · Bayes Business School Capstone, highest grade in cohort · London, UK</p>
           <div class="project-detail">
             <ul>
@@ -1348,41 +262,34 @@
               <li>Built the hypothesis-testing methodology for evaluation: a decision rule that picks the correct paired test by sample size and distribution (Wilcoxon signed-rank, paired t-test etc.), reports effect sizes with CIs, and tests against a meaningful-change threshold rather than zero.</li>
               <li>Built an automated evaluation harness that benchmarks the scorer against a hand-labelled gold dataset (0.90 Spearman correlation with human raters), then halved its scoring error with a cross-validated calibration that corrects the model's systematic bias.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">Causal Inference</span>
-              <span class="tag">RCT Design</span>
-              <span class="tag">Hypothesis Testing</span>
-              <span class="tag">LLM Rubric Scoring</span>
-              <span class="tag">LLM-as-Judge Eval</span>
-              <span class="tag">Calibration</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="https://tcm-gray.vercel.app" target="_blank" rel="noopener">Website + LLM Prototype ↗</a>
-              <a class="case-link repo-link" href="https://github.com/thylinao1/TCM" target="_blank" rel="noopener">GitHub repo ↗</a>
+              <a href="https://tcm-gray.vercel.app" target="_blank" rel="noopener">Website + LLM prototype ↗</a>
+              <a href="https://github.com/thylinao1/TCM" target="_blank" rel="noopener">GitHub repo ↗</a>
             </div>
           </div>
-        </div>
-      </article>
+        </div></li>
+      </ul>
+    </section>
 
-    </div>
-  </div>
-</section>
+    <section id="s-blogs" aria-labelledby="h-blogs">
+      <h2 id="h-blogs">Blogs</h2>
+      <ul class="list rows">
+        <li><a href="projects/model-as-judge.html" target="_blank" rel="noopener">When the Judge Is a Language Model</a><span class="meta">Sep 2026</span>
+          <span class="desc">State-of-the-art LLM-as-a-judge applications for screening and the problems with them.</span></li>
+        <li><a href="projects/leaderboards.html" target="_blank" rel="noopener">What the Leaderboards Are Actually Measuring</a><span class="meta">Sep 2026</span>
+          <span class="desc">A critique of the public evaluation metrics for frontier AI models, using the launch week of Claude Fable 5.1 and GPT-6 Astra as the case.</span></li>
+        <li><a href="projects/p-values.html" target="_blank" rel="noopener">One in Twenty</a><span class="meta">Jul 2026</span>
+          <span class="desc">Why the 0.05 significance threshold misleads.</span></li>
+        <li><a href="projects/hidden-markov-models.html" target="_blank" rel="noopener">Lamps in the Dark</a><span class="meta">Jun 2026</span>
+          <span class="desc">A geometric interpretation of hidden Markov models and the EM algorithm (incl. forward-backward &amp; Viterbi).</span></li>
+      </ul>
+    </section>
 
-<!-- ============ PROJECTS ============ -->
-<section id="projects" class="s alt">
-  <div class="wrap">
-    <div class="section-num">§ 02 · Projects</div>
-
-    <div class="exp-list">
-
-      <!-- Olist -->
-      <article class="exp project-card" data-project-id="olist" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">2026</span>
-          <span class="type project">Project</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">Olist Hierarchical Bayesian A/B Testing</h3>
+    <section id="s-projects" aria-labelledby="h-projects">
+      <h2 id="h-projects">Projects</h2>
+      <ul class="list rows">
+        <li class="card-li"><div class="project-card" data-project-id="olist" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">Olist Hierarchical Bayesian A/B Testing</span><span class="meta">2026</span>
           <p class="sub">Brazilian e-commerce panel · 97k orders · hierarchical Bayesian causal inference in PyMC 5</p>
           <div class="project-detail">
             <ul>
@@ -1391,29 +298,14 @@
               <li>Architected the analysis as a clean, importable Python package (ETL, feature builders, causal DAG, separate model factories per likelihood) with a DuckDB feature stack that rebuilds end-to-end in roughly five seconds.</li>
               <li>Validated the models with held-out cross-validation (PSIS-LOO), posterior-predictive checks, and prior-sensitivity sweeps. The headline result shifted just 0.0004 logit across three hyperprior families.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">PyMC 5</span>
-              <span class="tag">Hierarchical Bayes</span>
-              <span class="tag">Difference-in-Differences</span>
-              <span class="tag">DuckDB</span>
-              <span class="tag">PSIS-LOO</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="projects/olist.html">Read case study →</a>
-              <a class="case-link repo-link" href="https://github.com/thylinao1/Olist-Bayesian-AB-Testing/tree/main" target="_blank" rel="noopener">GitHub repo ↗</a>
+              <a href="projects/olist.html">Read case study →</a>
+              <a href="https://github.com/thylinao1/Olist-Bayesian-AB-Testing/tree/main" target="_blank" rel="noopener">GitHub repo ↗</a>
             </div>
           </div>
-        </div>
-      </article>
-
-      <!-- A/B-Test Experimentation Guardrail -->
-      <article class="exp project-card" data-project-id="ab-guardrail" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">2026</span>
-          <span class="type project">Project</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">A/B-Test Experimentation Guardrail</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="ab-guardrail" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">A/B-Test Experimentation Guardrail</span><span class="meta">2026</span>
           <p class="sub">Experiment-safety auditing tool · SRM detection &amp; causal inference · optional Claude tool-use agent</p>
           <div class="project-detail">
             <ul>
@@ -1423,29 +315,14 @@
               <li>Designed the default pipeline to route deterministically and call the LLM once, at the end, narrating a code-decided verdict as a plain-English summary; one model call per audit, the statistical core covered by a 36-case pytest suite in CI (Python 3.10 to 3.12).</li>
               <li>Engineered the tool as a production-shaped Python package (typed dataclasses, a custom exception hierarchy, an installable CLI, ruff-linted CI) with a data loader hardened against messy real-world exports; validating against the 14M-row Criteo dataset surfaced three production bugs, each fixed and locked down with a regression test.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">SRM Detection</span>
-              <span class="tag">Propensity Score Matching</span>
-              <span class="tag">Claude Tool-Use Agent</span>
-              <span class="tag">Criteo Uplift</span>
-              <span class="tag">pytest + CI</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="projects/abguardrail.html">Read case study →</a>
-              <a class="case-link repo-link" href="https://github.com/thylinao1/ab-guardrail" target="_blank" rel="noopener">GitHub repo ↗</a>
+              <a href="projects/abguardrail.html">Read case study →</a>
+              <a href="https://github.com/thylinao1/ab-guardrail" target="_blank" rel="noopener">GitHub repo ↗</a>
             </div>
           </div>
-        </div>
-      </article>
-
-      <!-- PowerCo -->
-      <article class="exp project-card" data-project-id="powerco" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">2025</span>
-          <span class="type project">Project</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">Cost-Sensitive Churn Pipeline</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="powerco" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">Cost-Sensitive Churn Pipeline</span><span class="meta">2025</span>
           <p class="sub">Energy-utility SME churn · 14,606 customers · cost-sensitive, decision-aware modelling</p>
           <div class="project-detail">
             <ul>
@@ -1455,29 +332,14 @@
               <li>Turned the churn score into a retention action list by running permutation feature importance on the frozen test pipeline, isolating profit-margin variables as the dominant drivers so the business knew which accounts to prioritise and why.</li>
               <li>Added a Random Survival Forest for time-to-churn (held-out concordance 0.71, vs 0.56 for the Cox model it replaced), validated it on a temporal holdout, and shipped the pipeline as a typed Python library with a 48-test CI suite.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">SMOTE</span>
-              <span class="tag">Cost-Sensitive Thresholding</span>
-              <span class="tag">Random Survival Forest</span>
-              <span class="tag">Permutation Importance</span>
-              <span class="tag">CI Suite</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="projects/powerco.html">Read case study →</a>
-              <a class="case-link repo-link" href="https://github.com/thylinao1/BCGX-Data-Scientist" target="_blank" rel="noopener">GitHub repo ↗</a>
+              <a href="projects/powerco.html">Read case study →</a>
+              <a href="https://github.com/thylinao1/BCGX-Data-Scientist" target="_blank" rel="noopener">GitHub repo ↗</a>
             </div>
           </div>
-        </div>
-      </article>
-
-      <!-- Rare-Event Prediction & RL -->
-      <article class="exp project-card" data-project-id="rare-event" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">2025</span>
-          <span class="type project">Project</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">Rare-Event Prediction &amp; Reinforcement Learning for Sequential Allocation</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="rare-event" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">Rare-Event Prediction &amp; RL for Sequential Allocation</span><span class="meta">2025</span>
           <p class="sub">Sovereign-default prediction · 34-year cross-country macro panel · 5-model benchmark + PPO from scratch</p>
           <div class="project-detail">
             <ul>
@@ -1487,29 +349,14 @@
               <li>Built a perturbation-based sensitivity harness that exposed a policy under-responsiveness in the trained agent, then implemented Welford running z-score normalisation over the 1,878-dimensional continuous state as the candidate fix.</li>
               <li>Packaged the work to production engineering standards: a typed src/ package, a 47-test pytest suite, and a GitHub Actions CI pipeline running a Python 3.10/3.11 test matrix and notebook validation.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">Rare-Event Prediction</span>
-              <span class="tag">Model Benchmark</span>
-              <span class="tag">Two-Tower NN</span>
-              <span class="tag">PPO + GAE</span>
-              <span class="tag">TensorFlow / Keras</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="projects/sovereign.html">Read case study →</a>
-              <a class="case-link repo-link" href="https://github.com/thylinao1/Sovereign-Risk-and-Portfolio-Allocation" target="_blank" rel="noopener">GitHub repo ↗</a>
+              <a href="projects/sovereign.html">Read case study →</a>
+              <a href="https://github.com/thylinao1/Sovereign-Risk-and-Portfolio-Allocation" target="_blank" rel="noopener">GitHub repo ↗</a>
             </div>
           </div>
-        </div>
-      </article>
-
-      <!-- JPMC / Credit Risk -->
-      <article class="exp project-card" data-project-id="jpmc" tabindex="0" role="button" aria-haspopup="dialog">
-        <div class="exp-meta">
-          <span class="date">2025</span>
-          <span class="type project">Project</span>
-        </div>
-        <div class="exp-body">
-          <h3 class="project-title">Credit Risk Classifier &amp; MLOps Pipeline</h3>
+        </div></li>
+        <li class="card-li"><div class="project-card" data-project-id="jpmc" tabindex="0" role="button" aria-haspopup="dialog">
+          <span class="project-title">Credit Risk Classifier &amp; MLOps Pipeline</span><span class="meta">2025</span>
           <p class="sub">Retail credit-risk modelling · probability-of-default under an asymmetric cost matrix · Q-learning</p>
           <div class="project-detail">
             <ul>
@@ -1518,367 +365,27 @@
               <li>Implemented tabular Q-learning for a finite-horizon inventory-optimisation MDP (deterministic seed, linear epsilon decay, illegal-action handling), and built the chronological 24/24-month evaluation that caught its in-sample edge as an overfit.</li>
               <li>Implemented covariate-shift mitigations (importance weighting, cohort-adaptive thresholding) and a diagnostic that identified the cohort failure as a base-rate problem rather than covariate shift, recommending a 45% break-even repricing instead of a model retune.</li>
             </ul>
-            <div class="tags">
-              <span class="tag">Probability of Default</span>
-              <span class="tag">Cost-Sensitive Classification</span>
-              <span class="tag">Q-Learning</span>
-              <span class="tag">Covariate Shift</span>
-              <span class="tag">pytest + CI</span>
-            </div>
             <div class="detail-actions">
-              <a class="case-link" href="projects/jpmc.html">Read case study →</a>
-              <a class="case-link repo-link" href="https://github.com/thylinao1/JPMC-Quantitative-Researcher" target="_blank" rel="noopener">GitHub repo ↗</a>
+              <a href="projects/jpmc.html">Read case study →</a>
+              <a href="https://github.com/thylinao1/JPMC-Quantitative-Researcher" target="_blank" rel="noopener">GitHub repo ↗</a>
             </div>
           </div>
-        </div>
-      </article>
-
-    </div>
+        </div></li>
+      </ul>
+    </section>
   </div>
-</section>
+</main>
 
-<!-- ============ BLOG ============ -->
-<section id="blog" class="s">
-  <div class="wrap">
-    <div class="section-num">§ 03 · Blog</div>
-
-    <div class="blog-list">
-
-      <!-- Language models as screeners: failures, safeguards, governance (published 16 Sep 2026) -->
-      <a class="blog-entry" href="projects/model-as-judge.html" target="_blank" rel="noopener">
-        <div class="exp-meta">
-          <span class="date">2026 · ~55 min read</span>
-          <span class="type essay">Essay</span>
-        </div>
-        <div class="blog-body">
-          <h3 class="blog-title">When the Judge Is a Language Model</h3>
-          <p class="sub">The evidence on automated screening, the safeguards in use, and the gap in governance</p>
-          <p class="blog-excerpt">
-            Language models now read applications and return a number. Thirteen published failures
-            of that number, fourteen safeguards that deployers and regulators rely on, the evidence
-            that none of them removes the failure it targets, the state of regulation in 2026, and
-            the other domains where the same instrument is arriving: admissions, credit, insurance,
-            public benefits, peer review and the courts.
-          </p>
-          <div class="tags">
-            <span class="tag">LLM-as-a-Judge</span>
-            <span class="tag">Hiring</span>
-            <span class="tag">AI Governance</span>
-            <span class="tag">Fairness</span>
-            <span class="tag">Interactive</span>
-          </div>
-          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
-        </div>
-      </a>
-
-      <!-- Critique of public frontier-model evaluation metrics (published 6 Sep 2026) -->
-      <a class="blog-entry" href="projects/leaderboards.html" target="_blank" rel="noopener">
-        <div class="exp-meta">
-          <span class="date">2026 · ~70 min read</span>
-          <span class="type essay">Essay</span>
-        </div>
-        <div class="blog-body">
-          <h3 class="blog-title">What the Leaderboards Are Actually Measuring</h3>
-          <p class="sub">A critique of the public evaluation metrics for frontier AI models</p>
-          <p class="blog-excerpt">
-            Arena rankings, benchmark scores and lab-reported numbers get read as measurements of
-            capability. This essay asks what each of them measures and under which conditions a score
-            says something about capability, using the launch week of Claude Fable 5.1 and GPT-6 Astra
-            as the running case, with the same checks applied to both labs.
-          </p>
-          <div class="tags">
-            <span class="tag">AI Evaluation</span>
-            <span class="tag">Benchmarks</span>
-            <span class="tag">Leaderboards</span>
-            <span class="tag">Goodhart's Law</span>
-            <span class="tag">Interactive</span>
-          </div>
-          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
-        </div>
-      </a>
-
-      <!-- One in Twenty / p-values -->
-      <a class="blog-entry" href="projects/p-values.html" target="_blank" rel="noopener">
-        <div class="exp-meta">
-          <span class="date">2026 · ~15 min read</span>
-          <span class="type essay">Essay</span>
-        </div>
-        <div class="blog-body">
-          <h3 class="blog-title">One in Twenty</h3>
-          <p class="sub">The most overhyped threshold in statistics</p>
-          <p class="blog-excerpt">
-            Like a lot of people, when I was first introduced to the 0.05 significance threshold, I
-            just took it for granted. Later, as I learned more statistics, I realized how confusing
-            and misleading that hard line actually is. This essay explores why: a courtroom retelling
-            where the p-value is the evidence, 'significant' is the verdict, and 0.05 is a
-            fixed sentence nobody ever justified, with interactive figures for the tail area, the
-            false-discovery rate, the dance of the p-values, and the Type I/II tradeoff.
-          </p>
-          <div class="tags">
-            <span class="tag">p-values</span>
-            <span class="tag">Significance Testing</span>
-            <span class="tag">False Discovery Rate</span>
-            <span class="tag">Statistical Inference</span>
-            <span class="tag">Interactive</span>
-          </div>
-          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
-        </div>
-      </a>
-
-      <!-- Hidden Markov Models / EM -->
-      <a class="blog-entry" href="https://thylinao1.github.io/projects/hidden-markov-models.html" target="_blank" rel="noopener">
-        <div class="exp-meta">
-          <span class="date">2026 · ~16 min read</span>
-          <span class="type essay">Essay</span>
-        </div>
-        <div class="blog-body">
-          <h3 class="blog-title">Lamps in the Dark</h3>
-          <p class="sub">A geometric reading of Hidden Markov Models &amp; the EM algorithm</p>
-          <p class="blog-excerpt">
-            When I was learning hidden Markov models, I couldn't find an explanation that
-            really showed how they work. This piece builds a geometric, intuitive picture of
-            hidden Markov models, along with the EM steps, forward-backward, Baum-Welch, and the
-            Viterbi algorithm, and even how they link to PCA. Interactive diagrams and animations
-            throughout aim to make the picture stick in your head.
-          </p>
-          <div class="tags">
-            <span class="tag">Hidden Markov Models</span>
-            <span class="tag">EM Algorithm</span>
-            <span class="tag">Baum-Welch</span>
-            <span class="tag">Forward-Backward</span>
-            <span class="tag">Viterbi</span>
-          </div>
-          <span class="blog-read">Read the essay <span class="arrow">&rarr;</span></span>
-        </div>
-      </a>
-
-      <!-- Ongoing: LLM evaluator translation failures (extends WMT26 / EMNLP 2026 paper) -->
-      <div class="blog-entry is-forthcoming">
-        <div class="exp-meta">
-          <span class="date">2026 · ongoing</span>
-          <span class="type forthcoming">Ongoing</span>
-        </div>
-        <div class="blog-body">
-          <h3 class="blog-title">Where State-of-the-Art LLM Evaluators Fail at Translation</h3>
-          <p class="sub">Extending the WMT26 QEbreak findings (EMNLP 2026) beyond the challenge set</p>
-          <p class="blog-excerpt">
-            The QEbreak paper measured one thing: learned quality metrics punish added text far
-            more than missing text. This write-up asks the wider question of what else the current
-            LLM-based evaluators get wrong about translation quality, and why the same blind spots
-            keep showing up across systems.
-          </p>
-          <div class="tags">
-            <span class="tag">Machine Translation</span>
-            <span class="tag">LLM-as-a-Judge</span>
-            <span class="tag">Quality Estimation</span>
-            <span class="tag">WMT26</span>
-          </div>
-          <span class="blog-forthcoming-note"><span class="dot"></span>Ongoing</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ============ EDUCATION ============ -->
-<section id="education" class="s alt">
-  <div class="wrap">
-    <div class="section-num">§ 04 · Education</div>
-
-    <div class="edu-list">
-      <div class="edu">
-        <div class="edu-meta">Jul 2026 to 2027 (Expected)<br><span style="opacity:.7">Singapore</span></div>
-        <div class="edu-body">
-          <h3>National University of Singapore (NUS)</h3>
-          <p class="role">MSc in NUS School of Computing, specialising in Statistics</p>
-
-          <div class="edu-ra">
-            <p class="edu-ra-head"><strong>Honor-NUS Research Project, Recommender Systems</strong><em class="edu-date">Aug 2026 to Present</em></p>
-            <p class="edu-ra-role">Research Assistant · Advisor: Prof. James Pang, NUS Business Analytics Centre</p>
-            <ul class="edu-ra-desc">
-              <li>Research with HONOR on its millions-user phone feed: generative ranking over long user histories (HSTU, MTGR, HPGR) and multi-task ranking that fixes rare conversion targets (PLE vs ESMM, AITM), with UniMixer for GPU optimisation and parameter scaling.</li>
-              <li>Designing the filter-bubble study: whether a less repetitive lock-screen feed raises retention and user satisfaction, and ultimately keeps readers out of an information bubble.</li>
-            </ul>
-          </div>
-
-          <p style="margin-top:14px"><strong style="color:var(--ink)">Bootcamps:</strong></p>
-          <ul class="exchanges bc-dated">
-            <li><span class="bc-main"><strong>Technical Alignment Research Accelerator (TARA)</strong>, Singapore Cohort, Round 2 2026 · part-time technical AI-safety programme.</span><em class="edu-date">Sep to Dec 2026</em></li>
-            <li><span class="bc-main"><strong>Beijing University of Posts &amp; Telecommunications (BUPT)</strong>, Agentic AI Bootcamp · Fully-Funded Scholarship · 1st Place, Final Project.</span><em class="edu-date">Jun to Jul 2026</em></li>
-            <li><span class="bc-main"><strong>University of Oxford</strong> · ML Representation Learning &amp; Generative AI Bootcamp. Standout lectures from Tom Rainforth (intelligent data gathering) and Ricardo Silva (causal discovery and the extrapolation of causal effects).</span><em class="edu-date">2026</em></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="edu">
-        <div class="edu-meta">Sep 2022 to Jun 2026<br><span style="opacity:.7">London, UK</span></div>
-        <div class="edu-body">
-          <h3>Bayes Business School (City, University of London)</h3>
-          <p class="role">BSc International Business (Hons), Specialised in AI and Quantitative Methods; First-Class Honours (Highest Distinction)</p>
-          <p>Top of cohort in <em>Quantitative Methods &amp; Analytics</em>, <em>AI &amp; Big Data</em>, <em>Capstone Project</em>, and ESADE <em>Mergers &amp; Acquisitions</em>.</p>
-          <ul class="exchanges bc-dated">
-            <li><span class="bc-main"><strong>NUS exchange</strong>, Singapore · Full Scholarship</span><em class="edu-date">Jan to Jun 2025</em></li>
-            <li><span class="bc-main"><strong>ESADE Business School exchange</strong>, Barcelona, Spain · Full Scholarship</span><em class="edu-date">Aug to Dec 2024</em></li>
-            <li><span class="bc-main"><strong>UT Austin exchange</strong>, Austin, USA</span><em class="edu-date">Aug to Dec 2023</em></li>
-          </ul>
-          <p style="margin-top:14px"><strong style="color:var(--ink)">Extracurricular Quantitative Coursework:</strong> Stanford CS229 Machine Learning, Stanford CS230 Deep Learning, MIT RES.6-012 Introduction to Probability, Stanford EE178 Probabilistic Systems Analysis, Imperial College Mathematics for Machine Learning, IBM Applied Data Science Specialization (Databases &amp; SQL, Visualization, Python), Statistical Rethinking 2026 (R. McElreath, Max Planck).</p>
-        </div>
-      </div>
-
-      <div class="edu">
-        <div class="edu-meta">Sep 2021 to Jun 2022<br><span style="opacity:.7">London, UK</span></div>
-        <div class="edu-body">
-          <h3>UCL Economics &amp; Mathematics Foundation Programme</h3>
-          <p class="role">Final grade A* · Mathematics 87%, Highest Distinction</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SKILLS (moved to bottom) ============ -->
-<section id="skills" class="s">
-  <div class="wrap">
-    <div class="section-num">§ 05 · Skills</div>
-
-    <div class="skills-grid">
-      <div class="skill-group">
-        <h4>Statistical Methods</h4>
-        <p>
-          Causal Inference (DiD, RCT design, causal DAGs, wait-list controlled trials, synthetic controls, propensity-score matching, Rosenbaum sensitivity bounds, uplift modelling),
-          A/B Testing &amp; Experimentation (variant design, power analysis, SRM detection, CUPED variance reduction, multiple-testing correction),
-          Bayesian Statistics (PyMC 5, NUTS, hierarchical models, posterior-predictive checks, PSIS-LOO),
-          Survival Analysis (Cox PH, Kaplan-Meier, Random Survival Forest),
-          Hypothesis Testing (t-test, Wilcoxon signed-rank, Mann-Whitney U, chi-square, Fisher z),
-          Stochastic Processes &amp; Sequential Modeling (Hidden Markov Models, time-series, state-space methods),
-          SHAP, permutation importance, Brier, isotonic and LOOCV calibration,
-          bootstrap &amp; Hodges-Lehmann confidence intervals, Effect-size estimation (Cohen's d, rank-biserial).
-        </p>
-      </div>
-
-      <div class="skill-group">
-        <h4>Machine Learning, Deep Learning &amp; GenAI</h4>
-        <p>
-          Supervised/Unsupervised Learning, Gradient Boosting (XGBoost, LightGBM),
-          Anomaly &amp; Rare-Event Detection,
-          Neural Networks (CNNs, RNNs, LSTMs, Transformers, Two-Tower),
-          NLP, Computer Vision, Recommendation Systems (implicit feedback, negative sampling, embeddings &amp; vector search),
-          Reinforcement Learning (Q-learning, DQN, PPO + GAE, Actor-Critic),
-          Probabilistic Graphical Models, LLMs, Prompt Engineering, RAG,
-          OpenAI API, Anthropic Claude tool-use, Zod structured outputs, LLM-as-judge evaluation,
-          LLM Fine-Tuning, RLHF, tool-using LLM agents (LangChain, LlamaIndex), Generative AI Applications.
-        </p>
-      </div>
-
-      <div class="skill-group">
-        <h4>Programming &amp; Databases</h4>
-        <p>
-          Python (NumPy, pandas, scikit-learn, TensorFlow, PyTorch, statsmodels, SciPy, XGBoost, LightGBM, PyMC),
-          TypeScript, C++, R, SQL, BigQuery, Spark/PySpark, DuckDB,
-          React 19, Vite, Vercel Serverless, Supabase (Postgres).
-        </p>
-      </div>
-
-      <div class="skill-group">
-        <h4>MLOps, Cloud &amp; Visualisation</h4>
-        <p>
-          Google Cloud Platform (BigQuery, Vertex AI), Docker, Kubernetes,
-          MLOps (CI/CD, Model Deployment, Feature Pipelines, ETL/Airflow),
-          GitHub Actions, pytest, Vitest, ruff, Git/GitHub, Jupyter, LaTeX,
-          Tableau, Power BI, matplotlib, seaborn, Plotly.
-        </p>
-      </div>
-
-      <div class="skill-group">
-        <h4>Spoken Languages</h4>
-        <p>
-          English (Fluent), Russian (Native),
-          Ukrainian (Native), Belarusian (Fluent),
-          Spanish (Professional Working; advanced certification, 2026).
-        </p>
-      </div>
-
-      <div class="skill-group">
-        <h4>Extracurricular Coursework</h4>
-        <p>
-          Stanford CS229 Machine Learning, Stanford CS230 Deep Learning,
-          MIT RES.6-012 Introduction to Probability, Stanford EE178 Probabilistic Systems Analysis,
-          Imperial College Mathematics for Machine Learning, IBM Applied Data Science Specialization,
-          Statistical Rethinking 2026 (R. McElreath, Max Planck).
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ FOOTER ============ -->
-<footer>
-  <div class="wrap">
-    <span class="name">Maksim Silchenko</span>
-    <div class="contact-links">
-      <a href="mailto:mthylinao@gmail.com">Email</a>
-      <a href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </div>
-</footer>
-
-<!-- ============ MOBILE NAV DRAWER ============ -->
-<div id="nav-backdrop" class="drawer-backdrop"></div>
-<aside id="nav-drawer" class="nav-drawer" aria-label="Site menu" aria-hidden="true">
-  <button type="button" class="drawer-close" aria-label="Close menu">&times;</button>
-  <div class="drawer-links">
-    <a href="#awards">Distinctions</a>
-    <a href="#results">Results</a>
-    <a href="#internships">Experience</a>
-    <a href="#projects">Projects</a>
-    <a href="#blog">Blog</a>
-    <a href="#education">Education</a>
-    <a href="#skills">Skills</a>
-  </div>
-  <div class="drawer-sep"></div>
-  <div class="drawer-links">
-    <a href="https://github.com/thylinao1" target="_blank" rel="noopener">GitHub ↗</a>
-    <a href="https://www.linkedin.com/in/maksim-s-278971257/" target="_blank" rel="noopener">LinkedIn ↗</a>
-    <a href="mailto:mthylinao@gmail.com">Email ↗</a>
-  </div>
-</aside>
-
-<!-- ============ CV MODAL ============ -->
-<div id="cv-modal" class="modal-overlay" hidden>
-  <div class="modal-card cv-card" role="dialog" aria-modal="true" aria-label="Choose a CV">
-    <button type="button" class="modal-close" aria-label="Close">&times;</button>
-    <div class="cv-card-body">
-      <h3 class="cv-card-title">Choose the CV variant that fits your role</h3>
-      <div class="cv-choices">
-        <a class="cv-choice" href="cv-applied-ai-ds.pdf" target="_blank" rel="noopener">
-          <span class="cv-choice-name">Applied AI &amp; Data Science ↗</span>
-          <span class="cv-choice-desc">Causal inference, experimentation, and statistical machine learning.</span>
-        </a>
-        <a class="cv-choice" href="cv-agentic-genai.pdf" target="_blank" rel="noopener">
-          <span class="cv-choice-name">LLM Agents &amp; GenAI Systems ↗</span>
-          <span class="cv-choice-desc">LLM agents, RAG, tool-use, and generative-AI applications.</span>
-        </a>
-        <a class="cv-choice" href="cv-mlops-rl.pdf" target="_blank" rel="noopener">
-          <span class="cv-choice-name">MLOps &amp; Production Engineering ↗</span>
-          <span class="cv-choice-desc">Reinforcement learning, deployment pipelines, and CI/CD.</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ PROJECT MODAL ============ -->
+<!-- project / experience details -->
 <div id="project-modal" class="modal-overlay" hidden>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-label="Project details">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="Details">
     <button type="button" class="modal-close" aria-label="Close">&times;</button>
-    <div class="modal-scroll exp-body"></div>
+    <div class="modal-scroll"></div>
     <div class="modal-foot" hidden></div>
   </div>
 </div>
 
-<!-- ============ IMAGE LIGHTBOX (generic) ============ -->
+<!-- image lightbox -->
 <div id="lightbox" class="modal-overlay" hidden>
   <div class="lightbox-card" role="dialog" aria-modal="true" aria-label="Image viewer">
     <button type="button" class="modal-close" aria-label="Close">&times;</button>
@@ -1896,49 +403,66 @@
 <script>
 (function () {
   document.body.classList.add('js-on');
-  var modal = document.getElementById('project-modal');
-  if (!modal) return;
-  var scroll = modal.querySelector('.modal-scroll');
-  var foot = modal.querySelector('.modal-foot');
-  var closeBtn = modal.querySelector('.modal-close');
-  var lastFocus = null;
 
-  function openModal(card) {
-    lastFocus = card;
-    var title = card.querySelector('.project-title');
-    var sub = card.querySelector('.sub');
-    var detail = card.querySelector('.project-detail');
-    scroll.innerHTML = '';
-    foot.innerHTML = '';
-    if (title) scroll.appendChild(title.cloneNode(true));
-    if (sub) scroll.appendChild(sub.cloneNode(true));
-    var actions = null;
-    if (detail) {
-      var kids = detail.children;
-      for (var i = 0; i < kids.length; i++) {
-        var node = kids[i];
-        if (node.classList && node.classList.contains('detail-actions')) actions = node;
-        else scroll.appendChild(node.cloneNode(true));
-      }
+  // generic open/close for an overlay; returns the open function
+  function overlay(el, onClose) {
+    var closeBtn = el.querySelector('.modal-close');
+    var last = null;
+    function close() {
+      el.hidden = true;
+      document.body.style.overflow = '';
+      if (onClose) onClose();
+      if (last) last.focus();
     }
-    if (actions) { foot.appendChild(actions.cloneNode(true)); foot.hidden = false; }
-    else { foot.hidden = true; }
-    modal.hidden = false;
-    document.body.style.overflow = 'hidden';
-    scroll.scrollTop = 0;
-    closeBtn.focus();
-    var id = card.getAttribute('data-project-id');
-    if (id) history.replaceState(null, '', '#' + id);
+    closeBtn.addEventListener('click', close);
+    el.addEventListener('click', function (e) { if (e.target === el) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) close(); });
+    return function open(trigger) {
+      last = trigger;
+      el.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    };
   }
 
-  function closeModal() {
-    modal.hidden = true;
-    document.body.style.overflow = '';
+  // experience and project rows open a details dialog
+  var modal = document.getElementById('project-modal');
+  var scroll = modal.querySelector('.modal-scroll');
+  var foot = modal.querySelector('.modal-foot');
+  var openProjectOverlay = overlay(modal, function () {
     var h = (location.hash || '').replace('#', '');
     if (h && document.querySelector('[data-project-id="' + h + '"]')) {
       history.replaceState(null, '', location.pathname + location.search);
     }
-    if (lastFocus) lastFocus.focus();
+  });
+
+  function openModal(card) {
+    var title = card.querySelector('.project-title');
+    var sub = card.querySelector('.sub');
+    var detail = card.querySelector('.project-detail');
+    var actions = null;
+    scroll.innerHTML = '';
+    foot.innerHTML = '';
+    if (title) {
+      var heading = document.createElement('h3');
+      heading.className = 'project-title';
+      heading.textContent = title.textContent;
+      scroll.appendChild(heading);
+    }
+    if (sub) scroll.appendChild(sub.cloneNode(true));
+    if (detail) {
+      for (var i = 0; i < detail.children.length; i++) {
+        var node = detail.children[i];
+        if (node.classList.contains('detail-actions')) actions = node;
+        else scroll.appendChild(node.cloneNode(true));
+      }
+    }
+    foot.hidden = !actions;
+    if (actions) foot.appendChild(actions.cloneNode(true));
+    openProjectOverlay(card);
+    scroll.scrollTop = 0;
+    var id = card.getAttribute('data-project-id');
+    if (id) history.replaceState(null, '', '#' + id);
   }
 
   var cards = document.querySelectorAll('.project-card');
@@ -1951,105 +475,40 @@
     })(cards[i]);
   }
 
-  closeBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !modal.hidden) closeModal();
-  });
-
-  // deep linking: open a project/internship modal straight from the URL hash
+  // deep links such as #olist open that dialog on load
   function openFromHash() {
     var h = (location.hash || '').replace('#', '');
-    if (!h) return;
-    var target = document.querySelector('[data-project-id="' + h + '"]');
+    var target = h && document.querySelector('[data-project-id="' + h + '"]');
     if (target) openModal(target);
   }
   window.addEventListener('hashchange', openFromHash);
   openFromHash();
 
-  // CV chooser modal
-  var cvModal = document.getElementById('cv-modal');
-  if (cvModal) {
-    var cvClose = cvModal.querySelector('.modal-close');
-    var cvLast = null;
-    var openCv = function (btn) {
-      cvLast = btn;
-      cvModal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      cvClose.focus();
-    };
-    var closeCv = function () {
-      cvModal.hidden = true;
-      document.body.style.overflow = '';
-      if (cvLast) cvLast.focus();
-    };
-    var cvBtns = document.querySelectorAll('.cv-open');
-    for (var c = 0; c < cvBtns.length; c++) {
-      (function (b) { b.addEventListener('click', function () { openCv(b); }); })(cvBtns[c]);
-    }
-    cvClose.addEventListener('click', closeCv);
-    cvModal.addEventListener('click', function (e) { if (e.target === cvModal) closeCv(); });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !cvModal.hidden) closeCv();
-    });
-  }
-
-  // image lightbox (generic, driven by trigger data attributes)
+  // image lightbox, driven by data attributes on the trigger
   var lb = document.getElementById('lightbox');
-  if (lb) {
-    var lbClose = lb.querySelector('.modal-close');
-    var lbImg = document.getElementById('lb-img');
-    var lbFig = document.getElementById('lb-fig');
-    var lbCap = document.getElementById('lb-cap');
-    var lbTitle = document.getElementById('lb-title');
-    var lbMissing = document.getElementById('lb-missing');
-    var lbLast = null;
-    lbImg.addEventListener('error', function () { lbFig.hidden = true; lbMissing.hidden = false; });
-    lbImg.addEventListener('load', function () { lbFig.hidden = false; lbMissing.hidden = true; });
-    var openLb = function (btn) {
-      lbLast = btn;
-      var cap = btn.getAttribute('data-cap') || '';
-      lbTitle.textContent = btn.getAttribute('data-title') || '';
-      lbCap.textContent = cap;
-      lbFig.hidden = false;
-      lbMissing.hidden = true;
-      lbImg.alt = cap || lbTitle.textContent;
-      lbImg.src = btn.getAttribute('data-img') || '';
-      lb.hidden = false;
-      document.body.style.overflow = 'hidden';
-      lb.querySelector('.lightbox-scroll').scrollTop = 0;
-      lbClose.focus();
-    };
-    var closeLb = function () {
-      lb.hidden = true;
-      document.body.style.overflow = '';
-      if (lbLast) lbLast.focus();
-    };
-    var lbBtns = document.querySelectorAll('.lightbox-open');
-    for (var k = 0; k < lbBtns.length; k++) {
-      (function (b) { b.addEventListener('click', function () { openLb(b); }); })(lbBtns[k]);
-    }
-    lbClose.addEventListener('click', closeLb);
-    lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !lb.hidden) closeLb();
-    });
-  }
-
-  // mobile nav drawer
-  var ham=document.querySelector('.hamburger');
-  var navDrawer=document.getElementById('nav-drawer');
-  var navBackdrop=document.getElementById('nav-backdrop');
-  if(ham&&navDrawer){
-    var openNav=function(){document.body.classList.add('nav-open');ham.setAttribute('aria-expanded','true');navDrawer.setAttribute('aria-hidden','false');};
-    var closeNav=function(){document.body.classList.remove('nav-open');ham.setAttribute('aria-expanded','false');navDrawer.setAttribute('aria-hidden','true');};
-    ham.addEventListener('click',openNav);
-    if(navBackdrop)navBackdrop.addEventListener('click',closeNav);
-    var dc=navDrawer.querySelector('.drawer-close');
-    if(dc)dc.addEventListener('click',closeNav);
-    var dlinks=navDrawer.querySelectorAll('a, .drawer-cv');
-    for(var d=0;d<dlinks.length;d++)dlinks[d].addEventListener('click',closeNav);
-    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('nav-open'))closeNav();});
+  var lbImg = document.getElementById('lb-img');
+  var lbFig = document.getElementById('lb-fig');
+  var lbCap = document.getElementById('lb-cap');
+  var lbTitle = document.getElementById('lb-title');
+  var lbMissing = document.getElementById('lb-missing');
+  var openLbOverlay = overlay(lb);
+  lbImg.addEventListener('error', function () { lbFig.hidden = true; lbMissing.hidden = false; });
+  lbImg.addEventListener('load', function () { lbFig.hidden = false; lbMissing.hidden = true; });
+  var lbBtns = document.querySelectorAll('.lightbox-open');
+  for (var k = 0; k < lbBtns.length; k++) {
+    (function (b) {
+      b.addEventListener('click', function () {
+        var cap = b.getAttribute('data-cap') || '';
+        lbTitle.textContent = b.getAttribute('data-title') || '';
+        lbCap.textContent = cap;
+        lbFig.hidden = false;
+        lbMissing.hidden = true;
+        lbImg.alt = cap || lbTitle.textContent;
+        lbImg.src = b.getAttribute('data-img') || '';
+        openLbOverlay(b);
+        lb.querySelector('.lightbox-scroll').scrollTop = 0;
+      });
+    })(lbBtns[k]);
   }
 })();
 </script>

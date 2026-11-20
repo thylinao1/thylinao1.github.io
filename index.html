@@ -39,8 +39,7 @@
   .intro h1{font-size:30px; line-height:1.15; font-weight:700; margin:0 0 2px; letter-spacing:-.01em}
   .role{margin:0 0 10px; color:var(--muted)}
   .interests{display:flex; flex-wrap:wrap; align-items:baseline; margin:0 0 10px; color:var(--ink)}
-  .interests .label{color:var(--muted); font-size:13.5px; font-weight:600; margin-right:12px}
-  .interests .label ~ span:not(:last-child)::after{content:"\00b7"; color:var(--muted); margin:0 9px}
+  .interests span:not(:last-child)::after{content:"\00b7"; color:var(--muted); margin:0 9px}
   .links{display:flex; flex-wrap:wrap; gap:4px 18px; font-weight:600}
 
   /* two columns */
@@ -120,7 +119,6 @@
     .intro-head{align-self:center}
     .intro > .interests, .intro > .links{grid-column:1 / -1}
     .intro > .interests{margin-top:14px}
-    .interests .label{flex-basis:100%; margin:0 0 1px}
     .cols{padding-top:26px}
     .intro h1{font-size:25px}
     .modal-overlay{padding:10px}
@@ -137,7 +135,7 @@
     <h1>Maksim Silchenko</h1>
     <p class="role">MSc student, NUS School of Computing &middot; SPAR Research Fellow &middot; Singapore</p>
   </div>
-    <p class="interests"><span class="label">Interests</span><span>AI evaluation</span><span>Causal inference</span><span>Interpretability</span></p>
+    <p class="interests"><span>AI evaluation</span><span>Causal inference</span><span>Interpretability</span></p>
     <nav class="links" aria-label="Contact">
       <a href="mailto:mthylinao@gmail.com">Email</a>
       <a href="Maksim_Silchenko_CV.pdf" target="_blank" rel="noopener">CV</a>
